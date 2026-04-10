@@ -1,0 +1,31 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
+export default function AdminNavLink({
+  href,
+  icon: Icon,
+  label,
+}: {
+  href: string
+  icon: React.ElementType
+  label: string
+}) {
+  const pathname = usePathname()
+  const isActive = pathname === href || pathname.startsWith(href + '/')
+
+  return (
+    <Link
+      href={href}
+      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+        isActive
+          ? 'bg-white/15 text-white'
+          : 'text-white/70 hover:text-white hover:bg-white/10'
+      }`}
+    >
+      <Icon size={16} />
+      {label}
+    </Link>
+  )
+}

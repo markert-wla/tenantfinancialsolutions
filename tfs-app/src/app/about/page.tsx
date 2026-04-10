@@ -39,7 +39,7 @@ export default async function AboutPage() {
   return (
     <>
       {/* ── VISION SECTION ───────────────────────────────────── */}
-      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden pt-16">
         <Image
           src="/images/vision-statement.png"
           alt="Our Vision — starfield background"

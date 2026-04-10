@@ -69,11 +69,23 @@ export default async function HomePage() {
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section
-        className="relative min-h-screen flex flex-col items-center justify-center text-white text-center px-4"
+        className="relative min-h-screen flex flex-col items-center justify-center text-white text-center px-4 overflow-hidden pt-16"
         style={{
           background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 60%, #0F1B30 100%)',
         }}
       >
+        {/* Logo watermark background */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <Image
+            src="/images/logo.png"
+            alt=""
+            fill
+            className="object-contain select-none opacity-[0.13] mix-blend-screen"
+            style={{ filter: 'grayscale(1) invert(1)' }}
+            priority
+          />
+        </div>
+
         {/* subtle grid overlay */}
         <div
           className="absolute inset-0 opacity-10"
@@ -85,16 +97,16 @@ export default async function HomePage() {
         />
 
         <div className="relative z-10 max-w-4xl mx-auto">
-          <span className="inline-block mb-4 px-4 py-1 rounded-full bg-white/10 text-tfs-gold text-sm font-medium tracking-wide uppercase">
-            Learn to Live in Financial Peace
-          </span>
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold leading-tight mb-6">
-            Tenant Focused –<br />Community Impact
+          {/* Vision statement */}
+          <p className="text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase text-tfs-gold mb-3">
+            Our Vision
+          </p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight mb-6">
+            To create a world where millions of tenants take ownership of their financial futures
           </h1>
-          <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Our mission is to deliver the best financial counsel to the maximum number of tenants
-            by providing direct access to a{' '}
-            <span className="font-semibold text-white">personal finance coach</span>.
+          <p className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Through accessible coaching delivered by the leading platform for{' '}
+            <span className="font-semibold text-white">renter financial empowerment</span>.
           </p>
 
           {/* Three CTA cards */}

@@ -57,31 +57,54 @@ npm run dev
 
 ---
 
-## Phase 2 — Client portal (target: April 25)
+## Phase 2 — Client portal ✅ COMPLETE (target: April 25)
 
-- [ ] `/portal/dashboard` — Full dashboard (sessions used, upcoming bookings, group session)
-- [ ] `/portal/book` — Browse coaches OR "show all availability", timezone-aware slots, booking engine
-  - Coach selection is optional — user can pick "Best available time" to see all slots
-  - When session limit reached: button disabled with upgrade nudge
-- [ ] `/portal/history` — Past sessions with notes
-- [ ] `POST /api/booking` — Full booking engine (availability check, conflict check, plan limit, email confirmations)
-- [ ] Monthly session reset cron job setup
+- [x] `/portal/dashboard` — Sessions used, upcoming bookings, next group session, book CTA
+- [x] `/portal/book` — Coach picker (any/specific), week navigator, 60-min slot grid, confirm step
+  - Coach selection is optional — "Any Available Coach" shows all open slots
+  - When session limit reached: blocked with upgrade nudge
+- [x] `/portal/history` — Past + upcoming sessions with coach name, time in user's timezone, status
+- [x] `POST /api/booking` — Plan limit check, availability check, conflict check, session increment, email confirmations
+- [x] `GET /api/booking/slots` — Generates open 60-min slots from availability table, filtered by existing bookings
+- [x] `POST /api/cron/reset-sessions` — Resets sessions_used_this_month, secured with CRON_SECRET
+- [x] `vercel.json` — Cron scheduled for 1st of each month at midnight UTC
+- [x] `src/app/portal/layout.tsx` — Sidebar nav (Dashboard / Book / My Sessions / Sign out)
+
+### Notes
+- All portal pages use `force-dynamic` and require authenticated session
+- Slots are timezone-aware: stored in UTC, displayed in user's profile timezone
+- Cron requires `CRON_SECRET` env var set in Vercel dashboard
 
 ---
 
 ## Phase 3 — Coach + Admin dashboards (target: May 1)
 
-- [ ] `/coach/dashboard` — Upcoming sessions in coach's timezone
-- [ ] `/coach/availability` — Set recurring weekly availability blocks
-- [ ] `/admin/dashboard` — Summary stats, quick actions
-- [ ] `/admin/clients` — Full client list, inactivity alerts (90/120 day flags), actions
-- [ ] `/admin/codes` — Promo code generation (batch single-use + multi-use), view/revoke
-- [ ] `/admin/bookings` — Full booking log, cancel/modify, attach notes
-- [ ] `/admin/coaches` — Manage coach profiles
-- [ ] `/admin/testimonials` — Approve/reject, approved ones show on homepage
-- [ ] `/admin/group-sessions` — Create sessions, add join link, post recording
-- [ ] `/admin/partners` — PM + non-profit partner directory
-- [ ] Group session reminder automation (Resend, fires 3 days before)
+### Must ship
+- [x] `/admin/dashboard` — Summary stats (clients, coaches, bookings this month, inactivity flags)
+- [x] `/admin/coaches` — Add coach (invite email), edit profile, deactivate (soft delete via is_active flag)
+- [x] `/admin/clients` — Full client list, 90/120-day inactivity flags, plan tier display
+- [x] `/admin/codes` — Promo code creation, view, revoke
+- [x] `/coach/dashboard` — Upcoming sessions in coach's timezone
+- [x] `/coach/availability` — Set recurring weekly availability blocks (timezone-aware, UTC stored)
+
+### Ship if time allows
+- [x] `/admin/bookings` — Full booking log, status filter, cancel (restores session credit), attach notes
+- [x] `/admin/testimonials` — Approve/reject pending, remove approved, live on homepage
+- [x] `/admin/group-sessions` — Schedule sessions, add/edit join link and recording URL
+- [x] `/admin/partners` — Add/edit PM + non-profit partner directory
+- [x] Group session reminder automation — Cron runs daily at 8am UTC, emails all active paid clients 3 days before
+
+### Notes
+- Coach deactivation sets `is_active = false` — data fully preserved, coach hidden from booking
+- Hard delete + client redistribution workflow deferred to Phase 4/5 (see below)
+
+---
+
+## Phase 4/5 — Coach offboarding + advanced admin (future)
+
+- [ ] Hard coach removal with 30-day profile + data retention
+- [ ] Client redistribution UI — reassign future bookings to replacement coach, notify affected clients
+- [ ] Admin role management UI — promote/demote users by role within the dashboard
 
 ---
 
