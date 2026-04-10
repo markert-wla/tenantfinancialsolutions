@@ -34,58 +34,40 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
-    console.log('[auth/callback] exchange result:', {
-      hasUser: !!data?.user,
-      userId: data?.user?.id,
-      email: data?.user?.email,
-      cookieCount: cookiesToSet.length,
-      cookieNames: cookiesToSet.map(c => c.name),
-      error: error?.message,
-    })
-
     if (!error && data.user) {
-      try {
-        const user = data.user
+      const user = data.user
 
-        // Bootstrap: promote to admin if email is in ADMIN_EMAILS
-        if (ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
-          try {
-            const service = createServiceClient()
-            await service.from('profiles').update({ role: 'admin' }).eq('id', user.id)
-            console.log('[auth/callback] admin promotion succeeded')
-          } catch (e) {
-            console.error('[auth/callback] admin promotion failed:', e)
-          }
+      // Bootstrap: promote to admin if email is in ADMIN_EMAILS
+      if (ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
+        try {
+          const service = createServiceClient()
+          await service.from('profiles').update({ role: 'admin' }).eq('id', user.id)
+        } catch {
+          // Non-fatal — can be promoted via SQL if this fails
         }
-
-        // Determine destination based on role
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-
-        console.log('[auth/callback] profile query:', { profile, profileError: profileError?.message })
-
-        const role = profile?.role ?? 'client'
-        const redirectPath =
-          role === 'admin' ? '/admin/dashboard' :
-          role === 'coach' ? '/coach/dashboard' :
-          '/portal/dashboard'
-
-        console.log('[auth/callback] redirecting to:', `${origin}${redirectPath}`, { role })
-
-        const response = NextResponse.redirect(`${origin}${redirectPath}`)
-
-        // Apply session cookies to the redirect so the browser receives them
-        cookiesToSet.forEach(({ name, value, options }) => {
-          response.cookies.set(name, value, options as Parameters<typeof response.cookies.set>[2])
-        })
-
-        return response
-      } catch (e) {
-        console.error('[auth/callback] unexpected error after exchange:', e)
       }
+
+      // Determine destination based on role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const role = profile?.role ?? 'client'
+      const redirectPath =
+        role === 'admin' ? '/admin/dashboard' :
+        role === 'coach' ? '/coach/dashboard' :
+        '/portal/dashboard'
+
+      const response = NextResponse.redirect(`${origin}${redirectPath}`)
+
+      // Apply session cookies to the redirect so the browser receives them
+      cookiesToSet.forEach(({ name, value, options }) => {
+        response.cookies.set(name, value, options as Parameters<typeof response.cookies.set>[2])
+      })
+
+      return response
     }
 
     console.error('[auth/callback] exchangeCodeForSession error:', error?.message)
