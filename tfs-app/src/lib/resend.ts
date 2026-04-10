@@ -1,7 +1,11 @@
 import { Resend } from 'resend'
 
 export const FROM = process.env.RESEND_FROM_EMAIL ?? 'noreply@tenantfinancialsolutions.com'
-export const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'tenantfinancialsolutions@gmail.com'
+const ADMIN_EMAILS_LIST = (process.env.ADMIN_EMAILS ?? 'tenantfinancialsolutions@gmail.com')
+  .split(',')
+  .map(e => e.trim())
+  .filter(Boolean)
+export const ADMIN_EMAIL = ADMIN_EMAILS_LIST[0]
 
 /** Stub: sends email when RESEND_API_KEY is set, silently no-ops otherwise. */
 export async function sendEmail({

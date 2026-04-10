@@ -4,6 +4,9 @@ import { getStripe, PLAN_PRICE_IDS } from '@/lib/stripe'
 import { sendEmail, ADMIN_EMAIL } from '@/lib/resend'
 import { authLimiter, checkRateLimit } from '@/lib/ratelimit'
 
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? '')
+  .split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
+
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
   const { allowed } = await checkRateLimit(authLimiter, ip)
@@ -70,7 +73,7 @@ export async function POST(req: NextRequest) {
     user_metadata: {
       first_name: firstName,
       last_name: lastName,
-      role: 'client',
+      role: ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'client',
       plan_tier: tier ?? 'free',
     },
   })
@@ -85,11 +88,13 @@ export async function POST(req: NextRequest) {
   const userId = authData.user.id
 
   // 3. Update profile with full details (trigger creates the base row)
+  const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase())
   const profileUpdate: Record<string, any> = {
     first_name: firstName,
     last_name: lastName,
     timezone,
     plan_tier: tier ?? 'free',
+    ...(isAdmin && { role: 'admin' }),
   }
   if (promoCode) profileUpdate.promo_code_used = promoCode
   if (unitNumber) profileUpdate.unit_number = unitNumber
