@@ -34,6 +34,15 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
+    console.log('[auth/callback] exchange result:', {
+      hasUser: !!data?.user,
+      userId: data?.user?.id,
+      email: data?.user?.email,
+      cookieCount: cookiesToSet.length,
+      cookieNames: cookiesToSet.map(c => c.name),
+      error: error?.message,
+    })
+
     if (!error && data.user) {
       const user = data.user
 
