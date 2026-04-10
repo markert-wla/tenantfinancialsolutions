@@ -5,12 +5,10 @@ import { usePathname } from 'next/navigation'
 
 export default function AdminNavLink({
   href,
-  icon: Icon,
-  label,
+  children,
 }: {
   href: string
-  icon: React.ElementType
-  label: string
+  children: React.ReactNode
 }) {
   const pathname = usePathname()
   const isActive = pathname === href || pathname.startsWith(href + '/')
@@ -24,8 +22,7 @@ export default function AdminNavLink({
           : 'text-white/70 hover:text-white hover:bg-white/10'
       }`}
     >
-      <Icon size={16} />
-      {label}
+      {children}
     </Link>
   )
 }

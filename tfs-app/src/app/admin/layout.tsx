@@ -35,14 +35,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <AdminNavLink href="/admin/dashboard"      icon={LayoutDashboard} label="Dashboard" />
-          <AdminNavLink href="/admin/clients"        icon={Users}           label="Clients" />
-          <AdminNavLink href="/admin/coaches"        icon={UserCheck}       label="Coaches" />
-          <AdminNavLink href="/admin/codes"          icon={Tag}             label="Promo Codes" />
-          <AdminNavLink href="/admin/bookings"       icon={Calendar}        label="Bookings" />
-          <AdminNavLink href="/admin/testimonials"   icon={Star}            label="Testimonials" />
-          <AdminNavLink href="/admin/group-sessions" icon={Video}           label="Group Sessions" />
-          <AdminNavLink href="/admin/partners"       icon={Building2}       label="Partners" />
+          <AdminNavLink href="/admin/dashboard">      <LayoutDashboard size={16} /> Dashboard </AdminNavLink>
+          <AdminNavLink href="/admin/clients">        <Users size={16} />           Clients </AdminNavLink>
+          <AdminNavLink href="/admin/coaches">        <UserCheck size={16} />       Coaches </AdminNavLink>
+          <AdminNavLink href="/admin/codes">          <Tag size={16} />             Promo Codes </AdminNavLink>
+          <AdminNavLink href="/admin/bookings">       <Calendar size={16} />        Bookings </AdminNavLink>
+          <AdminNavLink href="/admin/testimonials">   <Star size={16} />            Testimonials </AdminNavLink>
+          <AdminNavLink href="/admin/group-sessions"> <Video size={16} />           Group Sessions </AdminNavLink>
+          <AdminNavLink href="/admin/partners">       <Building2 size={16} />       Partners </AdminNavLink>
         </nav>
 
         <div className="px-3 py-4 border-t border-white/10">

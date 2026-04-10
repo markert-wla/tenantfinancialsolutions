@@ -32,8 +32,8 @@ export default async function CoachLayout({ children }: { children: React.ReactN
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
-          <AdminNavLink href="/coach/dashboard"    icon={LayoutDashboard} label="Dashboard" />
-          <AdminNavLink href="/coach/availability" icon={Clock}           label="Availability" />
+          <AdminNavLink href="/coach/dashboard">    <LayoutDashboard size={16} /> Dashboard </AdminNavLink>
+          <AdminNavLink href="/coach/availability"> <Clock size={16} />           Availability </AdminNavLink>
         </nav>
 
         <div className="px-3 py-4 border-t border-white/10">
