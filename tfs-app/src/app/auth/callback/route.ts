@@ -12,29 +12,35 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        // Bootstrap: promote to admin if email is in ADMIN_EMAILS
-        if (ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+    if (!error && data.user) {
+      const user = data.user
+
+      // Bootstrap: promote to admin if email is in ADMIN_EMAILS
+      if (ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
+        try {
           const service = createServiceClient()
           await service.from('profiles').update({ role: 'admin' }).eq('id', user.id)
+        } catch {
+          // Non-fatal — can be promoted manually via SQL if this fails
         }
-
-        // Redirect based on role
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-
-        const role = profile?.role ?? 'client'
-        if (role === 'admin') return NextResponse.redirect(`${origin}/admin/dashboard`)
-        if (role === 'coach') return NextResponse.redirect(`${origin}/coach/dashboard`)
-        return NextResponse.redirect(`${origin}/portal/dashboard`)
       }
+
+      // Redirect based on role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const role = profile?.role ?? 'client'
+      if (role === 'admin') return NextResponse.redirect(`${origin}/admin/dashboard`)
+      if (role === 'coach') return NextResponse.redirect(`${origin}/coach/dashboard`)
+      return NextResponse.redirect(`${origin}/portal/dashboard`)
     }
+
+    console.error('[auth/callback] exchangeCodeForSession error:', error?.message)
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth-callback`)
