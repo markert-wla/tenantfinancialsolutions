@@ -46,35 +46,31 @@ create policy "profiles: own update"
   using (auth.uid() = id)
   with check (auth.uid() = id);
 
+-- Helper: read current user's role without triggering RLS (prevents infinite recursion)
+create or replace function get_my_role()
+returns user_role
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select role from profiles where id = auth.uid()
+$$;
+
 -- Admins can read all profiles
 create policy "profiles: admin read all"
   on profiles for select
-  using (
-    exists (
-      select 1 from profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+  using (get_my_role() = 'admin');
 
 -- Admins can update any profile
 create policy "profiles: admin update all"
   on profiles for update
-  using (
-    exists (
-      select 1 from profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+  using (get_my_role() = 'admin');
 
 -- Coaches can read client profiles (for booking context)
 create policy "profiles: coach read clients"
   on profiles for select
-  using (
-    exists (
-      select 1 from profiles p
-      where p.id = auth.uid() and p.role = 'coach'
-    )
-  );
+  using (get_my_role() = 'coach');
 
 -- Service role can insert (used during registration via server-side API)
 create policy "profiles: service insert"
