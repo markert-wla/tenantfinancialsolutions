@@ -213,7 +213,7 @@ export default function ServicesPage() {
             {/* Paying */}
             <div className="bg-white rounded-2xl p-8 text-tfs-navy">
               <h3 className="text-xl font-bold font-serif mb-2">Tenant Partner Membership</h3>
-              <p className="text-4xl font-bold mb-1">$2,000<span className="text-base font-normal text-tfs-slate">/mo</span></p>
+              <p className="text-tfs-teal font-semibold text-lg mb-1">Custom Pricing</p>
               <p className="text-tfs-slate text-sm mb-5">You pay — your tenants get Silver coaching</p>
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Admin generates promo codes — 1 per unit</li>
@@ -222,7 +222,7 @@ export default function ServicesPage() {
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> No cost or billing to your tenants</li>
               </ul>
               <Link href="/contact?type=property-manager" className="btn-primary text-sm">
-                Become a paying partner
+                Contact us for pricing
               </Link>
             </div>
           </div>
