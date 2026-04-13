@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Check, AlertCircle, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { createClient } from '@/lib/supabase/client'
 
 type Path = 'individual' | 'partner' | 'nonprofit'
 
@@ -27,6 +28,7 @@ const TIER_LABELS: Record<string, string> = {
 function RegisterInner() {
   const params   = useSearchParams()
   const router   = useRouter()
+  const supabase = createClient()
 
   const preselectedTier = params.get('tier') ?? 'free'
 
@@ -105,6 +107,18 @@ function RegisterInner() {
 
       if (!res.ok) {
         setError(data.error ?? 'Registration failed. Please try again.')
+        return
+      }
+
+      // Account created server-side — now sign in to establish a browser session
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      })
+
+      if (signInErr) {
+        // Account exists but sign-in failed — send to login
+        router.push('/login?registered=1')
         return
       }
 

@@ -84,7 +84,13 @@ export async function GET(request: NextRequest) {
     }
 
     console.error('[auth/callback] exchangeCodeForSession error:', error?.message)
+    return NextResponse.redirect(`${origin}/login?error=auth-callback`)
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth-callback`)
+  // No ?code= present — invite/magic-link flows deliver the session via
+  // an access_token in the URL *fragment* (#), which is invisible to this
+  // server-side handler. The browser Supabase client picks it up automatically
+  // via detectSessionInUrl. Redirect to /login so the client can establish
+  // the session and then the login page will forward them to their dashboard.
+  return NextResponse.redirect(`${origin}/login`)
 }

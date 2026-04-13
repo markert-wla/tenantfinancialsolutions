@@ -29,9 +29,14 @@ export async function POST(req: NextRequest) {
 
   const service = createServiceClient()
 
-  // Invite the coach — sends them an email to set their password
+  // Invite the coach — sends them an email to set their password.
+  // redirectTo ensures the invite link lands on our callback handler
+  // (which reads their role and forwards them to /coach/dashboard).
   const { data: invite, error: inviteErr } = await service.auth.admin.inviteUserByEmail(email, {
     data: { role: 'coach' },
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+    },
   })
 
   if (inviteErr || !invite.user) {

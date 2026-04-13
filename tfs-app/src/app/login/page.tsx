@@ -1,17 +1,20 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function LoginPage() {
-  const router   = useRouter()
-  const supabase = createClient()
+function LoginInner() {
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+  const supabase     = createClient()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
+
+  const justRegistered = searchParams.get('registered') === '1'
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -78,6 +81,12 @@ export default function LoginPage() {
             />
           </div>
 
+          {justRegistered && (
+            <p className="text-green-700 text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+              Account created! Sign in to access your portal.
+            </p>
+          )}
+
           {error && (
             <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
           )}
@@ -117,5 +126,18 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 100%)' }}>
+        <p className="text-white text-lg">Loading…</p>
+      </div>
+    }>
+      <LoginInner />
+    </Suspense>
   )
 }
