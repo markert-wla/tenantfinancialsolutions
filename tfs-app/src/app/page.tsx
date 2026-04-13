@@ -62,7 +62,20 @@ const MGMT_BENEFITS = [
   'More time for core responsibilities',
 ]
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
+  // Supabase occasionally sends the OAuth ?code= to the Site URL (root) instead
+  // of /auth/callback when redirectTo validation fails. Catch it here as a
+  // second layer behind the middleware redirect.
+  if (searchParams.code) {
+    const { redirect } = await import('next/navigation')
+    const code = Array.isArray(searchParams.code) ? searchParams.code[0] : searchParams.code
+    redirect(`/auth/callback?code=${encodeURIComponent(code)}`)
+  }
+
   const testimonials = await getApprovedTestimonials()
 
   return (
