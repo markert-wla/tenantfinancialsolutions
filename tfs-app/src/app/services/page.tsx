@@ -5,7 +5,7 @@ import { Check, Building2, HeartHandshake, Users, ArrowRight } from 'lucide-reac
 export const metadata: Metadata = {
   title: 'Services & Membership Plans',
   description:
-    'Financial coaching membership plans for individuals, property management partners, and non-profits. Bronze $50/mo, Silver $100/mo, Gold $150/mo.',
+    'Financial coaching membership plans for individuals and/or couples, property management partners, and non-profits. Bronze $50/mo, Silver $100/mo, Gold $150/mo.',
 }
 
 const INDIVIDUAL_PLANS = [
@@ -67,7 +67,7 @@ const INDIVIDUAL_PLANS = [
       'Up to 4 × 45-min individual sessions/mo',
       'Monthly group coaching session',
       'Birthday gift — 1 free redeemable session code',
-      'Individual direct-pay only',
+      'Individual and/or Couples direct-pay only',
     ],
     cta: 'Start Gold',
     ctaHref: '/register?tier=gold',
@@ -101,7 +101,7 @@ export default function ServicesPage() {
         <div className="max-w-3xl mx-auto">
           <h1 className="text-5xl font-serif font-bold mb-4">Services & Plans</h1>
           <p className="text-white/80 text-xl">
-            Coaching plans for individuals, property managers, and community organizations.
+            Coaching plans for individuals and/or couples, property managers, and community organizations.
             Transparent pricing. No hidden fees.
           </p>
         </div>
@@ -112,7 +112,7 @@ export default function ServicesPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
             <Users className="text-tfs-teal" size={28} />
-            <h2 className="section-heading">Individual Membership Plans</h2>
+            <h2 className="section-heading">Individual and/or Couples Membership Plans</h2>
           </div>
           <p className="text-tfs-slate mb-12 text-lg max-w-2xl">
             Choose the plan that fits your coaching needs. Sessions do not roll over —
@@ -257,8 +257,8 @@ export default function ServicesPage() {
             <div className="card">
               <h3 className="font-bold text-tfs-navy text-xl mb-4 font-serif">What Your Residents Get</h3>
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Complimentary group coaching session</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Bronze tier coaching via promo code (1 session/mo)</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Complimentary group coaching session with your organization&apos;s promo code</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Custom pricing options available for individual coaching thereafter</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Register with a non-profit code — no billing to resident</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Private group session link provided to your organization</li>
               </ul>

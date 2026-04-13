@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { Mail, Send } from 'lucide-react'
 
 const INQUIRY_TYPES = [
-  { value: 'individual',        label: 'Individual Membership' },
+  { value: 'individual',        label: 'Individual and/or Couples Membership' },
   { value: 'property-manager',  label: 'Property Manager Partnership' },
   { value: 'nonprofit',         label: 'Non-Profit Partnership' },
   { value: 'general',           label: 'General Inquiry' },
@@ -139,7 +139,7 @@ export default function ContactPage() {
             <div className="mt-10 p-6 rounded-2xl bg-tfs-teal-light">
               <h3 className="font-bold text-tfs-navy mb-3 font-serif">Looking for a specific team?</h3>
               <ul className="space-y-2 text-sm text-tfs-slate">
-                <li>&bull; <strong>Individuals</strong> &mdash; select &quot;Individual Membership&quot; below</li>
+                <li>&bull; <strong>Individuals and/or Couples</strong> &mdash; select &quot;Individual and/or Couples Membership&quot; below</li>
                 <li>&bull; <strong>Property Managers</strong> &mdash; select &quot;Property Manager Partnership&quot;</li>
                 <li>&bull; <strong>Non-Profits</strong> &mdash; select &quot;Non-Profit Partnership&quot;</li>
               </ul>

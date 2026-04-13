@@ -29,7 +29,7 @@ async function getApprovedTestimonials() {
 const AUDIENCE_CARDS = [
   {
     icon: Users,
-    label: "I'm an Individual",
+    label: "I'm an Individual and/or Couple",
     href: '/services#individual',
     bg: 'bg-tfs-teal',
     desc: 'Personal coaching plans starting free',

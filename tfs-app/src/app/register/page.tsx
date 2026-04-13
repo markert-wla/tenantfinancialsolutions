@@ -145,7 +145,7 @@ function RegisterInner() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { id: 'individual', title: 'Individual', desc: 'I\'m signing up for myself', note: 'Free, Bronze, Silver, or Gold plan' },
+              { id: 'individual', title: 'Individual and/or Couples', desc: 'I\'m signing up for myself or with my partner', note: 'Free, Bronze, Silver, or Gold plan' },
               { id: 'partner',    title: 'Property Tenant', desc: 'My property manager provided a code', note: 'Requires promo code + unit #' },
               { id: 'nonprofit',  title: 'Non-Profit Resident', desc: 'My organization provided a code', note: 'Requires promo code' },
             ].map(opt => (
@@ -187,7 +187,7 @@ function RegisterInner() {
         </button>
 
         <h2 className="text-2xl font-serif font-bold text-tfs-navy mb-1">
-          {path === 'individual' ? 'Individual Registration' :
+          {path === 'individual' ? 'Individual and/or Couples Registration' :
            path === 'partner'   ? 'Property Tenant Registration' :
                                   'Non-Profit Resident Registration'}
         </h2>
@@ -237,7 +237,7 @@ function RegisterInner() {
                     onClick={() => setPath('individual')}
                     className="underline"
                   >
-                    continue as individual
+                    continue as individual/couple
                   </button>
                   .
                 </div>
