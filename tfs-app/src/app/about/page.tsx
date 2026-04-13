@@ -44,6 +44,7 @@ export default async function AboutPage() {
           src="/images/vision-statement.png"
           alt="Our Vision — starfield background"
           fill
+          sizes="100vw"
           className="object-cover"
           priority
         />
@@ -66,8 +67,9 @@ export default async function AboutPage() {
             <Image
               src="/images/core-values.png"
               alt="COACHES Core Values — Courage, Openness, Authenticity, Compassion, Honesty, Excellence, Service"
-              width={800}
-              height={533}
+              width={1152}
+              height={768}
+              sizes="(max-width: 1280px) 100vw, 1152px"
               className="w-full object-cover"
             />
           </div>
@@ -107,9 +109,12 @@ export default async function AboutPage() {
                 <div key={coach.id} className="card text-center hover:shadow-lg transition-shadow">
                   <div className="w-24 h-24 rounded-full bg-tfs-teal/20 mx-auto mb-4 overflow-hidden">
                     {coach.photo_url ? (
-                      <img
+                      <Image
                         src={coach.photo_url}
                         alt={coach.display_name}
+                        width={96}
+                        height={96}
+                        sizes="96px"
                         className="w-full h-full object-cover"
                       />
                     ) : (
