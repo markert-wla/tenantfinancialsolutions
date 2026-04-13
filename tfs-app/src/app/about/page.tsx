@@ -41,7 +41,7 @@ export default async function AboutPage() {
       {/* ── VISION SECTION ───────────────────────────────────── */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden pt-16">
         <Image
-          src="/images/vision-statement.png"
+          src="/images/tfs-vision-statement-optimized.webp"
           alt="Our Vision — starfield background"
           fill
           sizes="100vw"
@@ -65,7 +65,7 @@ export default async function AboutPage() {
           {/* Teal chalkboard image */}
           <div className="mb-12 rounded-2xl overflow-hidden shadow-xl">
             <Image
-              src="/images/core-values.png"
+              src="/images/core-values-optimized.webp"
               alt="COACHES Core Values — Courage, Openness, Authenticity, Compassion, Honesty, Excellence, Service"
               width={1152}
               height={768}
