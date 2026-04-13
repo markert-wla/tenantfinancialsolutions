@@ -17,6 +17,7 @@ export default function Navbar() {
   const [open, setOpen]         = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser]         = useState<any>(null)
+  const [role, setRole]         = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -26,12 +27,34 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user))
-    const { data: listener } = supabase.auth.onAuthStateChange((_, session) =>
+    async function loadUser() {
+      const { data } = await supabase.auth.getUser()
+      setUser(data.user ?? null)
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single()
+        setRole(profile?.role ?? 'client')
+      } else {
+        setRole(null)
+      }
+    }
+    loadUser()
+    const { data: listener } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
-    )
+      if (!session?.user) setRole(null)
+    })
     return () => listener.subscription.unsubscribe()
   }, [])
+
+  const dashboardHref =
+    role === 'admin' ? '/admin/dashboard' :
+    role === 'coach' ? '/coach/dashboard' :
+    '/portal/dashboard'
+
+  const dashboardLabel = role === 'client' || role === null ? 'My Portal' : 'Dashboard'
 
   return (
     <header
@@ -73,8 +96,8 @@ export default function Navbar() {
         {/* Auth CTA */}
         <div className="hidden md:flex items-center gap-3">
           {user ? (
-            <Link href="/portal/dashboard" className="btn-primary text-sm py-2">
-              My Portal
+            <Link href={dashboardHref} className="btn-primary text-sm py-2">
+              {dashboardLabel}
             </Link>
           ) : (
             <>
@@ -122,7 +145,7 @@ export default function Navbar() {
           ))}
           <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
             {user ? (
-              <Link href="/portal/dashboard" className="btn-primary text-sm text-center">My Portal</Link>
+              <Link href={dashboardHref} className="btn-primary text-sm text-center">{dashboardLabel}</Link>
             ) : (
               <>
                 <Link href="/login" className="btn-outline text-sm text-center" onClick={() => setOpen(false)}>Login</Link>
