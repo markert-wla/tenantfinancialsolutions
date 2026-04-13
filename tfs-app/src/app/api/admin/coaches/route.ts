@@ -34,9 +34,7 @@ export async function POST(req: NextRequest) {
   // (which reads their role and forwards them to /coach/dashboard).
   const { data: invite, error: inviteErr } = await service.auth.admin.inviteUserByEmail(email, {
     data: { role: 'coach' },
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-    },
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
   })
 
   if (inviteErr || !invite.user) {
