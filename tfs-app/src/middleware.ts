@@ -8,6 +8,18 @@ const PROTECTED_ROUTES: Record<string, string[]> = {
 }
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  // If Supabase sends the OAuth ?code= to the wrong page (e.g. root), redirect
+  // to the proper callback handler before the browser client auto-exchanges it
+  // and bypasses admin promotion logic.
+  const code = request.nextUrl.searchParams.get('code')
+  if (code && pathname !== '/auth/callback') {
+    const callbackUrl = request.nextUrl.clone()
+    callbackUrl.pathname = '/auth/callback'
+    return NextResponse.redirect(callbackUrl)
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -28,7 +40,6 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  const pathname = request.nextUrl.pathname
 
   for (const [prefix, allowedRoles] of Object.entries(PROTECTED_ROUTES)) {
     if (pathname.startsWith(prefix)) {

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 
+function esc(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 export const dynamic = 'force-dynamic'
 
 const PLAN_LIMITS: Record<string, number> = {
@@ -177,11 +181,11 @@ export async function POST(req: NextRequest) {
       subject: `Session Confirmed — ${displayTime}`,
       html: `
         <h2>Your Session is Confirmed!</h2>
-        <p>Hi ${profile.first_name},</p>
+        <p>Hi ${esc(profile.first_name)},</p>
         <p>Your coaching session has been scheduled:</p>
         <ul>
-          <li><strong>Coach:</strong> ${coach.display_name}</li>
-          <li><strong>Date & Time:</strong> ${displayTime} (${clientTz})</li>
+          <li><strong>Coach:</strong> ${esc(coach.display_name)}</li>
+          <li><strong>Date &amp; Time:</strong> ${esc(displayTime)} (${esc(clientTz)})</li>
         </ul>
         <p>You can view your upcoming sessions in your <a href="${siteUrl}/portal/dashboard">portal</a>.</p>
         <p>See you then!<br/>— The TFS Team</p>
@@ -192,11 +196,11 @@ export async function POST(req: NextRequest) {
       subject: `New Session Booked — ${displayTime}`,
       html: `
         <h2>New Session Booked</h2>
-        <p>Hi ${coach.display_name},</p>
+        <p>Hi ${esc(coach.display_name)},</p>
         <p>A new session has been booked with you:</p>
         <ul>
-          <li><strong>Client:</strong> ${profile.first_name} ${profile.last_name}</li>
-          <li><strong>Date & Time:</strong> ${displayTime} (${clientTz})</li>
+          <li><strong>Client:</strong> ${esc(profile.first_name)} ${esc(profile.last_name)}</li>
+          <li><strong>Date &amp; Time:</strong> ${esc(displayTime)} (${esc(clientTz)})</li>
         </ul>
         <p>View details in your <a href="${siteUrl}/coach/dashboard">coach dashboard</a>.</p>
         <p>— The TFS Team</p>

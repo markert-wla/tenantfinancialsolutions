@@ -13,9 +13,13 @@ export default async function PortalLayout({ children }: { children: React.React
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, last_name, plan_tier')
+    .select('first_name, last_name, plan_tier, role')
     .eq('id', user.id)
     .single()
+
+  // Admins and coaches shouldn't be in the client portal
+  if (profile?.role === 'admin') redirect('/admin/dashboard')
+  if (profile?.role === 'coach') redirect('/coach/dashboard')
 
   const tier = profile?.plan_tier ?? 'free'
   const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user.email

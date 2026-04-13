@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { contactLimiter, checkRateLimit } from '@/lib/ratelimit'
 import { sendEmail, ADMIN_EMAIL } from '@/lib/resend'
 
+function esc(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 export async function POST(req: NextRequest) {
   // Rate limit by IP
   const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
@@ -42,11 +46,11 @@ export async function POST(req: NextRequest) {
     html: `
       <h2>New Contact Form Submission</h2>
       <table style="border-collapse:collapse;width:100%">
-        <tr><td style="padding:8px;font-weight:bold">Name</td><td style="padding:8px">${name}</td></tr>
-        <tr><td style="padding:8px;font-weight:bold">Email</td><td style="padding:8px"><a href="mailto:${email}">${email}</a></td></tr>
-        <tr><td style="padding:8px;font-weight:bold">Phone</td><td style="padding:8px">${phone || 'Not provided'}</td></tr>
-        <tr><td style="padding:8px;font-weight:bold">Inquiry Type</td><td style="padding:8px">${inquiryLabel}</td></tr>
-        <tr><td style="padding:8px;font-weight:bold;vertical-align:top">Message</td><td style="padding:8px">${message.replace(/\n/g, '<br>')}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold">Name</td><td style="padding:8px">${esc(name)}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold">Email</td><td style="padding:8px"><a href="mailto:${esc(email)}">${esc(email)}</a></td></tr>
+        <tr><td style="padding:8px;font-weight:bold">Phone</td><td style="padding:8px">${phone ? esc(phone) : 'Not provided'}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold">Inquiry Type</td><td style="padding:8px">${esc(inquiryLabel)}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold;vertical-align:top">Message</td><td style="padding:8px">${esc(message).replace(/\n/g, '<br>')}</td></tr>
       </table>
     `,
   })

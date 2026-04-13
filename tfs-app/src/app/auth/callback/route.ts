@@ -36,19 +36,32 @@ export async function GET(request: NextRequest) {
 
     if (!error && data.user) {
       const user = data.user
+      const service = createServiceClient()
 
-      // Bootstrap: promote to admin if email is in ADMIN_EMAILS
-      if (ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
+      // Bootstrap: promote to admin if email is in ADMIN_EMAILS, and backfill
+      // name fields for Google OAuth users (Google sends full_name, not first/last).
+      const isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')
+      const meta    = user.user_metadata ?? {}
+      const profilePatch: Record<string, unknown> = {}
+
+      if (isAdmin) profilePatch.role = 'admin'
+
+      if (!meta.first_name && meta.full_name) {
+        const parts = (meta.full_name as string).trim().split(/\s+/)
+        profilePatch.first_name = parts[0] ?? ''
+        profilePatch.last_name  = parts.slice(1).join(' ') ?? ''
+      }
+
+      if (Object.keys(profilePatch).length > 0) {
         try {
-          const service = createServiceClient()
-          await service.from('profiles').update({ role: 'admin' }).eq('id', user.id)
+          await service.from('profiles').update(profilePatch).eq('id', user.id)
         } catch {
-          // Non-fatal — can be promoted via SQL if this fails
+          // Non-fatal
         }
       }
 
-      // Determine destination based on role
-      const { data: profile } = await supabase
+      // Read role back via service client to avoid stale read after the update above
+      const { data: profile } = await service
         .from('profiles')
         .select('role')
         .eq('id', user.id)

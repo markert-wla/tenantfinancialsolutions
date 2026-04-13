@@ -4,6 +4,10 @@ import { getStripe, PLAN_PRICE_IDS } from '@/lib/stripe'
 import { sendEmail, ADMIN_EMAIL } from '@/lib/resend'
 import { authLimiter, checkRateLimit } from '@/lib/ratelimit'
 
+function esc(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? '')
   .split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
 
@@ -41,9 +45,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
   }
 
+  const validTiers = ['free', 'bronze', 'silver', 'gold']
+  if (tier && !validTiers.includes(tier)) {
+    return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
+  }
+
   const supabase = createServiceClient()
 
-  // 1. If promo code provided — increment uses_count (already validated client-side, but double-check)
+  // 1. If promo code provided — re-validate server-side and derive tier from DB (never trust client-supplied tier)
+  // effectiveTier: promo path uses DB's assigned_tier; Stripe path starts as 'free' (webhook upgrades on payment)
+  let effectiveTier = 'free'
+
   if (promoCode) {
     const { data: code, error: codeErr } = await supabase
       .from('promo_codes')
@@ -58,12 +70,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Promo code has expired' }, { status: 400 })
     }
 
+    effectiveTier = code.assigned_tier
+
     // Increment uses
     await supabase
       .from('promo_codes')
       .update({ uses_count: code.uses_count + 1 })
       .eq('code', promoCode)
   }
+  // For Stripe-paid tiers (no promo code), leave effectiveTier as 'free'.
+  // The Stripe webhook sets plan_tier once payment is confirmed.
 
   // 2. Create Supabase auth user
   const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
@@ -74,7 +90,7 @@ export async function POST(req: NextRequest) {
       first_name: firstName,
       last_name: lastName,
       role: ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'client',
-      plan_tier: tier ?? 'free',
+      plan_tier: effectiveTier,
     },
   })
 
@@ -93,7 +109,7 @@ export async function POST(req: NextRequest) {
     first_name: firstName,
     last_name: lastName,
     timezone,
-    plan_tier: tier ?? 'free',
+    plan_tier: effectiveTier,
     ...(isAdmin && { role: 'admin' }),
   }
   if (promoCode) profileUpdate.promo_code_used = promoCode
@@ -124,7 +140,7 @@ export async function POST(req: NextRequest) {
           payment_behavior: 'default_incomplete',
           payment_settings: { save_default_payment_method: 'on_subscription' },
           expand: ['latest_invoice.payment_intent'],
-          metadata: { supabase_user_id: userId, tier },
+          metadata: { supabase_user_id: userId, tier: tier },
         })
         stripeSubId = subscription.id
 
@@ -144,8 +160,8 @@ export async function POST(req: NextRequest) {
     to: email,
     subject: 'Welcome to Tenant Financial Solutions!',
     html: `
-      <h2>Welcome, ${firstName}!</h2>
-      <p>Your account has been created with the <strong>${tier ?? 'free'}</strong> plan.</p>
+      <h2>Welcome, ${esc(firstName)}!</h2>
+      <p>Your account has been created with the <strong>${esc(effectiveTier)}</strong> plan.</p>
       <p>Log in to access your coaching portal: <a href="${process.env.NEXT_PUBLIC_SITE_URL}/login">Sign In</a></p>
       <p>We're excited to be part of your financial journey.<br/>— The TFS Team</p>
     `,
