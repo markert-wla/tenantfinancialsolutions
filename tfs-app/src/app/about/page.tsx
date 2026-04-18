@@ -9,6 +9,16 @@ export const metadata: Metadata = {
   title: 'About Us',
   description:
     'Meet the coaches and learn our vision at Tenant Financial Solutions. COACHES core values: Courage, Openness, Authenticity, Compassion, Honesty, Excellence, Service.',
+  openGraph: {
+    title: 'About Us | Tenant Financial Solutions',
+    description: 'Meet the coaches behind TFS. Real people committed to changing lives through financial coaching.',
+    url: '/about',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Us | Tenant Financial Solutions',
+    description: 'Meet the coaches behind TFS. Real people committed to changing lives through financial coaching.',
+  },
 }
 
 const CORE_VALUES = [

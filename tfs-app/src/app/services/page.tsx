@@ -7,6 +7,16 @@ export const metadata: Metadata = {
   title: 'Services & Membership Plans',
   description:
     'Financial coaching for individuals, couples, property managers, and non-profits. Starter Plan $50/mo, Advantage Plan $100/mo. Start free — no credit card required.',
+  openGraph: {
+    title: 'Services & Plans | Tenant Financial Solutions',
+    description: 'Coaching plans for every need. Start free, upgrade anytime. Individual, couple, property manager, and non-profit options.',
+    url: '/services',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Services & Plans | Tenant Financial Solutions',
+    description: 'Coaching plans for every need. Start free, upgrade anytime. Individual, couple, property manager, and non-profit options.',
+  },
 }
 
 const INDIVIDUAL_PLANS = [

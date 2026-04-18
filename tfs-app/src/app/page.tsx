@@ -11,6 +11,18 @@ export const metadata: Metadata = {
   title: 'Tenant Focused – Community Impact | Tenant Financial Solutions',
   description:
     'Financial coaching for tenants, property managers, and non-profits. One-on-one sessions with dedicated coaches. Real People – Real Coaching.',
+  openGraph: {
+    title: 'Tenant Financial Solutions — Real People, Real Coaching',
+    description:
+      'Personal financial coaching for tenants. One-on-one sessions, group coaching, and property management partnerships.',
+    url: '/',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tenant Financial Solutions — Real People, Real Coaching',
+    description:
+      'Personal financial coaching for tenants. One-on-one sessions, group coaching, and property management partnerships.',
+  },
 }
 
 async function getApprovedTestimonials() {
