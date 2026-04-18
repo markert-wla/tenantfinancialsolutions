@@ -1,6 +1,7 @@
 'use client'
 import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { Mail, Send } from 'lucide-react'
 
 const INQUIRY_TYPES = [
@@ -119,7 +120,13 @@ export default function ContactPage() {
       >
         <div className="max-w-2xl mx-auto">
           <h1 className="text-5xl font-serif font-bold mb-4">Get in Touch</h1>
-          <p className="text-white/80 text-xl">Questions? Ready to partner? We&apos;d love to hear from you.</p>
+          <p className="text-white/80 text-xl mb-8">Questions? Ready to partner? We&apos;d love to hear from you.</p>
+          <Link
+            href="/register?tier=free"
+            className="inline-block bg-tfs-gold text-tfs-navy font-bold text-lg px-10 py-4 rounded-xl shadow-lg hover:brightness-105 hover:scale-105 transition-all duration-200"
+          >
+            Step into your free Connection Session
+          </Link>
         </div>
       </section>
 

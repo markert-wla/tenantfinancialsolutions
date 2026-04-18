@@ -9,10 +9,8 @@ function esc(str: string): string {
 export const dynamic = 'force-dynamic'
 
 const PLAN_LIMITS: Record<string, number> = {
-  free:   0,
   bronze: 1,
   silver: 2,
-  gold:   4,
 }
 
 export async function POST(req: NextRequest) {
@@ -49,7 +47,7 @@ export async function POST(req: NextRequest) {
   // --- Load client profile ---
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
-    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone')
+    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone, free_trial_expires_at')
     .eq('id', user.id)
     .single()
 
@@ -57,22 +55,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   }
 
-  // --- Plan limit check ---
-  const tier  = profile.plan_tier ?? 'free'
-  const limit = PLAN_LIMITS[tier] ?? 0
-  const used  = profile.sessions_used_this_month ?? 0
+  const tier = profile.plan_tier ?? 'free'
+  const used = profile.sessions_used_this_month ?? 0
 
-  if (limit === 0) {
-    return NextResponse.json(
-      { error: 'Your current plan does not include individual sessions. Please upgrade.' },
-      { status: 403 }
-    )
-  }
-  if (used >= limit) {
-    return NextResponse.json(
-      { error: `You have used all ${limit} session(s) for this month. Upgrade or wait for the monthly reset.` },
-      { status: 403 }
-    )
+  // --- Plan / free trial check ---
+  if (tier === 'free') {
+    const trialExpiry = profile.free_trial_expires_at
+      ? new Date(profile.free_trial_expires_at)
+      : null
+
+    if (!trialExpiry || trialExpiry < new Date()) {
+      return NextResponse.json(
+        { error: 'Your 30-day free trial has expired. Upgrade to a Starter or Advantage Plan to continue booking sessions.', upgrade: true },
+        { status: 403 }
+      )
+    }
+    if (used >= 1) {
+      return NextResponse.json(
+        { error: "You've already used your free Connection Session. Upgrade to book more sessions.", upgrade: true },
+        { status: 403 }
+      )
+    }
+  } else {
+    const limit = PLAN_LIMITS[tier] ?? 0
+    if (limit === 0) {
+      return NextResponse.json(
+        { error: 'Your current plan does not include individual sessions. Please upgrade.', upgrade: true },
+        { status: 403 }
+      )
+    }
+    if (used >= limit) {
+      return NextResponse.json(
+        { error: `You've used all ${limit} session${limit !== 1 ? 's' : ''} for this month. Upgrade or wait for the monthly reset.`, upgrade: true },
+        { status: 403 }
+      )
+    }
   }
 
   // --- Validate coach exists ---
@@ -88,7 +105,7 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Validate slot is within coach availability ---
-  const utcDow       = startDate.getUTCDay()
+  const utcDow        = startDate.getUTCDay()
   const slotStartTime = `${String(startDate.getUTCHours()).padStart(2,'0')}:${String(startDate.getUTCMinutes()).padStart(2,'0')}:00`
   const slotEndTime   = `${String(endDate.getUTCHours()).padStart(2,'0')}:${String(endDate.getUTCMinutes()).padStart(2,'0')}:00`
 
@@ -133,7 +150,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'You already have a session booked at that time.' }, { status: 409 })
   }
 
-  // --- Insert booking (use service client to bypass RLS insert check for this server context) ---
+  // --- Insert booking ---
   const service = createServiceClient()
   const { data: booking, error: bookingErr } = await service
     .from('bookings')
@@ -159,7 +176,7 @@ export async function POST(req: NextRequest) {
     .eq('id', user.id)
 
   // --- Format display time for emails ---
-  const clientTz  = profile.timezone ?? 'America/New_York'
+  const clientTz = profile.timezone ?? 'America/New_York'
   const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone: clientTz,
     weekday:  'long',
@@ -172,7 +189,7 @@ export async function POST(req: NextRequest) {
   })
   const displayTime = fmt.format(startDate)
 
-  // --- Confirmation emails (no-op if Resend key not set) ---
+  const sessionLabel = tier === 'free' ? 'Connection Session' : 'coaching session'
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tenantfinancialsolutions.com'
 
   await Promise.all([
@@ -180,14 +197,14 @@ export async function POST(req: NextRequest) {
       to: profile.email,
       subject: `Session Confirmed — ${displayTime}`,
       html: `
-        <h2>Your Session is Confirmed!</h2>
+        <h2>Your ${esc(sessionLabel)} is Confirmed!</h2>
         <p>Hi ${esc(profile.first_name)},</p>
         <p>Your coaching session has been scheduled:</p>
         <ul>
           <li><strong>Coach:</strong> ${esc(coach.display_name)}</li>
           <li><strong>Date &amp; Time:</strong> ${esc(displayTime)} (${esc(clientTz)})</li>
         </ul>
-        <p>You can view your upcoming sessions in your <a href="${siteUrl}/portal/dashboard">portal</a>.</p>
+        <p>View your upcoming sessions in your <a href="${siteUrl}/portal/dashboard">portal</a>.</p>
         <p>See you then!<br/>— The TFS Team</p>
       `,
     }),

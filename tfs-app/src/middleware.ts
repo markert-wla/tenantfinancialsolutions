@@ -2,9 +2,10 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const PROTECTED_ROUTES: Record<string, string[]> = {
-  '/portal': ['client', 'admin'],
-  '/coach': ['coach', 'admin'],
-  '/admin': ['admin'],
+  '/portal':  ['client', 'admin'],
+  '/coach':   ['coach', 'admin'],
+  '/admin':   ['admin'],
+  '/manager': ['property_manager', 'admin'],
 }
 
 export async function middleware(request: NextRequest) {
@@ -73,6 +74,7 @@ export const config = {
     '/portal/:path*',
     '/coach/:path*',
     '/admin/:path*',
+    '/manager/:path*',
     '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 }

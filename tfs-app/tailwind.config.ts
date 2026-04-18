@@ -10,13 +10,16 @@ const config: Config = {
     extend: {
       colors: {
         tfs: {
-          teal:        '#1D9E75',
-          'teal-dark': '#158A63',
-          'teal-light':'#E8F7F2',
-          navy:        '#1A2B4A',
-          'navy-light':'#2C3E6B',
-          slate:       '#6B7E8F',
-          gold:        '#F5C842',
+          teal:          '#1D9E75',
+          'teal-dark':   '#158A63',
+          'teal-light':  '#E8F7F2',
+          navy:          '#1A2B4A',
+          'navy-light':  '#2C3E6B',
+          slate:         '#6B7E8F',
+          gold:          '#F5C842',
+          purple:        '#5B2D8E',
+          'purple-dark': '#4A2478',
+          'purple-light':'#F0E8F9',
         },
       },
       fontFamily: {

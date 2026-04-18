@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
@@ -39,17 +40,38 @@ export default async function AboutPage() {
   return (
     <>
       {/* ── VISION SECTION ───────────────────────────────────── */}
-      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden pt-16">
-        <Image
-          src="/images/tfs-vision-statement-optimized.webp"
-          alt="Our Vision — starfield background"
-          fill
-          sizes="100vw"
-          className="object-cover"
-          priority
-        />
-        {/* The image itself contains the text, so just overlay a subtle gradient */}
-        <div className="absolute inset-0 bg-black/20" />
+      <section
+        className="relative min-h-[60vh] flex items-center justify-center overflow-hidden pt-16"
+        style={{ background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 60%, #0F1B30 100%)' }}
+      >
+        {/* Logo watermark */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <Image
+            src="/images/logo.png"
+            alt=""
+            fill
+            className="object-contain select-none opacity-[0.13] mix-blend-screen"
+            style={{ filter: 'grayscale(1) invert(1)' }}
+            priority
+          />
+        </div>
+
+        <div className="relative z-10 max-w-3xl mx-auto text-white text-center px-4 py-10">
+          <p className="text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase text-tfs-gold mb-4">
+            Our Vision
+          </p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight">
+            To create a world where millions of tenants take ownership of their financial futures
+          </h1>
+          <div className="mt-8">
+            <Link
+              href="/register?tier=free"
+              className="inline-block bg-tfs-gold text-tfs-navy font-bold text-lg px-10 py-4 rounded-xl shadow-lg hover:brightness-105 hover:scale-105 transition-all duration-200"
+            >
+              Step into your free Connection Session
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* ── CORE VALUES ──────────────────────────────────────── */}
@@ -143,7 +165,7 @@ export default async function AboutPage() {
           ) : (
             <div className="text-center py-16 text-tfs-slate">
               <p className="text-lg mb-2">Coach profiles coming soon.</p>
-              <p className="text-sm">Check back shortly — we're adding our team now.</p>
+              <p className="text-sm">Check back shortly — we&apos;re adding our team now.</p>
             </div>
           )}
         </div>
@@ -151,15 +173,26 @@ export default async function AboutPage() {
 
       {/* ── CTA ──────────────────────────────────────────────── */}
       <section
-        className="py-16 px-4 text-white text-center"
+        className="relative py-16 px-4 text-white text-center overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #1D9E75, #1A2B4A)' }}
       >
-        <div className="max-w-2xl mx-auto">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <Image
+            src="/images/logo.png"
+            alt=""
+            fill
+            className="object-contain select-none opacity-[0.10] mix-blend-screen"
+            style={{ filter: 'grayscale(1) invert(1)' }}
+          />
+        </div>
+        <div className="relative z-10 max-w-2xl mx-auto">
           <h2 className="text-3xl font-serif font-bold mb-4">
             Ready to work with one of our coaches?
           </h2>
-          <p className="text-white/80 mb-8">Sign up today — your first group session is complimentary.</p>
-          <a href="/register" className="btn-primary px-8 py-4">Get Started</a>
+          <p className="text-white/80 mb-8">No credit card required. Your first Connection Session is on us.</p>
+          <Link href="/register" className="btn-primary px-8 py-4">
+            Step into your free Connection Session
+          </Link>
         </div>
       </section>
     </>

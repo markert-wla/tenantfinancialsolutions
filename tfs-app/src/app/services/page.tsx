@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Check, Building2, HeartHandshake, Users, ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Services & Membership Plans',
   description:
-    'Financial coaching membership plans for individuals and/or couples, property management partners, and non-profits. Bronze $50/mo, Silver $100/mo, Gold $150/mo.',
+    'Financial coaching for individuals, couples, property managers, and non-profits. Starter Plan $50/mo, Advantage Plan $100/mo. Start free — no credit card required.',
 }
 
 const INDIVIDUAL_PLANS = [
@@ -13,71 +14,55 @@ const INDIVIDUAL_PLANS = [
     name: 'Free',
     price: 0,
     tier: 'free',
-    tagline: 'Start your journey',
+    tagline: 'Start with no commitment',
     color: 'border-gray-200',
     badge: '',
     features: [
-      'Permanent — no expiry, no forced upgrade',
-      'Access to self-help financial tools',
-      'Pay-per-session at full price (no discount)',
-      'Account stays open until you close it',
+      'Free Connection Session with your selected coach',
+      'One group coaching session during the first week of the month',
     ],
-    cta: 'Sign up free',
+    cta: 'Step into your free Connection Session',
     ctaHref: '/register?tier=free',
+    ctaStyle: 'btn-primary text-sm text-center',
   },
   {
-    name: 'Bronze',
+    name: 'Starter Plan',
     price: 50,
     tier: 'bronze',
-    tagline: 'Great for getting started',
+    tagline: 'Best for tenants new to coaching',
     color: 'border-amber-400',
     badge: 'amber',
     features: [
-      '1 × 45-min individual coaching session/mo',
-      'Monthly group coaching session',
-      'Birthday gift — 1 free redeemable session code',
+      '1 individual coaching session per month',
+      '1 complimentary group coaching session per month',
     ],
-    cta: 'Start Bronze',
+    cta: 'Get Started',
     ctaHref: '/register?tier=bronze',
+    ctaStyle: 'btn-primary text-sm text-center',
   },
   {
-    name: 'Silver',
+    name: 'Advantage Plan',
     price: 100,
     tier: 'silver',
-    tagline: 'Most popular',
+    tagline: 'For tenants who want real momentum',
     color: 'border-tfs-teal',
     badge: 'teal',
     popular: true,
     features: [
-      '2 × 45-min individual coaching sessions/mo',
-      'Monthly group coaching session',
-      'Birthday gift — 1 free redeemable session code',
+      '2 individual coaching sessions per month',
+      '1 complimentary group coaching session per month',
+      'Priority scheduling',
+      'Text check-ins',
     ],
-    cta: 'Start Silver',
+    cta: 'Get Started',
     ctaHref: '/register?tier=silver',
-  },
-  {
-    name: 'Gold',
-    price: 150,
-    tier: 'gold',
-    tagline: 'Maximum coaching coverage',
-    color: 'border-yellow-400',
-    badge: 'gold',
-    features: [
-      'Up to 4 × 45-min individual sessions/mo',
-      'Monthly group coaching session',
-      'Birthday gift — 1 free redeemable session code',
-      'Individual and/or Couples direct-pay only',
-    ],
-    cta: 'Start Gold',
-    ctaHref: '/register?tier=gold',
+    ctaStyle: 'btn-primary text-sm text-center',
   },
 ]
 
 const BADGE_STYLES: Record<string, string> = {
   amber: 'bg-amber-100 text-amber-700',
   teal:  'bg-tfs-teal/10 text-tfs-teal',
-  gold:  'bg-yellow-100 text-yellow-700',
 }
 
 const NONPROFIT_ORGS = [
@@ -95,31 +80,73 @@ export default function ServicesPage() {
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section
-        className="pt-28 pb-20 px-4 text-white text-center"
+        className="relative pt-28 pb-20 px-4 text-white text-center overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 100%)' }}
       >
-        <div className="max-w-3xl mx-auto">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <Image
+            src="/images/logo.png"
+            alt=""
+            fill
+            className="object-contain select-none opacity-[0.13] mix-blend-screen"
+            style={{ filter: 'grayscale(1) invert(1)' }}
+            priority
+          />
+        </div>
+        <div className="relative z-10 max-w-3xl mx-auto">
           <h1 className="text-5xl font-serif font-bold mb-4">Services & Plans</h1>
-          <p className="text-white/80 text-xl">
-            Coaching plans for individuals and/or couples, property managers, and community organizations.
+          <p className="text-white/80 text-xl mb-8">
+            Coaching plans for individuals, couples, property managers, and community organizations.
             Transparent pricing. No hidden fees.
           </p>
+          <Link
+            href="/register?tier=free"
+            className="inline-block bg-tfs-gold text-tfs-navy font-bold text-lg px-10 py-4 rounded-xl shadow-lg hover:brightness-105 hover:scale-105 transition-all duration-200"
+          >
+            Step into your free Connection Session
+          </Link>
+        </div>
+      </section>
+
+      {/* ── WHAT FREE INCLUDES ───────────────────────────────── */}
+      <section className="py-14 bg-tfs-teal-light px-4 border-b border-tfs-teal/20">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl font-serif font-bold text-tfs-navy mb-2">What Free Includes</h2>
+          <p className="text-tfs-teal font-semibold mb-6">Individuals / Couples — Start for Free</p>
+          <div className="inline-flex flex-col gap-3 text-left mx-auto">
+            <div className="flex items-start gap-3">
+              <Check className="text-tfs-teal shrink-0 mt-0.5" size={18} />
+              <span className="text-tfs-slate text-base">
+                <strong className="text-tfs-navy">Free Connection Session</strong> with your selected coach
+              </span>
+            </div>
+            <div className="flex items-start gap-3">
+              <Check className="text-tfs-teal shrink-0 mt-0.5" size={18} />
+              <span className="text-tfs-slate text-base">
+                <strong className="text-tfs-navy">One group coaching session</strong> during the first week of the month
+              </span>
+            </div>
+          </div>
+          <div className="mt-8">
+            <Link href="/register?tier=free" className="btn-primary px-8 py-3">
+              Step into your free Connection Session
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* ── INDIVIDUAL PLANS ─────────────────────────────────── */}
       <section id="individual" className="py-20 bg-white px-4 scroll-mt-16">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
             <Users className="text-tfs-teal" size={28} />
             <h2 className="section-heading">Individual and/or Couples Membership Plans</h2>
           </div>
           <p className="text-tfs-slate mb-12 text-lg max-w-2xl">
-            Choose the plan that fits your coaching needs. Sessions do not roll over —
-            they reset on the 1st of each month.
+            Choose the plan that fits your coaching needs. Sessions reset on the 1st of each month and do not roll over.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {INDIVIDUAL_PLANS.map(plan => (
               <div
                 key={plan.tier}
@@ -164,7 +191,7 @@ export default function ServicesPage() {
                   ))}
                 </ul>
 
-                <Link href={plan.ctaHref} className="btn-primary text-sm text-center">
+                <Link href={plan.ctaHref} className={plan.ctaStyle}>
                   {plan.cta}
                 </Link>
               </div>
@@ -173,25 +200,41 @@ export default function ServicesPage() {
 
           <p className="text-center text-tfs-slate text-sm mt-8">
             * Sessions reset the 1st of every month. Unused sessions do not carry over.
-            Birthday gift session code issued in your birthday month.
           </p>
         </div>
       </section>
 
       {/* ── PROPERTY MANAGEMENT ──────────────────────────────── */}
-      <section id="property-management" className="py-20 px-4 scroll-mt-16"
+      <section id="property-management" className="relative py-20 px-4 scroll-mt-16 overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #1A2B4A, #1D9E75)' }}>
-        <div className="max-w-5xl mx-auto text-white">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <Image
+            src="/images/logo.png"
+            alt=""
+            fill
+            className="object-contain select-none opacity-[0.07] mix-blend-screen"
+            style={{ filter: 'grayscale(1) invert(1)' }}
+          />
+        </div>
+        <div className="relative z-10 max-w-5xl mx-auto text-white">
           <div className="flex items-center gap-3 mb-4">
             <Building2 className="text-white/80" size={28} />
             <h2 className="text-3xl md:text-4xl font-serif font-bold">Property Management Partners</h2>
           </div>
-          <p className="text-white/80 text-lg mb-12 max-w-2xl">
-            Two partnership models. Both reduce delinquencies, improve tenant relationships,
-            and free up your team to focus on core responsibilities.
-          </p>
+          <div className="text-white/80 text-lg mb-8 max-w-3xl space-y-3">
+            <p>
+              Money stress doesn't have to define your tenants' lives. With{' '}
+              <strong className="text-white">one-on-one coaching</strong>, they gain clarity, confidence, and control.
+            </p>
+            <p>
+              Tenant Financial Solutions gives your community a powerful amenity: coaches who help residents change behaviors, shift perspectives, and build financial peace that lasts.
+            </p>
+            <p className="font-semibold text-white">
+              Financial Clarity That Supports On-Time Payments. &nbsp;·&nbsp; Coaching That Lightens the Load on Management.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
             {/* Affiliate */}
             <div className="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20">
               <h3 className="text-xl font-bold font-serif mb-2">Affiliate Model</h3>
@@ -214,10 +257,10 @@ export default function ServicesPage() {
             <div className="bg-white rounded-2xl p-8 text-tfs-navy">
               <h3 className="text-xl font-bold font-serif mb-2">Tenant Partner Membership</h3>
               <p className="text-tfs-teal font-semibold text-lg mb-1">Custom Pricing</p>
-              <p className="text-tfs-slate text-sm mb-5">You pay — your tenants get Silver coaching</p>
+              <p className="text-tfs-slate text-sm mb-5">You pay — your tenants get Advantage Plan coaching</p>
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Admin generates promo codes — 1 per unit</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Tenants register with their code → Silver tier unlocked</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Tenants register with their code → Advantage Plan unlocked</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> 2 individual sessions + group session per tenant/mo</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> No cost or billing to your tenants</li>
               </ul>
@@ -267,6 +310,29 @@ export default function ServicesPage() {
               </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── BOTTOM CTA ───────────────────────────────────────── */}
+      <section
+        className="relative py-16 px-4 text-white text-center overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #1D9E75, #1A2B4A)' }}
+      >
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <Image
+            src="/images/logo.png"
+            alt=""
+            fill
+            className="object-contain select-none opacity-[0.10] mix-blend-screen"
+            style={{ filter: 'grayscale(1) invert(1)' }}
+          />
+        </div>
+        <div className="relative z-10 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-serif font-bold mb-4">Ready to get started?</h2>
+          <p className="text-white/80 mb-8">No credit card required. Your first Connection Session is on us.</p>
+          <Link href="/register" className="btn-primary px-8 py-4">
+            Step into your free Connection Session
+          </Link>
         </div>
       </section>
     </>

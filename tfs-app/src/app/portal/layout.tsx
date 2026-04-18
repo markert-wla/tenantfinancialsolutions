@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { LayoutDashboard, CalendarPlus, History } from 'lucide-react'
+import { LayoutDashboard, CalendarPlus, History, UserCircle, Users, MessageSquare, CreditCard } from 'lucide-react'
 import SignOutButton from '@/components/portal/SignOutButton'
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
@@ -36,9 +36,13 @@ export default async function PortalLayout({ children }: { children: React.React
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
-          <NavLink href="/portal/dashboard" icon={LayoutDashboard} label="Dashboard" />
-          <NavLink href="/portal/book"      icon={CalendarPlus}    label="Book a Session" />
-          <NavLink href="/portal/history"   icon={History}         label="My Sessions" />
+          <NavLink href="/portal/dashboard"      icon={LayoutDashboard} label="Dashboard" />
+          <NavLink href="/portal/book"          icon={CalendarPlus}    label="Book a Session" />
+          <NavLink href="/portal/history"       icon={History}         label="My Sessions" />
+          <NavLink href="/portal/group-sessions" icon={Users}          label="Group Sessions" />
+          <NavLink href="/portal/profile"       icon={UserCircle}      label="Profile" />
+          <NavLink href="/portal/testimonial"   icon={MessageSquare}   label="Share Story" />
+          <NavLink href="/portal/billing"       icon={CreditCard}      label="Billing" />
         </nav>
 
         <div className="px-3 py-4 border-t border-white/10">

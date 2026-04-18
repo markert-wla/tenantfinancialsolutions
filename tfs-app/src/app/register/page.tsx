@@ -5,43 +5,43 @@ import Link from 'next/link'
 import { Check, AlertCircle, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { createClient } from '@/lib/supabase/client'
+import { TIMEZONES } from '@/lib/timezones'
 
 type Path = 'individual' | 'partner' | 'nonprofit'
 
-const TIMEZONES = [
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'America/Phoenix',
-  'America/Anchorage',
-  'Pacific/Honolulu',
+const TIER_LABELS: Record<string, string> = {
+  free:   'Free',
+  bronze: 'Starter Plan ($50/mo)',
+  silver: 'Advantage Plan ($100/mo)',
+}
+
+const MONTHS = [
+  'January','February','March','April','May','June',
+  'July','August','September','October','November','December',
 ]
 
-const TIER_LABELS: Record<string, string> = {
-  free: 'Free',
-  bronze: 'Bronze ($50/mo)',
-  silver: 'Silver ($100/mo)',
-  gold: 'Gold ($150/mo)',
-}
+const INPUT = 'w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal'
 
 function RegisterInner() {
   const params   = useSearchParams()
   const router   = useRouter()
   const supabase = createClient()
 
-  const preselectedTier = params.get('tier') ?? 'free'
+  const preselectedTier = (['free','bronze','silver'].includes(params.get('tier') ?? ''))
+    ? (params.get('tier') as string)
+    : 'free'
 
   const [path, setPath]         = useState<Path | null>(null)
+  const [isCouple, setIsCouple] = useState(false)
   const [tier, setTier]         = useState(preselectedTier)
   const [form, setForm]         = useState({
     firstName: '', lastName: '', email: '', password: '', timezone: 'America/New_York',
     promoCode: '', unitNumber: '', birthdayMonth: '',
   })
-  const [codeStatus, setCodeStatus]   = useState<'idle'|'checking'|'valid'|'invalid'>('idle')
-  const [codeInfo, setCodeInfo]       = useState<any>(null)
-  const [error, setError]             = useState('')
-  const [loading, setLoading]         = useState(false)
+  const [codeStatus, setCodeStatus] = useState<'idle'|'checking'|'valid'|'invalid'>('idle')
+  const [codeInfo, setCodeInfo]     = useState<any>(null)
+  const [error, setError]           = useState('')
+  const [loading, setLoading]       = useState(false)
 
   function update(field: string, value: string) {
     setForm(f => ({ ...f, [field]: value }))
@@ -70,16 +70,20 @@ function RegisterInner() {
     }
   }
 
+  function clientType(): string {
+    if (path === 'partner')   return 'property_tenant'
+    if (path === 'nonprofit') return 'nonprofit_individual'
+    return isCouple ? 'couple' : 'individual'
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
 
-    // Promo code required for partner/nonprofit paths
     if ((path === 'partner' || path === 'nonprofit') && codeStatus !== 'valid') {
       setError('Please enter and validate your promo code.')
       return
     }
-    // Unit # required for PM tenants
     if (path === 'partner' && !form.unitNumber.trim()) {
       setError('Unit number is required for property management tenants.')
       return
@@ -91,14 +95,15 @@ function RegisterInner() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: form.email,
-          password: form.password,
-          firstName: form.firstName,
-          lastName: form.lastName,
-          timezone: form.timezone,
-          tier: path === 'individual' ? tier : (codeInfo?.assigned_tier ?? 'free'),
-          promoCode: (path === 'partner' || path === 'nonprofit') ? form.promoCode.trim().toUpperCase() : null,
-          unitNumber: path === 'partner' ? form.unitNumber.trim() : null,
+          email:         form.email,
+          password:      form.password,
+          firstName:     form.firstName,
+          lastName:      form.lastName,
+          timezone:      form.timezone,
+          tier:          path === 'individual' ? tier : (codeInfo?.assigned_tier ?? 'free'),
+          clientType:    clientType(),
+          promoCode:     (path === 'partner' || path === 'nonprofit') ? form.promoCode.trim().toUpperCase() : null,
+          unitNumber:    path === 'partner' ? form.unitNumber.trim() : null,
           birthdayMonth: form.birthdayMonth ? parseInt(form.birthdayMonth) : null,
         }),
       })
@@ -110,14 +115,12 @@ function RegisterInner() {
         return
       }
 
-      // Account created server-side — now sign in to establish a browser session
       const { error: signInErr } = await supabase.auth.signInWithPassword({
         email: form.email,
         password: form.password,
       })
 
       if (signInErr) {
-        // Account exists but sign-in failed — send to login
         router.push('/login?registered=1')
         return
       }
@@ -145,9 +148,9 @@ function RegisterInner() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { id: 'individual', title: 'Individual and/or Couples', desc: 'I\'m signing up for myself or with my partner', note: 'Free, Bronze, Silver, or Gold plan' },
-              { id: 'partner',    title: 'Property Tenant', desc: 'My property manager provided a code', note: 'Requires promo code + unit #' },
-              { id: 'nonprofit',  title: 'Non-Profit Resident', desc: 'My organization provided a code', note: 'Requires promo code' },
+              { id: 'individual', title: 'Individual and/or Couples', desc: "I'm signing up for myself or with my partner", note: 'Free, Starter, or Advantage plan' },
+              { id: 'partner',    title: 'Property Tenant',          desc: 'My property manager provided a code',          note: 'Requires promo code + unit #' },
+              { id: 'nonprofit',  title: 'Non-Profit Resident',      desc: 'My organization provided a code',              note: 'Requires promo code' },
             ].map(opt => (
               <button
                 key={opt.id}
@@ -180,7 +183,7 @@ function RegisterInner() {
     >
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 md:p-10">
         <button
-          onClick={() => { setPath(null); setCodeStatus('idle'); setCodeInfo(null) }}
+          onClick={() => { setPath(null); setIsCouple(false); setCodeStatus('idle'); setCodeInfo(null) }}
           className="text-tfs-teal text-sm mb-6 hover:underline"
         >
           ← Back
@@ -192,11 +195,12 @@ function RegisterInner() {
                                   'Non-Profit Resident Registration'}
         </h2>
         <p className="text-tfs-slate text-sm mb-6">
-          {path === 'individual' ? 'Choose a plan after filling in your info.' :
+          {path === 'individual' ? 'Start free — your first Connection Session is on us.' :
            'Enter your promo code first, then complete registration.'}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+
           {/* Promo code (partner/nonprofit only) */}
           {(path === 'partner' || path === 'nonprofit') && (
             <div>
@@ -218,26 +222,22 @@ function RegisterInner() {
                   className="px-4 py-2.5 bg-tfs-teal text-white text-sm rounded-lg font-medium
                              hover:bg-tfs-teal-dark transition-colors disabled:opacity-50"
                 >
-                  {codeStatus === 'checking' ? '...' : 'Validate'}
+                  {codeStatus === 'checking' ? '…' : 'Validate'}
                 </button>
               </div>
 
               {codeStatus === 'valid' && (
                 <div className="mt-2 flex items-center gap-2 text-green-600 text-sm">
                   <Check size={16} />
-                  Code valid — {TIER_LABELS[codeInfo?.assigned_tier] ?? codeInfo?.assigned_tier} tier assigned
+                  Code valid — {TIER_LABELS[codeInfo?.assigned_tier] ?? codeInfo?.assigned_tier} assigned
                 </div>
               )}
               {codeStatus === 'invalid' && (
                 <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
                   <AlertCircle size={16} />
-                  Invalid, expired, or fully used code. You can{' '}
-                  <button
-                    type="button"
-                    onClick={() => setPath('individual')}
-                    className="underline"
-                  >
-                    continue as individual/couple
+                  Invalid, expired, or fully used code.{' '}
+                  <button type="button" onClick={() => setPath('individual')} className="underline">
+                    Continue as individual
                   </button>
                   .
                 </div>
@@ -255,50 +255,78 @@ function RegisterInner() {
                 value={form.unitNumber}
                 onChange={e => update('unitNumber', e.target.value)}
                 placeholder="e.g. 4B or 214"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                className={INPUT}
               />
               <p className="text-xs text-gray-400 mt-1">Used only for eligibility verification if needed.</p>
             </div>
           )}
 
-          {/* Individual tier picker */}
+          {/* Individual: who's signing up + plan picker */}
           {path === 'individual' && (
-            <div>
-              <label className="block text-sm font-medium text-tfs-navy mb-2">Select a Plan</label>
-              <div className="grid grid-cols-2 gap-2">
-                {['free','bronze','silver','gold'].map(t => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setTier(t)}
-                    className={cn(
-                      'p-3 rounded-lg border-2 text-sm font-medium transition-colors',
-                      tier === t
-                        ? 'border-tfs-teal bg-tfs-teal/10 text-tfs-teal'
-                        : 'border-gray-200 text-tfs-slate hover:border-tfs-teal/50'
-                    )}
-                  >
-                    {TIER_LABELS[t]}
-                  </button>
-                ))}
+            <>
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-2">Who's signing up?</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: false, label: 'Just me' },
+                    { value: true,  label: 'Me & my partner' },
+                  ].map(opt => (
+                    <button
+                      key={String(opt.value)}
+                      type="button"
+                      onClick={() => setIsCouple(opt.value)}
+                      className={cn(
+                        'p-3 rounded-lg border-2 text-sm font-medium transition-colors',
+                        isCouple === opt.value
+                          ? 'border-tfs-teal bg-tfs-teal/10 text-tfs-teal'
+                          : 'border-gray-200 text-tfs-slate hover:border-tfs-teal/50'
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-2">Select a Plan</label>
+                <div className="grid grid-cols-1 gap-2">
+                  {(['free','bronze','silver'] as const).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setTier(t)}
+                      className={cn(
+                        'p-3 rounded-lg border-2 text-sm font-medium transition-colors text-left',
+                        tier === t
+                          ? 'border-tfs-teal bg-tfs-teal/10 text-tfs-teal'
+                          : 'border-gray-200 text-tfs-slate hover:border-tfs-teal/50'
+                      )}
+                    >
+                      {TIER_LABELS[t]}
+                      {t === 'free' && (
+                        <span className="block text-xs font-normal mt-0.5 opacity-75">
+                          Includes 1 free Connection Session + 1 group session
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
 
-          {/* Name row */}
+          {/* Name */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-tfs-navy mb-1">First Name *</label>
               <input required type="text" value={form.firstName}
-                onChange={e => update('firstName', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal" />
+                onChange={e => update('firstName', e.target.value)} className={INPUT} />
             </div>
             <div>
               <label className="block text-sm font-medium text-tfs-navy mb-1">Last Name *</label>
               <input required type="text" value={form.lastName}
-                onChange={e => update('lastName', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal" />
+                onChange={e => update('lastName', e.target.value)} className={INPUT} />
             </div>
           </div>
 
@@ -306,8 +334,7 @@ function RegisterInner() {
           <div>
             <label className="block text-sm font-medium text-tfs-navy mb-1">Email *</label>
             <input required type="email" value={form.email}
-              onChange={e => update('email', e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal" />
+              onChange={e => update('email', e.target.value)} className={INPUT} />
           </div>
 
           {/* Password */}
@@ -315,32 +342,29 @@ function RegisterInner() {
             <label className="block text-sm font-medium text-tfs-navy mb-1">Password *</label>
             <input required type="password" value={form.password}
               onChange={e => update('password', e.target.value)}
-              minLength={8}
-              placeholder="Minimum 8 characters"
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal" />
+              minLength={8} placeholder="Minimum 8 characters" className={INPUT} />
           </div>
 
           {/* Timezone */}
           <div>
             <label className="block text-sm font-medium text-tfs-navy mb-1">Your Timezone *</label>
             <select value={form.timezone} onChange={e => update('timezone', e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-tfs-teal">
+              className={INPUT + ' bg-white'}>
               {TIMEZONES.map(tz => (
-                <option key={tz} value={tz}>{tz.replace('America/', '').replace('_', ' ')}</option>
+                <option key={tz} value={tz}>{tz.replace('America/', '').replace(/_/g, ' ')}</option>
               ))}
             </select>
           </div>
 
-          {/* Birthday month (optional) */}
+          {/* Birthday month */}
           <div>
             <label className="block text-sm font-medium text-tfs-navy mb-1">
-              Birthday Month <span className="text-gray-400">(optional — unlocks your annual gift session)</span>
+              Birthday Month <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <select value={form.birthdayMonth} onChange={e => update('birthdayMonth', e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-tfs-teal">
+              className={INPUT + ' bg-white'}>
               <option value="">Select month</option>
-              {['January','February','March','April','May','June',
-                'July','August','September','October','November','December'].map((m, i) => (
+              {MONTHS.map((m, i) => (
                 <option key={m} value={i + 1}>{m}</option>
               ))}
             </select>
@@ -372,7 +396,7 @@ export default function RegisterPage() {
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center"
         style={{ background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 100%)' }}>
-        <p className="text-white text-lg">Loading&hellip;</p>
+        <p className="text-white text-lg">Loading…</p>
       </div>
     }>
       <RegisterInner />

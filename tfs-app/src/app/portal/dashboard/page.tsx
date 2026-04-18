@@ -8,7 +8,7 @@ import { CalendarPlus, Users, CalendarCheck } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
-const LIMITS: Record<string, number> = { free: 0, bronze: 1, silver: 2, gold: 4 }
+const LIMITS: Record<string, number> = { free: 1, bronze: 1, silver: 2 }
 
 export default async function PortalDashboard() {
   const supabase = createClient()

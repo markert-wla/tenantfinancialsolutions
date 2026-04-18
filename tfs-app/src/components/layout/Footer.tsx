@@ -19,13 +19,6 @@ function IconFacebook() {
     </svg>
   )
 }
-function IconTwitter() {
-  return (
-    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-  )
-}
 
 export default function Footer() {
   const [email, setEmail] = useState('')
@@ -80,17 +73,13 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4 uppercase tracking-wider text-xs">Follow Us</h3>
             <div className="flex gap-4">
-              <a href="https://instagram.com/tenantfinancialsolutions" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer"
                  aria-label="Instagram" className="text-gray-300 hover:text-tfs-teal transition-colors">
                 <IconInstagram />
               </a>
-              <a href="https://facebook.com/tenantfinancialsolutions" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer"
                  aria-label="Facebook" className="text-gray-300 hover:text-tfs-teal transition-colors">
                 <IconFacebook />
-              </a>
-              <a href="https://twitter.com/tenantfinancial" target="_blank" rel="noopener noreferrer"
-                 aria-label="Twitter / X" className="text-gray-300 hover:text-tfs-teal transition-colors">
-                <IconTwitter />
               </a>
             </div>
             <div className="mt-4 text-sm text-gray-300">
@@ -128,12 +117,10 @@ export default function Footer() {
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
           <p>&copy; {new Date().getFullYear()} Tenant Financial Solutions. All rights reserved.</p>
           <div className="flex gap-4">
-            <a href="https://instagram.com/tenantfinancialsolutions" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer"
                aria-label="Instagram" className="hover:text-tfs-teal transition-colors"><IconInstagram /></a>
-            <a href="https://facebook.com/tenantfinancialsolutions" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer"
                aria-label="Facebook" className="hover:text-tfs-teal transition-colors"><IconFacebook /></a>
-            <a href="https://twitter.com/tenantfinancial" target="_blank" rel="noopener noreferrer"
-               aria-label="X / Twitter" className="hover:text-tfs-teal transition-colors"><IconTwitter /></a>
           </div>
         </div>
       </div>

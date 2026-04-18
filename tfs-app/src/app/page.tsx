@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { ChevronRight, Users, Building2, HeartHandshake } from 'lucide-react'
+import HeroCTAButton from '@/components/layout/HeroCTAButton'
 
 export const metadata: Metadata = {
   title: 'Tenant Focused – Community Impact | Tenant Financial Solutions',
@@ -45,7 +46,7 @@ const AUDIENCE_CARDS = [
     icon: HeartHandshake,
     label: 'I Represent a Non-Profit',
     href: '/services#nonprofit',
-    bg: 'bg-tfs-teal-dark',
+    bg: 'bg-tfs-purple',
     desc: 'Complimentary group coaching available',
   },
 ]
@@ -117,18 +118,18 @@ export default async function HomePage({
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight mb-6">
             To create a world where millions of tenants take ownership of their financial futures
           </h1>
-          <p className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Through accessible coaching delivered by the leading platform for{' '}
-            <span className="font-semibold text-white">renter financial empowerment</span>.
-          </p>
+          {/* Primary CTA */}
+          <div className="mb-8">
+            <HeroCTAButton />
+          </div>
 
           {/* Three CTA cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-            {AUDIENCE_CARDS.map(({ icon: Icon, label, href, bg, desc }) => (
+            {AUDIENCE_CARDS.map(({ icon: Icon, label, href, desc }) => (
               <Link
                 key={href}
                 href={href}
-                className={`${bg} rounded-xl p-6 text-left hover:scale-105 transition-transform duration-200 group`}
+                className={`rounded-xl p-6 text-left hover:scale-105 transition-transform duration-200 group bg-white/10 backdrop-blur-sm border border-white/20`}
               >
                 <Icon className="mb-3 text-white/80" size={28} />
                 <p className="font-semibold text-white text-base mb-1">{label}</p>
@@ -142,13 +143,9 @@ export default async function HomePage({
           </div>
         </div>
 
-        {/* Scroll cue */}
-        <div className="absolute bottom-8 inset-x-0 flex justify-center animate-bounce">
-          <div className="w-6 h-10 rounded-full border-2 border-white/40 flex items-start justify-center p-1">
-            <div className="w-1 h-2 bg-white/60 rounded-full" />
-          </div>
-        </div>
       </section>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
       {/* ── BENEFITS ─────────────────────────────────────────── */}
       <section className="relative">
@@ -188,6 +185,8 @@ export default async function HomePage({
         </div>
       </section>
 
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
       {/* ── AUDIENCE CARDS (repeated lower) ──────────────────── */}
       <section className="py-20 bg-tfs-teal-light px-4">
         <div className="max-w-5xl mx-auto text-center mb-12">
@@ -214,6 +213,8 @@ export default async function HomePage({
         </div>
       </section>
 
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
       {/* ── MONEY STIGMA ─────────────────────────────────────── */}
       <section
         className="py-20 px-4 text-center"
@@ -232,36 +233,42 @@ export default async function HomePage({
         </div>
       </section>
 
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
       {/* ── WELCOME SECTION ──────────────────────────────────── */}
       <section className="py-20 bg-white px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="section-heading text-center mb-10">Welcome to Tenant Financial Solutions</h2>
-          <div className="space-y-6 text-tfs-slate text-base md:text-lg leading-relaxed">
+          <div className="space-y-5 text-tfs-slate text-base md:text-lg leading-relaxed mb-10">
             <p>
-              Welcome to Tenant Financial Solutions, your partner in assisting tenants financially in
-              the most sustainable way possible – <strong className="text-tfs-teal">COACHING!</strong> We
-              are passionate about seeing your community thrive through the relief of money stress. There
-              is no quick fix here. There are only dedicated coaches who desire the success of each and
-              every client through behavioral changes, process changes, perspective changes, and people
-              changes.
+              Money stress doesn't have to define your tenants' lives. With{' '}
+              <strong className="text-tfs-teal">one-on-one coaching</strong>, they gain clarity, confidence, and control.
             </p>
             <p>
-              Imagine a world where there was a direct resource for your tenant population to go to first
-              when facing financial challenges or seeking financial clarity – IMAGINE NO LONGER! A market
-              differentiator in the form of an amenity outside of a physical asset. Coaching is an amenity
-              that has the power to provide lasting peace. Tenant Financial Solutions understands this
-              transformative power. We work diligently to understand the needs of the tenant and the
-              management staff.
+              Tenant Financial Solutions gives your community a powerful amenity: coaches who help
+              residents change behaviors, shift perspectives, and build financial peace that lasts.
             </p>
             <p>
-              In addition to the individual coaching, members have access to one complimentary group
-              session lesson per month with multiple coaches present during the call. This is a great time
-              to interact outside of a one on one environment and a time to learn about topical discussions
-              and present day financial trends.
+              Your residents want clarity. Your team wants fewer financial emergencies.
+              Our <strong className="text-tfs-teal">individual financial coaching</strong> delivers both.
             </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="rounded-xl border border-tfs-teal/30 bg-tfs-teal/5 px-6 py-5">
+              <p className="font-bold text-tfs-navy font-serif text-lg leading-snug">
+                Financial Clarity That Supports On-Time Payments.
+              </p>
+            </div>
+            <div className="rounded-xl border border-tfs-navy/20 bg-tfs-navy/5 px-6 py-5">
+              <p className="font-bold text-tfs-navy font-serif text-lg leading-snug">
+                Coaching That Lightens the Load on Management.
+              </p>
+            </div>
           </div>
         </div>
       </section>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
       {/* ── TESTIMONIALS ─────────────────────────────────────── */}
       {testimonials.length > 0 && (
@@ -287,6 +294,8 @@ export default async function HomePage({
         </section>
       )}
 
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
       {/* ── FINAL CTA ────────────────────────────────────────── */}
       <section
         className="py-20 px-4 text-white text-center"
@@ -297,10 +306,10 @@ export default async function HomePage({
             Ready to Take Ownership of Your Financial Future?
           </h2>
           <p className="text-white/80 text-lg mb-8">
-            Start for free. No credit card required. Your first group session is on us.
+            Start for free. No credit card required. Your first Connection Session is on us.
           </p>
           <Link href="/register" className="btn-primary text-base px-8 py-4">
-            Start Your Journey
+            Step into your free Connection Session
           </Link>
         </div>
       </section>

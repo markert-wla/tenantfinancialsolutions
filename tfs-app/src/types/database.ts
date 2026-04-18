@@ -48,6 +48,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          attended: boolean | null
           client_id: string
           coach_id: string
           created_at: string
@@ -58,6 +59,7 @@ export type Database = {
           status: Database["public"]["Enums"]["booking_status"]
         }
         Insert: {
+          attended?: boolean | null
           client_id: string
           coach_id: string
           created_at?: string
@@ -68,6 +70,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["booking_status"]
         }
         Update: {
+          attended?: boolean | null
           client_id?: string
           coach_id?: string
           created_at?: string
@@ -195,12 +198,54 @@ export type Database = {
         }
         Relationships: []
       }
+      group_session_attendance: {
+        Row: {
+          attended: boolean
+          client_id: string
+          created_at: string
+          id: string
+          session_id: string
+        }
+        Insert: {
+          attended?: boolean
+          client_id: string
+          created_at?: string
+          id?: string
+          session_id: string
+        }
+        Update: {
+          attended?: boolean
+          client_id?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_session_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "group_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_session_attendance_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           birthday_month: number | null
+          client_type: Database["public"]["Enums"]["client_type"] | null
+          contact_email: string | null
           created_at: string
           email: string
           first_name: string
+          free_trial_expires_at: string | null
           id: string
           is_active: boolean
           last_active_at: string
@@ -216,9 +261,12 @@ export type Database = {
         }
         Insert: {
           birthday_month?: number | null
+          client_type?: Database["public"]["Enums"]["client_type"] | null
+          contact_email?: string | null
           created_at?: string
           email: string
           first_name: string
+          free_trial_expires_at?: string | null
           id: string
           is_active?: boolean
           last_active_at?: string
@@ -234,9 +282,12 @@ export type Database = {
         }
         Update: {
           birthday_month?: number | null
+          client_type?: Database["public"]["Enums"]["client_type"] | null
+          contact_email?: string | null
           created_at?: string
           email?: string
           first_name?: string
+          free_trial_expires_at?: string | null
           id?: string
           is_active?: boolean
           last_active_at?: string
@@ -335,10 +386,11 @@ export type Database = {
     }
     Enums: {
       booking_status: "pending" | "confirmed" | "cancelled"
+      client_type: "individual" | "couple" | "nonprofit_individual" | "property_tenant"
       partner_model: "affiliate" | "paying"
       partner_type: "property_management" | "nonprofit" | "trial"
       plan_tier: "free" | "bronze" | "silver" | "gold"
-      user_role: "client" | "coach" | "admin"
+      user_role: "client" | "coach" | "admin" | "property_manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -467,10 +519,11 @@ export const Constants = {
   public: {
     Enums: {
       booking_status: ["pending", "confirmed", "cancelled"],
+      client_type: ["individual", "couple", "nonprofit_individual", "property_tenant"],
       partner_model: ["affiliate", "paying"],
       partner_type: ["property_management", "nonprofit", "trial"],
       plan_tier: ["free", "bronze", "silver", "gold"],
-      user_role: ["client", "coach", "admin"],
+      user_role: ["client", "coach", "admin", "property_manager"],
     },
   },
 } as const
