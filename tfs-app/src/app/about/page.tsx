@@ -125,18 +125,20 @@ export default async function AboutPage() {
         <div className="absolute inset-0 bg-tfs-navy/82" aria-hidden="true" />
 
         {/* Core Values */}
-        <div className="relative z-10 max-w-6xl mx-auto pt-[40rem] pb-16">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="relative z-10 max-w-6xl mx-auto pt-[40rem] pb-16 px-4">
+          <div className="flex flex-col gap-3 max-w-xl">
             {CORE_VALUES.map(({ letter, word, desc }) => (
               <div
                 key={word}
-                className="bg-black/40 backdrop-blur-sm border border-white/15 rounded-xl p-6 hover:bg-black/50 transition-colors"
+                className="bg-black/40 backdrop-blur-sm border border-white/15 rounded-xl px-5 py-4 hover:bg-black/50 transition-colors"
               >
-                <div className="w-10 h-10 rounded-lg bg-tfs-gold flex items-center justify-center mb-3">
-                  <span className="text-tfs-navy font-bold text-lg font-serif">{letter}</span>
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="w-9 h-9 rounded-lg bg-tfs-gold flex items-center justify-center shrink-0">
+                    <span className="text-tfs-navy font-bold text-base font-serif">{letter}</span>
+                  </div>
+                  <h3 className="font-bold text-white text-base font-serif">{word}</h3>
                 </div>
-                <h3 className="font-bold text-white text-lg mb-2 font-serif">{word}</h3>
-                <p className="text-white/80 text-sm leading-relaxed">{desc}</p>
+                <p className="text-white/80 text-sm leading-relaxed pl-12">{desc}</p>
               </div>
             ))}
           </div>
