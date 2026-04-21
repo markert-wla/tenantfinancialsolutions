@@ -130,15 +130,15 @@ export default async function AboutPage() {
             {CORE_VALUES.map(({ letter, word, desc }) => (
               <div
                 key={word}
-                className="bg-black/40 backdrop-blur-sm border border-white/15 rounded-xl px-5 py-4 hover:bg-black/50 transition-colors"
+                className="bg-white/90 backdrop-blur-sm border border-white/60 rounded-xl px-5 py-4 hover:bg-white/95 transition-colors"
               >
                 <div className="flex items-center gap-3 mb-1">
                   <div className="w-9 h-9 rounded-lg bg-tfs-gold flex items-center justify-center shrink-0">
                     <span className="text-tfs-navy font-bold text-base font-serif">{letter}</span>
                   </div>
-                  <h3 className="font-bold text-white text-base font-serif">{word}</h3>
+                  <h3 className="font-bold text-tfs-navy text-base font-serif">{word}</h3>
                 </div>
-                <p className="text-white/80 text-sm leading-relaxed pl-12">{desc}</p>
+                <p className="text-gray-600 text-sm leading-relaxed pl-12">{desc}</p>
               </div>
             ))}
           </div>
