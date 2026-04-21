@@ -125,7 +125,7 @@ export default async function AboutPage() {
         <div className="absolute inset-0 bg-tfs-navy/82" aria-hidden="true" />
 
         {/* Core Values */}
-        <div className="relative z-10 max-w-6xl mx-auto pt-56 pb-16">
+        <div className="relative z-10 max-w-6xl mx-auto pt-[40rem] pb-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {CORE_VALUES.map(({ letter, word, desc }) => (
               <div
