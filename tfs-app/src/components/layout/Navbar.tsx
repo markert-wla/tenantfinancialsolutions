@@ -16,32 +16,52 @@ const NAV_LINKS = [
 
 const PUBLIC_PAGES = new Set(['/', '/about', '/services', '/contact'])
 
-const FADE_START = 180
-const FADE_END   = 380
-
 export default function Navbar() {
   const pathname = usePathname()
-  const [open, setOpen]             = useState(false)
-  const [scrolled, setScrolled]     = useState(false)
-  const [ctaOpacity, setCtaOpacity] = useState(0)
-  const [user, setUser]             = useState<any>(null)
-  const [role, setRole]             = useState<string | null>(null)
+  const [open, setOpen]               = useState(false)
+  const [scrolled, setScrolled]       = useState(false)
+  const [sessionVisible, setSessionVisible] = useState(false)
+  const [user, setUser]               = useState<any>(null)
+  const [role, setRole]               = useState<string | null>(null)
   const supabase = createClient()
 
+  // Navbar background — tracks any scroll
   useEffect(() => {
-    const isPublic = PUBLIC_PAGES.has(pathname)
-    if (!isPublic) { setCtaOpacity(0); return }
-
-    function onScroll() {
-      const y = window.scrollY
-      setScrolled(y > 20)
-      setCtaOpacity(Math.min(1, Math.max(0, (y - FADE_START) / (FADE_END - FADE_START))))
-    }
+    const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Session button — uses IntersectionObserver on the hero CTA button
+  // When [data-hero-cta] leaves the viewport the nav Session button fades in
+  useEffect(() => {
+    setSessionVisible(false)
+    if (!PUBLIC_PAGES.has(pathname)) return
+
+    let observer: IntersectionObserver | null = null
+
+    // rAF defers until after new page content has painted
+    const raf = requestAnimationFrame(() => {
+      const heroCtaEl = document.querySelector('[data-hero-cta]')
+      if (!heroCtaEl) return
+
+      observer = new IntersectionObserver(
+        ([entry]) => setSessionVisible(!entry.isIntersecting),
+        // rootMargin top offset = navbar height so the trigger fires when
+        // the button slides behind the navbar, not when it hits the raw top
+        { rootMargin: '-64px 0px 0px 0px', threshold: 0 }
+      )
+      observer.observe(heroCtaEl)
+    })
+
+    return () => {
+      cancelAnimationFrame(raf)
+      observer?.disconnect()
+    }
   }, [pathname])
 
+  // Auth state
   useEffect(() => {
     async function loadUser() {
       const { data } = await supabase.auth.getUser()
@@ -68,7 +88,10 @@ export default function Navbar() {
     '/portal/dashboard'
 
   const dashboardLabel = role === 'client' || role === null ? 'My Portal' : 'Dashboard'
-  const showSessionBtn  = !user && PUBLIC_PAGES.has(pathname)
+
+  // Show the sliding Session button only for logged-out users on public pages
+  const showSessionBtn = !user && PUBLIC_PAGES.has(pathname)
+  const sessionActive  = showSessionBtn && sessionVisible
 
   return (
     <header
@@ -94,7 +117,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Center — Nav links + gradual Session CTA */}
+        {/* Center — Nav links + sliding Session CTA */}
         <ul className="hidden md:flex items-center gap-6">
           {NAV_LINKS.map(({ label, href }) => (
             <li key={href}>
@@ -110,20 +133,28 @@ export default function Navbar() {
             </li>
           ))}
 
-          {showSessionBtn && (
-            <li
-              style={{ opacity: ctaOpacity, pointerEvents: ctaOpacity > 0.1 ? 'auto' : 'none' }}
-              aria-hidden={ctaOpacity < 0.1}
+          {/*
+            Always in the DOM so the CSS transition has a start state.
+            max-w-0 → max-w-[140px] slides open and pushes nav links left.
+            opacity-0 → opacity-100 fades it in simultaneously.
+          */}
+          <li
+            className={cn(
+              'overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out',
+              sessionActive
+                ? 'max-w-[140px] opacity-100 pointer-events-auto'
+                : 'max-w-0 opacity-0 pointer-events-none'
+            )}
+            aria-hidden={!sessionActive}
+          >
+            <Link
+              href="/register?tier=free"
+              tabIndex={sessionActive ? 0 : -1}
+              className="bg-tfs-gold text-tfs-navy font-bold text-sm px-5 py-2 rounded-lg whitespace-nowrap hover:brightness-105 hover:scale-105 block"
             >
-              <Link
-                href="/register?tier=free"
-                tabIndex={ctaOpacity > 0.1 ? 0 : -1}
-                className="bg-tfs-gold text-tfs-navy font-bold text-sm px-5 py-2 rounded-lg whitespace-nowrap hover:brightness-105 hover:scale-105 transition-transform duration-150"
-              >
-                Session
-              </Link>
-            </li>
-          )}
+              Session
+            </Link>
+          </li>
         </ul>
 
         {/* Right — Auth */}

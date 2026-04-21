@@ -49,9 +49,9 @@ export default async function AboutPage() {
 
   return (
     <>
-      {/* ── VISION SECTION ───────────────────────────────────── */}
+      {/* ── WELCOME ──────────────────────────────────────────── */}
       <section
-        className="relative min-h-[60vh] flex items-center justify-center overflow-hidden pt-16"
+        className="relative pt-28 pb-16 px-4 text-white overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 60%, #0F1B30 100%)' }}
       >
         {/* Logo watermark */}
@@ -66,135 +66,149 @@ export default async function AboutPage() {
           />
         </div>
 
-        <div className="relative z-10 max-w-3xl mx-auto text-white text-center px-4 py-10">
-          <p className="text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase text-tfs-gold mb-4">
-            Our Vision
-          </p>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight">
-            To create a world where millions of tenants take ownership of their financial futures
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-white text-center mb-6">
+            Welcome to Tenant Financial Solutions
           </h1>
-          <div className="mt-8">
+
+          {/* CTA above the fold so IntersectionObserver starts visible → nav Session btn stays hidden on load */}
+          <div className="text-center mb-10">
             <Link
               href="/register?tier=free"
+              data-hero-cta="true"
               className="inline-block bg-tfs-gold text-tfs-navy font-bold text-lg px-10 py-4 rounded-xl shadow-lg hover:brightness-105 hover:scale-105 transition-all duration-200"
             >
               Step into your free Connection Session
             </Link>
           </div>
+
+          <div className="space-y-5 text-white/85 text-base md:text-lg leading-relaxed mb-10">
+            <p>
+              Money stress doesn&apos;t have to define your tenants&apos; lives. With{' '}
+              <strong className="text-tfs-gold">one-on-one coaching</strong>, they gain clarity, confidence, and control.
+            </p>
+            <p>
+              Tenant Financial Solutions gives your community a powerful amenity: coaches who help
+              residents change behaviors, shift perspectives, and build financial peace that lasts.
+            </p>
+            <p>
+              Your residents want clarity. Your team wants fewer financial emergencies.
+              Our <strong className="text-tfs-gold">individual financial coaching</strong> delivers both.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-6 py-5">
+              <p className="font-bold text-white font-serif text-lg leading-snug">
+                Financial Clarity That Supports On-Time Payments.
+              </p>
+            </div>
+            <div className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-6 py-5">
+              <p className="font-bold text-white font-serif text-lg leading-snug">
+                Coaching That Lightens the Load on Management.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── CORE VALUES ──────────────────────────────────────── */}
-      <section className="py-20 bg-white px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="section-heading mb-4">Our Core Values</h2>
-            <p className="text-tfs-slate text-lg max-w-xl mx-auto">
-              Everything we do is anchored in the <strong>COACHES</strong> framework.
-            </p>
-          </div>
+      {/* ── CORE VALUES + COACHES (shared lighthouse bg) ────── */}
+      <section className="relative px-4 text-white overflow-hidden" id="coaches">
+        {/* Lighthouse image — object-top shows the top of the image first */}
+        <Image
+          src="/images/lighthouse-image-optimized.webp"
+          alt=""
+          fill
+          className="object-cover object-top select-none"
+          aria-hidden="true"
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-tfs-navy/82" aria-hidden="true" />
 
-          {/* Teal chalkboard image */}
-          <div className="mb-12 rounded-2xl overflow-hidden shadow-xl">
-            <Image
-              src="/images/core-values-optimized.webp"
-              alt="COACHES Core Values — Courage, Openness, Authenticity, Compassion, Honesty, Excellence, Service"
-              width={1152}
-              height={768}
-              sizes="(max-width: 1280px) 100vw, 1152px"
-              className="w-full object-cover"
-            />
-          </div>
-
-          {/* Card grid */}
+        {/* Core Values */}
+        <div className="relative z-10 max-w-6xl mx-auto pt-56 pb-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {CORE_VALUES.map(({ letter, word, desc }) => (
               <div
                 key={word}
-                className="card hover:shadow-lg transition-shadow group"
+                className="bg-black/40 backdrop-blur-sm border border-white/15 rounded-xl p-6 hover:bg-black/50 transition-colors"
               >
-                <div className="w-10 h-10 rounded-lg bg-tfs-teal flex items-center justify-center mb-3">
-                  <span className="text-white font-bold text-lg font-serif">{letter}</span>
+                <div className="w-10 h-10 rounded-lg bg-tfs-gold flex items-center justify-center mb-3">
+                  <span className="text-tfs-navy font-bold text-lg font-serif">{letter}</span>
                 </div>
-                <h3 className="font-bold text-tfs-navy text-lg mb-2 font-serif">{word}</h3>
-                <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
+                <h3 className="font-bold text-white text-lg mb-2 font-serif">{word}</h3>
+                <p className="text-white/80 text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* ── COACHES ──────────────────────────────────────────── */}
-      <section className="py-20 bg-tfs-teal-light px-4" id="coaches">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="section-heading mb-4">Meet the Coaches</h2>
-            <p className="text-tfs-slate text-lg max-w-xl mx-auto">
-              Real people. Real coaching. Each coach brings unique expertise and a genuine desire
-              to help tenants achieve lasting financial peace.
-            </p>
-          </div>
+        {/* Meet the Coaches — light panel so black text reads against the lighthouse bg */}
+        <div className="relative z-10 max-w-6xl mx-auto pb-12 pt-8">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-8 py-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-tfs-navy mb-3">Meet the Coaches</h2>
+              <p className="text-gray-700 text-base max-w-xl mx-auto">
+                Real people. Real coaching. Each coach brings unique expertise and a genuine desire
+                to help tenants achieve lasting financial peace.
+              </p>
+            </div>
 
-          {coaches.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {coaches.map((coach: any) => (
-                <div key={coach.id} className="card text-center hover:shadow-lg transition-shadow">
-                  <div className="w-24 h-24 rounded-full bg-tfs-teal/20 mx-auto mb-4 overflow-hidden">
-                    {coach.photo_url ? (
-                      <Image
-                        src={coach.photo_url}
-                        alt={coach.display_name}
-                        width={96}
-                        height={96}
-                        sizes="96px"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-3xl font-bold text-tfs-teal font-serif">
-                          {coach.display_name?.charAt(0) ?? '?'}
-                        </span>
-                      </div>
+            {coaches.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {coaches.map((coach: any) => (
+                  <div key={coach.id} className="rounded-xl border border-gray-200 bg-white p-6 text-center hover:shadow-md transition-shadow">
+                    <div className="w-20 h-20 rounded-full bg-tfs-teal/20 mx-auto mb-3 overflow-hidden">
+                      {coach.photo_url ? (
+                        <Image
+                          src={coach.photo_url}
+                          alt={coach.display_name}
+                          width={80}
+                          height={80}
+                          sizes="80px"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-2xl font-bold text-tfs-teal font-serif">
+                            {coach.display_name?.charAt(0) ?? '?'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="font-bold text-tfs-navy text-lg mb-1 font-serif">{coach.display_name}</h3>
+                    {coach.specialty && (
+                      <p className="text-tfs-teal text-sm font-medium mb-2">{coach.specialty}</p>
+                    )}
+                    {coach.bio && (
+                      <p className="text-gray-600 text-sm leading-relaxed">{coach.bio}</p>
                     )}
                   </div>
-                  <h3 className="font-bold text-tfs-navy text-xl mb-1 font-serif">{coach.display_name}</h3>
-                  {coach.specialty && (
-                    <p className="text-tfs-teal text-sm font-medium mb-3">{coach.specialty}</p>
-                  )}
-                  {coach.bio && (
-                    <p className="text-tfs-slate text-sm leading-relaxed mb-3">{coach.bio}</p>
-                  )}
-                  {coach.timezone && (
-                    <span className="inline-block text-xs px-3 py-1 rounded-full bg-tfs-teal/10 text-tfs-teal">
-                      {coach.timezone.replace('_', ' ')}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 text-tfs-slate">
-              <p className="text-lg mb-2">Coach profiles coming soon.</p>
-              <p className="text-sm">Check back shortly — we&apos;re adding our team now.</p>
-            </div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-gray-500 py-2">
+                <p className="text-base mb-1 text-gray-800">Coach profiles coming soon.</p>
+                <p className="text-sm">Check back shortly — we&apos;re adding our team now.</p>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────── */}
       <section
         className="relative py-16 px-4 text-white text-center overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1D9E75, #1A2B4A)' }}
+        style={{ background: 'radial-gradient(ellipse at 60% 0%, #1D9E75 0%, #1A2B4A 55%, #0F1B30 100%)' }}
       >
-        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <Image
-            src="/images/logo.png"
-            alt=""
-            fill
-            className="object-contain select-none opacity-[0.10] mix-blend-screen"
-            style={{ filter: 'grayscale(1) invert(1)' }}
-          />
-        </div>
+        {/* Subtle dot pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
+          }}
+          aria-hidden="true"
+        />
         <div className="relative z-10 max-w-2xl mx-auto">
           <h2 className="text-3xl font-serif font-bold mb-4">
             Ready to work with one of our coaches?

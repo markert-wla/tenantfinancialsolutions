@@ -25,6 +25,20 @@ export const metadata: Metadata = {
   },
 }
 
+async function getCoaches() {
+  try {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('coaches')
+      .select('id, display_name, photo_url, bio, specialty')
+      .eq('is_active', true)
+      .limit(3)
+    return data ?? []
+  } catch {
+    return []
+  }
+}
+
 async function getApprovedTestimonials() {
   try {
     const supabase = createClient()
@@ -89,7 +103,10 @@ export default async function HomePage({
     redirect(`/auth/callback?code=${encodeURIComponent(code)}`)
   }
 
-  const testimonials = await getApprovedTestimonials()
+  const [testimonials, coaches] = await Promise.all([
+    getApprovedTestimonials(),
+    getCoaches(),
+  ])
 
   return (
     <>
@@ -155,6 +172,95 @@ export default async function HomePage({
           </div>
         </div>
 
+      </section>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
+      {/* ── HOW IT WORKS ─────────────────────────────────────── */}
+      <section className="py-20 bg-white px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="section-heading mb-4">How It Works</h2>
+          <p className="text-tfs-slate text-lg mb-12 max-w-xl mx-auto">
+            Three simple steps to financial peace.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[
+              { step: '1', title: 'Book Your Free Session', desc: 'Start with a no-cost Connection Session to meet your coach and set your goals.' },
+              { step: '2', title: 'Choose Your Path', desc: 'Select the coaching plan that fits your needs — individual, group, or property management.' },
+              { step: '3', title: 'Build Financial Peace', desc: 'Work with your coach to build clarity, confidence, and lasting financial habits.' },
+            ].map(({ step, title, desc }) => (
+              <div key={step} className="flex flex-col items-center text-center">
+                <div className="w-14 h-14 rounded-full bg-tfs-teal text-white font-bold text-2xl font-serif flex items-center justify-center mb-4 shadow-md">
+                  {step}
+                </div>
+                <h3 className="font-bold text-tfs-navy text-xl font-serif mb-2">{title}</h3>
+                <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12">
+            <Link href="/register?tier=free" className="btn-primary px-8 py-4">
+              Start with a Free Connection Session
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
+      {/* ── MEET THE COACHES ─────────────────────────────────── */}
+      <section className="py-20 bg-tfs-teal-light px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="section-heading mb-4">Meet the Coaches</h2>
+            <p className="text-tfs-slate text-lg max-w-xl mx-auto">
+              Real people. Real coaching. Dedicated to your financial peace.
+            </p>
+          </div>
+          {coaches.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {coaches.map((coach: any) => (
+                <div key={coach.id} className="card text-center hover:shadow-lg transition-shadow">
+                  <div className="w-24 h-24 rounded-full bg-tfs-teal/20 mx-auto mb-4 overflow-hidden">
+                    {coach.photo_url ? (
+                      <Image
+                        src={coach.photo_url}
+                        alt={coach.display_name}
+                        width={96}
+                        height={96}
+                        sizes="96px"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-3xl font-bold text-tfs-teal font-serif">
+                          {coach.display_name?.charAt(0) ?? '?'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="font-bold text-tfs-navy text-xl mb-1 font-serif">{coach.display_name}</h3>
+                  {coach.specialty && (
+                    <p className="text-tfs-teal text-sm font-medium">{coach.specialty}</p>
+                  )}
+                  {coach.bio && (
+                    <p className="text-tfs-slate text-sm leading-relaxed mt-2 line-clamp-3">{coach.bio}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10 text-tfs-slate">
+              <p className="text-lg mb-2">Coach profiles coming soon.</p>
+              <p className="text-sm">Check back shortly — we&apos;re adding our team now.</p>
+            </div>
+          )}
+          <div className="text-center mt-10">
+            <Link href="/about#coaches" className="btn-navy">
+              Learn More About Our Team
+            </Link>
+          </div>
+        </div>
       </section>
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
@@ -242,41 +348,6 @@ export default async function HomePage({
           <Link href="/about" className="btn-navy">
             Meet the Coaches
           </Link>
-        </div>
-      </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
-
-      {/* ── WELCOME SECTION ──────────────────────────────────── */}
-      <section className="py-20 bg-white px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="section-heading text-center mb-10">Welcome to Tenant Financial Solutions</h2>
-          <div className="space-y-5 text-tfs-slate text-base md:text-lg leading-relaxed mb-10">
-            <p>
-              Money stress doesn't have to define your tenants' lives. With{' '}
-              <strong className="text-tfs-teal">one-on-one coaching</strong>, they gain clarity, confidence, and control.
-            </p>
-            <p>
-              Tenant Financial Solutions gives your community a powerful amenity: coaches who help
-              residents change behaviors, shift perspectives, and build financial peace that lasts.
-            </p>
-            <p>
-              Your residents want clarity. Your team wants fewer financial emergencies.
-              Our <strong className="text-tfs-teal">individual financial coaching</strong> delivers both.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="rounded-xl border border-tfs-teal/30 bg-tfs-teal/5 px-6 py-5">
-              <p className="font-bold text-tfs-navy font-serif text-lg leading-snug">
-                Financial Clarity That Supports On-Time Payments.
-              </p>
-            </div>
-            <div className="rounded-xl border border-tfs-navy/20 bg-tfs-navy/5 px-6 py-5">
-              <p className="font-bold text-tfs-navy font-serif text-lg leading-snug">
-                Coaching That Lightens the Load on Management.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
