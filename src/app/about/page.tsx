@@ -51,7 +51,7 @@ export default async function AboutPage() {
     <>
       {/* ── WELCOME ──────────────────────────────────────────── */}
       <section
-        className="relative pt-28 pb-16 px-4 text-white overflow-hidden"
+        className="relative pt-32 pb-16 px-4 text-white overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 60%, #0F1B30 100%)' }}
       >
         {/* Logo watermark */}
@@ -67,6 +67,16 @@ export default async function AboutPage() {
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto">
+          {/* Vision statement */}
+          <div className="text-center mb-8">
+            <p className="text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase text-tfs-gold mb-3">
+              Our Vision
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white leading-tight">
+              To create a world where millions of tenants take ownership of their financial futures
+            </h2>
+          </div>
+
           <h1 className="text-3xl sm:text-4xl font-serif font-bold text-white text-center mb-6">
             Welcome to Tenant Financial Solutions
           </h1>
@@ -87,26 +97,11 @@ export default async function AboutPage() {
               Money stress doesn&apos;t have to define your tenants&apos; lives. With{' '}
               <strong className="text-tfs-gold">one-on-one coaching</strong>, they gain clarity, confidence, and control.
             </p>
-            <p>
-              Tenant Financial Solutions gives your community a powerful amenity: coaches who help
-              residents change behaviors, shift perspectives, and build financial peace that lasts.
-            </p>
-            <p>
-              Your residents want clarity. Your team wants fewer financial emergencies.
-              Our <strong className="text-tfs-gold">individual financial coaching</strong> delivers both.
-            </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-6 py-5">
-              <p className="font-bold text-white font-serif text-lg leading-snug">
-                Financial Clarity That Supports On-Time Payments.
-              </p>
-            </div>
-            <div className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-6 py-5">
-              <p className="font-bold text-white font-serif text-lg leading-snug">
-                Coaching That Lightens the Load on Management.
-              </p>
-            </div>
+          <div className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-6 py-5 max-w-sm">
+            <p className="font-bold text-white font-serif text-lg leading-snug">
+              Financial Clarity That Supports On-Time Payments.
+            </p>
           </div>
         </div>
       </section>
@@ -151,7 +146,7 @@ export default async function AboutPage() {
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-tfs-navy mb-3">Meet the Coaches</h2>
               <p className="text-gray-700 text-base max-w-xl mx-auto">
                 Real people. Real coaching. Each coach brings unique expertise and a genuine desire
-                to help tenants achieve lasting financial peace.
+                to help tenants achieve their financial goals.
               </p>
             </div>
 

@@ -90,7 +90,7 @@ export default function ServicesPage() {
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section
-        className="relative pt-28 pb-20 px-4 text-white text-center overflow-hidden"
+        className="relative pt-32 pb-20 px-4 text-white text-center overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 100%)' }}
       >
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -237,7 +237,7 @@ export default function ServicesPage() {
               <strong className="text-white">one-on-one coaching</strong>, they gain clarity, confidence, and control.
             </p>
             <p>
-              Tenant Financial Solutions gives your community a powerful amenity: coaches who help residents change behaviors, shift perspectives, and build financial peace that lasts.
+              Tenant Financial Solutions gives your community a powerful amenity: coaches who help residents change behaviors, shift perspectives, and build lasting financial clarity.
             </p>
             <p className="font-semibold text-white">
               Financial Clarity That Supports On-Time Payments. &nbsp;·&nbsp; Coaching That Lightens the Load on Management.

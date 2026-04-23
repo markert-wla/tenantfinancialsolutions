@@ -50,7 +50,7 @@ export default function Navbar() {
         ([entry]) => setSessionVisible(!entry.isIntersecting),
         // rootMargin top offset = navbar height so the trigger fires when
         // the button slides behind the navbar, not when it hits the raw top
-        { rootMargin: '-64px 0px 0px 0px', threshold: 0 }
+        { rootMargin: '-80px 0px 0px 0px', threshold: 0 }
       )
       observer.observe(heroCtaEl)
     })
@@ -101,19 +101,25 @@ export default function Navbar() {
       )}
     >
       {/* Three-column layout: logo | nav (centered) | auth */}
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center">
 
         {/* Left — Logo */}
         <div className="flex-1 flex items-center">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex flex-col items-start gap-0.5">
             <Image
               src="/images/logo.png"
               alt="Tenant Financial Solutions"
-              width={160}
-              height={48}
-              className="h-10 w-auto object-contain"
+              width={220}
+              height={64}
+              className="h-14 w-auto object-contain"
               priority
             />
+            <span className={cn(
+              'text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase leading-none pl-0.5',
+              scrolled ? 'text-tfs-gold' : 'text-tfs-gold'
+            )}>
+              Tenant Focused – Community Impact
+            </span>
           </Link>
         </div>
 

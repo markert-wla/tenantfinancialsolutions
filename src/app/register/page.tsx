@@ -146,15 +146,16 @@ function RegisterInner() {
             <p className="text-white/70 text-lg">How are you joining Tenant Financial Solutions?</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { id: 'individual', title: 'Individual and/or Couples', desc: "I'm signing up for myself or with my partner", note: 'Free, Starter, or Advantage plan' },
-              { id: 'partner',    title: 'Property Tenant',          desc: 'My property manager provided a code',          note: 'Requires promo code + unit #' },
-              { id: 'nonprofit',  title: 'Non-Profit Resident',      desc: 'My organization provided a code',              note: 'Requires promo code' },
+              { id: 'individual', couple: false, title: 'Individual',          desc: "I'm signing up for myself",               note: 'Free, Starter, or Advantage plan' },
+              { id: 'individual', couple: true,  title: 'Couples',             desc: "I'm signing up with my partner",          note: 'Free, Starter, or Advantage plan' },
+              { id: 'partner',    couple: false, title: 'Property Tenant',     desc: 'My property manager provided a code',     note: 'Requires promo code + unit #' },
+              { id: 'nonprofit',  couple: false, title: 'Non-Profit Resident', desc: 'My organization provided a code',         note: 'Requires promo code' },
             ].map(opt => (
               <button
-                key={opt.id}
-                onClick={() => setPath(opt.id as Path)}
+                key={`${opt.id}-${opt.couple}`}
+                onClick={() => { setPath(opt.id as Path); setIsCouple(opt.couple) }}
                 className="bg-white/10 hover:bg-white/20 border-2 border-white/20 hover:border-white/50
                            rounded-2xl p-6 text-left text-white transition-all group"
               >
@@ -190,9 +191,10 @@ function RegisterInner() {
         </button>
 
         <h2 className="text-2xl font-serif font-bold text-tfs-navy mb-1">
-          {path === 'individual' ? 'Individual and/or Couples Registration' :
-           path === 'partner'   ? 'Property Tenant Registration' :
-                                  'Non-Profit Resident Registration'}
+          {path === 'individual' && !isCouple ? 'Individual Registration' :
+           path === 'individual' && isCouple  ? 'Couples Registration' :
+           path === 'partner'                 ? 'Property Tenant Registration' :
+                                                'Non-Profit Resident Registration'}
         </h2>
         <p className="text-tfs-slate text-sm mb-6">
           {path === 'individual' ? 'Start free — your first Connection Session is on us.' :
@@ -261,33 +263,9 @@ function RegisterInner() {
             </div>
           )}
 
-          {/* Individual: who's signing up + plan picker */}
+          {/* Individual: plan picker */}
           {path === 'individual' && (
             <>
-              <div>
-                <label className="block text-sm font-medium text-tfs-navy mb-2">Who's signing up?</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { value: false, label: 'Just me' },
-                    { value: true,  label: 'Me & my partner' },
-                  ].map(opt => (
-                    <button
-                      key={String(opt.value)}
-                      type="button"
-                      onClick={() => setIsCouple(opt.value)}
-                      className={cn(
-                        'p-3 rounded-lg border-2 text-sm font-medium transition-colors',
-                        isCouple === opt.value
-                          ? 'border-tfs-teal bg-tfs-teal/10 text-tfs-teal'
-                          : 'border-gray-200 text-tfs-slate hover:border-tfs-teal/50'
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-tfs-navy mb-2">Select a Plan</label>
                 <div className="grid grid-cols-1 gap-2">

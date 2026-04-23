@@ -112,7 +112,7 @@ export default async function HomePage({
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section
-        className="relative min-h-screen flex flex-col items-center justify-center text-white text-center px-4 overflow-hidden pt-16"
+        className="relative min-h-screen flex flex-col items-center justify-center text-white text-center px-4 overflow-hidden pt-20"
         style={{
           background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 60%, #0F1B30 100%)',
         }}
@@ -140,12 +140,9 @@ export default async function HomePage({
         />
 
         <div className="relative z-10 max-w-4xl mx-auto">
-          {/* Vision statement */}
-          <p className="text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase text-tfs-gold mb-3">
-            Our Vision
-          </p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight mb-6">
-            To create a world where millions of tenants take ownership of their financial futures
+            Your residents want clarity. Your team wants fewer financial emergencies.{' '}
+            Our individual financial coaching delivers both.
           </h1>
           {/* Primary CTA */}
           <div className="mb-8">
@@ -181,13 +178,13 @@ export default async function HomePage({
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="section-heading mb-4">How It Works</h2>
           <p className="text-tfs-slate text-lg mb-12 max-w-xl mx-auto">
-            Three simple steps to financial peace.
+            3 Simple Steps towards your desired future.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
               { step: '1', title: 'Book Your Free Session', desc: 'Start with a no-cost Connection Session to meet your coach and set your goals.' },
               { step: '2', title: 'Choose Your Path', desc: 'Select the coaching plan that fits your needs — individual, group, or property management.' },
-              { step: '3', title: 'Build Financial Peace', desc: 'Work with your coach to build clarity, confidence, and lasting financial habits.' },
+              { step: '3', title: 'Create Change with Your Coach', desc: 'Work with your coach to build clarity, confidence, and lasting financial habits.' },
             ].map(({ step, title, desc }) => (
               <div key={step} className="flex flex-col items-center text-center">
                 <div className="w-14 h-14 rounded-full bg-tfs-teal text-white font-bold text-2xl font-serif flex items-center justify-center mb-4 shadow-md">
@@ -214,7 +211,7 @@ export default async function HomePage({
           <div className="text-center mb-12">
             <h2 className="section-heading mb-4">Meet the Coaches</h2>
             <p className="text-tfs-slate text-lg max-w-xl mx-auto">
-              Real people. Real coaching. Dedicated to your financial peace.
+              Real people. Real coaching. Dedicated to your financial future.
             </p>
           </div>
           {coaches.length > 0 ? (
@@ -288,7 +285,7 @@ export default async function HomePage({
             </div>
             <div>
               <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">
-                • Management benefits through:
+                • Coaching that lightens the load on management by:
               </h2>
               <ul className="space-y-3">
                 {MGMT_BENEFITS.map(b => (
