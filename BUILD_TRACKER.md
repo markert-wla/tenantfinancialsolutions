@@ -3,14 +3,14 @@
 **Client:** Michael Markert  
 **Developer:** Matthew Ellis / Web Launch Academy LLC  
 **Go-live target:** May 1, 2026  
-**Project directory:** `/home/ellis/tenantfinancialsolutions/tfs-app/`
+**Project directory:** `/home/ellis/tenantfinancialsolutions/` (repo root = Next.js app)
 
 ---
 
 ## How to run locally
 
 ```bash
-cd /home/ellis/tenantfinancialsolutions/tfs-app
+cd /home/ellis/tenantfinancialsolutions
 npm run dev
 # Open http://localhost:3000
 ```
@@ -19,11 +19,14 @@ npm run dev
 
 ## Environment setup (do this before deploying)
 
-1. Create a Supabase project at supabase.com
-2. Copy `tfs-app/.env.local.example` → `tfs-app/.env.local`
-3. Fill in real values for Supabase URL + keys, Stripe keys, Resend key
-4. Run `supabase/schema.sql` in the Supabase SQL editor
+1. Create a Supabase project at supabase.com ✅
+2. Copy `.env.local.example` → `.env.local` and fill in all values ✅
+3. Run `supabase/schema.sql` in the Supabase SQL Editor ✅
+4. Run `supabase/migration_phase3.sql` in the Supabase SQL Editor ✅
 5. Enable Google OAuth in Supabase Dashboard → Auth → Providers → Google
+6. Set `ADMIN_EMAILS` env var to comma-separated admin email(s): `markert.wla@gmail.com,mjmfinancialcoaching@gmail.com`
+7. Set `CRON_SECRET` env var — any strong random string; must match Vercel cron header
+8. Add all env vars to Vercel → Project Settings → Environment Variables
 
 ---
 
@@ -44,8 +47,8 @@ npm run dev
   - `gold` → **eliminated**; remove from all frontend UI, pricing pages, and registration paths. Backend enum value kept in DB for data integrity but never assigned to new users
   - Session limits in code already match: `bronze: 1`, `silver: 2` (booking API + portal dashboard)
 - **client_type set automatically at registration:**
-  - Individual path, no code → `individual`
-  - Individual path, couple selected → `couple`
+  - Individual path → `individual`
+  - Couples path → `couple`
   - Individual path, with PM promo code → `property_tenant`
   - Non-profit path → `nonprofit_individual`
   - PM invite → `property_manager` role (not a client)
@@ -56,10 +59,10 @@ npm run dev
 
 ### Pages built
 - [x] `/` — Home (hero, 3 audience CTAs, benefits, welcome copy, testimonials from DB)
-- [x] `/about` — Vision image, COACHES core values, live coach bios from DB
+- [x] `/about` — Vision statement, COACHES core values, live coach bios from DB
 - [x] `/services` — All plan tiers, PM affiliate + paying, non-profit section; gold removed, Starter/Advantage renamed
 - [x] `/contact` — Rate-limited form, pre-tagged by ?type= param, sends via Resend
-- [x] `/register` — 3-path flow (individual / PM tenant / non-profit), couple toggle, promo code optional, auto-sets `client_type` + `free_trial_expires_at`, gold removed, tiers renamed
+- [x] `/register` — 4-path flow (individual / couples / PM tenant / non-profit), promo code optional, auto-sets `client_type` + `free_trial_expires_at`, gold removed, tiers renamed
 - [x] `/login` — Email/password + Google OAuth
 
 ### API routes built
@@ -71,7 +74,8 @@ npm run dev
 - [x] `GET  /auth/callback` — OAuth callback handler
 
 ### Infrastructure built
-- [x] `supabase/schema.sql` — All 8 tables + RLS policies + triggers (paste into Supabase SQL editor)
+- [x] `supabase/schema.sql` — All tables + RLS policies + triggers (run in Supabase SQL editor)
+- [x] `supabase/migration_phase3.sql` — Phase 3 schema additions (run after schema.sql)
 - [x] `src/middleware.ts` — Protects /portal/*, /coach/*, /admin/*, /manager/* by role
 - [x] `src/lib/supabase/{client,server}.ts` — Browser + server clients
 - [x] `src/lib/stripe.ts` — Lazy Stripe client (getStripe())
@@ -104,73 +108,37 @@ npm run dev
 
 ## Phase 3 — Coach + Admin dashboards ✅ COMPLETE (target: May 1)
 
-### Must ship
+### Admin
 - [x] `/admin/dashboard` — Summary stats (clients, coaches, bookings this month, inactivity flags)
-- [x] `/admin/coaches` — Add coach (invite email), edit profile, deactivate (soft delete via is_active flag)
-- [x] `/admin/clients` — Full client list; filter by client_type + PM group; inline `free_trial_expires_at` date picker per row (saves on blur); bulk extend trial with PM-group shortcut
+- [x] `/admin/coaches` — Add coach (sends invite email via Supabase), edit profile, deactivate/reactivate
+- [x] `/admin/clients` — Full client list; filter by client_type + PM group; inline `free_trial_expires_at` date picker per row
 - [x] `/admin/managers` — Invite PM by email, view active managers with code counts
 - [x] `/admin/codes` — Promo code creation, view, revoke
-- [x] `/coach/dashboard` — Upcoming sessions in coach's timezone, 4 stat cards, inactivity alerts
-- [x] `/coach/availability` — Set recurring weekly availability blocks (timezone-aware, UTC stored)
-- [x] `PATCH /api/admin/clients/trial` — Bulk-update `free_trial_expires_at`; accepts array of client IDs or a `pm_code` (auto-resolves to all tenants under that PM); admin-only
-
-### Ship if time allows
 - [x] `/admin/bookings` — Full booking log, status filter, cancel (restores session credit), attach notes
 - [x] `/admin/testimonials` — Approve/reject pending, remove approved, live on homepage
 - [x] `/admin/group-sessions` — Schedule sessions, add/edit join link and recording URL
 - [x] `/admin/partners` — Add/edit PM + non-profit partner directory
-- [x] Group session reminder automation — Cron runs daily at 8am UTC, emails all active paid clients 3 days before
+- [x] `/admin/settings` — Admin profile name, timezone, contact email
 
----
+### Coach
+- [x] `/coach/dashboard` — 4 stat cards, inactivity alerts, upcoming sessions list
+- [x] `/coach/clients` — Clients with active bookings
+- [x] `/coach/sessions` — Full session history: filter tabs, inline note editing, attended/no-show, cancel
+- [x] `/coach/attendance` — Group session attendance roster
+- [x] `/coach/availability` — Set recurring weekly availability blocks (timezone-aware)
+- [x] `/coach/profile` — Edit display name, bio, specialty, photo URL, timezone
 
-## Phase 3b — Coach dashboard expansion ✅ COMPLETE (target: May 1)
+### Property Manager
+- [x] `/manager/dashboard` — 4 stat cards, quick-generate code button
+- [x] `/manager/tenants` — Tenants enrolled via PM's codes
+- [x] `/manager/codes` — PM's codes with usage/expiry/status
+- [x] `/manager/attendance` — Group + 1-on-1 attendance for their tenants
 
-- [x] `/coach/dashboard` — 4 stat cards (sessions this month, total clients, today's sessions, inactivity alerts), inactivity panel, upcoming sessions list
-- [x] `/coach/clients` — Clients with active bookings: name, client_type badge, plan tier, last active, sessions used this month
-- [x] `/coach/sessions` — Full session history: filter tabs (upcoming/past/all), inline note editing, attended/no-show toggle, cancel with confirm
-- [x] `/coach/attendance` — Group session attendance roster: session picker, client roster, attended/no-show toggles, live summary
-- [x] `/coach/profile` — Edit own record: display name, bio, specialty, photo URL, timezone
-- [x] `GET  /api/coach/clients` — Distinct clients with non-cancelled bookings for this coach
-- [x] `PATCH /api/coach/sessions/[id]` — Add/edit note, cancel session, mark attended/no-show (gated to booking's coach_id)
-- [x] `PATCH /api/coach/profile` — Update coaches table for own record
-- [x] `POST  /api/coach/attendance` — Mark group session attendance (upserts group_session_attendance)
-- [x] Coach layout nav: Clients, Sessions, Attendance, Profile links added
-
----
-
-## Phase 3c — Property Manager dashboard ✅ COMPLETE (target: May 1)
-
-### Schema migration (applied)
-- [x] `property_manager` added to `user_role` enum
-- [x] `client_type` enum added to profiles
-- [x] `free_trial_expires_at` timestamptz added to profiles
-- [x] `group_session_attendance` table created with RLS
-- [x] `attended` boolean added to `bookings`
-- [x] RLS policy: PM can read profiles where `promo_code_used` matches their codes
-- [x] Middleware protects `/manager/*` routes
-
-### Admin additions
-- [x] `/admin/managers` — Invite PM by email, view active managers, code counts per manager
-- [x] `POST /api/admin/managers` — Invite PM via Supabase email invite, sets `property_manager` role
-- [x] `POST /api/admin/codes/quick-generate` — Auto-generates TFS-XXXXXX code (unambiguous chars), 90-day expiry, unlimited uses, sets `created_by` to caller's profile ID
-
-### PM pages
-- [x] `/manager/layout.tsx` — Purple PM badge, Dashboard / My Tenants / Promo Codes / Attendance nav
-- [x] `/manager/dashboard` — 4 stat cards, quick generate code button (copies to clipboard), active codes preview
-- [x] `/manager/tenants` — Tenants enrolled via PM's codes: name, code used, plan, sessions/mo, last active, status
-- [x] `/manager/codes` — PM's codes: usage/expiry/status + QuickGenerateButton
-- [x] `/manager/attendance` — Group + 1-on-1 attendance side by side for their tenants (last 90 days)
-
----
-
-## Phase 3d — Client portal expansion ✅ COMPLETE (target: May 1)
-
-- [x] `/portal/group-sessions` — Upcoming sessions with Join link; past 90 days with Watch recording; per-session attendance badge
-- [x] `/portal/testimonial` — Quote form with 500-char counter, display name, success/pending state
-- [x] `/portal/billing` — Current plan display, trial expiry date, Stripe billing portal button (paid) or upgrade nudge (free)
-- [x] `POST /api/portal/testimonial` — Inserts testimonial with plan_tier, approved=false
-- [x] `GET  /api/portal/billing-portal` — Creates Stripe billing portal session, returns redirect URL
-- [x] Portal layout nav: Group Sessions, Profile, Share Story, Billing links added
+### Client portal additions
+- [x] `/portal/group-sessions` — Join links for upcoming; recording links for past 90 days
+- [x] `/portal/testimonial` — Submit quote, display name, success state
+- [x] `/portal/billing` — Plan display, trial expiry, Stripe billing portal (paid) or upgrade nudge (free)
+- [x] `/portal/profile` — Edit name, timezone, contact email, birthday month
 
 ---
 
@@ -182,41 +150,33 @@ npm run dev
 
 ---
 
-## Phase 4 — Security + polish (ongoing, 90-day window)
+## Phase 4 — Security + polish (ongoing)
 
 - [ ] Full security audit pass (OWASP Top 10, RLS policy review, API auth checks)
-- [ ] SEO meta + OG tags per page
-- [ ] Stripe customer portal for self-service billing management
-- [ ] Optional: tenant unit address list upload for PM code abuse prevention
+- [x] SEO meta + OG tags per page ✅
+- [ ] Stripe customer portal — self-service billing (portal button exists; needs live Stripe keys)
+- [ ] Upstash Redis — production rate limiting (no-ops safely without it; add when ready)
 
-### Lighthouse (target: 90+ across all four categories)
-- [ ] Performance ≥ 90
-- [ ] Accessibility ≥ 90
-- [ ] Best Practices ≥ 90
-- [ ] SEO ≥ 90
-- Run against: `/` (home), `/about`, `/services`, `/contact`, `/portal/dashboard`, `/coach/dashboard`, `/admin/dashboard`
+### Lighthouse targets (90+ across all four categories)
+- [ ] Run against: `/`, `/about`, `/services`, `/contact`, `/portal/dashboard`, `/coach/dashboard`, `/admin/dashboard`
 
 ### Browser testing
-- [ ] Chrome (latest) — primary dev target
-- [ ] Firefox (latest)
-- [ ] Safari (latest) — critical for iOS users; test on macOS + iPhone
-- [ ] Edge (latest) — Chromium-based, covers most Windows users
-- [ ] Samsung Internet — covers Android default browser on Galaxy devices
-- Note: Internet Explorer 11 is end-of-life and not supported
+- [ ] Chrome (latest), Firefox (latest), Safari (latest — critical for iOS), Edge (latest)
 
 ### Device / viewport testing
-- [ ] Mobile — 375px (iPhone SE), 390px (iPhone 14), 412px (Pixel 7)
-- [ ] Tablet — 768px (iPad Mini), 1024px (iPad Pro) — test if layout warrants it
-- [ ] Desktop — 1280px, 1440px, 1920px
-- Focus areas: Navbar sticky behavior, sidebar layouts (portal/coach/admin), booking slot grid, tables (overflow-x-auto on small screens)
+- [ ] Mobile: 375px, 390px, 412px
+- [ ] Tablet: 768px, 1024px
+- [ ] Desktop: 1280px, 1440px, 1920px
 
 ---
 
-## Pending client information needed
+## Client information status
 
-- [ ] Stripe account access — Bronze/Silver/Gold subscription price IDs + one-time session price
-- [ ] Real coach names, bios, photos, specialties, timezones
-- [ ] Social media URLs (Instagram, Facebook, Twitter/X handles)
-- [ ] Resend account + verified sending domain
-- [ ] Supabase project (URL + anon key + service role key)
-- [ ] Upstash Redis (for rate limiting in production) — optional, free tier available
+- [x] Stripe keys — received and in .env.local ✅
+- [x] Social media — Instagram: @mjmfinancialcoaching / Facebook: mjmfinancialcoaching — in footer ✅
+- [x] Resend — configured; needs end-to-end email delivery test
+- [x] Supabase — project live, schema applied, env vars filled ✅
+- [ ] Coach info — **not needed upfront**: admin adds coaches via /admin/coaches (sends invite email); coaches fill their own bio/photo/specialty via /coach/profile
+- [ ] Google OAuth — needs Client ID + Secret configured in Supabase Dashboard → Auth → Providers → Google
+- [ ] Upstash Redis — not configured; rate limiting no-ops safely; add before heavy traffic
+- [ ] CRON_SECRET — must be set in Vercel env vars for monthly session reset to work
