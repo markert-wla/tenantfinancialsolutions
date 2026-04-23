@@ -176,7 +176,7 @@ npm run dev
 - [x] Social media — Instagram: @mjmfinancialcoaching / Facebook: mjmfinancialcoaching — in footer ✅
 - [x] Resend — configured; needs end-to-end email delivery test
 - [x] Supabase — project live, schema applied, env vars filled ✅
-- [ ] Coach info — **not needed upfront**: admin adds coaches via /admin/coaches (sends invite email); coaches fill their own bio/photo/specialty via /coach/profile
-- [ ] Google OAuth — needs Client ID + Secret configured in Supabase Dashboard → Auth → Providers → Google
-- [ ] Upstash Redis — not configured; rate limiting no-ops safely; add before heavy traffic
-- [ ] CRON_SECRET — must be set in Vercel env vars for monthly session reset to work
+- [x] Coach info — **not needed upfront**: admin adds coaches via /admin/coaches (sends invite email); coaches fill their own bio/photo/specialty via /coach/profile
+- [x] Google OAuth — needs Client ID + Secret configured in Supabase Dashboard → Auth → Providers → Google
+- [ ] Upstash Redis — not configured; rate limiting no-ops safely; can be added before heavy traffic
+- [x] CRON_SECRET — must be set in Vercel env vars for monthly session reset to work
