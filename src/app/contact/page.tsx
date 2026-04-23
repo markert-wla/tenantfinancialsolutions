@@ -23,7 +23,7 @@ export default function ContactPage() {
   return (
     <>
       <section
-        className="pt-28 pb-20 px-4 text-white text-center"
+        className="pt-32 pb-20 px-4 text-white text-center"
         style={{ background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 100%)' }}
       >
         <div className="max-w-2xl mx-auto">
@@ -31,6 +31,7 @@ export default function ContactPage() {
           <p className="text-white/80 text-xl mb-8">Questions? Ready to partner? We&apos;d love to hear from you.</p>
           <Link
             href="/register?tier=free"
+            data-hero-cta="true"
             className="inline-block bg-tfs-gold text-tfs-navy font-bold text-lg px-10 py-4 rounded-xl shadow-lg hover:brightness-105 hover:scale-105 transition-all duration-200"
           >
             Step into your free Connection Session
