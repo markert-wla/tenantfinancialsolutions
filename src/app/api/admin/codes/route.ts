@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
     partner_type: string
     partner_name: string
     assigned_tier: string
+    code_type: string
+    discount_percent?: number | null
     max_uses: number
     expires_at?: string | null
   }
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { code, partner_type, partner_name, assigned_tier, max_uses, expires_at } = body
+  const { code, partner_type, partner_name, assigned_tier, code_type, discount_percent, max_uses, expires_at } = body
 
   if (!code || !partner_type || !partner_name || !assigned_tier) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -33,15 +35,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Gold tier cannot be assigned via promo code' }, { status: 400 })
   }
 
+  const validCodeTypes = ['tier_assignment', 'affiliate_discount', 'full_comp', 'group_comp']
+  const resolvedCodeType = validCodeTypes.includes(code_type) ? code_type : 'tier_assignment'
+
+  if (resolvedCodeType === 'affiliate_discount' && (!discount_percent || discount_percent <= 0 || discount_percent > 100)) {
+    return NextResponse.json({ error: 'Affiliate discount codes require a valid discount percentage (1–100).' }, { status: 400 })
+  }
+
   const service = createServiceClient()
   const { error } = await service.from('promo_codes').insert({
-    code:          code.toUpperCase().trim(),
+    code:             code.toUpperCase().trim(),
     partner_type,
     partner_name,
     assigned_tier,
-    max_uses:      Math.max(1, Number(max_uses)),
-    expires_at:    expires_at || null,
-    created_by:    user.id,
+    code_type:        resolvedCodeType,
+    discount_percent: resolvedCodeType === 'affiliate_discount' ? Number(discount_percent) : null,
+    max_uses:         Math.max(1, Number(max_uses)),
+    expires_at:       expires_at || null,
+    created_by:       user.id,
   })
 
   if (error) {

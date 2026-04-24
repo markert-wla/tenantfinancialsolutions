@@ -14,7 +14,7 @@ export default async function AdminCodesPage() {
 
   const { data: codes } = await supabase
     .from('promo_codes')
-    .select('code, partner_type, partner_name, assigned_tier, max_uses, uses_count, is_active, expires_at, created_at')
+    .select('code, partner_type, partner_name, assigned_tier, code_type, discount_percent, max_uses, uses_count, is_active, expires_at, created_at')
     .order('created_at', { ascending: false })
 
   return (

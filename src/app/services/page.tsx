@@ -246,14 +246,15 @@ export default function ServicesPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
-            {/* Affiliate */}
+            {/* Affiliate Member Partnership */}
             <div className="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20">
-              <h3 className="text-xl font-bold font-serif mb-2">Affiliate Model</h3>
-              <p className="text-white/60 text-sm mb-5">No cost to you</p>
+              <h3 className="text-xl font-bold font-serif mb-2">Affiliate Member Partnership</h3>
+              <p className="text-white/60 text-sm mb-5">No cost to you — your tenants save on day one</p>
               <ul className="space-y-3 text-white/90 text-sm mb-6">
-                <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Refer tenants to TFS via marketing materials</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Tenants sign up and pay their own plan</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> You benefit indirectly through more on-time rent payments</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Refer tenants to TFS with your affiliate code</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Tenants receive <strong className="text-white">10% off their first month</strong> of coaching</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Applies to both Starter ($50/mo) and Advantage ($100/mo) plans</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> You benefit through improved tenant financial wellness and on-time payments</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> No administrative burden</li>
               </ul>
               <Link
@@ -264,7 +265,7 @@ export default function ServicesPage() {
               </Link>
             </div>
 
-            {/* Paying */}
+            {/* Tenant Partner Membership */}
             <div className="bg-white rounded-2xl p-8 text-tfs-navy">
               <h3 className="text-xl font-bold font-serif mb-2">Tenant Partner Membership</h3>
               <p className="text-tfs-teal font-semibold text-lg mb-1">Custom Pricing</p>
@@ -279,6 +280,17 @@ export default function ServicesPage() {
                 Contact us for pricing
               </Link>
             </div>
+          </div>
+
+          {/* Workshops button */}
+          <div className="mt-8 text-center">
+            <Link
+              href="/contact?type=workshops"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white text-sm font-medium px-6 py-3 rounded-xl transition-all"
+            >
+              Ask About Our In-Person Workshops <ArrowRight size={15} />
+            </Link>
+            <p className="text-white/50 text-xs mt-2">Available in select regions — reach out to check availability near you.</p>
           </div>
         </div>
       </section>

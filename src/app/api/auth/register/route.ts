@@ -64,6 +64,8 @@ export async function POST(req: NextRequest) {
 
   // 1. Validate promo code server-side if provided
   let effectiveTier = 'free'
+  let codeType = 'tier_assignment'
+  let discountPercent: number | null = null
 
   if (promoCode) {
     const { data: code, error: codeErr } = await supabase
@@ -79,7 +81,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Promo code has expired' }, { status: 400 })
     }
 
-    effectiveTier = code.assigned_tier
+    effectiveTier  = code.assigned_tier
+    codeType       = code.code_type ?? 'tier_assignment'
+    discountPercent = code.discount_percent ?? null
 
     await supabase
       .from('promo_codes')
@@ -138,9 +142,12 @@ export async function POST(req: NextRequest) {
 
   await supabase.from('profiles').update(profileUpdate).eq('id', userId)
 
-  // 4. Stripe subscription (paid tiers only, no-op if price IDs not configured)
-  if (tier && tier !== 'free' && !promoCode) {
-    const priceId = PLAN_PRICE_IDS[tier]
+  // 4. Stripe subscription
+  // Affiliate discount codes: bill normally but apply a coupon for first month
+  // All other promo codes (comp, tier_assignment): no billing — access is granted via tier only
+  const billedTier = codeType === 'affiliate_discount' ? effectiveTier : (promoCode ? 'free' : (tier ?? 'free'))
+  if (billedTier !== 'free') {
+    const priceId = PLAN_PRICE_IDS[billedTier]
     if (priceId) {
       try {
         const stripe = getStripe()
@@ -150,13 +157,30 @@ export async function POST(req: NextRequest) {
           metadata: { supabase_user_id: userId },
         })
 
+        let stripeCouponId: string | undefined
+        if (codeType === 'affiliate_discount' && discountPercent) {
+          const couponId = `tfs-affiliate-${discountPercent}pct`
+          try {
+            await stripe.coupons.retrieve(couponId)
+          } catch {
+            await stripe.coupons.create({
+              id: couponId,
+              percent_off: discountPercent,
+              duration: 'once',
+              name: `TFS Affiliate ${discountPercent}% First Month`,
+            })
+          }
+          stripeCouponId = couponId
+        }
+
         const subscription = await stripe.subscriptions.create({
           customer: customer.id,
           items: [{ price: priceId }],
           payment_behavior: 'default_incomplete',
           payment_settings: { save_default_payment_method: 'on_subscription' },
           expand: ['latest_invoice.payment_intent'],
-          metadata: { supabase_user_id: userId, tier },
+          metadata: { supabase_user_id: userId, tier: billedTier },
+          ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
         })
 
         await supabase

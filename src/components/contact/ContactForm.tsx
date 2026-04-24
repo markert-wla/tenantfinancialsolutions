@@ -7,6 +7,7 @@ const INQUIRY_TYPES = [
   { value: 'individual',        label: 'Individual and/or Couples Membership' },
   { value: 'property-manager',  label: 'Property Manager Partnership' },
   { value: 'nonprofit',         label: 'Non-Profit Partnership' },
+  { value: 'workshops',         label: 'In-Person Workshops' },
   { value: 'general',           label: 'General Inquiry' },
 ]
 
