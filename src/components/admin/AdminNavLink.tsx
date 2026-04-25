@@ -6,9 +6,11 @@ import { usePathname } from 'next/navigation'
 export default function AdminNavLink({
   href,
   children,
+  badge,
 }: {
   href: string
   children: React.ReactNode
+  badge?: number
 }) {
   const pathname = usePathname()
   const isActive = pathname === href || pathname.startsWith(href + '/')
@@ -22,7 +24,12 @@ export default function AdminNavLink({
           : 'text-white/70 hover:text-white hover:bg-white/10'
       }`}
     >
-      {children}
+      <span className="flex-1 flex items-center gap-3">{children}</span>
+      {badge ? (
+        <span className="bg-red-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+          {badge}
+        </span>
+      ) : null}
     </Link>
   )
 }
