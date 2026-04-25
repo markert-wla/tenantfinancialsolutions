@@ -9,7 +9,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  let body: { status?: string; notes?: string }
+  let body: { status?: string; notes?: string; flagged?: boolean }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
@@ -59,6 +59,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { error } = await service
       .from('bookings')
       .update({ notes: body.notes ?? null })
+      .eq('id', params.id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
+
+  // Admin can clear a flag (coaches cannot)
+  if (body.flagged === false) {
+    const { error } = await service
+      .from('bookings')
+      .update({ flagged: false, flag_reason: null })
       .eq('id', params.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ ok: true })

@@ -15,7 +15,7 @@ export default async function AdminBookingsPage() {
   const { data: bookings } = await supabase
     .from('bookings')
     .select(`
-      id, start_time_utc, end_time_utc, status, notes,
+      id, start_time_utc, end_time_utc, status, notes, flagged, flag_reason,
       profiles!bookings_client_id_fkey ( first_name, last_name, email ),
       coaches ( display_name )
     `)
@@ -29,6 +29,8 @@ export default async function AdminBookingsPage() {
     end_time_utc:   b.end_time_utc,
     status:         b.status,
     notes:          b.notes,
+    flagged:        b.flagged ?? false,
+    flag_reason:    b.flag_reason ?? null,
     client:         b.profiles ?? null,
     coach:          b.coaches  ?? null,
   }))

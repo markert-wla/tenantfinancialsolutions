@@ -40,6 +40,11 @@ export async function PATCH(
   if ('attended' in body && typeof body.attended === 'boolean') {
     update.attended = body.attended
   }
+  // Coaches can flag; only admin can clear — enforced here and in admin API
+  if (body.flagged === true && typeof body.flag_reason === 'string') {
+    update.flagged     = true
+    update.flag_reason = body.flag_reason.trim().slice(0, 1000) || null
+  }
   if (body.status === 'cancelled') {
     if (booking.status === 'cancelled') {
       return NextResponse.json({ error: 'Already cancelled' }, { status: 400 })

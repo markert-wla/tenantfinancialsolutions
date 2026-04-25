@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { XCircle, StickyNote } from 'lucide-react'
+import { XCircle, StickyNote, Flag, FlagOff } from 'lucide-react'
 
 type Booking = {
   id: string
@@ -10,6 +10,8 @@ type Booking = {
   end_time_utc: string
   status: 'pending' | 'confirmed' | 'cancelled'
   notes: string | null
+  flagged: boolean
+  flag_reason: string | null
   client: { first_name: string; last_name: string; email: string } | null
   coach:  { display_name: string } | null
 }
@@ -30,26 +32,37 @@ function fmt(iso: string) {
   }).format(new Date(iso))
 }
 
+type Filter = 'all' | 'confirmed' | 'cancelled' | 'pending' | 'flagged'
+
 export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
   const router = useRouter()
-  const [cancelId, setCancelId]   = useState<string | null>(null)
-  const [notesId, setNotesId]     = useState<string | null>(null)
-  const [notesText, setNotesText] = useState('')
-  const [loading, setLoading]     = useState(false)
-  const [filter, setFilter]       = useState<'all' | 'confirmed' | 'cancelled' | 'pending'>('all')
+  const [cancelId, setCancelId]       = useState<string | null>(null)
+  const [notesId, setNotesId]         = useState<string | null>(null)
+  const [notesText, setNotesText]     = useState('')
+  const [expandFlag, setExpandFlag]   = useState<string | null>(null)
+  const [loading, setLoading]         = useState(false)
+  const [filter, setFilter]           = useState<Filter>('all')
 
-  const visible = filter === 'all' ? bookings : bookings.filter(b => b.status === filter)
+  const flaggedCount = bookings.filter(b => b.flagged).length
 
-  async function handleCancel(id: string) {
+  const visible = filter === 'all'     ? bookings
+    : filter === 'flagged'             ? bookings.filter(b => b.flagged)
+    : bookings.filter(b => b.status === filter)
+
+  async function patch(id: string, body: object) {
     setLoading(true)
     await fetch(`/api/admin/bookings/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'cancelled' }),
+      body: JSON.stringify(body),
     })
     setLoading(false)
-    setCancelId(null)
     router.refresh()
+  }
+
+  async function handleCancel(id: string) {
+    await patch(id, { status: 'cancelled' })
+    setCancelId(null)
   }
 
   function openNotes(b: Booking) {
@@ -59,35 +72,49 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
 
   async function handleSaveNotes() {
     if (!notesId) return
-    setLoading(true)
-    await fetch(`/api/admin/bookings/${notesId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notes: notesText }),
-    })
-    setLoading(false)
+    await patch(notesId, { notes: notesText })
     setNotesId(null)
-    router.refresh()
+  }
+
+  async function clearFlag(id: string) {
+    await patch(id, { flagged: false })
+    setExpandFlag(null)
   }
 
   const cancelTarget = bookings.find(b => b.id === cancelId)
+
+  const FILTERS: { key: Filter; label: string; count?: number }[] = [
+    { key: 'all',       label: 'All' },
+    { key: 'confirmed', label: 'Confirmed' },
+    { key: 'cancelled', label: 'Cancelled' },
+    { key: 'pending',   label: 'Pending' },
+    { key: 'flagged',   label: 'Flagged', count: flaggedCount || undefined },
+  ]
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-serif font-bold text-tfs-navy">Bookings</h1>
-        <div className="flex gap-2">
-          {(['all', 'confirmed', 'cancelled', 'pending'] as const).map(f => (
+        <div className="flex gap-2 flex-wrap">
+          {FILTERS.map(f => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${
-                filter === f
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${
+                filter === f.key
                   ? 'bg-tfs-navy text-white'
-                  : 'bg-white text-tfs-slate border border-gray-200 hover:border-tfs-teal'
+                  : f.key === 'flagged' && f.count
+                    ? 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100'
+                    : 'bg-white text-tfs-slate border border-gray-200 hover:border-tfs-teal'
               }`}
             >
-              {f}
+              {f.key === 'flagged' && <Flag size={11} />}
+              {f.label}
+              {f.count ? (
+                <span className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${
+                  filter === f.key ? 'bg-white/20' : 'bg-red-500 text-white'
+                }`}>{f.count}</span>
+              ) : null}
             </button>
           ))}
         </div>
@@ -105,52 +132,92 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                   <th className="text-left py-3 pr-4 font-medium text-tfs-slate">Client</th>
                   <th className="text-left py-3 pr-4 font-medium text-tfs-slate">Coach</th>
                   <th className="text-left py-3 pr-4 font-medium text-tfs-slate">Status</th>
-                  <th className="text-left py-3 pr-4 font-medium text-tfs-slate">Notes</th>
+                  <th className="text-left py-3 pr-4 font-medium text-tfs-slate">Notes / Flag</th>
                   <th className="text-right py-3 font-medium text-tfs-slate">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {visible.map(b => (
-                  <tr key={b.id}>
-                    <td className="py-3 pr-4 text-tfs-navy text-xs whitespace-nowrap">
-                      {fmt(b.start_time_utc)}
-                    </td>
-                    <td className="py-3 pr-4">
-                      <p className="font-medium text-tfs-navy">
-                        {b.client?.first_name} {b.client?.last_name}
-                      </p>
-                      <p className="text-xs text-tfs-slate">{b.client?.email}</p>
-                    </td>
-                    <td className="py-3 pr-4 text-tfs-slate">{b.coach?.display_name ?? '—'}</td>
-                    <td className="py-3 pr-4">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[b.status]}`}>
-                        {b.status}
-                      </span>
-                    </td>
-                    <td className="py-3 pr-4 text-xs text-tfs-slate max-w-[180px] truncate">
-                      {b.notes ?? '—'}
-                    </td>
-                    <td className="py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => openNotes(b)}
-                          className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
-                          title="Edit notes"
-                        >
-                          <StickyNote size={15} />
-                        </button>
-                        {b.status === 'confirmed' && (
+                  <>
+                    <tr key={b.id} className={b.flagged ? 'bg-red-50/50' : ''}>
+                      <td className="py-3 pr-4 text-tfs-navy text-xs whitespace-nowrap">
+                        {fmt(b.start_time_utc)}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <p className="font-medium text-tfs-navy">
+                          {b.client?.first_name} {b.client?.last_name}
+                        </p>
+                        <p className="text-xs text-tfs-slate">{b.client?.email}</p>
+                      </td>
+                      <td className="py-3 pr-4 text-tfs-slate">{b.coach?.display_name ?? '—'}</td>
+                      <td className="py-3 pr-4">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[b.status]}`}>
+                          {b.status}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4 max-w-[200px]">
+                        {b.flagged && (
                           <button
-                            onClick={() => setCancelId(b.id)}
-                            className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
-                            title="Cancel booking"
+                            onClick={() => setExpandFlag(expandFlag === b.id ? null : b.id)}
+                            className="flex items-center gap-1 text-xs text-red-600 font-semibold mb-1 hover:underline"
                           >
-                            <XCircle size={15} />
+                            <Flag size={11} /> Flagged by coach
                           </button>
                         )}
-                      </div>
-                    </td>
-                  </tr>
+                        <span className="text-xs text-tfs-slate truncate block">{b.notes ?? '—'}</span>
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => openNotes(b)}
+                            className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                            title="Edit notes"
+                          >
+                            <StickyNote size={15} />
+                          </button>
+                          {b.flagged && (
+                            <button
+                              onClick={() => clearFlag(b.id)}
+                              disabled={loading}
+                              className="p-1.5 rounded-lg text-red-500 hover:text-gray-500 hover:bg-gray-50 transition-colors"
+                              title="Clear flag"
+                            >
+                              <FlagOff size={15} />
+                            </button>
+                          )}
+                          {b.status === 'confirmed' && (
+                            <button
+                              onClick={() => setCancelId(b.id)}
+                              className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
+                              title="Cancel booking"
+                            >
+                              <XCircle size={15} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    {/* Flag reason expand row */}
+                    {b.flagged && expandFlag === b.id && (
+                      <tr key={`${b.id}-flag`} className="bg-red-50">
+                        <td colSpan={6} className="px-4 py-3">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-xs font-semibold text-red-700 mb-1">Coach flag reason:</p>
+                              <p className="text-sm text-red-800">{b.flag_reason ?? 'No reason provided.'}</p>
+                            </div>
+                            <button
+                              onClick={() => clearFlag(b.id)}
+                              disabled={loading}
+                              className="shrink-0 flex items-center gap-1.5 text-xs bg-white border border-red-200 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              <FlagOff size={12} /> Clear Flag
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
@@ -158,7 +225,7 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
         )}
       </div>
 
-      {/* Cancel confirmation */}
+      {/* Cancel modal */}
       {cancelId && cancelTarget && (
         <Modal title="Cancel Booking" onClose={() => setCancelId(null)}>
           <p className="text-tfs-slate text-sm mb-2">

@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Users, UserCheck, Calendar, AlertTriangle } from 'lucide-react'
+import { Users, UserCheck, Calendar, AlertTriangle, Flag } from 'lucide-react'
+import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Admin Dashboard' }
 
@@ -21,6 +22,7 @@ export default async function AdminDashboardPage() {
     { count: coachCount },
     { count: bookingCount },
     { data: inactiveClients },
+    { data: flaggedSessions },
   ] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'client').eq('is_active', true),
     supabase.from('coaches').select('*', { count: 'exact', head: true }).eq('is_active', true),
@@ -33,6 +35,11 @@ export default async function AdminDashboardPage() {
       .lt('last_active_at', ninetyDaysAgo)
       .order('last_active_at', { ascending: true })
       .limit(25),
+    supabase
+      .from('bookings')
+      .select('id, start_time_utc, flag_reason, profiles!bookings_client_id_fkey(first_name, last_name), coaches(display_name)')
+      .eq('flagged', true)
+      .order('start_time_utc', { ascending: false }),
   ])
 
   function daysSince(iso: string) {
@@ -44,11 +51,59 @@ export default async function AdminDashboardPage() {
       <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-8">Admin Dashboard</h1>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-10">
         <StatCard icon={Users}     label="Active Clients"       value={clientCount  ?? 0} color="teal" />
         <StatCard icon={UserCheck} label="Active Coaches"       value={coachCount   ?? 0} color="navy" />
         <StatCard icon={Calendar}  label="Bookings This Month"  value={bookingCount ?? 0} color="gold" />
+        <StatCard icon={Flag}      label="Flagged Sessions"     value={flaggedSessions?.length ?? 0} color={flaggedSessions?.length ? 'red' : 'gray'} href="/admin/bookings?filter=flagged" />
       </div>
+
+      {/* Flagged sessions */}
+      {(flaggedSessions?.length ?? 0) > 0 && (
+        <div className="card mb-6 border-l-4 border-l-red-400">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Flag size={20} className="text-red-500" />
+              <h2 className="font-serif font-bold text-tfs-navy text-xl">Flagged Sessions</h2>
+              <span className="text-sm text-tfs-slate">({flaggedSessions?.length} open)</span>
+            </div>
+            <Link href="/admin/bookings" className="text-sm text-tfs-teal hover:underline">
+              View in Bookings →
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Date (ET)</th>
+                  <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Client</th>
+                  <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Coach</th>
+                  <th className="text-left py-2 font-medium text-tfs-slate">Reason</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {(flaggedSessions ?? []).map((b: any) => (
+                  <tr key={b.id}>
+                    <td className="py-2.5 pr-4 text-xs text-tfs-navy whitespace-nowrap">
+                      {new Intl.DateTimeFormat('en-US', {
+                        timeZone: 'America/New_York', month: 'short', day: 'numeric',
+                        hour: 'numeric', minute: '2-digit', hour12: true,
+                      }).format(new Date(b.start_time_utc))}
+                    </td>
+                    <td className="py-2.5 pr-4 font-medium text-tfs-navy">
+                      {b.profiles?.first_name} {b.profiles?.last_name}
+                    </td>
+                    <td className="py-2.5 pr-4 text-tfs-slate">{b.coaches?.display_name ?? '—'}</td>
+                    <td className="py-2.5 text-tfs-slate text-xs max-w-xs truncate">
+                      {b.flag_reason ?? '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Inactivity alerts */}
       <div className="card">
@@ -106,19 +161,23 @@ function StatCard({
   label,
   value,
   color,
+  href,
 }: {
   icon: React.ElementType
   label: string
   value: number
-  color: 'teal' | 'navy' | 'gold'
+  color: 'teal' | 'navy' | 'gold' | 'red' | 'gray'
+  href?: string
 }) {
   const colors = {
     teal: 'text-tfs-teal bg-tfs-teal/10',
     navy: 'text-tfs-navy bg-tfs-navy/10',
     gold: 'text-tfs-gold bg-tfs-gold/10',
+    red:  'text-red-500 bg-red-50',
+    gray: 'text-gray-400 bg-gray-50',
   }
-  return (
-    <div className="card flex items-center gap-4">
+  const inner = (
+    <>
       <div className={`p-3 rounded-xl ${colors[color]}`}>
         <Icon size={24} />
       </div>
@@ -126,6 +185,14 @@ function StatCard({
         <p className="text-sm text-tfs-slate">{label}</p>
         <p className="text-3xl font-bold text-tfs-navy">{value}</p>
       </div>
-    </div>
+    </>
   )
+  if (href) {
+    return (
+      <Link href={href} className="card flex items-center gap-4 hover:shadow-md transition-shadow">
+        {inner}
+      </Link>
+    )
+  }
+  return <div className="card flex items-center gap-4">{inner}</div>
 }
