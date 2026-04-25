@@ -14,7 +14,7 @@ export default async function PortalProfilePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, last_name, timezone, unit_number, birthday_month, contact_email, client_type, plan_tier')
+    .select('first_name, last_name, timezone, unit_number, birthday_month, contact_email, client_type, plan_tier, photo_url, bio')
     .eq('id', user.id)
     .single()
 
@@ -28,6 +28,7 @@ export default async function PortalProfilePage() {
       </div>
       <PortalProfileForm
         authEmail={user.email ?? ''}
+        userId={user.id}
         profile={profile}
       />
     </div>

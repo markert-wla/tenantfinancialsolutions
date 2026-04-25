@@ -47,6 +47,18 @@ export async function PATCH(req: NextRequest) {
     update.birthday_month = body.birthday_month
   }
 
+  if (body.photo_url === null || body.photo_url === '') {
+    update.photo_url = null
+  } else if (typeof body.photo_url === 'string') {
+    update.photo_url = body.photo_url.trim().slice(0, 500)
+  }
+
+  if (body.bio === null || body.bio === '') {
+    update.bio = null
+  } else if (typeof body.bio === 'string') {
+    update.bio = body.bio.trim().slice(0, 1000)
+  }
+
   if (!update.first_name || !update.last_name) {
     return NextResponse.json({ error: 'First and last name are required' }, { status: 400 })
   }

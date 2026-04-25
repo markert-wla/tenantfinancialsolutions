@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Mail, User } from 'lucide-react'
 import { TIMEZONES } from '@/lib/timezones'
+import ChangePasswordForm from '@/components/settings/ChangePasswordForm'
+import PhotoUpload from '@/components/settings/PhotoUpload'
 
 const MONTHS = [
   'January','February','March','April','May','June',
@@ -19,6 +21,7 @@ const CLIENT_TYPE_LABELS: Record<string, string> = {
 
 type Props = {
   authEmail: string
+  userId: string
   profile: {
     first_name: string
     last_name: string
@@ -28,12 +31,14 @@ type Props = {
     contact_email: string | null
     client_type: string | null
     plan_tier: string
+    photo_url: string | null
+    bio: string | null
   }
 }
 
 const INPUT = 'w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-tfs-teal'
 
-export default function PortalProfileForm({ authEmail, profile }: Props) {
+export default function PortalProfileForm({ authEmail, userId, profile }: Props) {
   const router = useRouter()
   const [form, setForm] = useState({
     first_name:     profile.first_name,
@@ -42,6 +47,8 @@ export default function PortalProfileForm({ authEmail, profile }: Props) {
     unit_number:    profile.unit_number ?? '',
     birthday_month: profile.birthday_month ? String(profile.birthday_month) : '',
     contact_email:  profile.contact_email ?? '',
+    photo_url:      profile.photo_url ?? '',
+    bio:            profile.bio ?? '',
   })
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -69,6 +76,8 @@ export default function PortalProfileForm({ authEmail, profile }: Props) {
         unit_number:    form.unit_number.trim() || null,
         birthday_month: form.birthday_month ? Number(form.birthday_month) : null,
         contact_email:  form.contact_email.trim() || null,
+        photo_url:      form.photo_url.trim() || null,
+        bio:            form.bio.trim() || null,
       }),
     })
 
@@ -83,6 +92,7 @@ export default function PortalProfileForm({ authEmail, profile }: Props) {
   }
 
   return (
+    <div className="space-y-8">
     <form onSubmit={handleSubmit} className="space-y-8">
 
       {/* Account info (read-only) */}
@@ -177,6 +187,25 @@ export default function PortalProfileForm({ authEmail, profile }: Props) {
               ))}
             </select>
           </div>
+          <div>
+            <label className="block text-xs font-medium text-tfs-slate mb-1">Profile Photo <span className="font-normal">(optional)</span></label>
+            <PhotoUpload
+              userId={userId}
+              currentUrl={form.photo_url || null}
+              onUpload={url => set('photo_url', url)}
+              onRemove={() => set('photo_url', '')}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-tfs-slate mb-1">Short Bio <span className="font-normal">(optional)</span></label>
+            <textarea
+              value={form.bio}
+              onChange={e => set('bio', e.target.value)}
+              rows={3}
+              placeholder="A brief note about yourself…"
+              className={INPUT + ' resize-y'}
+            />
+          </div>
         </div>
       </div>
 
@@ -190,5 +219,7 @@ export default function PortalProfileForm({ authEmail, profile }: Props) {
         {error   && <p className="text-sm text-red-600">{error}</p>}
       </div>
     </form>
+    <ChangePasswordForm authEmail={authEmail} />
+    </div>
   )
 }

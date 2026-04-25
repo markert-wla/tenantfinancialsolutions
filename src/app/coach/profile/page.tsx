@@ -36,6 +36,7 @@ export default async function CoachProfilePage() {
       </div>
       <CoachProfileForm
         authEmail={user.email ?? ''}
+        userId={user.id}
         profile={profile}
         coach={coach}
       />

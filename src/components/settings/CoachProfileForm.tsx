@@ -4,9 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Mail, User } from 'lucide-react'
 import { TIMEZONES } from '@/lib/timezones'
+import ChangePasswordForm from '@/components/settings/ChangePasswordForm'
+import PhotoUpload from '@/components/settings/PhotoUpload'
 
 type Props = {
   authEmail: string
+  userId: string
   profile: {
     first_name: string
     last_name: string
@@ -24,7 +27,7 @@ type Props = {
 
 const INPUT = 'w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-tfs-teal'
 
-export default function CoachProfileForm({ authEmail, profile, coach }: Props) {
+export default function CoachProfileForm({ authEmail, userId, profile, coach }: Props) {
   const router = useRouter()
   const [form, setForm] = useState({
     first_name:    profile.first_name,
@@ -78,6 +81,7 @@ export default function CoachProfileForm({ authEmail, profile, coach }: Props) {
   }
 
   return (
+    <div className="space-y-8">
     <form onSubmit={handleSubmit} className="space-y-8">
 
       {/* Account */}
@@ -139,8 +143,13 @@ export default function CoachProfileForm({ authEmail, profile, coach }: Props) {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-tfs-slate mb-1">Photo URL <span className="font-normal">(optional)</span></label>
-            <input type="url" value={form.photo_url} onChange={e => set('photo_url', e.target.value)} placeholder="https://…" className={INPUT} />
+            <label className="block text-xs font-medium text-tfs-slate mb-1">Profile Photo <span className="font-normal">(optional)</span></label>
+            <PhotoUpload
+              userId={userId}
+              currentUrl={form.photo_url || null}
+              onUpload={url => set('photo_url', url)}
+              onRemove={() => set('photo_url', '')}
+            />
           </div>
           <div className="sm:col-span-2">
             <label className="block text-xs font-medium text-tfs-slate mb-1">Bio <span className="font-normal">(optional)</span></label>
@@ -165,5 +174,7 @@ export default function CoachProfileForm({ authEmail, profile, coach }: Props) {
         {error   && <p className="text-sm text-red-600">{error}</p>}
       </div>
     </form>
+    <ChangePasswordForm authEmail={authEmail} />
+    </div>
   )
 }

@@ -14,7 +14,7 @@ export default async function AdminSettingsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, last_name, timezone, contact_email, role')
+    .select('first_name, last_name, timezone, contact_email, role, photo_url, bio')
     .eq('id', user.id)
     .single()
 
@@ -28,6 +28,7 @@ export default async function AdminSettingsPage() {
       </div>
       <AdminProfileForm
         authEmail={user.email ?? ''}
+        userId={user.id}
         profile={profile}
       />
     </div>
