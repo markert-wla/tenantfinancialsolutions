@@ -57,8 +57,8 @@ export default async function PortalDashboard() {
     }).format(new Date(iso))
   }
 
-  const canBook  = tier !== 'free' && used < limit
-  const atLimit  = tier !== 'free' && used >= limit
+  const canBook  = limit > 0 && used < limit
+  const atLimit  = limit > 0 && used >= limit
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
@@ -80,13 +80,10 @@ export default async function PortalDashboard() {
             {used}
             <span className="text-lg font-normal text-tfs-slate"> / {limit === 0 ? '—' : limit}</span>
           </p>
-          {tier === 'free' && (
-            <p className="text-xs text-tfs-slate mt-1">
-              <Link href="/services" className="text-tfs-teal hover:underline">Upgrade</Link> to book sessions
-            </p>
-          )}
           {atLimit && (
-            <p className="text-xs text-orange-600 mt-1">Monthly limit reached</p>
+            <p className="text-xs text-orange-600 mt-1">Monthly limit reached —{' '}
+              <Link href="/portal/billing" className="underline">Upgrade</Link>
+            </p>
           )}
         </div>
 
@@ -94,15 +91,10 @@ export default async function PortalDashboard() {
         <div className="card col-span-2 flex items-center justify-between gap-4">
           <div>
             <p className="text-sm text-tfs-slate mb-1">Ready to meet with a coach?</p>
-            {tier === 'free' ? (
-              <p className="text-tfs-navy font-medium text-sm">
-                <Link href="/services" className="text-tfs-teal hover:underline">Upgrade your plan</Link>{' '}
-                to book individual sessions.
-              </p>
-            ) : atLimit ? (
+            {atLimit ? (
               <p className="text-tfs-navy font-medium text-sm">
                 Monthly sessions used.{' '}
-                <Link href="/services" className="text-tfs-teal hover:underline">Upgrade</Link> or wait for the monthly reset.
+                <Link href="/portal/billing" className="text-tfs-teal hover:underline">Upgrade</Link> or wait for the monthly reset.
               </p>
             ) : (
               <p className="text-tfs-navy font-medium">

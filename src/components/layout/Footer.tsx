@@ -51,7 +51,7 @@ export default function Footer() {
               alt="Tenant Financial Solutions"
               width={160}
               height={48}
-              className="h-10 w-auto object-contain brightness-0 invert mb-4"
+              className="h-10 w-auto object-contain mb-4 rounded"
             />
             <p className="text-sm text-gray-300 leading-relaxed">
               Tenant Focused &ndash; Community Impact.<br />
@@ -115,7 +115,16 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Tenant Financial Solutions. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} Tenant Financial Solutions. All rights reserved.{' '}
+            <Link href="/privacy" className="hover:text-tfs-teal transition-colors underline underline-offset-2">
+              Privacy Policy
+            </Link>
+            {' · '}
+            <Link href="/terms" className="hover:text-tfs-teal transition-colors underline underline-offset-2">
+              Terms of Service
+            </Link>
+          </p>
           <div className="flex gap-4">
             <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer"
                aria-label="Instagram" className="hover:text-tfs-teal transition-colors"><IconInstagram /></a>

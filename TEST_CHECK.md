@@ -14,14 +14,14 @@ Create fresh test accounts for client and coach flows.
 
 Before anything else:
 
-- [ ] `npm run dev` starts without errors
-- [ ] No TypeScript errors: `npx tsc --noEmit`
-- [ ] In Supabase Dashboard → Table Editor: confirm these tables exist:
+- [x] `npm run dev` starts without errors
+- [x] No TypeScript errors: `npx tsc --noEmit`
+- [x] In Supabase Dashboard → Table Editor: confirm these tables exist:
   `profiles`, `coaches`, `availability`, `bookings`, `promo_codes`,
   `testimonials`, `group_sessions`, `group_session_attendance`, `partners`
-- [ ] Confirm `ADMIN_EMAILS` env var contains both admin emails
-- [ ] Confirm Stripe keys are filled in `.env.local`
-- [ ] Confirm Resend key is filled in `.env.local`
+- [x] Confirm `ADMIN_EMAILS` env var contains both admin emails
+- [x] Confirm Stripe keys are filled in `.env.local`
+- [x] Confirm Resend key is filled in `.env.local`
 
 **Verify DB baseline (run in SQL Editor):**
 ```sql
@@ -34,45 +34,45 @@ SELECT role, COUNT(*) FROM profiles GROUP BY role;
 ## 1 · Public Pages
 
 ### 1.1 Home Page `/`
-- [ ] Loads without errors
-- [ ] Hero shows "Your residents want clarity..." heading (not "Our Vision")
-- [ ] Three audience cards render (Individual and/or Couple, I Manage Properties, Non-Profit)
-- [ ] "How It Works" section shows "3 Simple Steps towards your desired future."
-- [ ] Step 3 title reads "Create Change with Your Coach"
-- [ ] Benefits section shows "Coaching that lightens the load on management by:" (not "Management benefits through:")
-- [ ] Scroll past the hero CTA button → "Session" button slides into the navbar
-- [ ] Testimonials section only appears if there are approved testimonials in DB
+- [x] Loads without errors
+- [x] Hero shows "Your residents want clarity..." heading (not "Our Vision")
+- [x] Three audience cards render (Individual and/or Couple, I Manage Properties, Non-Profit)
+- [x] "How It Works" section shows "3 Simple Steps towards your desired future."
+- [x] Step 3 title reads "Create Change with Your Coach"
+- [x] Benefits section shows "Coaching that lightens the load on management by:" (not "Management benefits through:")
+- [x] Scroll past the hero CTA button → "Session" button slides into the navbar
+- [x] Testimonials section only appears if there are approved testimonials in DB
 
 ### 1.2 About Page `/about`
-- [ ] "Our Vision" label + vision statement at the TOP of the hero (before "Welcome to TFS")
-- [ ] "Your residents want clarity..." paragraph is GONE from this page
-- [ ] "Coaching That Lightens the Load on Management" card is GONE
-- [ ] COACHES core values section renders (C-O-A-C-H-E-S cards with gold letters)
-- [ ] Lighthouse image visible behind core values section
-- [ ] Coach cards section shows either live coach profiles or "coming soon" message
-- [ ] Scroll past hero CTA → "Session" button slides into navbar
+- [x] "Our Vision" label + vision statement at the TOP of the hero (before "Welcome to TFS")
+- [x] "Your residents want clarity..." paragraph is GONE from this page
+- [x] "Coaching That Lightens the Load on Management" card is GONE
+- [x] COACHES core values section renders (C-O-A-C-H-E-S cards with gold letters)
+- [x] Lighthouse image visible behind core values section
+- [x] Coach cards section shows either live coach profiles or "coming soon" message
+- [x] Scroll past hero CTA → "Session" button slides into navbar
 
 ### 1.3 Services Page `/services`
-- [ ] Hero loads with "Services & Plans" title
-- [ ] Scroll past hero CTA → "Session" button slides into navbar ← was broken, now fixed
-- [ ] Free plan shows $0 with correct features
-- [ ] Starter Plan shows $50/mo
-- [ ] Advantage Plan shows $100/mo with "Most Popular" badge
-- [ ] No "Gold" plan anywhere on the page
-- [ ] Property Management section shows Affiliate Model + Tenant Partner Membership
-- [ ] Non-Profit section shows eligible organizations + "What Your Residents Get"
+- [x] Hero loads with "Services & Plans" title
+- [x] Scroll past hero CTA → "Session" button slides into navbar ← was broken, now fixed
+- [x] Free plan shows $0 with correct features
+- [x] Starter Plan shows $50/mo
+- [x] Advantage Plan shows $100/mo with "Most Popular" badge
+- [x] No "Gold" plan anywhere on the page
+- [x] Property Management section shows Affiliate Model + Tenant Partner Membership
+- [x] Non-Profit section shows eligible organizations + "What Your Residents Get"
 
 ### 1.4 Contact Page `/contact`
-- [ ] Scroll past hero CTA → "Session" button slides into navbar ← was broken, now fixed
-- [ ] Form submits successfully → success message shown
-- [ ] **Email check:** Admin inbox (tenantfinancialsolutions@gmail.com) receives the contact form email
-- [ ] Rate limit: submitting 6+ times quickly should return a "too many requests" error
+- [x] Scroll past hero CTA → "Session" button slides into navbar ← was broken, now fixed
+- [x] Form submits successfully → success message shown
+- [x] **Email check:** Admin inbox (markert.wla@gmail.com) receives the contact form email
+- [x] Rate limit: submitting 6+ times quickly should return a "too many requests" error
 
 ### 1.5 Footer
-- [ ] Instagram icon links to `https://www.instagram.com/mjmfinancialcoaching/`
-- [ ] Facebook icon links to `https://www.facebook.com/profile.php?id=61578631015293`
-- [ ] Email address `tenantfinancialsolutions@gmail.com` is clickable (mailto)
-- [ ] Copyright year shows current year
+- [x] Instagram icon links to `https://www.instagram.com/mjmfinancialcoaching/`
+- [x] Facebook icon links to `https://www.facebook.com/profile.php?id=61578631015293`
+- [x] Email address `tenantfinancialsolutions@gmail.com` is clickable (mailto)
+- [x] Copyright year shows current year
 
 ---
 
@@ -87,9 +87,9 @@ Use a fresh email for each test (e.g. `testuser+individual@gmail.com`). Delete t
 4. Click **Create Account**
 
 **Expected:**
-- [ ] Redirected to `/portal/dashboard`
-- [ ] Dashboard shows "Free" plan, 0/1 sessions used
-- [ ] Welcome email arrives at the registered address
+- [x] Redirected to `/portal/dashboard`
+- [x] Dashboard shows "Free" plan, 0/1 sessions used
+- [x] Welcome email arrives at the registered address
 
 **DB check:**
 ```sql

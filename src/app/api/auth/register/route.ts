@@ -32,12 +32,15 @@ export async function POST(req: NextRequest) {
     password: string
     firstName: string
     lastName: string
+    partnerFirstName?: string | null
+    partnerLastName?: string | null
     timezone: string
     tier: string
     clientType?: ClientType
     promoCode?: string | null
     unitNumber?: string | null
     birthdayMonth?: number | null
+    anniversaryMonth?: number | null
   }
 
   try {
@@ -46,7 +49,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { email, password, firstName, lastName, timezone, tier, clientType, promoCode, unitNumber, birthdayMonth } = body
+  const { email, password, firstName, lastName, partnerFirstName, partnerLastName, timezone, tier, clientType, promoCode, unitNumber, birthdayMonth, anniversaryMonth } = body
 
   if (!email || !password || !firstName || !lastName) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -136,9 +139,12 @@ export async function POST(req: NextRequest) {
     profileUpdate.free_trial_expires_at = trialExpiry.toISOString()
   }
 
-  if (promoCode)    profileUpdate.promo_code_used = promoCode
-  if (unitNumber)   profileUpdate.unit_number     = unitNumber
-  if (birthdayMonth) profileUpdate.birthday_month = birthdayMonth
+  if (promoCode)         profileUpdate.promo_code_used      = promoCode
+  if (unitNumber)        profileUpdate.unit_number           = unitNumber
+  if (birthdayMonth)     profileUpdate.birthday_month        = birthdayMonth
+  if (partnerFirstName)  profileUpdate.partner_first_name    = partnerFirstName
+  if (partnerLastName)   profileUpdate.partner_last_name     = partnerLastName
+  if (anniversaryMonth)  profileUpdate.anniversary_month     = anniversaryMonth
 
   await supabase.from('profiles').update(profileUpdate).eq('id', userId)
 

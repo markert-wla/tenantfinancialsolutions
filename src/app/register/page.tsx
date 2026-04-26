@@ -35,8 +35,9 @@ function RegisterInner() {
   const [isCouple, setIsCouple] = useState(false)
   const [tier, setTier]         = useState(preselectedTier)
   const [form, setForm]         = useState({
-    firstName: '', lastName: '', email: '', password: '', timezone: 'America/New_York',
-    promoCode: '', unitNumber: '', birthdayMonth: '',
+    firstName: '', lastName: '', partnerFirstName: '', partnerLastName: '',
+    email: '', password: '', timezone: 'America/New_York',
+    promoCode: '', unitNumber: '', birthdayMonth: '', anniversaryMonth: '',
   })
   const [codeStatus, setCodeStatus] = useState<'idle'|'checking'|'valid'|'invalid'>('idle')
   const [codeInfo, setCodeInfo]     = useState<any>(null)
@@ -95,16 +96,19 @@ function RegisterInner() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email:         form.email,
-          password:      form.password,
-          firstName:     form.firstName,
-          lastName:      form.lastName,
-          timezone:      form.timezone,
-          tier:          path === 'individual' ? tier : (codeInfo?.assigned_tier ?? 'free'),
-          clientType:    clientType(),
-          promoCode:     (path === 'partner' || path === 'nonprofit') ? form.promoCode.trim().toUpperCase() : null,
-          unitNumber:    path === 'partner' ? form.unitNumber.trim() : null,
-          birthdayMonth: form.birthdayMonth ? parseInt(form.birthdayMonth) : null,
+          email:              form.email,
+          password:           form.password,
+          firstName:          form.firstName,
+          lastName:           form.lastName,
+          partnerFirstName:   isCouple ? form.partnerFirstName : null,
+          partnerLastName:    isCouple ? form.partnerLastName  : null,
+          timezone:           form.timezone,
+          tier:               path === 'individual' ? tier : (codeInfo?.assigned_tier ?? 'free'),
+          clientType:         clientType(),
+          promoCode:          (path === 'partner' || path === 'nonprofit') ? form.promoCode.trim().toUpperCase() : null,
+          unitNumber:         path === 'partner' ? form.unitNumber.trim() : null,
+          birthdayMonth:      !isCouple && form.birthdayMonth ? parseInt(form.birthdayMonth) : null,
+          anniversaryMonth:   isCouple && form.anniversaryMonth ? parseInt(form.anniversaryMonth) : null,
         }),
       })
 
@@ -297,16 +301,36 @@ function RegisterInner() {
           {/* Name */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-tfs-navy mb-1">First Name *</label>
+              <label className="block text-sm font-medium text-tfs-navy mb-1">
+                {isCouple ? 'Your First Name' : 'First Name'} *
+              </label>
               <input required type="text" value={form.firstName}
                 onChange={e => update('firstName', e.target.value)} className={INPUT} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-tfs-navy mb-1">Last Name *</label>
+              <label className="block text-sm font-medium text-tfs-navy mb-1">
+                {isCouple ? 'Your Last Name' : 'Last Name'} *
+              </label>
               <input required type="text" value={form.lastName}
                 onChange={e => update('lastName', e.target.value)} className={INPUT} />
             </div>
           </div>
+
+          {/* Partner name (couples only) */}
+          {isCouple && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Partner&apos;s First Name *</label>
+                <input required type="text" value={form.partnerFirstName}
+                  onChange={e => update('partnerFirstName', e.target.value)} className={INPUT} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Partner&apos;s Last Name *</label>
+                <input required type="text" value={form.partnerLastName}
+                  onChange={e => update('partnerLastName', e.target.value)} className={INPUT} />
+              </div>
+            </div>
+          )}
 
           {/* Email */}
           <div>
@@ -334,13 +358,17 @@ function RegisterInner() {
             </select>
           </div>
 
-          {/* Birthday month */}
+          {/* Birthday / Anniversary month */}
           <div>
             <label className="block text-sm font-medium text-tfs-navy mb-1">
-              Birthday Month <span className="text-gray-400 font-normal">(optional)</span>
+              {isCouple ? 'Anniversary Month' : 'Birthday Month'}{' '}
+              <span className="text-gray-400 font-normal">(optional)</span>
             </label>
-            <select value={form.birthdayMonth} onChange={e => update('birthdayMonth', e.target.value)}
-              className={INPUT + ' bg-white'}>
+            <select
+              value={isCouple ? form.anniversaryMonth : form.birthdayMonth}
+              onChange={e => update(isCouple ? 'anniversaryMonth' : 'birthdayMonth', e.target.value)}
+              className={INPUT + ' bg-white'}
+            >
               <option value="">Select month</option>
               {MONTHS.map((m, i) => (
                 <option key={m} value={i + 1}>{m}</option>

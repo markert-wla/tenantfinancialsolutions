@@ -7,7 +7,7 @@ import BookingClient from '@/components/portal/BookingClient'
 
 export const metadata: Metadata = { title: 'Book a Session' }
 
-const LIMITS: Record<string, number> = { free: 0, bronze: 1, silver: 2, gold: 4 }
+const LIMITS: Record<string, number> = { free: 1, bronze: 1, silver: 2, gold: 4 }
 
 export default async function BookPage() {
   const supabase = createClient()
@@ -24,7 +24,7 @@ export default async function BookPage() {
   const tier      = profile?.plan_tier ?? 'free'
   const used      = profile?.sessions_used_this_month ?? 0
   const limit     = LIMITS[tier] ?? 0
-  const canBook   = tier !== 'free' && used < limit
+  const canBook   = limit > 0 && used < limit
   const remaining = Math.max(0, limit - used)
   const userTz    = profile?.timezone ?? 'America/New_York'
 
