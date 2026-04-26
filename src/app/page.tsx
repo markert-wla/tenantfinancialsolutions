@@ -8,7 +8,7 @@ import { ChevronRight, Users, Building2, HeartHandshake } from 'lucide-react'
 import HeroCTAButton from '@/components/layout/HeroCTAButton'
 
 export const metadata: Metadata = {
-  title: 'Tenant Focused – Community Impact | Tenant Financial Solutions',
+  title: 'Tenant Financial Solutions — Tenant Focused, Community Impact',
   description:
     'Financial coaching for tenants, property managers, and non-profits. One-on-one sessions with dedicated coaches. Real People – Real Coaching.',
   openGraph: {
