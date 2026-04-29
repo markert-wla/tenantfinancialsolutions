@@ -37,6 +37,8 @@ export default function AttendanceClient({ groupSessions, clients, attendance: i
   const [saving, setSaving] = useState<string | null>(null)
 
   const session = groupSessions.find(s => s.id === selectedId)
+  const today = new Date().toISOString().split('T')[0]
+  const isFuture = session ? session.session_date > today : false
 
   function getAttendance(clientId: string): boolean | null {
     const r = records.find(r => r.session_id === selectedId && r.client_id === clientId)
@@ -97,6 +99,12 @@ export default function AttendanceClient({ groupSessions, clients, attendance: i
           Mark each client as attended or no-show. Only your assigned clients are shown.
         </p>
 
+        {isFuture && (
+          <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
+            Attendance can only be recorded after the session date has passed.
+          </div>
+        )}
+
         {clients.length === 0 ? (
           <p className="text-tfs-slate text-sm text-center py-8">No clients to display.</p>
         ) : (
@@ -126,18 +134,18 @@ export default function AttendanceClient({ groupSessions, clients, attendance: i
                     {/* Toggle buttons */}
                     <button
                       onClick={() => mark(client.id, true)}
-                      disabled={busy}
-                      title="Mark attended"
-                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-50 ${
+                      disabled={busy || isFuture}
+                      title={isFuture ? 'Session has not occurred yet' : 'Mark attended'}
+                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                         att === true ? 'text-green-600 bg-green-50' : 'text-gray-300 hover:text-green-600 hover:bg-green-50'
                       }`}>
                       <CheckCircle size={20} />
                     </button>
                     <button
                       onClick={() => mark(client.id, false)}
-                      disabled={busy}
-                      title="Mark no-show"
-                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-50 ${
+                      disabled={busy || isFuture}
+                      title={isFuture ? 'Session has not occurred yet' : 'Mark no-show'}
+                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                         att === false ? 'text-red-500 bg-red-50' : 'text-gray-300 hover:text-red-500 hover:bg-red-50'
                       }`}>
                       <XCircle size={20} />

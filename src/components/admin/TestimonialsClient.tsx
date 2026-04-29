@@ -28,6 +28,13 @@ export default function TestimonialsClient({ testimonials }: { testimonials: Tes
     router.refresh()
   }
 
+  async function deleteTestimonial(id: string) {
+    setLoading(id)
+    await fetch(`/api/admin/testimonials/${id}`, { method: 'DELETE' })
+    setLoading(null)
+    router.refresh()
+  }
+
   const pending  = testimonials.filter(t => !t.approved)
   const approved = testimonials.filter(t => t.approved)
 
@@ -47,7 +54,7 @@ export default function TestimonialsClient({ testimonials }: { testimonials: Tes
           </h2>
           <div className="space-y-4">
             {pending.map(t => (
-              <TestimonialCard key={t.id} t={t} loading={loading} onApprove={() => setApproved(t.id, true)} onReject={() => setApproved(t.id, false)} />
+              <TestimonialCard key={t.id} t={t} loading={loading} onApprove={() => setApproved(t.id, true)} onReject={() => deleteTestimonial(t.id)} />
             ))}
           </div>
         </div>

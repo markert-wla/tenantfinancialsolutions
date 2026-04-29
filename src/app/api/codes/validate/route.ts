@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('promo_codes')
-    .select('code, partner_type, partner_name, assigned_tier, max_uses, uses_count, is_active, expires_at')
+    .select('code, partner_type, partner_name, partner_id, assigned_tier, max_uses, uses_count, is_active, expires_at, partner:partners(partner_name, partner_type)')
     .eq('code', code.trim().toUpperCase())
     .single()
 
@@ -33,10 +33,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ valid: false, reason: 'expired' }, { status: 200 })
   }
 
+  const partnerRow = Array.isArray(data.partner) ? data.partner[0] : data.partner
   return NextResponse.json({
     valid: true,
     assigned_tier: data.assigned_tier,
-    partner_type: data.partner_type,
-    partner_name: data.partner_name,
+    partner_type:  partnerRow?.partner_type ?? data.partner_type,
+    partner_name:  partnerRow?.partner_name ?? data.partner_name,
   })
 }

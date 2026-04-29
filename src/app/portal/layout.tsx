@@ -17,11 +17,14 @@ export default async function PortalLayout({ children }: { children: React.React
     .eq('id', user.id)
     .single()
 
-  // Admins and coaches shouldn't be in the client portal
-  if (profile?.role === 'admin') redirect('/admin/dashboard')
-  if (profile?.role === 'coach') redirect('/coach/dashboard')
+  // Only clients belong in the client portal
+  if (profile?.role === 'admin')            redirect('/admin/dashboard')
+  if (profile?.role === 'coach')            redirect('/coach/dashboard')
+  if (profile?.role === 'property_manager') redirect('/manager/dashboard')
 
   const tier = profile?.plan_tier ?? 'free'
+  const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Starter Plan', silver: 'Advantage Plan' }
+  const tierLabel = TIER_LABEL[tier] ?? tier
   const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user.email
 
   return (
@@ -30,8 +33,8 @@ export default async function PortalLayout({ children }: { children: React.React
       <aside className="w-56 shrink-0 bg-tfs-navy text-white flex flex-col fixed left-0 top-16 bottom-0 z-40">
         <div className="px-5 py-5 border-b border-white/10">
           <p className="font-semibold text-white text-sm truncate">{name}</p>
-          <span className="mt-1 inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize bg-tfs-teal/40 text-tfs-gold">
-            {tier} plan
+          <span className="mt-1 inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-tfs-teal/40 text-tfs-gold">
+            {tierLabel}
           </span>
         </div>
 

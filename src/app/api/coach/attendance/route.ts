@@ -23,6 +23,18 @@ export async function POST(req: NextRequest) {
   }
 
   const service = createServiceClient()
+
+  // Block marking attendance for future sessions
+  const today = new Date().toISOString().split('T')[0]
+  const { data: sessionRow } = await service
+    .from('group_sessions')
+    .select('session_date')
+    .eq('id', session_id)
+    .single()
+
+  if (!sessionRow || sessionRow.session_date > today) {
+    return NextResponse.json({ error: 'Attendance cannot be recorded for future sessions' }, { status: 400 })
+  }
   const { error } = await service
     .from('group_session_attendance')
     .upsert({ session_id, client_id, attended }, { onConflict: 'session_id,client_id' })

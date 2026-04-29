@@ -9,6 +9,11 @@ import { CalendarPlus, Users, CalendarCheck } from 'lucide-react'
 export const metadata: Metadata = { title: 'Dashboard' }
 
 const LIMITS: Record<string, number> = { free: 1, bronze: 1, silver: 2 }
+const TIER_LABEL: Record<string, string> = {
+  free:   'Free',
+  bronze: 'Starter Plan',
+  silver: 'Advantage Plan',
+}
 
 export default async function PortalDashboard() {
   const supabase = createClient()
@@ -66,8 +71,8 @@ export default async function PortalDashboard() {
         <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-1">
           Welcome back, {profile?.first_name ?? 'there'}!
         </h1>
-        <span className="inline-block px-3 py-1 rounded-full text-sm font-semibold capitalize bg-tfs-teal text-white">
-          {tier} Plan
+        <span className="inline-block px-3 py-1 rounded-full text-sm font-semibold bg-tfs-teal text-white">
+          {TIER_LABEL[tier] ?? tier}
         </span>
       </div>
 

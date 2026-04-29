@@ -39,6 +39,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
   const [flagReason, setFlagReason]   = useState('')
   const [updating, setUpdating]       = useState<string | null>(null)
   const [filter, setFilter]           = useState<'upcoming' | 'past' | 'all'>('upcoming')
+  const [apiError, setApiError]       = useState('')
 
   const now = new Date()
 
@@ -61,6 +62,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
 
   async function patch(id: string, payload: Record<string, unknown>) {
     setUpdating(id)
+    setApiError('')
     const res = await fetch(`/api/coach/sessions/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -70,6 +72,9 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
     if (res.ok) {
       setSessions(prev => prev.map(s => s.id === id ? { ...s, ...payload } : s))
       router.refresh()
+    } else {
+      const body = await res.json().catch(() => ({}))
+      setApiError(body.error ?? `Request failed (${res.status})`)
     }
   }
 
@@ -87,6 +92,11 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
 
   return (
     <div>
+      {apiError && (
+        <p className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+          {apiError}
+        </p>
+      )}
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6">
         {(['upcoming', 'past', 'all'] as const).map(f => (

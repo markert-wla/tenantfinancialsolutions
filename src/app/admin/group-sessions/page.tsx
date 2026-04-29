@@ -12,14 +12,20 @@ export default async function AdminGroupSessionsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: sessions } = await supabase
-    .from('group_sessions')
-    .select('id, session_date, join_link, recording_url, reminder_sent, created_at')
-    .order('session_date', { ascending: false })
+  const [{ data: sessions }, { data: partners }] = await Promise.all([
+    supabase
+      .from('group_sessions')
+      .select('id, session_date, join_link, recording_url, reminder_sent, partner_ids, created_at')
+      .order('session_date', { ascending: false }),
+    supabase
+      .from('partners')
+      .select('id, partner_name, partner_type')
+      .order('partner_name', { ascending: true }),
+  ])
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <GroupSessionsClient sessions={sessions ?? []} />
+      <GroupSessionsClient sessions={sessions ?? []} partners={partners ?? []} />
     </div>
   )
 }

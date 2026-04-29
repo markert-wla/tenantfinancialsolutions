@@ -16,10 +16,34 @@ export default async function PortalGroupSessionsPage() {
   const today = new Date().toISOString().split('T')[0]
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
+  // Resolve client's partner_id via their promo code (if any)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('promo_code_used')
+    .eq('id', user.id)
+    .single()
+
+  let clientPartnerId: string | null = null
+  if (profile?.promo_code_used) {
+    const { data: codeRow } = await supabase
+      .from('promo_codes')
+      .select('partner_id')
+      .eq('code', profile.promo_code_used)
+      .maybeSingle()
+    clientPartnerId = codeRow?.partner_id ?? null
+  }
+
+  // Sessions visible to this client: partner_ids IS NULL (open to all)
+  // OR partner_ids contains their partner_id (if they have one)
+  const partnerFilter = clientPartnerId
+    ? `partner_ids.is.null,partner_ids.cs.{${clientPartnerId}}`
+    : 'partner_ids.is.null'
+
   // Upcoming sessions (today and forward)
   const { data: upcoming } = await supabase
     .from('group_sessions')
-    .select('id, session_date, join_link')
+    .select('id, session_date, join_link, recording_url')
+    .or(partnerFilter)
     .gte('session_date', today)
     .order('session_date', { ascending: true })
     .limit(12)
@@ -28,6 +52,7 @@ export default async function PortalGroupSessionsPage() {
   const { data: past } = await supabase
     .from('group_sessions')
     .select('id, session_date, recording_url')
+    .or(partnerFilter)
     .gte('session_date', ninetyDaysAgo)
     .lt('session_date', today)
     .order('session_date', { ascending: false })
@@ -84,20 +109,32 @@ export default async function PortalGroupSessionsPage() {
                   <p className="font-medium text-tfs-navy">{fmtDate(s.session_date)}</p>
                   <p className="text-xs text-tfs-slate mt-0.5">Group Coaching Session</p>
                 </div>
-                {s.join_link ? (
-                  <a
-                    href={s.join_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shrink-0 inline-flex items-center gap-1.5 bg-tfs-teal text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-tfs-teal-dark transition-colors"
-                  >
-                    <ExternalLink size={14} /> Join
-                  </a>
-                ) : (
-                  <span className="shrink-0 text-xs text-tfs-slate flex items-center gap-1">
-                    <Clock size={13} /> Link coming soon
-                  </span>
-                )}
+                <div className="shrink-0 flex items-center gap-2">
+                  {s.recording_url && (
+                    <a
+                      href={s.recording_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 border border-tfs-teal text-tfs-teal text-sm font-semibold px-4 py-2 rounded-lg hover:bg-tfs-teal hover:text-white transition-colors"
+                    >
+                      <Video size={14} /> Preview Recording
+                    </a>
+                  )}
+                  {s.join_link ? (
+                    <a
+                      href={`/api/portal/group-sessions/${s.id}/join`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 bg-tfs-teal text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-tfs-teal-dark transition-colors"
+                    >
+                      <ExternalLink size={14} /> Join
+                    </a>
+                  ) : (
+                    <span className="text-xs text-tfs-slate flex items-center gap-1">
+                      <Clock size={13} /> Link coming soon
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

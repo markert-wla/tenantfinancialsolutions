@@ -115,10 +115,10 @@ SELECT client_type FROM profiles WHERE email = 'your-test-email@gmail.com';
 3. Fill form, submit
 
 **Expected:**
-- [ ] Account created, redirected to portal dashboard
-- [ ] Dashboard shows "Starter Plan"
-- [ ] Stripe customer created (check Stripe Dashboard → Customers)
-- [ ] Stripe subscription created with status `incomplete` (payment not yet collected)
+- [x] Account created, redirected to portal dashboard
+- [x] Dashboard shows "Starter Plan"
+- [ ] Stripe customer created (check Stripe Dashboard → Customers) ← **SKIP: Stripe product catalog not yet configured**
+- [ ] Stripe subscription created with status `incomplete` (payment not yet collected) ← **SKIP: Stripe product catalog not yet configured**
 
 **DB check:**
 ```sql
@@ -161,10 +161,10 @@ SELECT client_type FROM profiles WHERE email = 'your-test-email@gmail.com';
 ```
 
 ### 2.6 Registration Error Cases
-- [ ] Duplicate email → shows "An account with this email already exists."
-- [ ] Password < 8 chars → form prevents submission
-- [ ] Invalid/expired promo code → shows error message; "Continue as individual" link appears
-- [ ] Property Tenant path without unit number → blocked with error
+- [x] Duplicate email → shows "An account with this email already exists."
+- [x] Password < 8 chars → form prevents submission
+- [x] Invalid/expired promo code → shows error message; "Continue as individual" link appears
+- [x] Property Tenant path without unit number → blocked with error
 
 ---
 
@@ -181,18 +181,18 @@ SELECT client_type FROM profiles WHERE email = 'your-test-email@gmail.com';
 | A coach email | `/coach/dashboard` |
 | A client email | `/portal/dashboard` |
 
-- [ ] Wrong password → shows error message
-- [ ] Non-existent email → shows error message
+- [x] Wrong password → shows error message
+- [x] Non-existent email → shows error message
 
 ### 3.2 Google OAuth
 > Requires Google OAuth configured in Supabase Dashboard → Auth → Providers → Google.
-- [ ] Click "Continue with Google" → Google consent screen appears
-- [ ] After consent → redirected to correct dashboard based on role
+- [x] Click "Continue with Google" → Google consent screen appears
+- [x] After consent → redirected to correct dashboard based on role
 
 ### 3.3 Auth Guard
-- [ ] Try visiting `/admin/dashboard` while logged out → redirected to `/login`
-- [ ] Try visiting `/portal/dashboard` while logged out → redirected to `/login`
-- [ ] Try visiting `/portal/dashboard` while logged in as admin → redirected to login (not a client)
+- [x] Try visiting `/admin/dashboard` while logged out → redirected to `/login`
+- [x] Try visiting `/portal/dashboard` while logged out → redirected to `/login`
+- [x] Try visiting `/portal/dashboard` while logged in as admin → redirected to login (not a client)
 
 ---
 
@@ -201,11 +201,11 @@ SELECT client_type FROM profiles WHERE email = 'your-test-email@gmail.com';
 Log in as a free-tier client created in Section 2.1.
 
 ### 4.1 Dashboard `/portal/dashboard`
-- [ ] Shows correct plan tier badge
-- [ ] Shows sessions used this month (should be 0)
-- [ ] Shows free trial expiry date
-- [ ] "Book a Session" button is present
-- [ ] If no upcoming bookings → "No upcoming sessions" state shown
+- [x] Shows correct plan tier badge
+- [x] Shows sessions used this month (should be 0)
+- [x] Shows free trial expiry date
+- [x] "Book a Session" button is present
+- [x] If no upcoming bookings → "No upcoming sessions" state shown
 
 ### 4.2 Booking `/portal/book`
 
@@ -218,10 +218,10 @@ Log in as a free-tier client created in Section 2.1.
 5. Confirm the booking
 
 **Expected:**
-- [ ] Booking appears in dashboard "Upcoming Sessions"
-- [ ] Confirmation email sent to client
-- [ ] Confirmation email sent to coach
-- [ ] sessions_used_this_month incremented to 1
+- [x] Booking appears in dashboard "Upcoming Sessions"
+- [x] Confirmation email sent to client
+- [x] Confirmation email sent to coach
+- [x] sessions_used_this_month incremented to 1
 
 **DB check:**
 ```sql
@@ -235,26 +235,26 @@ ORDER BY b.created_at DESC LIMIT 1;
 
 ### 4.3 Booking Limit Enforcement
 Free tier allows 1 individual session. After booking once:
-- [ ] Try to book again → blocked with "session limit reached" nudge and upgrade prompt
-- [ ] Upgrade nudge shows "Starter Plan" and "Advantage Plan" options
+- [x] Try to book again → blocked with "session limit reached" nudge and upgrade prompt
+- [x] Upgrade nudge shows "Starter Plan" and "Advantage Plan" options
 
 ### 4.4 Session History `/portal/history`
-- [ ] Upcoming session shows with correct date/time in client's timezone
-- [ ] Status badge shows "Confirmed"
-- [ ] After a session date passes, it moves to "Past Sessions"
+- [x] Upcoming session shows with correct date/time in client's timezone
+- [x] Status badge shows "Confirmed"
+- [x] After a session date passes, it moves to "Past Sessions"
 
 ### 4.5 Group Sessions `/portal/group-sessions`
 **Pre-condition:** Admin must have scheduled a group session (see Section 5.6).
-- [ ] Upcoming group session shows with date and Join link
-- [ ] Past sessions show with "Watch Recording" link (if recording URL set)
-- [ ] Attendance badge shows if admin/coach marked them attended
+- [x] Upcoming group session shows with date and Join link
+- [x] Past sessions show with "Watch Recording" link (if recording URL set)
+- [x] Attendance badge shows if admin/coach marked them attended
 
 ### 4.6 Profile `/portal/profile`
 1. Go to Profile → update First Name, Timezone
 2. Click Save
 
-- [ ] Success toast/message shown
-- [ ] Page reload reflects updated name
+- [x] Success toast/message shown
+- [x] Page reload reflects updated name
 
 **DB check:**
 ```sql
@@ -268,8 +268,8 @@ WHERE email = 'your-test-client@gmail.com';
 3. Submit
 
 **Expected:**
-- [ ] Success message shown
-- [ ] Testimonial does NOT appear on home page yet (needs admin approval)
+- [x] Success message shown
+- [x] Testimonial does NOT appear on home page yet (needs admin approval)
 
 **DB check:**
 ```sql
@@ -280,14 +280,14 @@ ORDER BY submitted_at DESC LIMIT 1;
 
 ### 4.8 Billing Page `/portal/billing`
 **Free tier client:**
-- [ ] Shows "Free" plan
-- [ ] Shows trial expiry date
-- [ ] Shows upgrade options (Starter / Advantage)
-- [ ] No "Manage Billing" button
+- [x] Shows "Free" plan
+- [x] Shows trial expiry date
+- [x] Shows upgrade options (Starter / Advantage)
+- [x] No "Manage Billing" button
 
 **Paid tier client (if Stripe live keys configured):**
-- [ ] Shows plan name
-- [ ] "Manage Billing" button opens Stripe Customer Portal
+- [ ] Shows plan name ← **SKIP: Stripe not yet configured**
+- [ ] "Manage Billing" button opens Stripe Customer Portal ← **SKIP: Stripe not yet configured**
 
 ---
 
@@ -296,8 +296,8 @@ ORDER BY submitted_at DESC LIMIT 1;
 Log in as `mjmfinancialcoaching@gmail.com` (or `markert.wla@gmail.com`).
 
 ### 5.1 Dashboard `/admin/dashboard`
-- [ ] Stat cards show: Total Clients, Active Coaches, Bookings This Month, Inactive Clients
-- [ ] Numbers match DB counts:
+- [x] Stat cards show: Total Clients, Active Coaches, Bookings This Month, Inactive Clients
+- [x] Numbers match DB counts:
 
 ```sql
 SELECT
@@ -309,11 +309,11 @@ SELECT
 ```
 
 ### 5.2 Clients `/admin/clients`
-- [ ] All registered clients appear in the list
-- [ ] Filter by client_type works (individual, couple, property_tenant, nonprofit_individual)
-- [ ] Plan tier badge shows correctly
-- [ ] Free trial expiry date is editable inline (click the date → date picker appears → change → blur to save)
-- [ ] "5d ago" last active timestamp shows
+- [x] All registered clients appear in the list
+- [x] Filter by client_type works (individual, couple, property_tenant, nonprofit_individual)
+- [x] Plan tier badge shows correctly
+- [x] Free trial expiry date is editable inline (click the date → date picker appears → change → blur to save)
+- [x] "5d ago" last active timestamp shows
 
 **Verify trial extension saves:**
 ```sql
@@ -327,18 +327,18 @@ SELECT email, free_trial_expires_at FROM profiles WHERE role = 'client';
 2. Fill in: Code (e.g. `TESTPM01`), Partner Type (property_management), Partner Name, Assigned Tier (bronze), Max Uses (10), Expiry Date (optional)
 3. Click Create
 
-- [ ] Code appears in the list
-- [ ] Status shows "Active"
+- [x] Code appears in the list
+- [x] Status shows "Active"
 
 **Validate the code works (public endpoint):**
 ```
 POST /api/codes/validate  body: { "code": "TESTPM01" }
 ```
-- [ ] Returns `{ valid: true, assigned_tier: "bronze" }`
+- [x] Returns `{ valid: true, assigned_tier: "bronze" }`
 
 **Revoke a code:**
-- [ ] Click revoke icon → code status changes to "Revoked"
-- [ ] Attempting to use the code at registration → error message
+- [x] Click revoke icon → code status changes to "Revoked"
+- [x] Attempting to use the code at registration → error message
 
 ### 5.4 Coaches `/admin/coaches`
 
@@ -348,9 +348,9 @@ POST /api/codes/validate  body: { "code": "TESTPM01" }
 3. Click **Invite Coach**
 
 **Expected:**
-- [ ] Coach appears in the list with "Active" status
-- [ ] Supabase sends an invite email to that address
-- [ ] DB has a row in `coaches` table and `profiles` with `role = 'coach'`
+- [x] Coach appears in the list with "Active" status
+- [x] Supabase sends an invite email to that address
+- [x] DB has a row in `coaches` table and `profiles` with `role = 'coach'`
 
 ```sql
 SELECT p.email, p.role, c.display_name, c.is_active
@@ -359,19 +359,19 @@ ORDER BY c.display_name;
 ```
 
 **Edit a coach:**
-- [ ] Click pencil icon → modal opens with current values
-- [ ] Change bio → Save → list updates
+- [x] Click pencil icon → modal opens with current values
+- [x] Change bio → Save → list updates
 
 **Deactivate a coach:**
-- [ ] Click power-off icon → confirmation modal
-- [ ] Confirm → coach shows "Inactive"
-- [ ] Inactive coach does NOT appear on `/about` page or in booking coach picker
-- [ ] Reactivate → coach reappears
+- [x] Click power-off icon → confirmation modal
+- [x] Confirm → coach shows "Inactive"
+- [x] Inactive coach does NOT appear on `/about` page or in booking coach picker
+- [x] Reactivate → coach reappears
 
 ### 5.5 Bookings `/admin/bookings`
-- [ ] All bookings appear in the table
-- [ ] Filter by status (confirmed / cancelled) works
-- [ ] Click **Cancel** on a booking → status changes to "cancelled"
+- [x] All bookings appear in the table
+- [x] Filter by status (confirmed / cancelled / flagged) works
+- [x] Click **Cancel** on a booking → status changes to "cancelled"
 
 **Verify session credit restored on cancel:**
 ```sql
@@ -386,18 +386,18 @@ SELECT sessions_used_this_month FROM profiles WHERE id = 'client-uuid';
 2. Pick a date, enter a Join link (e.g. Zoom URL), add coaches present
 3. Save
 
-- [ ] Session appears in list
-- [ ] Clients can now see it on `/portal/group-sessions`
+- [x] Session appears in list
+- [x] Clients can now see it on `/portal/group-sessions`
 
 **Add recording after session:**
-- [ ] Edit the session → paste recording URL → save
-- [ ] Clients see "Watch Recording" link on `/portal/group-sessions`
+- [x] Edit the session → paste recording URL → save
+- [x] Clients see "Watch Recording" link on `/portal/group-sessions`
 
 ### 5.7 Testimonials `/admin/testimonials`
-- [ ] Pending testimonials (submitted by clients in Section 4.7) appear here
-- [ ] Click **Approve** → testimonial status changes
-- [ ] Go to `/` home page → approved testimonial now appears in the Testimonials section
-- [ ] Click **Remove** → testimonial disappears from home page
+- [x] Pending testimonials (submitted by clients in Section 4.7) appear here
+- [x] Click **Approve** → testimonial status changes
+- [x] Go to `/` home page → approved testimonial now appears in the Testimonials section
+- [x] Click **Remove** → testimonial disappears from home page
 
 ### 5.8 PM Managers `/admin/managers`
 
@@ -406,9 +406,9 @@ SELECT sessions_used_this_month FROM profiles WHERE id = 'client-uuid';
 2. Enter email address
 3. Click Invite
 
-- [ ] Supabase sends invite email to PM
-- [ ] PM accepts invite → redirected to `/manager/dashboard`
-- [ ] PM appears in the managers list
+- [x] Supabase sends invite email to PM
+- [x] PM accepts invite → redirected to `/manager/dashboard`
+- [x] PM appears in the managers list
 
 ### 5.9 Partners `/admin/partners`
 - [ ] Add a partner (property management or nonprofit)

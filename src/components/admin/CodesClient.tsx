@@ -2,10 +2,17 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, XCircle } from 'lucide-react'
+import { Plus, XCircle, Trash2 } from 'lucide-react'
+
+type Partner = {
+  id: string
+  partner_name: string
+  partner_type: 'property_management' | 'nonprofit' | 'trial'
+}
 
 type PromoCode = {
   code: string
+  partner_id: string | null
   partner_type: 'property_management' | 'nonprofit' | 'trial'
   partner_name: string
   assigned_tier: 'free' | 'bronze' | 'silver'
@@ -50,7 +57,7 @@ const CODE_TYPE_COLORS: Record<string, string> = {
   group_comp:         'bg-blue-100 text-blue-700',
 }
 
-export default function CodesClient({ codes }: { codes: PromoCode[] }) {
+export default function CodesClient({ codes, partners }: { codes: PromoCode[]; partners: Partner[] }) {
   const router = useRouter()
   const [showAdd, setShowAdd]   = useState(false)
   const [revoking, setRevoking] = useState<string | null>(null)
@@ -58,18 +65,62 @@ export default function CodesClient({ codes }: { codes: PromoCode[] }) {
   const [error, setError]       = useState('')
   const [codeType, setCodeType] = useState('tier_assignment')
 
+  // Partner selection state for the create form
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string>('')
+  const [newPartnerName, setNewPartnerName]         = useState('')
+  const [newPartnerType, setNewPartnerType]         = useState('property_management')
+  const isNewPartner = selectedPartnerId === '__new__'
+
+  function resetForm() {
+    setCodeType('tier_assignment')
+    setSelectedPartnerId('')
+    setNewPartnerName('')
+    setNewPartnerType('property_management')
+    setError('')
+  }
+
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
     setLoading(true)
+
     const fd = new FormData(e.currentTarget)
+
+    let partnerId = selectedPartnerId
+
+    if (isNewPartner) {
+      if (!newPartnerName.trim()) {
+        setError('Partner name is required.')
+        setLoading(false)
+        return
+      }
+      // Create the partner first, then use the returned ID
+      const pRes = await fetch('/api/admin/partners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partner_name: newPartnerName.trim(), partner_type: newPartnerType }),
+      })
+      const pData = await pRes.json()
+      if (!pRes.ok) {
+        setError(pData.error ?? 'Failed to create partner')
+        setLoading(false)
+        return
+      }
+      partnerId = pData.id
+    }
+
+    if (!partnerId) {
+      setError('Please select or create a partner.')
+      setLoading(false)
+      return
+    }
+
     const res = await fetch('/api/admin/codes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code:             (fd.get('code') as string).toUpperCase().trim(),
-        partner_type:     fd.get('partner_type'),
-        partner_name:     fd.get('partner_name'),
+        partner_id:       partnerId,
         assigned_tier:    fd.get('assigned_tier'),
         code_type:        fd.get('code_type'),
         discount_percent: fd.get('discount_percent') ? Number(fd.get('discount_percent')) : null,
@@ -81,7 +132,7 @@ export default function CodesClient({ codes }: { codes: PromoCode[] }) {
     setLoading(false)
     if (!res.ok) { setError(data.error ?? 'Failed to create code'); return }
     setShowAdd(false)
-    setCodeType('tier_assignment')
+    resetForm()
     router.refresh()
   }
 
@@ -90,6 +141,13 @@ export default function CodesClient({ codes }: { codes: PromoCode[] }) {
     await fetch(`/api/admin/codes/${encodeURIComponent(code)}/revoke`, { method: 'PATCH' })
     setLoading(false)
     setRevoking(null)
+    router.refresh()
+  }
+
+  async function handleDelete(code: string) {
+    setLoading(true)
+    await fetch(`/api/admin/codes/${encodeURIComponent(code)}`, { method: 'DELETE' })
+    setLoading(false)
     router.refresh()
   }
 
@@ -107,25 +165,29 @@ export default function CodesClient({ codes }: { codes: PromoCode[] }) {
 
       <CodeTable
         codes={activeCodes}
+        partners={partners}
         title="Active Codes"
         emptyMessage="No active promo codes."
         onRevoke={setRevoking}
+        onDelete={null}
       />
 
       {inactiveCodes.length > 0 && (
         <div className="mt-6">
           <CodeTable
             codes={inactiveCodes}
+            partners={partners}
             title="Revoked / Expired"
             emptyMessage=""
             onRevoke={null}
+            onDelete={handleDelete}
           />
         </div>
       )}
 
       {/* Create modal */}
       {showAdd && (
-        <Modal title="Create Promo Code" onClose={() => { setShowAdd(false); setError(''); setCodeType('tier_assignment') }}>
+        <Modal title="Create Promo Code" onClose={() => { setShowAdd(false); resetForm() }}>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-tfs-navy mb-1">Code</label>
@@ -136,28 +198,56 @@ export default function CodesClient({ codes }: { codes: PromoCode[] }) {
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-tfs-teal"
               />
             </div>
+
+            {/* Partner selection */}
             <div>
-              <label className="block text-sm font-medium text-tfs-navy mb-1">Partner Name</label>
-              <input
-                name="partner_name"
+              <label className="block text-sm font-medium text-tfs-navy mb-1">Partner</label>
+              <select
+                value={selectedPartnerId}
+                onChange={e => setSelectedPartnerId(e.target.value)}
                 required
-                placeholder="Sunrise Properties"
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
-              />
+              >
+                <option value="">— Select a partner —</option>
+                {partners.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.partner_name} ({PARTNER_LABELS[p.partner_type] ?? p.partner_type})
+                  </option>
+                ))}
+                <option value="__new__">— Create new partner —</option>
+              </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-tfs-navy mb-1">Partner Type</label>
-                <select
-                  name="partner_type"
-                  required
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
-                >
-                  <option value="property_management">Property Management</option>
-                  <option value="nonprofit">Non-Profit</option>
-                  <option value="trial">Trial</option>
-                </select>
+
+            {/* Inline new-partner fields */}
+            {isNewPartner && (
+              <div className="border border-tfs-teal/30 bg-tfs-teal/5 rounded-lg p-4 space-y-3">
+                <p className="text-xs font-semibold text-tfs-teal uppercase tracking-wide">New Partner Details</p>
+                <div>
+                  <label className="block text-sm font-medium text-tfs-navy mb-1">Partner Name</label>
+                  <input
+                    value={newPartnerName}
+                    onChange={e => setNewPartnerName(e.target.value)}
+                    placeholder="Sunrise Properties LLC"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-tfs-navy mb-1">Partner Type</label>
+                  <select
+                    value={newPartnerType}
+                    onChange={e => setNewPartnerType(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                  >
+                    <option value="property_management">Property Management</option>
+                    <option value="nonprofit">Non-Profit</option>
+                    <option value="trial">Trial</option>
+                  </select>
+                </div>
+                <p className="text-xs text-tfs-slate">The partner will be created automatically when you save this code. You can add contact details later in the Partners section.</p>
               </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-tfs-navy mb-1">Code Type</label>
                 <select
@@ -173,9 +263,6 @@ export default function CodesClient({ codes }: { codes: PromoCode[] }) {
                   <option value="group_comp">Group Comp (no billing)</option>
                 </select>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-tfs-navy mb-1">Assigned Tier</label>
                 <select
@@ -188,21 +275,22 @@ export default function CodesClient({ codes }: { codes: PromoCode[] }) {
                   <option value="silver">Advantage</option>
                 </select>
               </div>
-              {codeType === 'affiliate_discount' && (
-                <div>
-                  <label className="block text-sm font-medium text-tfs-navy mb-1">Discount % (first month)</label>
-                  <input
-                    type="number"
-                    name="discount_percent"
-                    required
-                    min={1}
-                    max={100}
-                    defaultValue={10}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
-                  />
-                </div>
-              )}
             </div>
+
+            {codeType === 'affiliate_discount' && (
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Discount % (first month)</label>
+                <input
+                  type="number"
+                  name="discount_percent"
+                  required
+                  min={1}
+                  max={100}
+                  defaultValue={10}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                />
+              </div>
+            )}
 
             {codeType === 'affiliate_discount' && (
               <p className="text-xs text-tfs-slate bg-tfs-teal-light rounded-lg px-4 py-3">
@@ -215,13 +303,35 @@ export default function CodesClient({ codes }: { codes: PromoCode[] }) {
               </p>
             )}
 
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Max Uses</label>
+                <input
+                  type="number"
+                  name="max_uses"
+                  required
+                  min={1}
+                  defaultValue={10}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Expiry Date <span className="text-gray-400 font-normal">(optional)</span></label>
+                <input
+                  type="date"
+                  name="expires_at"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                />
+              </div>
+            </div>
+
             {error && (
               <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
             )}
 
             <div className="flex justify-end pt-2">
               <button type="submit" disabled={loading} className="btn-primary">
-                {loading ? 'Creating…' : 'Create Code'}
+                {loading ? (isNewPartner ? 'Creating partner & code…' : 'Creating…') : 'Create Code'}
               </button>
             </div>
           </form>
@@ -253,15 +363,21 @@ export default function CodesClient({ codes }: { codes: PromoCode[] }) {
 
 function CodeTable({
   codes,
+  partners,
   title,
   emptyMessage,
   onRevoke,
+  onDelete,
 }: {
   codes: PromoCode[]
+  partners: Partner[]
   title: string
   emptyMessage: string
   onRevoke: ((code: string) => void) | null
+  onDelete: ((code: string) => void) | null
 }) {
+  const partnerMap = Object.fromEntries(partners.map(p => [p.id, p]))
+
   return (
     <div className="card overflow-hidden">
       <h2 className="font-serif font-bold text-tfs-navy text-lg mb-4">{title}</h2>
@@ -278,51 +394,67 @@ function CodeTable({
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Tier</th>
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Uses</th>
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Expires</th>
-                {onRevoke && <th className="text-right py-2 font-medium text-tfs-slate">Actions</th>}
+                {(onRevoke || onDelete) && <th className="text-right py-2 font-medium text-tfs-slate">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {codes.map(c => (
-                <tr key={c.code} className={!c.is_active ? 'opacity-50' : ''}>
-                  <td className="py-2.5 pr-4 font-mono font-medium text-tfs-navy">{c.code}</td>
-                  <td className="py-2.5 pr-4 text-tfs-slate">
-                    <span>{c.partner_name}</span>
-                    <span className="ml-2 text-xs text-gray-400">({PARTNER_LABELS[c.partner_type]})</span>
-                  </td>
-                  <td className="py-2.5 pr-4">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${CODE_TYPE_COLORS[c.code_type ?? 'tier_assignment']}`}>
-                      {CODE_TYPE_LABELS[c.code_type ?? 'tier_assignment']}
-                    </span>
-                    {c.code_type === 'affiliate_discount' && c.discount_percent && (
-                      <span className="ml-1 text-xs text-tfs-teal font-semibold">{c.discount_percent}%</span>
-                    )}
-                  </td>
-                  <td className="py-2.5 pr-4">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TIER_COLORS[c.assigned_tier]}`}>
-                      {TIER_LABELS[c.assigned_tier]}
-                    </span>
-                  </td>
-                  <td className="py-2.5 pr-4 text-tfs-slate">
-                    {c.uses_count} / {c.max_uses}
-                  </td>
-                  <td className="py-2.5 pr-4 text-tfs-slate text-xs">
-                    {c.expires_at
-                      ? new Date(c.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                      : '—'}
-                  </td>
-                  {onRevoke && (
-                    <td className="py-2.5 text-right">
-                      <button
-                        onClick={() => onRevoke(c.code)}
-                        className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
-                        title="Revoke"
-                      >
-                        <XCircle size={15} />
-                      </button>
+              {codes.map(c => {
+                const partner = c.partner_id ? partnerMap[c.partner_id] : null
+                const displayName = partner?.partner_name ?? c.partner_name
+                const displayType = partner?.partner_type ?? c.partner_type
+                return (
+                  <tr key={c.code} className={!c.is_active ? 'opacity-50' : ''}>
+                    <td className="py-2.5 pr-4 font-mono font-medium text-tfs-navy">{c.code}</td>
+                    <td className="py-2.5 pr-4 text-tfs-slate">
+                      <span>{displayName}</span>
+                      <span className="ml-2 text-xs text-gray-400">({PARTNER_LABELS[displayType] ?? displayType})</span>
                     </td>
-                  )}
-                </tr>
-              ))}
+                    <td className="py-2.5 pr-4">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${CODE_TYPE_COLORS[c.code_type ?? 'tier_assignment']}`}>
+                        {CODE_TYPE_LABELS[c.code_type ?? 'tier_assignment']}
+                      </span>
+                      {c.code_type === 'affiliate_discount' && c.discount_percent && (
+                        <span className="ml-1 text-xs text-tfs-teal font-semibold">{c.discount_percent}%</span>
+                      )}
+                    </td>
+                    <td className="py-2.5 pr-4">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TIER_COLORS[c.assigned_tier]}`}>
+                        {TIER_LABELS[c.assigned_tier]}
+                      </span>
+                    </td>
+                    <td className="py-2.5 pr-4 text-tfs-slate">
+                      {c.uses_count} / {c.max_uses}
+                    </td>
+                    <td className="py-2.5 pr-4 text-tfs-slate text-xs">
+                      {c.expires_at
+                        ? new Date(c.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        : '—'}
+                    </td>
+                    {(onRevoke || onDelete) && (
+                      <td className="py-2.5 text-right flex items-center justify-end gap-1">
+                        {onRevoke && (
+                          <button
+                            onClick={() => onRevoke(c.code)}
+                            className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
+                            title="Revoke"
+                          >
+                            <XCircle size={15} />
+                          </button>
+                        )}
+                        {onDelete && (
+                          <button
+                            onClick={() => onDelete(c.code)}
+                            className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
+                            title="Delete permanently"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

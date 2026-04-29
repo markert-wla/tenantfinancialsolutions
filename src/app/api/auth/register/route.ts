@@ -66,7 +66,8 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceClient()
 
   // 1. Validate promo code server-side if provided
-  let effectiveTier = 'free'
+  // Seed effectiveTier from the form's direct tier selection; promo code overrides below.
+  let effectiveTier = (tier && ['free', 'bronze', 'silver'].includes(tier)) ? tier : 'free'
   let codeType = 'tier_assignment'
   let discountPercent: number | null = null
 
@@ -108,7 +109,7 @@ export async function POST(req: NextRequest) {
   })
 
   if (authErr || !authData.user) {
-    if (authErr?.message?.includes('already registered')) {
+    if (authErr?.message?.toLowerCase().includes('already')) {
       return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 })
     }
     return NextResponse.json({ error: authErr?.message ?? 'Registration failed' }, { status: 500 })

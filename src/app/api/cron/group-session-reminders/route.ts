@@ -18,23 +18,11 @@ export async function GET(req: NextRequest) {
 
   const { data: sessions } = await service
     .from('group_sessions')
-    .select('id, session_date, join_link')
+    .select('id, session_date, join_link, partner_ids')
     .eq('session_date', targetDate)
     .eq('reminder_sent', false)
 
   if (!sessions?.length) {
-    return NextResponse.json({ ok: true, sent: 0 })
-  }
-
-  // Get all active clients
-  const { data: clients } = await service
-    .from('profiles')
-    .select('email, first_name')
-    .eq('role', 'client')
-    .eq('is_active', true)
-    .neq('plan_tier', 'free')
-
-  if (!clients?.length) {
     return NextResponse.json({ ok: true, sent: 0 })
   }
 
@@ -46,7 +34,45 @@ export async function GET(req: NextRequest) {
       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC',
     })
 
-    // Send to each active client
+    // Determine which clients to notify
+    let clients: { email: string; first_name: string | null }[] | null = null
+
+    if (session.partner_ids && session.partner_ids.length > 0) {
+      // Targeted: only tenants whose promo code links to one of the partner groups
+      const { data: matchingCodes } = await service
+        .from('promo_codes')
+        .select('code')
+        .in('partner_id', session.partner_ids)
+
+      const codelist = matchingCodes?.map(c => c.code) ?? []
+
+      if (codelist.length > 0) {
+        const { data } = await service
+          .from('profiles')
+          .select('email, first_name')
+          .eq('role', 'client')
+          .eq('is_active', true)
+          .neq('plan_tier', 'free')
+          .in('promo_code_used', codelist)
+        clients = data
+      }
+    } else {
+      // Open to all active paid clients
+      const { data } = await service
+        .from('profiles')
+        .select('email, first_name')
+        .eq('role', 'client')
+        .eq('is_active', true)
+        .neq('plan_tier', 'free')
+      clients = data
+    }
+
+    if (!clients?.length) {
+      await service.from('group_sessions').update({ reminder_sent: true }).eq('id', session.id)
+      continue
+    }
+
+    // Send to each qualifying client
     for (const client of clients) {
       await sendEmail({
         to: client.email,

@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
     const { data: invite, error: inviteErr } = await service.auth.admin.inviteUserByEmail(email, {
       data: { role: 'property_manager' },
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
     })
 
     if (inviteErr || !invite.user) {

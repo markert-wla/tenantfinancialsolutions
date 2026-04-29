@@ -1,9 +1,16 @@
 'use client'
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+
+function roleToPath(role: string | undefined) {
+  if (role === 'admin')            return '/admin/dashboard'
+  if (role === 'coach')            return '/coach/dashboard'
+  if (role === 'property_manager') return '/manager/dashboard'
+  return '/portal/dashboard'
+}
 
 function LoginInner() {
   const router       = useRouter()
@@ -14,7 +21,26 @@ function LoginInner() {
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
 
-  const justRegistered = searchParams.get('registered') === '1'
+  const justRegistered  = searchParams.get('registered') === '1'
+  const inviteExpired   = searchParams.get('error') === 'invite-expired'
+
+  // Handle invite / magic-link flows: Supabase delivers the session via a
+  // hash fragment (#access_token=...) that the client SDK picks up silently.
+  // Once it fires onAuthStateChange we redirect to the correct dashboard.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .maybeSingle()
+        if (profile) router.push(roleToPath(profile.role))
+      }
+    })
+    return () => subscription.unsubscribe()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -33,10 +59,7 @@ function LoginInner() {
         .select('role')
         .eq('id', user.id)
         .single()
-      const role = profile?.role ?? 'client'
-      if (role === 'admin') router.push('/admin/dashboard')
-      else if (role === 'coach') router.push('/coach/dashboard')
-      else router.push('/portal/dashboard')
+      router.push(roleToPath(profile?.role))
     } else {
       router.push('/portal/dashboard')
     }
@@ -83,6 +106,12 @@ function LoginInner() {
           {justRegistered && (
             <p className="text-green-700 text-sm bg-green-50 border border-green-200 rounded-lg px-4 py-3">
               Account created! Sign in to access your portal.
+            </p>
+          )}
+
+          {inviteExpired && (
+            <p className="text-amber-700 text-sm bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+              That invite link has expired or already been used. Please contact your administrator for a new one.
             </p>
           )}
 

@@ -12,14 +12,20 @@ export default async function AdminCodesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: codes } = await supabase
-    .from('promo_codes')
-    .select('code, partner_type, partner_name, assigned_tier, code_type, discount_percent, max_uses, uses_count, is_active, expires_at, created_at')
-    .order('created_at', { ascending: false })
+  const [{ data: codes }, { data: partners }] = await Promise.all([
+    supabase
+      .from('promo_codes')
+      .select('code, partner_id, partner_type, partner_name, assigned_tier, code_type, discount_percent, max_uses, uses_count, is_active, expires_at, created_at')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('partners')
+      .select('id, partner_name, partner_type')
+      .order('partner_name', { ascending: true }),
+  ])
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <CodesClient codes={codes ?? []} />
+      <CodesClient codes={codes ?? []} partners={partners ?? []} />
     </div>
   )
 }

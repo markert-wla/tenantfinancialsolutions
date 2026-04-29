@@ -69,8 +69,9 @@ export async function GET(request: NextRequest) {
 
       const role = profile?.role ?? 'client'
       const redirectPath =
-        role === 'admin' ? '/admin/dashboard' :
-        role === 'coach' ? '/coach/dashboard' :
+        role === 'admin'            ? '/admin/dashboard' :
+        role === 'coach'            ? '/coach/dashboard' :
+        role === 'property_manager' ? '/manager/dashboard' :
         '/portal/dashboard'
 
       const response = NextResponse.redirect(`${origin}${redirectPath}`)
@@ -83,7 +84,7 @@ export async function GET(request: NextRequest) {
       return response
     }
 
-    console.error('[auth/callback] exchangeCodeForSession error:', error?.message)
+    console.error('[auth/callback] exchangeCodeForSession error:', error?.message, error?.status)
     return NextResponse.redirect(`${origin}/login?error=auth-callback`)
   }
 

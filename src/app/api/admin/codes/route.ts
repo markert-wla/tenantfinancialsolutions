@@ -11,8 +11,7 @@ export async function POST(req: NextRequest) {
 
   let body: {
     code: string
-    partner_type: string
-    partner_name: string
+    partner_id: string
     assigned_tier: string
     code_type: string
     discount_percent?: number | null
@@ -24,9 +23,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { code, partner_type, partner_name, assigned_tier, code_type, discount_percent, max_uses, expires_at } = body
+  const { code, partner_id, assigned_tier, code_type, discount_percent, max_uses, expires_at } = body
 
-  if (!code || !partner_type || !partner_name || !assigned_tier) {
+  if (!code || !partner_id || !assigned_tier) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
@@ -43,10 +42,23 @@ export async function POST(req: NextRequest) {
   }
 
   const service = createServiceClient()
+
+  // Look up partner to get canonical name and type
+  const { data: partner, error: partnerErr } = await service
+    .from('partners')
+    .select('partner_name, partner_type')
+    .eq('id', partner_id)
+    .single()
+
+  if (partnerErr || !partner) {
+    return NextResponse.json({ error: 'Partner not found' }, { status: 400 })
+  }
+
   const { error } = await service.from('promo_codes').insert({
     code:             code.toUpperCase().trim(),
-    partner_type,
-    partner_name,
+    partner_id,
+    partner_name:     partner.partner_name,
+    partner_type:     partner.partner_type,
     assigned_tier,
     code_type:        resolvedCodeType,
     discount_percent: resolvedCodeType === 'affiliate_discount' ? Number(discount_percent) : null,

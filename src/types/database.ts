@@ -144,6 +144,7 @@ export type Database = {
           created_at: string
           id: string
           join_link: string | null
+          partner_ids: string[] | null
           recording_url: string | null
           reminder_sent: boolean
           session_date: string
@@ -153,6 +154,7 @@ export type Database = {
           created_at?: string
           id?: string
           join_link?: string | null
+          partner_ids?: string[] | null
           recording_url?: string | null
           reminder_sent?: boolean
           session_date: string
@@ -162,6 +164,7 @@ export type Database = {
           created_at?: string
           id?: string
           join_link?: string | null
+          partner_ids?: string[] | null
           recording_url?: string | null
           reminder_sent?: boolean
           session_date?: string
@@ -307,11 +310,14 @@ export type Database = {
         Row: {
           assigned_tier: Database["public"]["Enums"]["plan_tier"]
           code: string
+          code_type: string | null
           created_at: string
           created_by: string | null
+          discount_percent: number | null
           expires_at: string | null
           is_active: boolean
           max_uses: number
+          partner_id: string | null
           partner_name: string
           partner_type: Database["public"]["Enums"]["partner_type"]
           uses_count: number
@@ -319,11 +325,14 @@ export type Database = {
         Insert: {
           assigned_tier: Database["public"]["Enums"]["plan_tier"]
           code: string
+          code_type?: string | null
           created_at?: string
           created_by?: string | null
+          discount_percent?: number | null
           expires_at?: string | null
           is_active?: boolean
           max_uses?: number
+          partner_id?: string | null
           partner_name: string
           partner_type: Database["public"]["Enums"]["partner_type"]
           uses_count?: number
@@ -331,11 +340,14 @@ export type Database = {
         Update: {
           assigned_tier?: Database["public"]["Enums"]["plan_tier"]
           code?: string
+          code_type?: string | null
           created_at?: string
           created_by?: string | null
+          discount_percent?: number | null
           expires_at?: string | null
           is_active?: boolean
           max_uses?: number
+          partner_id?: string | null
           partner_name?: string
           partner_type?: Database["public"]["Enums"]["partner_type"]
           uses_count?: number
@@ -346,6 +358,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_codes_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]

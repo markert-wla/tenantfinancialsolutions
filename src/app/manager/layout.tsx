@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { LayoutDashboard, Users, Tag, ClipboardList } from 'lucide-react'
+import { LayoutDashboard, Users, Tag, ClipboardList, UserCircle } from 'lucide-react'
 import SignOutButton from '@/components/portal/SignOutButton'
 
 export default async function ManagerLayout({ children }: { children: React.ReactNode }) {
@@ -36,6 +36,7 @@ export default async function ManagerLayout({ children }: { children: React.Reac
           <NavLink href="/manager/tenants"    icon={Users}           label="My Tenants" />
           <NavLink href="/manager/codes"      icon={Tag}             label="Promo Codes" />
           <NavLink href="/manager/attendance" icon={ClipboardList}   label="Attendance" />
+          <NavLink href="/manager/profile"    icon={UserCircle}      label="Profile" />
         </nav>
 
         <div className="px-3 py-4 border-t border-white/10">

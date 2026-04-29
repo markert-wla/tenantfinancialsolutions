@@ -19,14 +19,14 @@ export async function POST(req: NextRequest) {
   }
 
   const service = createServiceClient()
-  const { error } = await service.from('partners').insert({
+  const { data, error } = await service.from('partners').insert({
     partner_name:  body.partner_name,
     partner_type:  body.partner_type,
     contact_name:  body.contact_name  ?? null,
     contact_email: body.contact_email ?? null,
     model:         body.model         ?? null,
-  })
+  }).select('id').single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, id: data.id })
 }
