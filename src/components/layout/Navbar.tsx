@@ -80,7 +80,7 @@ export default function Navbar() {
       if (!session?.user) setRole(null)
     })
     return () => listener.subscription.unsubscribe()
-  }, [])
+  }, [supabase])
 
   const dashboardHref =
     role === 'admin' ? '/admin/dashboard' :
