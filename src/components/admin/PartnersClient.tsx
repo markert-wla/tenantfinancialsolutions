@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil } from 'lucide-react'
+import { Plus, Pencil, Trash2 } from 'lucide-react'
 
 type Partner = {
   id: string
@@ -32,6 +32,16 @@ export default function PartnersClient({ partners }: { partners: Partner[] }) {
   const [editP, setEditP]       = useState<Partner | null>(null)
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
+  const [deleting, setDeleting] = useState<string | null>(null)
+
+  async function handleDelete(id: string, name: string) {
+    if (!confirm(`Delete partner "${name}"? This cannot be undone.`)) return
+    setDeleting(id)
+    const res = await fetch(`/api/admin/partners/${id}`, { method: 'DELETE' })
+    setDeleting(null)
+    if (res.ok) router.refresh()
+    else alert('Failed to delete partner.')
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>, id?: string) {
     e.preventDefault()
@@ -98,13 +108,23 @@ export default function PartnersClient({ partners }: { partners: Partner[] }) {
                       {!p.contact_name && !p.contact_email && '—'}
                     </td>
                     <td className="py-3 text-right">
-                      <button
-                        onClick={() => setEditP(p)}
-                        className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
-                        title="Edit"
-                      >
-                        <Pencil size={15} />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => setEditP(p)}
+                          className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                          title="Edit"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id, p.partner_name)}
+                          disabled={deleting === p.id}
+                          className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+                          title="Delete"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
