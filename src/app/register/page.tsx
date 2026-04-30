@@ -41,7 +41,11 @@ function RegisterInner() {
   })
   const [codeStatus, setCodeStatus] = useState<'idle'|'checking'|'valid'|'invalid'>('idle')
   const [codeInfo, setCodeInfo]     = useState<any>(null)
-  const [error, setError]           = useState('')
+  const [error, setError]           = useState(
+    params.get('cancelled') === '1'
+      ? 'Payment was cancelled. You can try again or choose a free plan.'
+      : ''
+  )
   const [loading, setLoading]       = useState(false)
 
   function update(field: string, value: string) {
@@ -126,6 +130,11 @@ function RegisterInner() {
 
       if (signInErr) {
         router.push('/login?registered=1')
+        return
+      }
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
         return
       }
 
@@ -384,7 +393,11 @@ function RegisterInner() {
           )}
 
           <button type="submit" disabled={loading} className="btn-primary w-full text-base py-3">
-            {loading ? 'Creating account…' : 'Create Account'}
+            {loading
+              ? 'Creating account…'
+              : path === 'individual' && tier !== 'free'
+                ? 'Create Account & Continue to Payment'
+                : 'Create Account'}
           </button>
         </form>
 

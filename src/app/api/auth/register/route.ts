@@ -67,7 +67,6 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceClient()
 
   // 1. Validate promo code server-side if provided
-  // Seed effectiveTier from the form's direct tier selection; promo code overrides below.
   let effectiveTier = (tier && ['free', 'bronze', 'silver'].includes(tier)) ? tier : 'free'
   let codeType = 'tier_assignment'
   let discountPercent: number | null = null
@@ -86,8 +85,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Promo code has expired' }, { status: 400 })
     }
 
-    effectiveTier  = code.assigned_tier
-    codeType       = code.code_type ?? 'tier_assignment'
+    effectiveTier   = code.assigned_tier
+    codeType        = code.code_type ?? 'tier_assignment'
     discountPercent = code.discount_percent ?? null
 
     await supabase
@@ -95,6 +94,11 @@ export async function POST(req: NextRequest) {
       .update({ uses_count: code.uses_count + 1 })
       .eq('code', promoCode)
   }
+
+  // Determine whether this signup requires Stripe checkout.
+  // Affiliate discount codes bill normally (with coupon). All other promo codes grant
+  // tier access directly — no checkout. Free signups have no Stripe flow at all.
+  const billedTier = codeType === 'affiliate_discount' ? effectiveTier : (promoCode ? 'free' : (tier ?? 'free'))
 
   // 2. Create Supabase auth user
   const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
@@ -120,50 +124,64 @@ export async function POST(req: NextRequest) {
   const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase())
 
   // 3. Build profile update
+  // For paid checkouts (billedTier !== 'free'), set plan_tier to 'free' initially.
+  // The webhook updates it to the paid tier once payment is confirmed.
+  // Comp/tier_assignment codes grant the tier directly (billedTier === 'free') — keep effectiveTier.
   const profileUpdate: Record<string, any> = {
     first_name: firstName,
     last_name:  lastName,
     timezone,
-    plan_tier:  effectiveTier,
+    plan_tier:  billedTier !== 'free' ? 'free' : effectiveTier,
     ...(isAdmin && { role: 'admin' }),
   }
 
-  // Set client_type — default to 'individual' if not provided
   const resolvedClientType: ClientType = (clientType && VALID_CLIENT_TYPES.includes(clientType))
     ? clientType
     : 'individual'
   profileUpdate.client_type = resolvedClientType
 
-  // Set free trial window for free-tier signups
-  if (effectiveTier === 'free') {
+  // Set free trial window — applies to free tier and paid-pending-checkout (they're free until payment clears)
+  if (billedTier !== 'free' || effectiveTier === 'free') {
     const trialExpiry = new Date()
     trialExpiry.setDate(trialExpiry.getDate() + 30)
     profileUpdate.free_trial_expires_at = trialExpiry.toISOString()
   }
 
-  if (promoCode)         profileUpdate.promo_code_used      = promoCode
-  if (unitNumber)        profileUpdate.unit_number           = unitNumber
-  if (birthdayMonth)     profileUpdate.birthday_month        = birthdayMonth
-  if (partnerFirstName)  profileUpdate.partner_first_name    = partnerFirstName
-  if (partnerLastName)   profileUpdate.partner_last_name     = partnerLastName
-  if (anniversaryMonth)  profileUpdate.anniversary_month     = anniversaryMonth
+  if (promoCode)        profileUpdate.promo_code_used   = promoCode
+  if (unitNumber)       profileUpdate.unit_number        = unitNumber
+  if (birthdayMonth)    profileUpdate.birthday_month     = birthdayMonth
+  if (partnerFirstName) profileUpdate.partner_first_name = partnerFirstName
+  if (partnerLastName)  profileUpdate.partner_last_name  = partnerLastName
+  if (anniversaryMonth) profileUpdate.anniversary_month  = anniversaryMonth
 
   await supabase.from('profiles').update(profileUpdate).eq('id', userId)
 
-  // 4. Stripe subscription
-  // Affiliate discount codes: bill normally but apply a coupon for first month
-  // All other promo codes (comp, tier_assignment): no billing — access is granted via tier only
-  const billedTier = codeType === 'affiliate_discount' ? effectiveTier : (promoCode ? 'free' : (tier ?? 'free'))
+  // 4. Stripe — only for paid checkouts
+  let checkoutUrl: string | undefined
+
   if (billedTier !== 'free') {
     const priceId = PLAN_PRICE_IDS[billedTier]
     if (priceId) {
       try {
-        const stripe = getStripe()
+        const stripe   = getStripe()
+        const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+
         const customer = await stripe.customers.create({
           email,
           name: `${firstName} ${lastName}`,
           metadata: { supabase_user_id: userId },
         })
+
+        // Save customer ID now; subscription ID arrives via webhook after payment
+        const { error: custErr } = await supabase
+          .from('profiles')
+          .update({ stripe_customer_id: customer.id })
+          .eq('id', userId)
+        if (custErr) {
+          console.error('[Stripe] Customer ID save failed:', custErr.message)
+        } else {
+          console.log('[Stripe] Customer created:', customer.id, 'for user:', userId)
+        }
 
         let stripeCouponId: string | undefined
         if (codeType === 'affiliate_discount' && discountPercent) {
@@ -181,27 +199,24 @@ export async function POST(req: NextRequest) {
           stripeCouponId = couponId
         }
 
-        const subscription = await stripe.subscriptions.create({
+        const session = await stripe.checkout.sessions.create({
           customer: customer.id,
-          items: [{ price: priceId }],
-          payment_behavior: 'default_incomplete',
-          payment_settings: { save_default_payment_method: 'on_subscription' },
-          expand: ['latest_invoice.payment_intent'],
-          metadata: { supabase_user_id: userId, tier: billedTier },
+          mode: 'subscription',
+          line_items: [{ price: priceId, quantity: 1 }],
+          success_url: `${siteUrl}/portal/dashboard?welcome=1`,
+          cancel_url:  `${siteUrl}/register?cancelled=1`,
+          subscription_data: {
+            metadata: { supabase_user_id: userId, tier: billedTier },
+          },
           ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
         })
 
-        const { error: stripeProfileErr } = await supabase
-          .from('profiles')
-          .update({ stripe_customer_id: customer.id, stripe_subscription_id: subscription.id })
-          .eq('id', userId)
-        if (stripeProfileErr) {
-          console.error('[Stripe] Profile update failed:', stripeProfileErr.message, '| customer:', customer.id, '| user:', userId)
-        } else {
-          console.log('[Stripe] Profile updated — customer:', customer.id, 'sub:', subscription.id)
+        if (session.url) {
+          checkoutUrl = session.url
+          console.log('[Stripe] Checkout session created:', session.id, 'for user:', userId)
         }
       } catch (stripeErr: any) {
-        console.error('[Stripe] Subscription creation failed:', stripeErr.message)
+        console.error('[Stripe] Checkout session creation failed:', stripeErr.message)
       }
     }
   }
@@ -213,15 +228,20 @@ export async function POST(req: NextRequest) {
     subject: 'Welcome to Tenant Financial Solutions!',
     html: brandedEmail(`
       <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">Welcome, ${esc(firstName)}!</h1>
-      <p style="margin:0 0 16px;color:#6B7E8F;">Your account has been created with the <strong style="color:#1A2B4A;">${esc(tierDisplay)}</strong> plan.</p>
-      ${effectiveTier === 'free'
-        ? `<p style="margin:0 0 24px;color:#6B7E8F;">Your free Connection Session and group session access are ready — log in and book your first session.</p>`
-        : `<p style="margin:0 0 24px;color:#6B7E8F;">Your membership is active. Log in to schedule your coaching sessions and start your financial journey.</p>`
+      ${checkoutUrl
+        ? `<p style="margin:0 0 16px;color:#6B7E8F;">Your account has been created. Complete your payment below to activate your <strong style="color:#1A2B4A;">${esc(tierDisplay)}</strong> membership.</p>
+           <p style="margin:0 0 24px;color:#6B7E8F;">Once payment is processed, you&rsquo;ll have full access to schedule coaching sessions and join group sessions.</p>
+           ${emailButton(checkoutUrl, 'Complete Payment')}`
+        : `<p style="margin:0 0 16px;color:#6B7E8F;">Your account has been created with the <strong style="color:#1A2B4A;">${esc(tierDisplay)}</strong> plan.</p>
+           ${effectiveTier === 'free'
+             ? `<p style="margin:0 0 24px;color:#6B7E8F;">Your free Connection Session and group session access are ready &mdash; log in and book your first session.</p>`
+             : `<p style="margin:0 0 24px;color:#6B7E8F;">Your membership is active. Log in to schedule your coaching sessions and start your financial journey.</p>`
+           }
+           ${emailButton(`${process.env.NEXT_PUBLIC_SITE_URL}/portal/dashboard`, 'Go to My Portal')}`
       }
-      ${emailButton(`${process.env.NEXT_PUBLIC_SITE_URL}/portal/dashboard`, 'Go to My Portal')}
       <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">We&rsquo;re excited to be part of your financial journey.<br/>— The TFS Team</p>
     `),
   })
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, ...(checkoutUrl ? { checkoutUrl } : {}) })
 }

@@ -15,7 +15,7 @@ const TIER_LABEL: Record<string, string> = {
   silver: 'Advantage Plan',
 }
 
-export default async function PortalDashboard() {
+export default async function PortalDashboard({ searchParams }: { searchParams: { welcome?: string } }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -67,6 +67,15 @@ export default async function PortalDashboard() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
+      {searchParams.welcome === '1' && (
+        <div className="mb-6 flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-4">
+          <span className="text-green-600 text-xl leading-none mt-0.5">✓</span>
+          <div>
+            <p className="font-semibold text-green-800">Payment successful — welcome aboard!</p>
+            <p className="text-sm text-green-700 mt-0.5">Your plan is now active. Book your first coaching session whenever you&rsquo;re ready.</p>
+          </div>
+        </div>
+      )}
       <div className="mb-8">
         <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-1">
           Welcome back, {profile?.first_name ?? 'there'}!
