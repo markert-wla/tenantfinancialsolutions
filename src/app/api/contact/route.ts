@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { contactLimiter, checkRateLimit } from '@/lib/ratelimit'
 import { sendEmail, ADMIN_EMAIL } from '@/lib/resend'
+import { brandedEmail } from '@/lib/email-template'
 import { createServiceClient } from '@/lib/supabase/server'
 
 function esc(str: string): string {
@@ -57,17 +58,34 @@ export async function POST(req: NextRequest) {
   await sendEmail({
     to: ADMIN_EMAIL,
     subject: `[TFS Contact] ${inquiryLabel} — ${name}`,
-    html: `
-      <h2>New Contact Form Submission</h2>
-      <table style="border-collapse:collapse;width:100%">
-        <tr><td style="padding:8px;font-weight:bold">Name</td><td style="padding:8px">${esc(name)}</td></tr>
-        <tr><td style="padding:8px;font-weight:bold">Email</td><td style="padding:8px"><a href="mailto:${esc(email)}">${esc(email)}</a></td></tr>
-        <tr><td style="padding:8px;font-weight:bold">Phone</td><td style="padding:8px">${phone ? esc(phone) : 'Not provided'}</td></tr>
-        <tr><td style="padding:8px;font-weight:bold">Inquiry Type</td><td style="padding:8px">${esc(inquiryLabel)}</td></tr>
-        <tr><td style="padding:8px;font-weight:bold;vertical-align:top">Message</td><td style="padding:8px">${esc(message).replace(/\n/g, '<br>')}</td></tr>
+    html: brandedEmail(`
+      <h1 style="margin:0 0 24px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">New Contact Form Submission</h1>
+      <table cellpadding="0" cellspacing="0" style="width:100%;background:#F8FFFE;border:1px solid #D1EFE6;border-radius:8px;margin-bottom:24px;">
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #D1EFE6;">
+          <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Name</span><br>
+          <strong style="color:#1A2B4A;">${esc(name)}</strong>
+        </td></tr>
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #D1EFE6;">
+          <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Email</span><br>
+          <a href="mailto:${esc(email)}" style="color:#1D9E75;">${esc(email)}</a>
+        </td></tr>
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #D1EFE6;">
+          <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Phone</span><br>
+          <strong style="color:#1A2B4A;">${phone ? esc(phone) : 'Not provided'}</strong>
+        </td></tr>
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #D1EFE6;">
+          <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Inquiry Type</span><br>
+          <strong style="color:#1A2B4A;">${esc(inquiryLabel)}</strong>
+        </td></tr>
+        <tr><td style="padding:12px 16px;">
+          <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Message</span><br>
+          <p style="margin:8px 0 0;color:#1A2B4A;">${esc(message).replace(/\n/g, '<br>')}</p>
+        </td></tr>
       </table>
-      <p style="margin-top:16px;font-size:12px;color:#666">Manage this in the <a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin/contacts">Admin Contacts inbox</a>.</p>
-    `,
+      <p style="margin:0;font-size:13px;color:#6B7E8F;">
+        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/admin/dashboard" style="color:#1D9E75;">View in Admin Dashboard →</a>
+      </p>
+    `),
   })
 
   return NextResponse.json({ ok: true })

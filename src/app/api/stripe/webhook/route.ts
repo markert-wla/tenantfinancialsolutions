@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getStripe } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
+import { brandedEmail, emailButton } from '@/lib/email-template'
 import Stripe from 'stripe'
 
 // Raw body required for Stripe signature verification
@@ -58,13 +59,16 @@ export async function POST(req: NextRequest) {
         await sendEmail({
           to: profile.email,
           subject: 'Action needed: Payment failed for your TFS membership',
-          html: `
-            <p>Hi ${profile.first_name},</p>
-            <p>We were unable to process your recent payment for your Tenant Financial Solutions membership.</p>
-            <p>Please update your payment method to continue your coaching sessions:</p>
-            <p><a href="${process.env.NEXT_PUBLIC_SITE_URL}/portal/billing">Update Payment Method</a></p>
-            <p>If you have questions, reply to this email or contact us at tenantfinancialsolutions@gmail.com.</p>
-          `,
+          html: brandedEmail(`
+            <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">Payment Failed</h1>
+            <p style="margin:0 0 24px;color:#6B7E8F;">Hi ${profile.first_name}, we were unable to process your recent payment for your Tenant Financial Solutions membership.</p>
+            <p style="margin:0 0 24px;color:#6B7E8F;">Please update your payment method to continue your coaching sessions.</p>
+            ${emailButton(`${process.env.NEXT_PUBLIC_SITE_URL}/portal/billing`, 'Update Payment Method')}
+            <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">
+              If you have questions, reply to this email or contact us at
+              <a href="mailto:tenantfinancialsolutions@gmail.com" style="color:#1D9E75;">tenantfinancialsolutions@gmail.com</a>.
+            </p>
+          `),
         })
       }
       break

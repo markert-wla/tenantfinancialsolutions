@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getStripe, PLAN_PRICE_IDS } from '@/lib/stripe'
 import { sendEmail } from '@/lib/resend'
+import { brandedEmail, emailButton } from '@/lib/email-template'
 import { authLimiter, checkRateLimit } from '@/lib/ratelimit'
 
 function esc(str: string): string {
@@ -190,10 +191,15 @@ export async function POST(req: NextRequest) {
           ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
         })
 
-        await supabase
+        const { error: stripeProfileErr } = await supabase
           .from('profiles')
           .update({ stripe_customer_id: customer.id, stripe_subscription_id: subscription.id })
           .eq('id', userId)
+        if (stripeProfileErr) {
+          console.error('[Stripe] Profile update failed:', stripeProfileErr.message, '| customer:', customer.id, '| user:', userId)
+        } else {
+          console.log('[Stripe] Profile updated — customer:', customer.id, 'sub:', subscription.id)
+        }
       } catch (stripeErr: any) {
         console.error('[Stripe] Subscription creation failed:', stripeErr.message)
       }
@@ -205,13 +211,16 @@ export async function POST(req: NextRequest) {
   await sendEmail({
     to: email,
     subject: 'Welcome to Tenant Financial Solutions!',
-    html: `
-      <h2>Welcome, ${esc(firstName)}!</h2>
-      <p>Your account has been created with the <strong>${esc(tierDisplay)}</strong> plan.</p>
-      ${effectiveTier === 'free' ? '<p>Your free Connection Session and group session access are ready to go — log in and book your first session!</p>' : ''}
-      <p>Log in to access your coaching portal: <a href="${process.env.NEXT_PUBLIC_SITE_URL}/login">Sign In</a></p>
-      <p>We&apos;re excited to be part of your financial journey.<br/>— The TFS Team</p>
-    `,
+    html: brandedEmail(`
+      <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">Welcome, ${esc(firstName)}!</h1>
+      <p style="margin:0 0 16px;color:#6B7E8F;">Your account has been created with the <strong style="color:#1A2B4A;">${esc(tierDisplay)}</strong> plan.</p>
+      ${effectiveTier === 'free'
+        ? `<p style="margin:0 0 24px;color:#6B7E8F;">Your free Connection Session and group session access are ready — log in and book your first session.</p>`
+        : `<p style="margin:0 0 24px;color:#6B7E8F;">Your membership is active. Log in to schedule your coaching sessions and start your financial journey.</p>`
+      }
+      ${emailButton(`${process.env.NEXT_PUBLIC_SITE_URL}/portal/dashboard`, 'Go to My Portal')}
+      <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">We&rsquo;re excited to be part of your financial journey.<br/>— The TFS Team</p>
+    `),
   })
 
   return NextResponse.json({ ok: true })

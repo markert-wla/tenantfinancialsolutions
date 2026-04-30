@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
+import { brandedEmail, emailButton } from '@/lib/email-template'
 
 function esc(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -196,32 +197,42 @@ export async function POST(req: NextRequest) {
     sendEmail({
       to: profile.email,
       subject: `Session Confirmed — ${displayTime}`,
-      html: `
-        <h2>Your ${esc(sessionLabel)} is Confirmed!</h2>
-        <p>Hi ${esc(profile.first_name)},</p>
-        <p>Your coaching session has been scheduled:</p>
-        <ul>
-          <li><strong>Coach:</strong> ${esc(coach.display_name)}</li>
-          <li><strong>Date &amp; Time:</strong> ${esc(displayTime)} (${esc(clientTz)})</li>
-        </ul>
-        <p>View your upcoming sessions in your <a href="${siteUrl}/portal/dashboard">portal</a>.</p>
-        <p>See you then!<br/>— The TFS Team</p>
-      `,
+      html: brandedEmail(`
+        <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">Your ${esc(sessionLabel)} is Confirmed!</h1>
+        <p style="margin:0 0 24px;color:#6B7E8F;">Hi ${esc(profile.first_name)}, your coaching session has been scheduled.</p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;background:#F8FFFE;border:1px solid #D1EFE6;border-radius:8px;margin-bottom:24px;">
+          <tr><td style="padding:12px 16px;border-bottom:1px solid #D1EFE6;">
+            <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Coach</span><br>
+            <strong style="color:#1A2B4A;">${esc(coach.display_name)}</strong>
+          </td></tr>
+          <tr><td style="padding:12px 16px;">
+            <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Date &amp; Time</span><br>
+            <strong style="color:#1A2B4A;">${esc(displayTime)} (${esc(clientTz)})</strong>
+          </td></tr>
+        </table>
+        ${emailButton(`${siteUrl}/portal/dashboard`, 'View My Sessions')}
+        <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">See you then! — The TFS Team</p>
+      `),
     }),
     sendEmail({
       to: coach.email,
       subject: `New Session Booked — ${displayTime}`,
-      html: `
-        <h2>New Session Booked</h2>
-        <p>Hi ${esc(coach.display_name)},</p>
-        <p>A new session has been booked with you:</p>
-        <ul>
-          <li><strong>Client:</strong> ${esc(profile.first_name)} ${esc(profile.last_name)}</li>
-          <li><strong>Date &amp; Time:</strong> ${esc(displayTime)} (${esc(clientTz)})</li>
-        </ul>
-        <p>View details in your <a href="${siteUrl}/coach/dashboard">coach dashboard</a>.</p>
-        <p>— The TFS Team</p>
-      `,
+      html: brandedEmail(`
+        <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">New Session Booked</h1>
+        <p style="margin:0 0 24px;color:#6B7E8F;">Hi ${esc(coach.display_name)}, a new session has been booked with you.</p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;background:#F8FFFE;border:1px solid #D1EFE6;border-radius:8px;margin-bottom:24px;">
+          <tr><td style="padding:12px 16px;border-bottom:1px solid #D1EFE6;">
+            <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Client</span><br>
+            <strong style="color:#1A2B4A;">${esc(profile.first_name)} ${esc(profile.last_name)}</strong>
+          </td></tr>
+          <tr><td style="padding:12px 16px;">
+            <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Date &amp; Time</span><br>
+            <strong style="color:#1A2B4A;">${esc(displayTime)} (${esc(clientTz)})</strong>
+          </td></tr>
+        </table>
+        ${emailButton(`${siteUrl}/coach/dashboard`, 'View Coach Dashboard')}
+        <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">— The TFS Team</p>
+      `),
     }),
   ])
 
