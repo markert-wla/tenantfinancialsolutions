@@ -112,13 +112,15 @@ SELECT client_type FROM profiles WHERE email = 'your-test-email@gmail.com';
 ### 2.3 Paid Tier Registration (Starter Plan — bronze)
 1. Go to `/register` → click **Individual**
 2. Select **Starter Plan ($50/mo)**
-3. Fill form, submit
+3. Fill form → click **Create Account & Continue to Payment**
+4. Enter test card `4242 4242 4242 4242`, any future expiry, any CVC → Pay
 
 **Expected:**
-- [x] Account created, redirected to portal dashboard
+- [x] Account created, redirected to Stripe Checkout for payment
+- [x] After payment → redirected to `/portal/dashboard` with green success banner
 - [x] Dashboard shows "Starter Plan"
-- [ ] Stripe customer created (check Stripe Dashboard → Customers) ← **SKIP: Stripe product catalog not yet configured**
-- [ ] Stripe subscription created with status `incomplete` (payment not yet collected) ← **SKIP: Stripe product catalog not yet configured**
+- [x] Stripe customer created (Stripe Dashboard → Customers)
+- [x] Stripe subscription created with status `active`
 
 **DB check:**
 ```sql
@@ -126,8 +128,6 @@ SELECT email, plan_tier, stripe_customer_id, stripe_subscription_id
 FROM profiles WHERE email = 'your-test-email@gmail.com';
 -- plan_tier = 'bronze', stripe_customer_id and stripe_subscription_id should be populated
 ```
-
-> **Note:** Stripe payment collection requires the client to complete checkout via Stripe. With test keys, no actual charge occurs. Subscription status will be `incomplete` until payment method is added.
 
 ### 2.4 Promo Code Registration (Property Tenant)
 
@@ -285,9 +285,11 @@ ORDER BY submitted_at DESC LIMIT 1;
 - [x] Shows upgrade options (Starter / Advantage)
 - [x] No "Manage Billing" button
 
-**Paid tier client (if Stripe live keys configured):**
-- [ ] Shows plan name ← **SKIP: Stripe not yet configured**
-- [ ] "Manage Billing" button opens Stripe Customer Portal ← **SKIP: Stripe not yet configured**
+**Paid tier client:**
+- [x] Shows plan name (Starter Plan / Advantage Plan)
+- [x] "Manage Billing" button opens Stripe Customer Portal
+- [x] Upgrade buttons (Starter / Advantage) visible and redirect to Stripe Checkout
+- [x] Upgrade completes → plan_tier updated, dashboard reflects new tier
 
 ---
 
@@ -543,8 +545,15 @@ All emails require `RESEND_API_KEY` and `RESEND_FROM_EMAIL` to be set.
 | Group session 3 days away | Reminder email | All active paid clients |
 
 **To test each:**
-- [ ] Perform the triggering action
-- [ ] Check the recipient's inbox within ~1 minute
+- [x] New individual registers → Welcome email ✓
+- [x] Client books a session → Booking confirmation to client ✓
+- [x] Client books a session → Booking notification to coach ✓
+- [x] Contact form submitted → Contact inquiry to admin ✓
+- [x] Admin adds a coach → Invite email ✓
+- [x] Admin invites a PM → Invite email ✓
+- [ ] Admin cancels a booking → Cancellation notice to client
+- [ ] Group session 3 days away → Reminder email to paid clients (test via cron — Section 10.2)
+- [ ] Payment fails → Payment failed email to client (trigger via Stripe test card `4000 0000 0000 0341`)
 - [ ] Check Resend Dashboard → Emails for delivery status and any bounces
 
 ---
@@ -568,13 +577,13 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 
 ### 9.2 Test Paid Registration Flow
 1. Register as a paid tier (Starter Plan — bronze)
-2. In Stripe Dashboard → Subscriptions → find the new subscription
-3. Use Stripe test card `4242 4242 4242 4242` to complete payment
+2. Complete payment via Stripe Checkout with test card `4242 4242 4242 4242`
 
 **Expected after successful payment:**
-- [ ] Subscription status changes to `active`
-- [ ] Webhook fires `customer.subscription.updated`
-- [ ] DB profile `plan_tier` remains `bronze`
+- [x] Subscription status `active`
+- [x] Webhook fires `customer.subscription.created` → 200 response
+- [x] DB profile `plan_tier` = `bronze`
+- [x] Redirected to `/portal/dashboard` with success banner
 
 ### 9.3 Billing Portal
 1. Log in as a paid client
@@ -583,8 +592,8 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 4. Client can update payment method, view invoices, cancel subscription
 
 **On cancellation:**
-- [ ] Webhook fires `customer.subscription.deleted`
-- [ ] DB profile `plan_tier` reverts to `free`
+- [x] Webhook fires `customer.subscription.deleted`
+- [x] DB profile `plan_tier` reverts to `free`
 
 ---
 
