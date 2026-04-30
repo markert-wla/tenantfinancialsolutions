@@ -4,8 +4,9 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BillingPortalButton from '@/components/portal/BillingPortalButton'
+import UpgradeButtons from '@/components/portal/UpgradeButtons'
 import Link from 'next/link'
-import { CreditCard, ArrowUpRight } from 'lucide-react'
+import { CreditCard } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Billing — Portal' }
 
@@ -64,24 +65,17 @@ export default async function PortalBillingPage() {
         )}
 
         {isPaid && hasStripe ? (
-          <BillingPortalButton />
+          <div className="space-y-3">
+            <BillingPortalButton />
+            {tier === 'bronze' && <UpgradeButtons currentTier={tier} />}
+          </div>
         ) : isPaid && !hasStripe ? (
           <p className="text-sm text-tfs-slate">
             Billing portal not yet linked. Contact{' '}
             <Link href="/contact" className="text-tfs-teal hover:underline">support</Link>.
           </p>
         ) : (
-          <div className="space-y-3">
-            <p className="text-sm text-tfs-slate">
-              Upgrade to a paid plan for more individual coaching sessions and priority scheduling.
-            </p>
-            <Link
-              href="/services"
-              className="inline-flex items-center gap-1.5 btn-primary text-sm py-2"
-            >
-              View Plans <ArrowUpRight size={14} />
-            </Link>
-          </div>
+          <UpgradeButtons currentTier={tier} />
         )}
       </div>
 
