@@ -31,8 +31,12 @@ export async function POST(req: NextRequest) {
       if (meta?.supabase_user_id) {
         await supabase
           .from('profiles')
-          .update({ plan_tier: tier, stripe_subscription_id: sub.id })
-          .eq('stripe_customer_id', (sub.customer as string))
+          .update({
+            plan_tier:              tier,
+            stripe_subscription_id: sub.id,
+            stripe_customer_id:     sub.customer as string,
+          })
+          .eq('id', meta.supabase_user_id)
       }
       break
     }

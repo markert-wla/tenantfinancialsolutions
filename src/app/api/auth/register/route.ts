@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
       first_name: firstName,
       last_name: lastName,
       role: ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'client',
-      plan_tier: effectiveTier,
+      plan_tier: billedTier !== 'free' ? 'free' : effectiveTier,
     },
   })
 
