@@ -413,12 +413,12 @@ SELECT sessions_used_this_month FROM profiles WHERE id = 'client-uuid';
 - [x] PM appears in the managers list
 
 ### 5.9 Partners `/admin/partners`
-- [ ] Add a partner (property management or nonprofit)
-- [ ] Partner appears in the list with type, contact name, contact email
+- [x] Add a partner (property management or nonprofit)
+- [x] Partner appears in the list with type, contact name, contact email
 
 ### 5.10 Settings `/admin/settings`
-- [ ] Update admin display name and timezone → save
-- [ ] Changes persist after page reload
+- [x] Update admin display name and timezone → save
+- [x] Changes persist after page reload
 
 ```sql
 SELECT first_name, last_name, timezone FROM profiles WHERE email = 'mjmfinancialcoaching@gmail.com';
@@ -433,8 +433,8 @@ SELECT first_name, last_name, timezone FROM profiles WHERE email = 'mjmfinancial
 Log in with the invited coach email.
 
 ### 6.1 Dashboard `/coach/dashboard`
-- [ ] Shows stat cards: Sessions This Month, Total Clients, Today's Sessions, Inactivity Alerts
-- [ ] Upcoming sessions list shows booked sessions
+- [x] Shows stat cards: Sessions This Month, Total Clients, Today's Sessions, Inactivity Alerts
+- [x] Upcoming sessions list shows booked sessions
 
 ### 6.2 Availability `/coach/availability`
 
