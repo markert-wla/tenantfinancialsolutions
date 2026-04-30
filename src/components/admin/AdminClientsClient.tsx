@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { Filter, CalendarClock, CheckSquare, Square, Loader2 } from 'lucide-react'
+import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2 } from 'lucide-react'
 
 const TIER_LABEL: Record<string, string> = {
   free: 'Free', bronze: 'Starter', silver: 'Advantage',
@@ -64,6 +64,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
   const [bulkDate, setBulkDate]       = useState('')
   const [bulkPM, setBulkPM]           = useState('')
   const [savingId, setSavingId]       = useState<string | null>(null)
+  const [deleting, setDeleting]       = useState<string | null>(null)
   const [bulkSaving, setBulkSaving]   = useState(false)
   const [toast, setToast]             = useState('')
 
@@ -113,6 +114,22 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
       showToast('Failed to update trial date')
     } finally {
       setSavingId(null)
+    }
+  }
+
+  // ── Delete client ────────────────────────────────────────────
+  async function deleteClient(id: string, name: string) {
+    if (!confirm(`Delete client "${name}"? This permanently removes their account and cannot be undone.`)) return
+    setDeleting(id)
+    try {
+      const res = await fetch(`/api/admin/clients/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      setClients(prev => prev.filter(c => c.id !== id))
+      showToast('Client deleted')
+    } catch {
+      showToast('Failed to delete client')
+    } finally {
+      setDeleting(null)
     }
   }
 
@@ -261,12 +278,13 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                 <th className="text-left px-4 py-3 font-semibold">Trial Expires</th>
                 <th className="text-left px-4 py-3 font-semibold">Sessions</th>
                 <th className="text-left px-4 py-3 font-semibold">Last Active</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-tfs-slate text-sm">
+                  <td colSpan={8} className="px-4 py-10 text-center text-tfs-slate text-sm">
                     No clients match the current filter.
                   </td>
                 </tr>
@@ -336,6 +354,16 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                         {flag === 'critical' && <span className="block text-red-400">120+ days</span>}
                         {flag === 'warning'  && <span className="block text-orange-400">90+ days</span>}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => deleteClient(c.id, `${c.first_name} ${c.last_name}`.trim() || c.email)}
+                        disabled={deleting === c.id}
+                        className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+                        title="Delete client"
+                      >
+                        {deleting === c.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                      </button>
                     </td>
                   </tr>
                 )
