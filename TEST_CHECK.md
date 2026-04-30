@@ -443,9 +443,9 @@ Log in with the invited coach email.
 2. Set start time and end time (e.g. 9:00 AM – 5:00 PM)
 3. Click Add
 
-- [ ] Slot appears in the availability list
-- [ ] Repeat for several days
-- [ ] Go to a CLIENT account → `/portal/book` → coach's slots now appear as bookable
+- [x] Slot appears in the availability list
+- [x] Repeat for several days
+- [x] Go to a CLIENT account → `/portal/book` → coach's slots now appear as bookable
 
 **DB check:**
 ```sql
@@ -454,8 +454,8 @@ FROM availability WHERE coach_id = 'your-coach-uuid';
 ```
 
 **Remove availability:**
-- [ ] Delete a slot → it disappears
-- [ ] Client booking page no longer shows those slots
+- [x] Delete a slot → it disappears
+- [x] Client booking page no longer shows those slots
 
 ### 6.3 Clients `/coach/clients`
 - [ ] Lists all clients who have non-cancelled bookings with this coach
