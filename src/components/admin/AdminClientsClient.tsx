@@ -1,6 +1,6 @@
 'use client'
-import { useState, useMemo, useTransition } from 'react'
-import { Users, Filter, CalendarClock, CheckSquare, Square, Loader2 } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Filter, CalendarClock, CheckSquare, Square, Loader2 } from 'lucide-react'
 
 const TIER_LABEL: Record<string, string> = {
   free: 'Free', bronze: 'Starter', silver: 'Advantage',
@@ -48,10 +48,6 @@ interface Props {
   pmCodes: PMCode[]
 }
 
-function fmtDate(iso: string) {
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    .format(new Date(iso))
-}
 function toInputDate(iso: string | null) {
   if (!iso) return ''
   return iso.split('T')[0]
@@ -67,7 +63,6 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
   const [selected, setSelected]       = useState<Set<string>>(new Set())
   const [bulkDate, setBulkDate]       = useState('')
   const [bulkPM, setBulkPM]           = useState('')
-  const [isPending, startTransition]  = useTransition()
   const [savingId, setSavingId]       = useState<string | null>(null)
   const [bulkSaving, setBulkSaving]   = useState(false)
   const [toast, setToast]             = useState('')

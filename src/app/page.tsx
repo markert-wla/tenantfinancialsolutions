@@ -358,7 +358,7 @@ export default async function HomePage({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {testimonials.map((t: any) => (
                 <div key={t.id} className="card">
-                  <p className="text-tfs-slate italic mb-4 leading-relaxed">"{t.quote}"</p>
+                  <p className="text-tfs-slate italic mb-4 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-tfs-navy text-sm">{t.client_name}</p>
                     {t.plan_tier && (

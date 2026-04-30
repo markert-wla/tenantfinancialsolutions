@@ -234,7 +234,7 @@ export default function ServicesPage() {
           </div>
           <div className="text-white/80 text-lg mb-8 max-w-3xl space-y-3">
             <p>
-              Money stress doesn't have to define your tenants' lives. With{' '}
+              Money stress doesn&apos;t have to define your tenants&apos; lives. With{' '}
               <strong className="text-white">one-on-one coaching</strong>, they gain clarity, confidence, and control.
             </p>
             <p>

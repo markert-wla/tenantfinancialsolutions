@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { CalendarCheck, Users, AlertTriangle, Clock, Bell, MessageSquare } from 'lucide-react'
+import { CalendarCheck, Users, AlertTriangle, Clock, Bell } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Coach Dashboard' }

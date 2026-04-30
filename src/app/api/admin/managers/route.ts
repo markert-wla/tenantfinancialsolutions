@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       .from('profiles').select('role').eq('id', user.id).single()
     if (actor?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-    const { email, first_name, last_name, company_name } = await req.json()
+    const { email, first_name, last_name } = await req.json()
     if (!email || !first_name || !last_name) {
       return NextResponse.json({ error: 'Email, first name, and last name are required' }, { status: 400 })
     }
@@ -63,7 +63,7 @@ export async function GET() {
       .order('last_name')
 
     return NextResponse.json(managers ?? [])
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
