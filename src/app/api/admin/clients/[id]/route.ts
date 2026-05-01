@@ -10,7 +10,14 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   if (actor?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const service = createServiceClient()
+
+  // Clean up related records that would block deletion (NO ACTION FKs)
+  const { error: cleanupErr } = await service.rpc('delete_client_data', { target_user_id: params.id })
+  if (cleanupErr) return NextResponse.json({ error: cleanupErr.message }, { status: 500 })
+
+  // Delete the auth user — cascades to profiles, group_session_attendance
   const { error } = await service.auth.admin.deleteUser(params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
   return NextResponse.json({ ok: true })
 }
