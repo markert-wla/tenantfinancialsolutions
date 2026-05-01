@@ -110,6 +110,8 @@ export async function POST(req: NextRequest) {
       last_name: lastName,
       role: ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'client',
       plan_tier: billedTier !== 'free' ? 'free' : effectiveTier,
+      client_type: (clientType && VALID_CLIENT_TYPES.includes(clientType)) ? clientType : 'individual',
+      timezone: timezone || 'America/New_York',
     },
   })
 
