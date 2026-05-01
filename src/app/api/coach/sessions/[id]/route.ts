@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function PATCH(
   req: NextRequest,
@@ -59,30 +59,14 @@ export async function PATCH(
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
   }
 
-  const service = createServiceClient()
-  const { data: updated, error } = await service.from('bookings').update(update).eq('id', params.id).select('id')
+  // Use regular client for the update — coach UPDATE policy now allows this
+  const { error } = await supabase.from('bookings').update(update).eq('id', params.id)
   if (error) {
     console.error('[Sessions PATCH] Update failed:', error.message, error.details)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-  if (!updated?.length) {
-    console.error('[Sessions PATCH] No rows updated for booking:', params.id, 'update:', JSON.stringify(update))
-  }
-
-  // Restore session credit when cancelling a future session
-  if (update.status === 'cancelled') {
-    const { data: clientProfile } = await service
-      .from('profiles')
-      .select('sessions_used_this_month')
-      .eq('id', booking.client_id)
-      .single()
-    if (clientProfile) {
-      const restored = Math.max(0, (clientProfile.sessions_used_this_month ?? 0) - 1)
-      await service.from('profiles')
-        .update({ sessions_used_this_month: restored })
-        .eq('id', booking.client_id)
-    }
-  }
+  // Credit restoration on cancellation is handled by the DB trigger
+  // trg_restore_session_credit (SECURITY DEFINER, bypasses RLS)
 
   return NextResponse.json({ ok: true })
 }
