@@ -60,8 +60,14 @@ export async function PATCH(
   }
 
   const service = createServiceClient()
-  const { error } = await service.from('bookings').update(update).eq('id', params.id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const { data: updated, error } = await service.from('bookings').update(update).eq('id', params.id).select('id')
+  if (error) {
+    console.error('[Sessions PATCH] Update failed:', error.message, error.details)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+  if (!updated?.length) {
+    console.error('[Sessions PATCH] No rows updated for booking:', params.id, 'update:', JSON.stringify(update))
+  }
 
   // Restore session credit when cancelling a future session
   if (update.status === 'cancelled') {

@@ -60,7 +60,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
     }).format(new Date(iso))
   }
 
-  async function patch(id: string, payload: Record<string, unknown>) {
+  async function patch(id: string, payload: Record<string, unknown>, refresh = true) {
     setUpdating(id)
     setApiError('')
     const res = await fetch(`/api/coach/sessions/${id}`, {
@@ -71,7 +71,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
     setUpdating(null)
     if (res.ok) {
       setSessions(prev => prev.map(s => s.id === id ? { ...s, ...payload } : s))
-      router.refresh()
+      if (refresh) router.refresh()
     } else {
       const body = await res.json().catch(() => ({}))
       setApiError(body.error ?? `Request failed (${res.status})`)
@@ -79,7 +79,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
   }
 
   async function saveNote(id: string) {
-    await patch(id, { notes: noteText || null })
+    await patch(id, { notes: noteText || null }, false)
     setEditingNote(null)
   }
 
