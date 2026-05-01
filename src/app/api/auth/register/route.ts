@@ -154,7 +154,8 @@ export async function POST(req: NextRequest) {
   if (partnerLastName)  profileUpdate.partner_last_name  = partnerLastName
   if (anniversaryMonth) profileUpdate.anniversary_month  = anniversaryMonth
 
-  await supabase.from('profiles').update(profileUpdate).eq('id', userId)
+  const { error: profileErr } = await supabase.from('profiles').update(profileUpdate).eq('id', userId)
+  if (profileErr) console.error('[Register] Profile update failed:', profileErr.message, profileErr.details, profileErr.hint)
 
   // 4. Stripe — only for paid checkouts
   let checkoutUrl: string | undefined
