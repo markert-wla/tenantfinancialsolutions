@@ -19,7 +19,7 @@ export default async function AdminClientsPage() {
   const [{ data: clients }, { data: pmCodes }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, plan_tier, client_type, promo_code_used, free_trial_expires_at, sessions_used_this_month, last_active_at, is_active, created_at')
+      .select('id, first_name, last_name, email, plan_tier, client_type, promo_code_used, free_trial_expires_at, sessions_used_this_month, extra_sessions, last_active_at, is_active, created_at')
       .eq('role', 'client')
       .order('last_active_at', { ascending: true }),
 

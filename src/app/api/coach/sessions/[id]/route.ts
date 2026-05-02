@@ -65,7 +65,8 @@ export async function PATCH(
     if (new Date(booking.start_time_utc) < new Date()) {
       return NextResponse.json({ error: 'Cannot cancel a past session' }, { status: 400 })
     }
-    update.status = 'cancelled'
+    update.status       = 'cancelled'
+    update.cancelled_by = 'coach'
   }
 
   if (!Object.keys(update).length) {
@@ -96,7 +97,7 @@ export async function PATCH(
             <strong style="color:#1A2B4A;">Cancelled session:</strong> ${sessionTime}
           </p>
           <p style="margin:0 0 24px;color:#6B7E8F;">
-            Your session credit has been restored. Please log in to book a new time that works for you.
+            Please log in to book a new time that works for you or contact us if you have any questions.
           </p>
           ${emailButton(`${process.env.NEXT_PUBLIC_SITE_URL}/portal/dashboard`, 'Book a New Session')}
           <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">— The TFS Team</p>

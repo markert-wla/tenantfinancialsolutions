@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2 } from 'lucide-react'
+import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2, PlusCircle } from 'lucide-react'
 
 const TIER_LABEL: Record<string, string> = {
   free: 'Free', bronze: 'Starter', silver: 'Advantage',
@@ -33,6 +33,7 @@ interface Client {
   promo_code_used: string | null
   free_trial_expires_at: string | null
   sessions_used_this_month: number
+  extra_sessions: number
   last_active_at: string
   is_active: boolean
   created_at: string
@@ -57,16 +58,18 @@ function daysSince(iso: string) {
 }
 
 export default function AdminClientsClient({ clients: initial, pmCodes }: Props) {
-  const [clients, setClients]         = useState<Client[]>(initial)
-  const [typeFilter, setTypeFilter]   = useState<string>('all')
-  const [pmFilter, setPmFilter]       = useState<string>('all')
-  const [selected, setSelected]       = useState<Set<string>>(new Set())
-  const [bulkDate, setBulkDate]       = useState('')
-  const [bulkPM, setBulkPM]           = useState('')
-  const [savingId, setSavingId]       = useState<string | null>(null)
-  const [deleting, setDeleting]       = useState<string | null>(null)
-  const [bulkSaving, setBulkSaving]   = useState(false)
-  const [toast, setToast]             = useState('')
+  const [clients, setClients]           = useState<Client[]>(initial)
+  const [typeFilter, setTypeFilter]     = useState<string>('all')
+  const [pmFilter, setPmFilter]         = useState<string>('all')
+  const [selected, setSelected]         = useState<Set<string>>(new Set())
+  const [bulkDate, setBulkDate]         = useState('')
+  const [bulkPM, setBulkPM]             = useState('')
+  const [savingId, setSavingId]         = useState<string | null>(null)
+  const [deleting, setDeleting]         = useState<string | null>(null)
+  const [bulkSaving, setBulkSaving]     = useState(false)
+  const [grantingId, setGrantingId]     = useState<string | null>(null)
+  const [grantAmount, setGrantAmount]   = useState<Record<string, string>>({})
+  const [toast, setToast]               = useState('')
 
   function showToast(msg: string) {
     setToast(msg)
@@ -174,6 +177,31 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
     }
   }
 
+  // ── Grant extra session ──────────────────────────────────
+  async function grantSession(clientId: string) {
+    const amount = parseInt(grantAmount[clientId] ?? '1', 10)
+    if (isNaN(amount) || amount <= 0) return
+    setGrantingId(clientId)
+    try {
+      const res = await fetch('/api/admin/clients/extra-sessions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId, amount }),
+      })
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setClients(prev => prev.map(c =>
+        c.id === clientId ? { ...c, extra_sessions: data.extra_sessions } : c
+      ))
+      setGrantAmount(prev => ({ ...prev, [clientId]: '1' }))
+      showToast(`${amount} extra session${amount !== 1 ? 's' : ''} granted`)
+    } catch {
+      showToast('Failed to grant session')
+    } finally {
+      setGrantingId(null)
+    }
+  }
+
   const allSelected = filtered.length > 0 && selected.size === filtered.length
 
   return (
@@ -277,6 +305,8 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                 <th className="text-left px-4 py-3 font-semibold">Plan</th>
                 <th className="text-left px-4 py-3 font-semibold">Trial Expires</th>
                 <th className="text-left px-4 py-3 font-semibold">Sessions</th>
+                <th className="text-left px-4 py-3 font-semibold">Extra</th>
+                <th className="text-left px-4 py-3 font-semibold">Grant Session</th>
                 <th className="text-left px-4 py-3 font-semibold">Last Active</th>
                 <th className="px-4 py-3" />
               </tr>
@@ -284,7 +314,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
             <tbody className="divide-y divide-gray-50">
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-tfs-slate text-sm">
+                  <td colSpan={10} className="px-4 py-10 text-center text-tfs-slate text-sm">
                     No clients match the current filter.
                   </td>
                 </tr>
@@ -344,6 +374,38 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                       )}
                     </td>
                     <td className="px-4 py-3 text-tfs-slate text-center">{c.sessions_used_this_month}</td>
+                    <td className="px-4 py-3 text-center">
+                      {(c.extra_sessions ?? 0) > 0 ? (
+                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-tfs-teal/10 text-tfs-teal">
+                          +{c.extra_sessions}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          min="1"
+                          max="50"
+                          value={grantAmount[c.id] ?? '1'}
+                          onChange={e => setGrantAmount(prev => ({ ...prev, [c.id]: e.target.value }))}
+                          className="w-14 text-xs border border-gray-200 rounded px-2 py-1 text-center focus:outline-none focus:ring-1 focus:ring-tfs-teal"
+                        />
+                        <button
+                          onClick={() => grantSession(c.id)}
+                          disabled={grantingId === c.id}
+                          className="p-1 rounded-lg text-tfs-teal hover:bg-tfs-teal/10 transition-colors disabled:opacity-40"
+                          title="Grant extra sessions"
+                        >
+                          {grantingId === c.id
+                            ? <Loader2 size={15} className="animate-spin" />
+                            : <PlusCircle size={15} />
+                          }
+                        </button>
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium ${
                         flag === 'critical' ? 'text-red-600' :

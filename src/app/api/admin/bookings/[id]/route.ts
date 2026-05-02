@@ -39,9 +39,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
     if (booking.status === 'cancelled') return NextResponse.json({ ok: true })
 
-    const { error } = await service.from('bookings').update({ status: 'cancelled' }).eq('id', params.id)
+    const { error } = await service.from('bookings').update({ status: 'cancelled', cancelled_by: 'admin' }).eq('id', params.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    // Credit restoration handled by trg_restore_session_credit DB trigger
 
     const client = booking.client as any
     const coach  = booking.coach as any
@@ -63,7 +62,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
             <strong style="color:#1A2B4A;">Cancelled session:</strong> ${sessionTime}
           </p>
           <p style="margin:0 0 24px;color:#6B7E8F;">
-            Your session credit has been restored. Please log in to book a new time.
+            Please log in or contact us if you have any questions about rescheduling.
           </p>
           ${emailButton(`${siteUrl}/portal/dashboard`, 'Book a New Session')}
           <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">— The TFS Team</p>

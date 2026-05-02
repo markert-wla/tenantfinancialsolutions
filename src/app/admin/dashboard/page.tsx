@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Users, UserCheck, Calendar, AlertTriangle, Flag } from 'lucide-react'
+import { Users, UserCheck, Calendar, AlertTriangle, Flag, XCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Admin Dashboard' }
@@ -14,7 +14,7 @@ export default async function AdminDashboardPage() {
   if (!user) redirect('/login')
 
   const now = new Date()
-  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const firstOfMonth  = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString()
 
   const [
@@ -23,6 +23,7 @@ export default async function AdminDashboardPage() {
     { count: bookingCount },
     { data: inactiveClients },
     { data: flaggedSessions },
+    { data: coachCancellations },
   ] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'client').eq('is_active', true),
     supabase.from('coaches').select('*', { count: 'exact', head: true }).eq('is_active', true),
@@ -40,10 +41,28 @@ export default async function AdminDashboardPage() {
       .select('id, start_time_utc, flag_reason, profiles!bookings_client_id_fkey(first_name, last_name), coaches(display_name)')
       .eq('flagged', true)
       .order('start_time_utc', { ascending: false }),
+    supabase
+      .from('bookings')
+      .select(`
+        id, start_time_utc,
+        client:profiles!bookings_client_id_fkey(id, first_name, last_name, email),
+        coach:coaches!bookings_coach_id_fkey(display_name)
+      `)
+      .eq('cancelled_by', 'coach')
+      .order('start_time_utc', { ascending: false })
+      .limit(50),
   ])
 
   function daysSince(iso: string) {
     return Math.floor((now.getTime() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24))
+  }
+
+  const ET = 'America/New_York'
+  function fmtET(iso: string) {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: ET, month: 'short', day: 'numeric', year: 'numeric',
+      hour: 'numeric', minute: '2-digit', hour12: true,
+    }).format(new Date(iso))
   }
 
   return (
@@ -57,6 +76,58 @@ export default async function AdminDashboardPage() {
         <StatCard icon={Calendar}  label="Bookings This Month"  value={bookingCount ?? 0} color="gold" />
         <StatCard icon={Flag}      label="Flagged Sessions"     value={flaggedSessions?.length ?? 0} color={flaggedSessions?.length ? 'red' : 'gray'} href="/admin/bookings?filter=flagged" />
       </div>
+
+      {/* Coach cancellation alerts */}
+      {(coachCancellations?.length ?? 0) > 0 && (
+        <div className="card mb-6 border-l-4 border-l-orange-400">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <XCircle size={20} className="text-orange-500" />
+              <h2 className="font-serif font-bold text-tfs-navy text-xl">Coach Cancellations</h2>
+              <span className="text-sm text-tfs-slate">({coachCancellations?.length} total) — review and grant sessions as needed</span>
+            </div>
+            <Link href="/admin/clients" className="text-sm text-tfs-teal hover:underline">
+              Grant Sessions →
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Date (ET)</th>
+                  <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Client</th>
+                  <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Coach</th>
+                  <th className="text-left py-2 font-medium text-tfs-slate">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {(coachCancellations ?? []).map((b: any) => (
+                  <tr key={b.id}>
+                    <td className="py-2.5 pr-4 text-xs text-tfs-navy whitespace-nowrap">
+                      {fmtET(b.start_time_utc)}
+                    </td>
+                    <td className="py-2.5 pr-4 font-medium text-tfs-navy">
+                      {b.client?.first_name} {b.client?.last_name}
+                      <p className="text-xs font-normal text-tfs-slate">{b.client?.email}</p>
+                    </td>
+                    <td className="py-2.5 pr-4 text-tfs-slate">{b.coach?.display_name ?? '—'}</td>
+                    <td className="py-2.5">
+                      {b.client?.id && (
+                        <Link
+                          href="/admin/clients"
+                          className="text-xs text-tfs-teal hover:underline"
+                        >
+                          Grant session →
+                        </Link>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Flagged sessions */}
       {(flaggedSessions?.length ?? 0) > 0 && (
@@ -85,10 +156,7 @@ export default async function AdminDashboardPage() {
                 {(flaggedSessions ?? []).map((b: any) => (
                   <tr key={b.id}>
                     <td className="py-2.5 pr-4 text-xs text-tfs-navy whitespace-nowrap">
-                      {new Intl.DateTimeFormat('en-US', {
-                        timeZone: 'America/New_York', month: 'short', day: 'numeric',
-                        hour: 'numeric', minute: '2-digit', hour12: true,
-                      }).format(new Date(b.start_time_utc))}
+                      {fmtET(b.start_time_utc)}
                     </td>
                     <td className="py-2.5 pr-4 font-medium text-tfs-navy">
                       {b.profiles?.first_name} {b.profiles?.last_name}
