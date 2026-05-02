@@ -288,7 +288,7 @@ export default function ServicesPage() {
               href="/contact?type=workshops"
               className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white text-sm font-medium px-6 py-3 rounded-xl transition-all"
             >
-              Ask About Our In-Person Workshops <ArrowRight size={15} />
+              Ask About Our Workshops <ArrowRight size={15} />
             </Link>
             <p className="text-white/50 text-xs mt-2">Available in select regions — reach out to check availability near you.</p>
           </div>
@@ -331,6 +331,14 @@ export default function ServicesPage() {
               <Link href="/contact?type=nonprofit" className="btn-primary text-sm block text-center">
                 Partner with us
               </Link>
+              <div className="mt-4 text-center">
+                <Link
+                  href="/contact?type=workshops"
+                  className="inline-flex items-center gap-2 text-tfs-teal text-sm font-medium hover:underline"
+                >
+                  Ask About Our Workshops <ArrowRight size={13} />
+                </Link>
+              </div>
             </div>
           </div>
         </div>

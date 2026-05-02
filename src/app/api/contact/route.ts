@@ -12,7 +12,7 @@ const inquiryLabels: Record<string, string> = {
   individual:         'Individual Membership',
   'property-manager': 'Property Manager Partnership',
   nonprofit:          'Non-Profit Partnership',
-  workshops:          'In-Person Workshops',
+  workshops:          'Workshops',
   general:            'General Inquiry',
 }
 
