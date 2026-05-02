@@ -22,7 +22,7 @@ export default async function CoachProfilePage() {
 
   const { data: coach } = await supabase
     .from('coaches')
-    .select('display_name, bio, specialty, photo_url, timezone')
+    .select('display_name, bio, bio_short, specialty, photo_url, timezone')
     .eq('id', user.id)
     .single()
 

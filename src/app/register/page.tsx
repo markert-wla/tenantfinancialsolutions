@@ -31,6 +31,8 @@ function RegisterInner() {
     ? (params.get('tier') as string)
     : 'free'
 
+  const preselectedCoach = params.get('coach') ?? null
+
   const [path, setPath]         = useState<Path | null>(null)
   const [isCouple, setIsCouple] = useState(false)
   const [tier, setTier]         = useState(preselectedTier)
@@ -113,6 +115,7 @@ function RegisterInner() {
           unitNumber:         path === 'partner' ? form.unitNumber.trim() : null,
           birthdayMonth:      !isCouple && form.birthdayMonth ? parseInt(form.birthdayMonth) : null,
           anniversaryMonth:   isCouple && form.anniversaryMonth ? parseInt(form.anniversaryMonth) : null,
+          coachId:            preselectedCoach,
         }),
       })
 
@@ -157,6 +160,11 @@ function RegisterInner() {
           <div className="text-center mb-10">
             <h1 className="text-4xl font-serif font-bold text-white mb-3">Create Your Account</h1>
             <p className="text-white/70 text-lg">How are you joining Tenant Financial Solutions?</p>
+            {preselectedCoach && (
+              <p className="mt-3 text-tfs-gold text-sm font-medium">
+                You&apos;ll be paired with your selected coach after signing up.
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

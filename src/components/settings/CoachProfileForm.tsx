@@ -19,6 +19,7 @@ type Props = {
   coach: {
     display_name: string
     bio: string | null
+    bio_short: string | null
     specialty: string | null
     photo_url: string | null
     timezone: string
@@ -35,6 +36,7 @@ export default function CoachProfileForm({ authEmail, userId, profile, coach }: 
     contact_email: profile.contact_email ?? '',
     display_name:  coach.display_name,
     bio:           coach.bio ?? '',
+    bio_short:     coach.bio_short ?? '',
     specialty:     coach.specialty ?? '',
     photo_url:     coach.photo_url ?? '',
     timezone:      coach.timezone || profile.timezone,
@@ -64,6 +66,7 @@ export default function CoachProfileForm({ authEmail, userId, profile, coach }: 
         contact_email: form.contact_email.trim() || null,
         display_name:  form.display_name.trim(),
         bio:           form.bio.trim() || null,
+        bio_short:     form.bio_short.trim() || null,
         specialty:     form.specialty.trim() || null,
         photo_url:     form.photo_url.trim() || null,
         timezone:      form.timezone,
@@ -152,12 +155,28 @@ export default function CoachProfileForm({ authEmail, userId, profile, coach }: 
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-tfs-slate mb-1">Bio <span className="font-normal">(optional)</span></label>
+            <label className="block text-xs font-medium text-tfs-slate mb-1">
+              Short Summary <span className="font-normal">(optional — shown on coach cards)</span>
+            </label>
+            <textarea
+              value={form.bio_short}
+              onChange={e => set('bio_short', e.target.value.slice(0, 200))}
+              rows={2}
+              maxLength={200}
+              placeholder="One or two sentences that capture your coaching style and focus area."
+              className={INPUT + ' resize-none'}
+            />
+            <p className="text-xs text-tfs-slate mt-1 text-right">{form.bio_short.length}/200</p>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-tfs-slate mb-1">
+              Full Bio <span className="font-normal">(optional — shown when clients click your card)</span>
+            </label>
             <textarea
               value={form.bio}
               onChange={e => set('bio', e.target.value)}
-              rows={4}
-              placeholder="A short bio clients will see on the About page and when booking."
+              rows={5}
+              placeholder="Your full background, approach, and what clients can expect working with you."
               className={INPUT + ' resize-y'}
             />
           </div>

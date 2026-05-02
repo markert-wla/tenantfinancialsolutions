@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import CoachCard from '@/components/public/CoachCard'
 
 export const metadata: Metadata = {
   title: 'About Us',
@@ -36,7 +37,7 @@ async function getCoaches() {
     const supabase = createClient()
     const { data } = await supabase
       .from('coaches')
-      .select('id, display_name, photo_url, bio, specialty, timezone')
+      .select('id, display_name, photo_url, bio, bio_short, specialty')
       .eq('is_active', true)
     return data ?? []
   } catch {
@@ -153,33 +154,7 @@ export default async function AboutPage() {
             {coaches.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {coaches.map((coach: any) => (
-                  <div key={coach.id} className="rounded-xl border border-gray-200 bg-white p-6 text-center hover:shadow-md transition-shadow">
-                    <div className="w-20 h-20 rounded-full bg-tfs-teal/20 mx-auto mb-3 overflow-hidden">
-                      {coach.photo_url ? (
-                        <Image
-                          src={coach.photo_url}
-                          alt={coach.display_name}
-                          width={80}
-                          height={80}
-                          sizes="80px"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-2xl font-bold text-tfs-teal font-serif">
-                            {coach.display_name?.charAt(0) ?? '?'}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="font-bold text-tfs-navy text-lg mb-1 font-serif">{coach.display_name}</h3>
-                    {coach.specialty && (
-                      <p className="text-tfs-teal text-sm font-medium mb-2">{coach.specialty}</p>
-                    )}
-                    {coach.bio && (
-                      <p className="text-gray-600 text-sm leading-relaxed">{coach.bio}</p>
-                    )}
-                  </div>
+                  <CoachCard key={coach.id} coach={coach} />
                 ))}
               </div>
             ) : (

@@ -45,6 +45,7 @@ export async function PATCH(req: NextRequest) {
 
   if (typeof body.display_name === 'string') coachUpdate.display_name = body.display_name.trim().slice(0, 150)
   if (typeof body.bio          === 'string') coachUpdate.bio          = body.bio.trim().slice(0, 2000) || null
+  if (typeof body.bio_short    === 'string') coachUpdate.bio_short    = body.bio_short.trim().slice(0, 200) || null
   if (typeof body.specialty    === 'string') coachUpdate.specialty    = body.specialty.trim().slice(0, 200) || null
   if (typeof body.photo_url    === 'string') coachUpdate.photo_url    = body.photo_url.trim() || null
 
