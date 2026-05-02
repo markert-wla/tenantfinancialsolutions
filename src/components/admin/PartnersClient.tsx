@@ -162,7 +162,7 @@ export default function PartnersClient({ partners }: { partners: Partner[] }) {
               </div>
             </div>
             <Field label="Contact Name (optional)" name="contact_name" defaultValue={editP?.contact_name ?? ''} placeholder="Jane Smith" />
-            <Field label="Contact Email (optional)" name="contact_email" type="email" defaultValue={editP?.contact_email ?? ''} placeholder="jane@company.com" />
+            <Field label="Contact Email" name="contact_email" type="email" defaultValue={editP?.contact_email ?? ''} required placeholder="jane@company.com" />
 
             {error && (
               <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>

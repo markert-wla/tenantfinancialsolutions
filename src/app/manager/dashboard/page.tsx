@@ -15,15 +15,17 @@ export default async function ManagerDashboardPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
-    .from('profiles').select('first_name, role').eq('id', user.id).single()
+    .from('profiles').select('first_name, role, partner_id').eq('id', user.id).single()
   if (profile?.role !== 'property_manager' && profile?.role !== 'admin') redirect('/login')
 
-  // This PM's promo codes
-  const { data: codes } = await supabase
-    .from('promo_codes')
-    .select('code, uses_count, partner_name')
-    .eq('created_by', user.id)
-    .eq('is_active', true)
+  // This PM's promo codes via their partner record
+  const { data: codes } = profile?.partner_id
+    ? await supabase
+        .from('promo_codes')
+        .select('code, uses_count, partner_name')
+        .eq('partner_id', profile.partner_id)
+        .eq('is_active', true)
+    : { data: [] }
 
   const myCodes = (codes ?? []).map(c => c.code)
 

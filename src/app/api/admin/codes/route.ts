@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendEmail } from '@/lib/resend'
+import { brandedEmail } from '@/lib/email-template'
 
 export async function POST(req: NextRequest) {
   const supabase = createClient()
@@ -43,10 +45,10 @@ export async function POST(req: NextRequest) {
 
   const service = createServiceClient()
 
-  // Look up partner to get canonical name and type
+  // Look up partner to get canonical name, type, and contact email
   const { data: partner, error: partnerErr } = await service
     .from('partners')
-    .select('partner_name, partner_type')
+    .select('partner_name, partner_type, contact_email, contact_name')
     .eq('id', partner_id)
     .single()
 
@@ -72,6 +74,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'A code with that name already exists.' }, { status: 409 })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  // Email the partner contact with their new code
+  if (partner.contact_email) {
+    const siteUrl     = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tenantfinancialsolutions.com'
+    const firstName   = (partner.contact_name as string | null)?.split(' ')[0] ?? 'there'
+    const tierLabels: Record<string, string> = { free: 'Free', bronze: 'Starter Plan', silver: 'Advantage Plan' }
+    const tierLabel   = tierLabels[assigned_tier] ?? assigned_tier
+    const expiryLine  = expires_at
+      ? `<p style="margin:0 0 16px;color:#6B7E8F;"><strong style="color:#1A2B4A;">Expires:</strong> ${new Date(expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>`
+      : ''
+
+    sendEmail({
+      to:      partner.contact_email as string,
+      subject: `Your TFS Promo Code — ${code.toUpperCase().trim()}`,
+      html:    brandedEmail(`
+        <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:22px;color:#1A2B4A;">Your Promo Code is Ready</h1>
+        <p style="margin:0 0 16px;color:#6B7E8F;">Hi ${firstName}, a new promo code has been generated for <strong style="color:#1A2B4A;">${partner.partner_name}</strong>.</p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;background:#F8FFFE;border:1px solid #D1EFE6;border-radius:8px;margin-bottom:24px;">
+          <tr><td style="padding:16px 20px;border-bottom:1px solid #D1EFE6;">
+            <span style="font-size:11px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Promo Code</span><br>
+            <strong style="font-size:22px;letter-spacing:2px;color:#1A2B4A;">${code.toUpperCase().trim()}</strong>
+          </td></tr>
+          <tr><td style="padding:12px 20px;border-bottom:1px solid #D1EFE6;">
+            <span style="font-size:11px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Plan Unlocked</span><br>
+            <strong style="color:#1A2B4A;">${tierLabel}</strong>
+          </td></tr>
+          <tr><td style="padding:12px 20px;">
+            <span style="font-size:11px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Max Uses</span><br>
+            <strong style="color:#1A2B4A;">${max_uses}</strong>
+          </td></tr>
+        </table>
+        ${expiryLine}
+        <p style="margin:0 0 24px;color:#6B7E8F;">
+          Share this code with your residents or members. They'll enter it at registration on the TFS website to unlock their plan at no cost to them.
+        </p>
+        <a href="${siteUrl}/register" style="display:inline-block;background:#1D9E75;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;font-size:15px;">
+          Registration Page
+        </a>
+        <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">— The TFS Team</p>
+      `),
+    }).catch(err => console.error('[Promo code] Partner email failed:', err))
   }
 
   return NextResponse.json({ ok: true })

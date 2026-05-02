@@ -14,14 +14,16 @@ export default async function ManagerCodesPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
-    .from('profiles').select('role, first_name, last_name').eq('id', user.id).single()
+    .from('profiles').select('role, first_name, last_name, partner_id').eq('id', user.id).single()
   if (profile?.role !== 'property_manager' && profile?.role !== 'admin') redirect('/login')
 
-  const { data: codes } = await supabase
-    .from('promo_codes')
-    .select('code, partner_name, assigned_tier, uses_count, max_uses, expires_at, is_active, created_at')
-    .eq('created_by', user.id)
-    .order('created_at', { ascending: false })
+  const { data: codes } = profile?.partner_id
+    ? await supabase
+        .from('promo_codes')
+        .select('code, partner_name, assigned_tier, uses_count, max_uses, expires_at, is_active, created_at')
+        .eq('partner_id', profile.partner_id)
+        .order('created_at', { ascending: false })
+    : { data: [] }
 
   const partnerName = codes?.[0]?.partner_name
     ?? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')

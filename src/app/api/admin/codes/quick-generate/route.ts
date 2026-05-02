@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: profile } = await supabase
-      .from('profiles').select('role, first_name, last_name').eq('id', user.id).single()
+      .from('profiles').select('role, first_name, last_name, partner_id').eq('id', user.id).single()
     if (profile?.role !== 'admin' && profile?.role !== 'property_manager') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
@@ -38,12 +38,13 @@ export async function POST(req: Request) {
     const { error } = await supabase.from('promo_codes').insert({
       code,
       partner_name:   partnerName,
-      partner_type:   'property_manager',
+      partner_type:   'property_management',
       assigned_tier:  'free',
       max_uses:       9999,
       is_active:      true,
       expires_at:     expiresAt,
       created_by:     user.id,
+      partner_id:     profile?.partner_id ?? null,
       uses_count:     0,
     })
     if (error) throw error

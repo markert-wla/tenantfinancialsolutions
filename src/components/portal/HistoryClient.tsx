@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CalendarX, CalendarPlus, XCircle } from 'lucide-react'
+import { CalendarX, CalendarPlus, XCircle, Edit3, X } from 'lucide-react'
 
 type Booking = {
   id: string
   start_time_utc: string
   end_time_utc: string
   status: string
-  notes: string | null
+  client_notes: string | null
   coaches: { display_name: string } | null
 }
 
@@ -30,9 +30,14 @@ export default function HistoryClient({
   userTz: string
 }) {
   const router = useRouter()
-  const [cancelId, setCancelId] = useState<string | null>(null)
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState('')
+  const [bookings, setBookings]     = useState({ upcoming, past })
+  const [cancelId, setCancelId]     = useState<string | null>(null)
+  const [editingNote, setEditingNote] = useState<string | null>(null)
+  const [noteText, setNoteText]     = useState('')
+  const [savingNote, setSavingNote] = useState(false)
+  const [cancelLoading, setCancelLoading] = useState(false)
+  const [error, setError]           = useState('')
+  const [noteError, setNoteError]   = useState('')
 
   function fmt(iso: string) {
     return new Intl.DateTimeFormat('en-US', {
@@ -48,11 +53,38 @@ export default function HistoryClient({
     return { label: 'Confirmed', cls: STATUS_COLORS.confirmed }
   }
 
+  function openNote(b: Booking) {
+    setEditingNote(b.id)
+    setNoteText(b.client_notes ?? '')
+    setNoteError('')
+  }
+
+  async function saveNote(id: string) {
+    setSavingNote(true)
+    setNoteError('')
+    const res = await fetch(`/api/portal/bookings/${id}/notes`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_notes: noteText || null }),
+    })
+    setSavingNote(false)
+    if (res.ok) {
+      const saved = noteText.trim() || null
+      const update = (list: Booking[]) =>
+        list.map(b => b.id === id ? { ...b, client_notes: saved } : b)
+      setBookings(prev => ({ upcoming: update(prev.upcoming), past: update(prev.past) }))
+      setEditingNote(null)
+    } else {
+      const data = await res.json().catch(() => ({}))
+      setNoteError(data.error ?? 'Failed to save note.')
+    }
+  }
+
   async function handleCancel(id: string) {
-    setLoading(true)
+    setCancelLoading(true)
     setError('')
     const res = await fetch(`/api/portal/bookings/${id}/cancel`, { method: 'POST' })
-    setLoading(false)
+    setCancelLoading(false)
     if (res.ok) {
       setCancelId(null)
       router.refresh()
@@ -62,7 +94,91 @@ export default function HistoryClient({
     }
   }
 
-  const cancelTarget = upcoming.find(b => b.id === cancelId)
+  const cancelTarget = bookings.upcoming.find(b => b.id === cancelId)
+
+  function BookingCard({ b, dimmed = false }: { b: Booking; dimmed?: boolean }) {
+    const badge = statusLabel(b)
+    const isCancelled = b.status === 'cancelled'
+    const isFuture = new Date(b.start_time_utc) > new Date()
+    const isEditing = editingNote === b.id
+
+    return (
+      <div className={`card ${dimmed ? 'opacity-80' : ''}`}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-tfs-navy">
+              {b.coaches?.display_name ?? 'TFS Coach'}
+            </p>
+            <p className="text-sm text-tfs-slate mt-0.5">
+              {fmt(b.start_time_utc)}
+              <span className="text-xs ml-1 opacity-60">({userTz})</span>
+            </p>
+            {b.client_notes && !isEditing && (
+              <p className="text-sm text-tfs-slate mt-2 italic border-l-2 border-gray-200 pl-2">
+                {b.client_notes}
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <span className={`text-xs px-2 py-1 rounded-full font-medium ${badge.cls}`}>
+              {badge.label}
+            </span>
+            {!isCancelled && (
+              <button
+                onClick={() => openNote(b)}
+                className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                title={b.client_notes ? 'Edit your note' : 'Add a note'}
+              >
+                <Edit3 size={15} />
+              </button>
+            )}
+            {b.status === 'confirmed' && isFuture && (
+              <button
+                onClick={() => setCancelId(b.id)}
+                className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
+                title="Cancel this session"
+              >
+                <XCircle size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {isEditing && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <label className="block text-xs font-medium text-tfs-navy mb-1">My Notes</label>
+            <textarea
+              value={noteText}
+              onChange={e => setNoteText(e.target.value)}
+              rows={4}
+              placeholder="Jot down questions, action items, or anything you want to remember…"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none mb-2"
+              autoFocus
+            />
+            {noteError && (
+              <p className="text-xs text-red-600 mb-2">{noteError}</p>
+            )}
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setEditingNote(null)}
+                className="text-sm text-tfs-slate hover:text-tfs-navy px-3 py-1.5 rounded-lg border border-gray-200"
+              >
+                <X size={13} className="inline mr-1" />Cancel
+              </button>
+              <button
+                onClick={() => saveNote(b.id)}
+                disabled={savingNote}
+                className="btn-primary text-sm px-4 py-1.5"
+              >
+                {savingNote ? 'Saving…' : 'Save Note'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
@@ -75,43 +191,11 @@ export default function HistoryClient({
       </div>
 
       {/* Upcoming */}
-      {upcoming.length > 0 && (
+      {bookings.upcoming.length > 0 && (
         <section className="mb-10">
           <h2 className="text-lg font-semibold text-tfs-navy mb-4">Upcoming</h2>
           <div className="space-y-3">
-            {upcoming.map(b => {
-              const badge = statusLabel(b)
-              return (
-                <div key={b.id} className="card flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="font-semibold text-tfs-navy">
-                      {b.coaches?.display_name ?? 'TFS Coach'}
-                    </p>
-                    <p className="text-sm text-tfs-slate mt-0.5">
-                      {fmt(b.start_time_utc)}
-                      <span className="text-xs ml-1 opacity-60">({userTz})</span>
-                    </p>
-                    {b.notes && (
-                      <p className="text-sm text-tfs-slate mt-2 italic">&ldquo;{b.notes}&rdquo;</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${badge.cls}`}>
-                      {badge.label}
-                    </span>
-                    {b.status === 'confirmed' && new Date(b.start_time_utc) > new Date() && (
-                      <button
-                        onClick={() => setCancelId(b.id)}
-                        className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
-                        title="Cancel this session"
-                      >
-                        <XCircle size={16} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
+            {bookings.upcoming.map(b => <BookingCard key={b.id} b={b} />)}
           </div>
         </section>
       )}
@@ -119,11 +203,11 @@ export default function HistoryClient({
       {/* Past */}
       <section>
         <h2 className="text-lg font-semibold text-tfs-navy mb-4">Past Sessions</h2>
-        {past.length === 0 ? (
+        {bookings.past.length === 0 ? (
           <div className="card flex flex-col items-center py-12 text-center">
             <CalendarX className="text-tfs-slate/40 mb-3" size={40} />
             <p className="text-tfs-slate">No past sessions yet.</p>
-            {upcoming.length === 0 && (
+            {bookings.upcoming.length === 0 && (
               <Link href="/portal/book" className="btn-primary text-sm mt-4">
                 Book Your First Session
               </Link>
@@ -131,25 +215,7 @@ export default function HistoryClient({
           </div>
         ) : (
           <div className="space-y-3">
-            {past.map(b => {
-              const badge = statusLabel(b)
-              return (
-                <div key={b.id} className="card flex items-start justify-between gap-4 opacity-80">
-                  <div>
-                    <p className="font-semibold text-tfs-navy">
-                      {b.coaches?.display_name ?? 'TFS Coach'}
-                    </p>
-                    <p className="text-sm text-tfs-slate mt-0.5">{fmt(b.start_time_utc)}</p>
-                    {b.notes && (
-                      <p className="text-sm text-tfs-slate mt-2 italic">&ldquo;{b.notes}&rdquo;</p>
-                    )}
-                  </div>
-                  <span className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${badge.cls}`}>
-                    {badge.label}
-                  </span>
-                </div>
-              )
-            })}
+            {bookings.past.map(b => <BookingCard key={b.id} b={b} dimmed />)}
           </div>
         )}
       </section>
@@ -181,16 +247,16 @@ export default function HistoryClient({
                 <button
                   onClick={() => { setCancelId(null); setError('') }}
                   className="btn-outline"
-                  disabled={loading}
+                  disabled={cancelLoading}
                 >
                   Keep Session
                 </button>
                 <button
                   onClick={() => handleCancel(cancelId)}
-                  disabled={loading}
+                  disabled={cancelLoading}
                   className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
                 >
-                  {loading ? 'Cancelling…' : 'Cancel Session'}
+                  {cancelLoading ? 'Cancelling…' : 'Cancel Session'}
                 </button>
               </div>
             </div>

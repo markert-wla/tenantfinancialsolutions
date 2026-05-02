@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
   let effectiveTier = (tier && ['free', 'bronze', 'silver'].includes(tier)) ? tier : 'free'
   let codeType = 'tier_assignment'
   let discountPercent: number | null = null
+  let promoPartnerId: string | null = null
 
   if (promoCode) {
     const { data: code, error: codeErr } = await supabase
@@ -88,6 +89,7 @@ export async function POST(req: NextRequest) {
     effectiveTier   = code.assigned_tier
     codeType        = code.code_type ?? 'tier_assignment'
     discountPercent = code.discount_percent ?? null
+    promoPartnerId  = code.partner_id ?? null
 
     await supabase
       .from('promo_codes')
@@ -150,6 +152,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (promoCode)        profileUpdate.promo_code_used   = promoCode
+  if (promoPartnerId)   profileUpdate.partner_id         = promoPartnerId
   if (unitNumber)       profileUpdate.unit_number        = unitNumber
   if (birthdayMonth)    profileUpdate.birthday_month     = birthdayMonth
   if (partnerFirstName) profileUpdate.partner_first_name = partnerFirstName

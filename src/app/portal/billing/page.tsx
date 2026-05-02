@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BillingPortalButton from '@/components/portal/BillingPortalButton'
 import UpgradeButtons from '@/components/portal/UpgradeButtons'
+import ApplyPromoCode from '@/components/portal/ApplyPromoCode'
 import Link from 'next/link'
 import { CreditCard } from 'lucide-react'
 
@@ -23,13 +24,14 @@ export default async function PortalBillingPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan_tier, stripe_customer_id, free_trial_expires_at')
+    .select('plan_tier, stripe_customer_id, free_trial_expires_at, promo_code_used')
     .eq('id', user.id)
     .single()
 
-  const tier     = profile?.plan_tier ?? 'free'
-  const isPaid   = tier !== 'free'
-  const hasStripe = !!profile?.stripe_customer_id
+  const tier       = profile?.plan_tier ?? 'free'
+  const isPaid     = tier !== 'free'
+  const hasStripe  = !!profile?.stripe_customer_id
+  const isPromoUser = isPaid && !hasStripe && !!profile?.promo_code_used
 
   const trialExpiry = profile?.free_trial_expires_at
     ? new Date(profile.free_trial_expires_at)
@@ -69,6 +71,14 @@ export default async function PortalBillingPage() {
             <BillingPortalButton />
             {tier === 'bronze' && <UpgradeButtons currentTier={tier} />}
           </div>
+        ) : isPromoUser ? (
+          <div className="space-y-3">
+            <p className="text-sm text-tfs-slate">
+              Your <strong className="text-tfs-navy">{TIER_LABEL[tier] ?? tier}</strong> plan is provided
+              through your property manager at no charge.
+            </p>
+            {tier === 'bronze' && <UpgradeButtons currentTier={tier} />}
+          </div>
         ) : isPaid && !hasStripe ? (
           <p className="text-sm text-tfs-slate">
             Billing portal not yet linked. Contact{' '}
@@ -78,6 +88,8 @@ export default async function PortalBillingPage() {
           <UpgradeButtons currentTier={tier} />
         )}
       </div>
+
+      {!isPaid && <ApplyPromoCode />}
 
       {isPaid && (
         <p className="text-xs text-tfs-slate text-center">

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -23,7 +23,7 @@ export default function Navbar() {
   const [sessionVisible, setSessionVisible] = useState(false)
   const [user, setUser]               = useState<any>(null)
   const [role, setRole]               = useState<string | null>(null)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   // Navbar background — tracks any scroll
   useEffect(() => {
@@ -61,14 +61,15 @@ export default function Navbar() {
     }
   }, [pathname])
 
-  // Auth state
+  // Auth state — getSession() reads the local cookie without a network call,
+  // avoiding lock contention with concurrent server-side token refreshes.
   useEffect(() => {
     async function loadUser() {
-      const { data } = await supabase.auth.getUser()
-      setUser(data.user ?? null)
-      if (data.user) {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user ?? null)
+      if (session?.user) {
         const { data: profile } = await supabase
-          .from('profiles').select('role').eq('id', data.user.id).single()
+          .from('profiles').select('role').eq('id', session.user.id).single()
         setRole(profile?.role ?? 'client')
       } else {
         setRole(null)
@@ -77,7 +78,12 @@ export default function Navbar() {
     loadUser()
     const { data: listener } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
-      if (!session?.user) setRole(null)
+      if (session?.user) {
+        supabase.from('profiles').select('role').eq('id', session.user.id).single()
+          .then(({ data: profile }) => setRole(profile?.role ?? 'client'))
+      } else {
+        setRole(null)
+      }
     })
     return () => listener.subscription.unsubscribe()
   }, [supabase])

@@ -27,7 +27,7 @@ export default async function HistoryPage() {
       start_time_utc,
       end_time_utc,
       status,
-      notes,
+      client_notes,
       coaches ( display_name )
     `)
     .eq('client_id', user.id)
@@ -42,7 +42,7 @@ export default async function HistoryPage() {
     start_time_utc: b.start_time_utc,
     end_time_utc:   b.end_time_utc,
     status:         b.status,
-    notes:          b.notes ?? null,
+    client_notes:   b.client_notes ?? null,
     coaches:        b.coaches ?? null,
   })
 

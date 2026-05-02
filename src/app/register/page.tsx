@@ -138,7 +138,7 @@ function RegisterInner() {
         return
       }
 
-      router.push('/portal/dashboard')
+      window.location.href = '/portal/dashboard'
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {

@@ -13,12 +13,13 @@ export default async function ManagerAttendancePage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
+    .from('profiles').select('role, partner_id').eq('id', user.id).single()
   if (profile?.role !== 'property_manager' && profile?.role !== 'admin') redirect('/login')
 
   // PM's codes → tenant IDs
-  const { data: codes } = await supabase
-    .from('promo_codes').select('code').eq('created_by', user.id)
+  const { data: codes } = profile?.partner_id
+    ? await supabase.from('promo_codes').select('code').eq('partner_id', profile.partner_id)
+    : { data: [] }
   const myCodes = (codes ?? []).map(c => c.code)
 
   const tenantIds = myCodes.length > 0

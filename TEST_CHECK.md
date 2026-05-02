@@ -458,27 +458,27 @@ FROM availability WHERE coach_id = 'your-coach-uuid';
 - [x] Client booking page no longer shows those slots
 
 ### 6.3 Clients `/coach/clients`
-- [ ] Lists all clients who have non-cancelled bookings with this coach
-- [ ] Shows plan tier, sessions used this month, last active date
+- [x] Lists all clients who have non-cancelled bookings with this coach
+- [x] Shows plan tier, sessions used this month, last active date
 
 ### 6.4 Sessions `/coach/sessions`
 
 **After a client books a session:**
-- [ ] Session appears in "Upcoming" tab
-- [ ] After session date: session moves to "Past" tab
+- [x] Session appears in "Upcoming" tab
+- [x] After session date: session moves to "Past" tab
 
 **Mark as attended:**
-- [ ] Toggle attended → saves
-- [ ] Mark as no-show → saves
+- [x] Toggle attended → saves
+- [x] Mark as no-show → saves
 
 **Add a note:**
-- [ ] Click note field → type note text → blur to save
-- [ ] Note persists on page reload
+- [x] Click note field → type note text → blur to save
+- [x] Note persists on page reload
 
 **Cancel a session:**
-- [ ] Click Cancel → confirmation → session status changes to "cancelled"
-- [ ] Client receives cancellation email
-- [ ] Client's `sessions_used_this_month` decremented
+- [x] Click Cancel → confirmation → session status changes to "cancelled"
+- [x] Client receives cancellation email
+- [x] Client's `sessions_used_this_month` decremented
 
 ### 6.5 Group Attendance `/coach/attendance`
 **Pre-condition:** Admin has scheduled a group session (Section 5.6).
@@ -486,8 +486,8 @@ FROM availability WHERE coach_id = 'your-coach-uuid';
 1. Select the group session from the picker
 2. Mark individual clients as attended/not attended
 
-- [ ] Attendance saves correctly
-- [ ] Clients can see their attendance badge on `/portal/group-sessions`
+- [x] Attendance saves correctly
+- [x] Clients can see their attendance badge on `/portal/group-sessions`
 
 ```sql
 SELECT client_id, attended FROM group_session_attendance
@@ -495,8 +495,8 @@ WHERE session_id = 'your-session-uuid';
 ```
 
 ### 6.6 Coach Profile `/coach/profile`
-- [ ] Edit display name, bio, specialty, photo URL, timezone
-- [ ] Save → changes appear on `/about` page coach cards
+- [x] Edit display name, bio, specialty, photo URL, timezone
+- [x] Save → changes appear on `/about` page coach cards
 
 ```sql
 SELECT display_name, bio, specialty, photo_url, timezone
@@ -512,20 +512,20 @@ FROM coaches WHERE id = 'your-coach-uuid';
 Log in as the PM.
 
 ### 7.1 Dashboard `/manager/dashboard`
-- [ ] Stat cards show: Total Tenants, Active Codes, Sessions This Month, Attendance Rate
-- [ ] **Quick Generate Code** button → generates a new promo code → copies to clipboard
-- [ ] Active codes preview shows recently created codes
+- [x] Stat cards show: Total Tenants, Active Codes, Sessions This Month, Attendance Rate
+- [x] **Quick Generate Code** button → generates a new promo code → copies to clipboard
+- [x] Active codes preview shows recently created codes
 
 ### 7.2 My Tenants `/manager/tenants`
-- [ ] Lists tenants who registered using this PM's promo codes
-- [ ] Shows plan tier, sessions used, last active
+- [x] Lists tenants who registered using this PM's promo codes
+- [x] Shows plan tier, sessions used, last active
 
 ### 7.3 Promo Codes `/manager/codes`
-- [ ] PM's codes appear here
-- [ ] Quick generate creates a new `TFS-XXXXXX` code
+- [x] PM's codes appear here
+- [x] Quick generate creates a new `TFS-XXXXXX` code
 
 ### 7.4 Attendance `/manager/attendance`
-- [ ] Shows group session and 1-on-1 attendance for PM's tenants (last 90 days)
+- [x] Shows group session and 1-on-1 attendance for PM's tenants (last 90 days)
 
 ---
 
@@ -551,10 +551,10 @@ All emails require `RESEND_API_KEY` and `RESEND_FROM_EMAIL` to be set.
 - [x] Contact form submitted → Contact inquiry to admin ✓
 - [x] Admin adds a coach → Invite email ✓
 - [x] Admin invites a PM → Invite email ✓
-- [ ] Admin cancels a booking → Cancellation notice to client
-- [ ] Group session 3 days away → Reminder email to paid clients (test via cron — Section 10.2)
-- [ ] Payment fails → Payment failed email to client (trigger via Stripe test card `4000 0000 0000 0341`)
-- [ ] Check Resend Dashboard → Emails for delivery status and any bounces
+- [x] Admin cancels a booking → Cancellation notice to client
+- [x] Group session 3 days away → Reminder email to paid clients (test via cron — Section 10.2)
+- [x] Payment fails → Payment failed email to client (trigger via Stripe test card `4000 0000 0000 0341`)
+- [x] Check Resend Dashboard → Emails for delivery status and any bounces
 
 ---
 
@@ -609,7 +609,7 @@ curl -X POST https://your-domain.com/api/cron/reset-sessions \
 ```
 
 **Expected:**
-- [ ] All client `sessions_used_this_month` values reset to 0
+- [x] All client `sessions_used_this_month` values reset to 0
 
 ```sql
 SELECT email, sessions_used_this_month FROM profiles WHERE role = 'client';
@@ -619,22 +619,22 @@ SELECT email, sessions_used_this_month FROM profiles WHERE role = 'client';
 ### 10.2 Group Session Reminders
 The cron at `POST /api/cron/group-session-reminders` runs daily at 8am UTC.
 
-- [ ] Schedule a group session 3 days from today (Section 5.6)
-- [ ] Trigger the cron manually or wait for the scheduled run
-- [ ] All active paid clients should receive a reminder email
+- [x] Schedule a group session 3 days from today (Section 5.6)
+- [x] Trigger the cron manually or wait for the scheduled run
+- [x] All active paid clients should receive a reminder email
 
 ---
 
 ## 11 · Edge Cases & Security
 
-- [ ] Visiting `/admin/*` as a client → redirected to `/login`
-- [ ] Visiting `/coach/*` as a client → redirected to `/login`
-- [ ] Visiting `/portal/*` as an admin → redirected to `/login` (not their role)
-- [ ] Direct `POST /api/booking` without auth → 401 response
-- [ ] Direct `POST /api/admin/coaches` without admin auth → 403 response
-- [ ] Booking when `free_trial_expires_at` has passed → blocked with trial expired message
-- [ ] Promo code with `max_uses` reached → registration shows "invalid or fully used" error
-- [ ] Deactivated coach does not appear in booking coach picker
+- [x] Visiting `/admin/*` as a client → redirected to `/login`
+- [x] Visiting `/coach/*` as a client → redirected to `/login`
+- [x] Visiting `/portal/*` as an admin → redirected to `/login` (not their role)
+- [x] Direct `POST /api/booking` without auth → 401 response
+- [x] Direct `POST /api/admin/coaches` without admin auth → 403 response
+- [x] Booking when `free_trial_expires_at` has passed → blocked with trial expired message
+- [x] Promo code with `max_uses` reached → registration shows "invalid or fully used" error
+- [x] Deactivated coach does not appear in booking coach picker
 
 ---
 

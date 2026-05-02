@@ -38,8 +38,8 @@ export async function POST(req: NextRequest) {
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
     return NextResponse.json({ error: 'Invalid date format' }, { status: 400 })
   }
-  if (startDate <= new Date()) {
-    return NextResponse.json({ error: 'Cannot book a slot in the past' }, { status: 400 })
+  if (startDate.getTime() < Date.now() + 12 * 60 * 60_000) {
+    return NextResponse.json({ error: 'Sessions must be booked at least 12 hours in advance.' }, { status: 400 })
   }
   if (endDate.getTime() - startDate.getTime() !== 60 * 60_000) {
     return NextResponse.json({ error: 'Slot must be exactly 60 minutes' }, { status: 400 })
