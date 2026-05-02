@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   // --- Load client profile ---
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
-    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone, free_trial_expires_at')
+    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone, free_trial_expires_at, coach_id, extra_sessions')
     .eq('id', user.id)
     .single()
 
@@ -56,11 +56,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   }
 
-  const tier = profile.plan_tier ?? 'free'
-  const used = profile.sessions_used_this_month ?? 0
+  const tier          = profile.plan_tier ?? 'free'
+  const used          = profile.sessions_used_this_month ?? 0
+  const extraSessions = profile.extra_sessions ?? 0
 
   // --- Plan / free trial check ---
-  if (tier === 'free') {
+  // Extra purchased sessions bypass the normal plan limits.
+  if (extraSessions > 0) {
+    // Allow — will consume one extra session credit below.
+  } else if (tier === 'free') {
     const trialExpiry = profile.free_trial_expires_at
       ? new Date(profile.free_trial_expires_at)
       : null
@@ -170,10 +174,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create booking. Please try again.' }, { status: 500 })
   }
 
-  // --- Increment sessions_used_this_month ---
+  // --- Update session counters; save coach_id on first booking ---
   await service
     .from('profiles')
-    .update({ sessions_used_this_month: used + 1 })
+    .update({
+      sessions_used_this_month: used + 1,
+      ...(extraSessions > 0 ? { extra_sessions: extraSessions - 1 } : {}),
+      ...(!profile.coach_id ? { coach_id: coachId } : {}),
+    })
     .eq('id', user.id)
 
   // --- Format display time for emails ---

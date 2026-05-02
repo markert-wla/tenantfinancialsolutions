@@ -29,12 +29,14 @@ interface Props {
   canBook:           boolean
   sessionsRemaining: number
   tier:              string
+  defaultCoachId:    string | null
+  buyMode?:          boolean
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export default function BookingClient({ coaches, userTimezone, canBook, sessionsRemaining, tier }: Props) {
-  const [selectedCoachId, setSelectedCoachId] = useState<string>('any')
+export default function BookingClient({ coaches, userTimezone, canBook, sessionsRemaining, tier, defaultCoachId, buyMode = false }: Props) {
+  const [selectedCoachId, setSelectedCoachId] = useState<string>(defaultCoachId ?? 'any')
   const [weekOffset,      setWeekOffset]      = useState(0)
   const [slotDays,        setSlotDays]        = useState<SlotDay[]>([])
   const [loadingSlots,    setLoadingSlots]    = useState(false)
@@ -83,21 +85,40 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
     setConfirming(true)
     setError(null)
     try {
-      const res = await fetch('/api/booking', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          coachId:  selectedSlot.coachId,
-          startUtc: selectedSlot.startUtc,
-          endUtc:   selectedSlot.endUtc,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? 'Booking failed. Please try again.')
+      if (buyMode) {
+        // Purchase flow — go to Stripe with the selected slot
+        const res = await fetch('/api/portal/session-checkout', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            coachId:  selectedSlot.coachId,
+            startUtc: selectedSlot.startUtc,
+            endUtc:   selectedSlot.endUtc,
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          setError(data.error ?? 'Could not start checkout. Please try again.')
+        } else {
+          window.location.href = data.checkoutUrl
+        }
       } else {
-        setBookedSlot(selectedSlot)
-        setBooked(true)
+        const res = await fetch('/api/booking', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            coachId:  selectedSlot.coachId,
+            startUtc: selectedSlot.startUtc,
+            endUtc:   selectedSlot.endUtc,
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          setError(data.error ?? 'Booking failed. Please try again.')
+        } else {
+          setBookedSlot(selectedSlot)
+          setBooked(true)
+        }
       }
     } catch {
       setError('Network error. Please check your connection and try again.')
@@ -151,7 +172,7 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
         </h2>
         <p className="text-tfs-slate mb-6 max-w-sm">
           {tier === 'free'
-            ? 'Individual coaching sessions are available on Bronze, Silver, and Gold plans.'
+            ? 'Individual coaching sessions are available on Starter, Advantage, and Gold plans.'
             : `You've used all your sessions for this month. Upgrade for more, or check back next month.`}
         </p>
         <a href="/services" className="btn-primary text-sm">View Plans</a>
@@ -170,9 +191,15 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
   return (
     <div className="max-w-3xl mx-auto">
       {/* Sessions remaining banner */}
-      <div className="mb-6 px-4 py-3 rounded-lg bg-tfs-teal/10 border border-tfs-teal/20 text-tfs-teal text-sm font-medium">
-        You have <strong>{sessionsRemaining}</strong> session{sessionsRemaining !== 1 ? 's' : ''} remaining this month.
-      </div>
+      {buyMode ? (
+        <div className="mb-6 px-4 py-3 rounded-lg bg-tfs-gold/10 border border-tfs-gold/30 text-tfs-navy text-sm font-medium">
+          Select a coach and time slot below, then complete payment to confirm your session.
+        </div>
+      ) : (
+        <div className="mb-6 px-4 py-3 rounded-lg bg-tfs-teal/10 border border-tfs-teal/20 text-tfs-teal text-sm font-medium">
+          You have <strong>{sessionsRemaining}</strong> session{sessionsRemaining !== 1 ? 's' : ''} remaining this month.
+        </div>
+      )}
 
       {/* Coach selector */}
       <div className="card mb-6">
@@ -180,10 +207,25 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
           <User size={16} />
           Who would you like to meet with?
         </h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-2">
+            {coaches.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedCoachId(c.id)}
+                className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                  selectedCoachId === c.id
+                    ? 'bg-tfs-teal text-white border-tfs-teal'
+                    : 'bg-white text-tfs-navy border-gray-200 hover:border-tfs-teal'
+                }`}
+              >
+                {c.displayName}
+              </button>
+            ))}
+          </div>
           <button
             onClick={() => setSelectedCoachId('any')}
-            className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors shrink-0 ${
               selectedCoachId === 'any'
                 ? 'bg-tfs-teal text-white border-tfs-teal'
                 : 'bg-white text-tfs-navy border-gray-200 hover:border-tfs-teal'
@@ -191,19 +233,6 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
           >
             Any Available Coach
           </button>
-          {coaches.map(c => (
-            <button
-              key={c.id}
-              onClick={() => setSelectedCoachId(c.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-                selectedCoachId === c.id
-                  ? 'bg-tfs-teal text-white border-tfs-teal'
-                  : 'bg-white text-tfs-navy border-gray-200 hover:border-tfs-teal'
-              }`}
-            >
-              {c.displayName}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -296,7 +325,9 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
               className="btn-primary text-sm shrink-0 flex items-center gap-2"
             >
               {confirming && <Loader2 size={14} className="animate-spin" />}
-              {confirming ? 'Confirming…' : 'Confirm Booking'}
+              {confirming
+                ? (buyMode ? 'Redirecting…' : 'Confirming…')
+                : (buyMode ? 'Buy & Book — $75' : 'Confirm Booking')}
             </button>
           </div>
         </div>

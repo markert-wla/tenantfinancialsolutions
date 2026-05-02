@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { XCircle, StickyNote, Flag, FlagOff } from 'lucide-react'
+import { XCircle, StickyNote, Flag, FlagOff, Lock, Share2 } from 'lucide-react'
 
 type Booking = {
   id: string
@@ -10,6 +10,7 @@ type Booking = {
   end_time_utc: string
   status: 'pending' | 'confirmed' | 'cancelled'
   notes: string | null
+  client_notes: string | null
   flagged: boolean
   flag_reason: string | null
   client: { first_name: string; last_name: string; email: string } | null
@@ -37,8 +38,9 @@ type Filter = 'all' | 'confirmed' | 'cancelled' | 'pending' | 'flagged'
 export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
   const router = useRouter()
   const [cancelId, setCancelId]       = useState<string | null>(null)
-  const [notesId, setNotesId]         = useState<string | null>(null)
-  const [notesText, setNotesText]     = useState('')
+  const [notesId,         setNotesId]         = useState<string | null>(null)
+  const [coachNoteText,   setCoachNoteText]   = useState('')
+  const [clientNoteText,  setClientNoteText]  = useState('')
   const [expandFlag, setExpandFlag]   = useState<string | null>(null)
   const [loading, setLoading]         = useState(false)
   const [filter, setFilter]           = useState<Filter>('all')
@@ -67,12 +69,13 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
 
   function openNotes(b: Booking) {
     setNotesId(b.id)
-    setNotesText(b.notes ?? '')
+    setCoachNoteText(b.notes ?? '')
+    setClientNoteText(b.client_notes ?? '')
   }
 
   async function handleSaveNotes() {
     if (!notesId) return
-    await patch(notesId, { notes: notesText })
+    await patch(notesId, { notes: coachNoteText || null, client_notes: clientNoteText || null })
     setNotesId(null)
   }
 
@@ -155,7 +158,7 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                           {b.status}
                         </span>
                       </td>
-                      <td className="py-3 pr-4 max-w-[200px]">
+                      <td className="py-3 pr-4 max-w-[220px]">
                         {b.flagged && (
                           <button
                             onClick={() => setExpandFlag(expandFlag === b.id ? null : b.id)}
@@ -164,7 +167,19 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                             <Flag size={11} /> Flagged by coach
                           </button>
                         )}
-                        <span className="text-xs text-tfs-slate truncate block">{b.notes ?? '—'}</span>
+                        {b.notes && (
+                          <p className="text-xs text-tfs-slate truncate flex items-center gap-1">
+                            <Lock size={10} className="shrink-0 text-gray-400" />{b.notes}
+                          </p>
+                        )}
+                        {b.client_notes && (
+                          <p className="text-xs text-tfs-teal truncate flex items-center gap-1 mt-0.5">
+                            <Share2 size={10} className="shrink-0" />{b.client_notes}
+                          </p>
+                        )}
+                        {!b.notes && !b.client_notes && !b.flagged && (
+                          <span className="text-xs text-gray-300">—</span>
+                        )}
                       </td>
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -252,13 +267,32 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
       {/* Notes modal */}
       {notesId && (
         <Modal title="Session Notes" onClose={() => setNotesId(null)}>
-          <textarea
-            value={notesText}
-            onChange={e => setNotesText(e.target.value)}
-            rows={4}
-            placeholder="Add internal notes about this session…"
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none mb-4"
-          />
+          <div className="space-y-4 mb-4">
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                <Lock size={11} /> Coach Notes <span className="font-normal normal-case text-gray-400">(internal)</span>
+              </label>
+              <textarea
+                value={coachNoteText}
+                onChange={e => setCoachNoteText(e.target.value)}
+                rows={3}
+                placeholder="Private notes visible only to coaches and admins…"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal uppercase tracking-wide mb-1.5">
+                <Share2 size={11} /> Client Notes <span className="font-normal normal-case text-tfs-slate">(shared with client)</span>
+              </label>
+              <textarea
+                value={clientNoteText}
+                onChange={e => setClientNoteText(e.target.value)}
+                rows={3}
+                placeholder="Notes visible to the client, coach, and admin…"
+                className="w-full border border-tfs-teal/40 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
+              />
+            </div>
+          </div>
           <div className="flex gap-3 justify-end">
             <button onClick={() => setNotesId(null)} className="btn-outline">Cancel</button>
             <button onClick={handleSaveNotes} disabled={loading} className="btn-primary">

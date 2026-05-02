@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AvailabilityClient from '@/components/coach/AvailabilityClient'
+import UnavailableDatesClient from '@/components/coach/UnavailableDatesClient'
 
 export const metadata: Metadata = { title: 'Availability — Coach' }
 
@@ -25,6 +26,12 @@ export default async function CoachAvailabilityPage() {
     .order('day_of_week')
     .order('start_time_utc')
 
+  const { data: unavailableDates } = await supabase
+    .from('coach_unavailable_dates')
+    .select('id, date, note')
+    .eq('coach_id', user.id)
+    .order('date')
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="mb-8">
@@ -34,10 +41,13 @@ export default async function CoachAvailabilityPage() {
           Clients will see open 60-minute slots based on this schedule.
         </p>
       </div>
-      <AvailabilityClient
-        initialSlots={slots ?? []}
-        timezone={profile?.timezone ?? 'America/New_York'}
-      />
+      <div className="space-y-8">
+        <AvailabilityClient
+          initialSlots={slots ?? []}
+          timezone={profile?.timezone ?? 'America/New_York'}
+        />
+        <UnavailableDatesClient initialDates={unavailableDates ?? []} />
+      </div>
     </div>
   )
 }

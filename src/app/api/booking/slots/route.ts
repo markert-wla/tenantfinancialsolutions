@@ -80,6 +80,21 @@ export async function GET(req: NextRequest) {
     .gte('start_time_utc', weekStart.toISOString())
     .lt('start_time_utc', weekEnd.toISOString())
 
+  // --- Fetch unavailable dates in the window ---
+  const weekStartDate = weekStart.toISOString().split('T')[0]
+  const weekEndDate   = new Date(weekEnd.getTime() - 1).toISOString().split('T')[0]
+  const { data: unavailableDates } = await supabase
+    .from('coach_unavailable_dates')
+    .select('coach_id, date')
+    .in('coach_id', coachIds)
+    .gte('date', weekStartDate)
+    .lte('date', weekEndDate)
+
+  // Build a set of "coachId|YYYY-MM-DD" for O(1) lookup
+  const unavailableSet = new Set<string>(
+    (unavailableDates ?? []).map((r: any) => `${r.coach_id}|${r.date}`)
+  )
+
   // Build a set of booked intervals per coach for quick lookup
   const bookedByCoach: Record<string, Array<{ start: Date; end: Date }>> = {}
   for (const b of existingBookings ?? []) {
@@ -108,6 +123,7 @@ export async function GET(req: NextRequest) {
 
     for (const block of availability) {
       if (block.day_of_week !== utcDow) continue
+      if (unavailableSet.has(`${block.coach_id}|${dateStr}`)) continue
 
       // Parse HH:MM:SS start/end times for this block
       const [sh, sm] = block.start_time_utc.split(':').map(Number)

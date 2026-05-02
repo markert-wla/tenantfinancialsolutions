@@ -48,6 +48,9 @@ export async function PATCH(
   if ('notes' in body) {
     update.notes = typeof body.notes === 'string' ? body.notes.trim().slice(0, 2000) || null : null
   }
+  if ('client_notes' in body) {
+    update.client_notes = typeof body.client_notes === 'string' ? body.client_notes.trim().slice(0, 2000) || null : null
+  }
   if ('attended' in body && typeof body.attended === 'boolean') {
     update.attended = body.attended
   }

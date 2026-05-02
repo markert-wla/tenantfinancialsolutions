@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'My Clients — Coach' }
 
@@ -83,6 +84,7 @@ export default async function CoachClientsPage() {
                   <th className="text-left px-4 py-3 font-semibold">Sessions / mo</th>
                   <th className="text-left px-4 py-3 font-semibold">Last Active</th>
                   <th className="text-left px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -120,6 +122,14 @@ export default async function CoachClientsPage() {
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                           {c.is_active ? 'Active' : 'Inactive'}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Link
+                          href={`/coach/clients/${c.id}`}
+                          className="text-xs font-medium text-tfs-teal hover:underline whitespace-nowrap"
+                        >
+                          View →
+                        </Link>
                       </td>
                     </tr>
                   )

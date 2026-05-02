@@ -345,7 +345,10 @@ function RegisterInner() {
           <div>
             <label className="block text-sm font-medium text-tfs-navy mb-1">Email *</label>
             <input required type="email" value={form.email}
-              onChange={e => update('email', e.target.value)} className={INPUT} />
+              onChange={e => update('email', e.target.value)}
+              pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+              title="Please enter a valid email address (e.g. name@example.com)"
+              className={INPUT} />
           </div>
 
           {/* Password */}

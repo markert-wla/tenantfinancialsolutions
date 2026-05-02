@@ -1,58 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { getStripe, PLAN_PRICE_IDS } from '@/lib/stripe'
+import { getStripe, SESSION_PRICE_ID } from '@/lib/stripe'
 
 export async function POST(req: NextRequest) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let body: { tier: string }
+  if (!SESSION_PRICE_ID) {
+    return NextResponse.json({ error: 'Session pricing not configured' }, { status: 500 })
+  }
+
+  let coachId:  string | null = null
+  let startUtc: string | null = null
+  let endUtc:   string | null = null
   try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
-  }
-
-  const { tier } = body
-  if (!['bronze', 'silver'].includes(tier)) {
-    return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
-  }
-
-  const priceId = PLAN_PRICE_IDS[tier]
-  if (!priceId) {
-    return NextResponse.json({ error: 'Plan not configured' }, { status: 400 })
-  }
+    const body = await req.json()
+    coachId  = body.coachId  ?? null
+    startUtc = body.startUtc ?? null
+    endUtc   = body.endUtc   ?? null
+  } catch { /* all stay null */ }
 
   const service = createServiceClient()
   const { data: profile } = await service
     .from('profiles')
-    .select('first_name, last_name, email, plan_tier, stripe_customer_id')
+    .select('first_name, last_name, email, stripe_customer_id')
     .eq('id', user.id)
     .single()
 
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-  if (profile.plan_tier === tier) return NextResponse.json({ error: 'Already on this plan' }, { status: 400 })
 
   let stripe: ReturnType<typeof getStripe>
   try {
     stripe = getStripe()
   } catch (err: any) {
-    console.error('[upgrade] Stripe init failed:', err.message)
     return NextResponse.json({ error: 'Payment system not configured' }, { status: 500 })
   }
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
 
   try {
     let customerId = profile.stripe_customer_id
 
     if (!customerId) {
-      const emailForStripe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email ?? '')
-        ? profile.email
-        : user.email   // fall back to auth email if profile email is malformed
       const customer = await stripe.customers.create({
-        ...(emailForStripe ? { email: emailForStripe } : {}),
+        email: profile.email,
         name:  `${profile.first_name} ${profile.last_name}`,
         metadata: { supabase_user_id: user.id },
       })
@@ -60,20 +50,28 @@ export async function POST(req: NextRequest) {
       await service.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id)
     }
 
+    const siteUrl    = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+    const hasSlot    = coachId && startUtc && endUtc
+    const successUrl = hasSlot
+      ? `${siteUrl}/portal/dashboard?welcome=1`
+      : `${siteUrl}/portal/book?session_purchased=1`
+
     const session = await stripe.checkout.sessions.create({
-      customer:  customerId,
-      mode:      'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${siteUrl}/portal/dashboard?welcome=1`,
-      cancel_url:  `${siteUrl}/portal/billing`,
-      subscription_data: {
-        metadata: { supabase_user_id: user.id, tier },
+      customer:    customerId,
+      mode:        'payment',
+      line_items:  [{ price: SESSION_PRICE_ID, quantity: 1 }],
+      success_url: successUrl,
+      cancel_url:  `${siteUrl}/portal/book?buy=1`,
+      metadata:    {
+        supabase_user_id: user.id,
+        type:             'session_credit',
+        ...(hasSlot ? { coach_id: coachId!, start_utc: startUtc!, end_utc: endUtc! } : {}),
       },
     })
 
     return NextResponse.json({ checkoutUrl: session.url })
   } catch (err: any) {
-    console.error('[upgrade] Stripe error:', err.message)
+    console.error('[session-checkout]', err.message)
     return NextResponse.json({ error: err.message ?? 'Stripe error' }, { status: 500 })
   }
 }

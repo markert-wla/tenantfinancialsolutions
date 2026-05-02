@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { CalendarPlus, Users, CalendarCheck } from 'lucide-react'
+import ExtraSessionCard from '@/components/portal/ExtraSessionCard'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
@@ -208,6 +209,8 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
           </p>
         )}
       </div>
+
+      <ExtraSessionCard />
     </div>
   )
 }

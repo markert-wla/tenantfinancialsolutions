@@ -209,10 +209,13 @@ export default async function HomePage({
       <section className="py-20 bg-tfs-teal-light px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="section-heading mb-4">Meet the Coaches</h2>
-            <p className="text-tfs-slate text-lg max-w-xl mx-auto">
-              Real people. Real coaching. Dedicated to your financial future.
+            <p className="text-3xl md:text-4xl font-serif font-bold text-tfs-navy mb-2">
+              <span className="line-through">Money Stigma</span> – No More
             </p>
+            <p className="text-tfs-slate text-lg mb-6">
+              Real People – Real Coaching
+            </p>
+            <h2 className="section-heading mb-4">Meet the Coaches</h2>
           </div>
           {coaches.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -330,51 +333,26 @@ export default async function HomePage({
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
-      {/* ── MONEY STIGMA ─────────────────────────────────────── */}
-      <section
-        className="py-20 px-4 text-center"
-        style={{ background: '#7A909F' }}
-      >
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-tfs-navy mb-4">
-            <span className="line-through">Money Stigma</span> – No More
-          </h2>
-          <p className="text-tfs-navy text-lg mb-8">
-            Real People – Real Coaching
-          </p>
-          <Link href="/about" className="btn-navy">
-            Meet the Coaches
-          </Link>
-        </div>
-      </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
-
       {/* ── TESTIMONIALS ─────────────────────────────────────── */}
       {testimonials.length > 0 && (
-        <section className="py-20 bg-tfs-teal-light px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="section-heading text-center mb-12">What Our Clients Say</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {testimonials.map((t: any) => (
-                <div key={t.id} className="card">
-                  <p className="text-tfs-slate italic mb-4 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold text-tfs-navy text-sm">{t.client_name}</p>
-                    {t.plan_tier && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-tfs-teal/10 text-tfs-teal capitalize font-medium">
-                        {t.plan_tier}
-                      </span>
-                    )}
+        <>
+          <section className="py-20 bg-white px-4">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="section-heading text-center mb-12">What Our Clients Say</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {testimonials.map((t: any) => (
+                  <div key={t.id} className="rounded-2xl p-6 bg-tfs-navy shadow-md">
+                    <p className="text-white italic mb-4 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
+                    <p className="font-semibold text-tfs-gold text-lg">{t.client_name}</p>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+          <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+        </>
       )}
 
-      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
       {/* ── FINAL CTA ────────────────────────────────────────── */}
       <section

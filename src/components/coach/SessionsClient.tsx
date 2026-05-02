@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, XCircle, Edit3, X, Flag } from 'lucide-react'
+import { CheckCircle, XCircle, Edit3, X, Flag, Lock, Share2 } from 'lucide-react'
 
 type Session = {
   id: string
@@ -10,6 +10,7 @@ type Session = {
   end_time_utc: string
   status: 'confirmed' | 'pending' | 'cancelled'
   notes: string | null
+  client_notes: string | null
   attended: boolean | null
   flagged: boolean
   flag_reason: string | null
@@ -33,8 +34,9 @@ type Props = { sessions: Session[]; coachTz: string }
 export default function SessionsClient({ sessions: initial, coachTz }: Props) {
   const router = useRouter()
   const [sessions, setSessions]       = useState(initial)
-  const [editingNote, setEditingNote] = useState<string | null>(null)
-  const [noteText, setNoteText]       = useState('')
+  const [editingNote,    setEditingNote]    = useState<string | null>(null)
+  const [coachNoteText,  setCoachNoteText]  = useState('')
+  const [clientNoteText, setClientNoteText] = useState('')
   const [flaggingId, setFlaggingId]   = useState<string | null>(null)
   const [flagReason, setFlagReason]   = useState('')
   const [updating, setUpdating]       = useState<string | null>(null)
@@ -79,7 +81,10 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
   }
 
   async function saveNote(id: string) {
-    await patch(id, { notes: noteText || null }, false)
+    await patch(id, {
+      notes:        coachNoteText  || null,
+      client_notes: clientNoteText || null,
+    }, false)
     setEditingNote(null)
   }
 
@@ -150,7 +155,14 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                       <p className="text-xs text-tfs-slate">{client.email}</p>
                     )}
                     {s.notes && (
-                      <p className="text-xs text-tfs-slate italic mt-1 border-l-2 border-gray-200 pl-2">{s.notes}</p>
+                      <p className="text-xs text-tfs-slate italic mt-1 border-l-2 border-gray-300 pl-2 flex items-start gap-1">
+                        <Lock size={10} className="shrink-0 mt-0.5 text-gray-400" />{s.notes}
+                      </p>
+                    )}
+                    {s.client_notes && (
+                      <p className="text-xs text-tfs-teal italic mt-1 border-l-2 border-tfs-teal/40 pl-2 flex items-start gap-1">
+                        <Share2 size={10} className="shrink-0 mt-0.5" />{s.client_notes}
+                      </p>
                     )}
                     {s.flagged && s.flag_reason && (
                       <p className="text-xs text-red-600 mt-1 border-l-2 border-red-300 pl-2 italic">
@@ -178,7 +190,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
 
                     {/* Edit note */}
                     <button
-                      onClick={() => { setEditingNote(s.id); setNoteText(s.notes ?? '') }}
+                      onClick={() => { setEditingNote(s.id); setCoachNoteText(s.notes ?? ''); setClientNoteText(s.client_notes ?? '') }}
                       className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
                       title="Edit note"
                     >
@@ -212,14 +224,31 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
 
                 {/* Inline note editor */}
                 {editingNote === s.id && (
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <textarea
-                      value={noteText}
-                      onChange={e => setNoteText(e.target.value)}
-                      rows={3}
-                      placeholder="Session notes…"
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none mb-2"
-                    />
+                  <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
+                    <div>
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        <Lock size={11} /> Coach Notes <span className="font-normal normal-case text-gray-400">(internal — admin only)</span>
+                      </label>
+                      <textarea
+                        value={coachNoteText}
+                        onChange={e => setCoachNoteText(e.target.value)}
+                        rows={2}
+                        placeholder="Private notes visible only to coaches and admins…"
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal uppercase tracking-wide mb-1">
+                        <Share2 size={11} /> Client Notes <span className="font-normal normal-case text-tfs-slate">(shared with client)</span>
+                      </label>
+                      <textarea
+                        value={clientNoteText}
+                        onChange={e => setClientNoteText(e.target.value)}
+                        rows={2}
+                        placeholder="Notes visible to the client, coach, and admin…"
+                        className="w-full border border-tfs-teal/40 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
+                      />
+                    </div>
                     <div className="flex gap-2 justify-end">
                       <button onClick={() => setEditingNote(null)} className="text-sm text-tfs-slate hover:text-tfs-navy px-3 py-1.5 rounded-lg border border-gray-200">
                         <X size={13} className="inline mr-1" />Cancel
@@ -229,7 +258,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                         disabled={updating === s.id}
                         className="btn-primary text-sm px-4 py-1.5"
                       >
-                        {updating === s.id ? 'Saving…' : 'Save'}
+                        {updating === s.id ? 'Saving…' : 'Save Notes'}
                       </button>
                     </div>
                   </div>

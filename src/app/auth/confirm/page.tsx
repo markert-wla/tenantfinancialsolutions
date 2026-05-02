@@ -28,11 +28,18 @@ export default function AuthConfirmPage() {
       const refreshToken = params.get('refresh_token')
 
       if (accessToken && refreshToken) {
+        const tokenType = params.get('type')
+
         const { data: { session } } = await supabase.auth.setSession({
           access_token:  accessToken,
           refresh_token: refreshToken,
         })
         if (session?.user) {
+          // Invite links require the user to set a password before continuing.
+          if (tokenType === 'invite') {
+            router.replace('/auth/set-password')
+            return
+          }
           const role = (session.user.user_metadata?.role ?? session.user.app_metadata?.role) as string | undefined
           router.replace(roleToPath(role))
           return

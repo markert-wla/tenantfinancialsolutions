@@ -18,7 +18,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  let body: { status?: string; notes?: string; flagged?: boolean }
+  let body: { status?: string; notes?: string | null; client_notes?: string | null; flagged?: boolean }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
@@ -95,11 +95,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ ok: true })
   }
 
-  if ('notes' in body) {
-    const { error } = await service
-      .from('bookings')
-      .update({ notes: body.notes ?? null })
-      .eq('id', params.id)
+  if ('notes' in body || 'client_notes' in body) {
+    const update: Record<string, string | null> = {}
+    if ('notes' in body)        update.notes        = body.notes        ?? null
+    if ('client_notes' in body) update.client_notes = body.client_notes ?? null
+    const { error } = await service.from('bookings').update(update).eq('id', params.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ ok: true })
   }
