@@ -29,33 +29,57 @@ export async function POST(req: NextRequest) {
 
   const service = createServiceClient()
 
-  // Invite the coach — sends them an email to set their password.
-  // redirectTo ensures the invite link lands on our callback handler
-  // (which reads their role and forwards them to /coach/dashboard).
-  const { data: invite, error: inviteErr } = await service.auth.admin.inviteUserByEmail(email, {
-    data: { role: 'coach' },
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
-  })
-
-  if (inviteErr || !invite.user) {
-    if (inviteErr?.message?.includes('already registered')) {
-      return NextResponse.json({ error: 'A user with this email already exists.' }, { status: 409 })
-    }
-    return NextResponse.json({ error: inviteErr?.message ?? 'Failed to create coach account' }, { status: 500 })
-  }
-
-  const coachId = invite.user.id
   const tz = timezone ?? 'America/New_York'
   const nameParts = display_name.trim().split(/\s+/)
 
-  // Trigger creates the profiles row; update it with coach role + name
-  await service.from('profiles').update({
-    role:       'coach',
-    first_name: nameParts[0],
-    last_name:  nameParts.slice(1).join(' ') || '',
-    timezone:   tz,
-    email,
-  }).eq('id', coachId)
+  // Check if a user with this email already exists
+  const { data: { users: existingUsers } } = await service.auth.admin.listUsers()
+  const existingUser = existingUsers.find(u => u.email?.toLowerCase() === email.toLowerCase())
+
+  let coachId: string
+
+  if (existingUser) {
+    const { data: existingProfile } = await service
+      .from('profiles')
+      .select('role')
+      .eq('id', existingUser.id)
+      .single()
+
+    // Only allow promoting admins — don't silently reassign clients or PMs
+    if (existingProfile?.role !== 'admin') {
+      return NextResponse.json({ error: 'A user with this email already exists.' }, { status: 409 })
+    }
+
+    coachId = existingUser.id
+
+    // Check if already in coaches table
+    const { data: existingCoach } = await service.from('coaches').select('id').eq('id', coachId).single()
+    if (existingCoach) {
+      return NextResponse.json({ error: 'This admin is already set up as a coach.' }, { status: 409 })
+    }
+
+    // Don't change the admin's role — just add the coaches row
+  } else {
+    // New user — send invite
+    const { data: invite, error: inviteErr } = await service.auth.admin.inviteUserByEmail(email, {
+      data: { role: 'coach' },
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+    })
+
+    if (inviteErr || !invite.user) {
+      return NextResponse.json({ error: inviteErr?.message ?? 'Failed to create coach account' }, { status: 500 })
+    }
+
+    coachId = invite.user.id
+
+    await service.from('profiles').update({
+      role:       'coach',
+      first_name: nameParts[0],
+      last_name:  nameParts.slice(1).join(' ') || '',
+      timezone:   tz,
+      email,
+    }).eq('id', coachId)
+  }
 
   // Create coaches row
   const { error: coachErr } = await service.from('coaches').insert({
