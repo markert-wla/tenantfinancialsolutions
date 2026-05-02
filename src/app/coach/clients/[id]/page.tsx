@@ -35,6 +35,14 @@ export default async function CoachClientDetailPage({ params }: { params: { id: 
     .eq('client_id', params.id)
     .order('start_time_utc', { ascending: false })
 
+  // General notes about this client
+  const { data: clientNotes } = await supabase
+    .from('coach_client_notes')
+    .select('id, note, created_at')
+    .eq('coach_id', user.id)
+    .eq('client_id', params.id)
+    .order('created_at', { ascending: false })
+
   const coachTz = profile.timezone ?? 'America/New_York'
 
   return (
@@ -53,6 +61,7 @@ export default async function CoachClientDetailPage({ params }: { params: { id: 
       <ClientDetailClient
         client={client as any}
         bookings={(bookings ?? []) as any}
+        clientNotes={(clientNotes ?? []) as any}
         coachTz={coachTz}
       />
     </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock, Share2, Edit3, X, CheckCircle } from 'lucide-react'
+import { Lock, Share2, Edit3, X, CheckCircle, Trash2, Plus, FileText } from 'lucide-react'
 
 type Client = {
   id: string
@@ -27,6 +27,12 @@ type Booking = {
   flag_reason: string | null
 }
 
+type ClientNote = {
+  id: string
+  note: string
+  created_at: string
+}
+
 const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Starter', silver: 'Advantage' }
 const STATUS_BADGE: Record<string, string> = {
   confirmed: 'bg-green-100 text-green-700',
@@ -37,19 +43,30 @@ const STATUS_BADGE: Record<string, string> = {
 export default function ClientDetailClient({
   client,
   bookings: initial,
+  clientNotes: initialNotes,
   coachTz,
 }: {
-  client:   Client
-  bookings: Booking[]
-  coachTz:  string
+  client:       Client
+  bookings:     Booking[]
+  clientNotes:  ClientNote[]
+  coachTz:      string
 }) {
   const router = useRouter()
+
+  // Session note editing state
   const [bookings,       setBookings]       = useState(initial)
   const [editingId,      setEditingId]      = useState<string | null>(null)
   const [coachNoteText,  setCoachNoteText]  = useState('')
   const [clientNoteText, setClientNoteText] = useState('')
   const [updating,       setUpdating]       = useState<string | null>(null)
-  const [error,          setError]          = useState('')
+  const [sessionError,   setSessionError]   = useState('')
+
+  // General client notes state
+  const [notes,        setNotes]        = useState<ClientNote[]>(initialNotes)
+  const [newNote,      setNewNote]      = useState('')
+  const [addingNote,   setAddingNote]   = useState(false)
+  const [deletingId,   setDeletingId]   = useState<string | null>(null)
+  const [noteError,    setNoteError]    = useState('')
 
   function fmt(iso: string) {
     return new Intl.DateTimeFormat('en-US', {
@@ -58,6 +75,14 @@ export default function ClientDetailClient({
     }).format(new Date(iso))
   }
 
+  function fmtDate(iso: string) {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: 'numeric', minute: '2-digit', hour12: true,
+    }).format(new Date(iso))
+  }
+
+  // Session notes
   function openEdit(b: Booking) {
     setEditingId(b.id)
     setCoachNoteText(b.notes ?? '')
@@ -66,7 +91,7 @@ export default function ClientDetailClient({
 
   async function saveNotes(id: string) {
     setUpdating(id)
-    setError('')
+    setSessionError('')
     const res = await fetch(`/api/coach/sessions/${id}`, {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -81,7 +106,37 @@ export default function ClientDetailClient({
       router.refresh()
     } else {
       const data = await res.json().catch(() => ({}))
-      setError(data.error ?? 'Failed to save notes')
+      setSessionError(data.error ?? 'Failed to save notes')
+    }
+  }
+
+  // General client notes
+  async function addNote() {
+    if (!newNote.trim()) return
+    setAddingNote(true)
+    setNoteError('')
+    const res = await fetch('/api/coach/client-notes', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ clientId: client.id, note: newNote.trim() }),
+    })
+    setAddingNote(false)
+    if (res.ok) {
+      const created = await res.json()
+      setNotes(prev => [created, ...prev])
+      setNewNote('')
+    } else {
+      const data = await res.json().catch(() => ({}))
+      setNoteError(data.error ?? 'Failed to save note')
+    }
+  }
+
+  async function deleteNote(id: string) {
+    setDeletingId(id)
+    const res = await fetch(`/api/coach/client-notes/${id}`, { method: 'DELETE' })
+    setDeletingId(null)
+    if (res.ok) {
+      setNotes(prev => prev.filter(n => n.id !== id))
     }
   }
 
@@ -115,8 +170,65 @@ export default function ClientDetailClient({
         </div>
       </div>
 
-      {error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+      {/* General client notes */}
+      <section>
+        <div className="flex items-center gap-2 mb-3">
+          <FileText size={16} className="text-tfs-teal" />
+          <h2 className="font-serif font-bold text-tfs-navy text-lg">Client Notes</h2>
+          <span className="text-xs text-tfs-slate">General notes about this client</span>
+        </div>
+
+        <div className="card space-y-4">
+          {/* Add note */}
+          <div>
+            <textarea
+              value={newNote}
+              onChange={e => setNewNote(e.target.value)}
+              rows={3}
+              placeholder="Add a general note about this client…"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
+            />
+            {noteError && <p className="text-xs text-red-600 mt-1">{noteError}</p>}
+            <div className="flex justify-end mt-2">
+              <button
+                onClick={addNote}
+                disabled={addingNote || !newNote.trim()}
+                className="btn-primary text-sm px-4 py-1.5 flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <Plus size={13} />
+                {addingNote ? 'Saving…' : 'Add Note'}
+              </button>
+            </div>
+          </div>
+
+          {/* Notes list */}
+          {notes.length === 0 ? (
+            <p className="text-sm text-tfs-slate italic">No general notes yet.</p>
+          ) : (
+            <div className="space-y-3 pt-2 border-t border-gray-100">
+              {notes.map(n => (
+                <div key={n.id} className="flex items-start gap-3 group">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-tfs-navy whitespace-pre-wrap">{n.note}</p>
+                    <p className="text-xs text-tfs-slate mt-0.5">{fmtDate(n.created_at)}</p>
+                  </div>
+                  <button
+                    onClick={() => deleteNote(n.id)}
+                    disabled={deletingId === n.id}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-300 hover:text-red-500 transition-all shrink-0"
+                    title="Delete note"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {sessionError && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{sessionError}</p>
       )}
 
       {/* Upcoming sessions */}
