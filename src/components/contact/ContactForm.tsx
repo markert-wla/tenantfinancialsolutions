@@ -67,26 +67,26 @@ function ContactFormInner() {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-tfs-navy mb-1">Full Name *</label>
-          <input required type="text" value={form.name} onChange={e => update('name', e.target.value)}
+          <label htmlFor="contact-name" className="block text-sm font-medium text-tfs-navy mb-1">Full Name *</label>
+          <input id="contact-name" required type="text" value={form.name} onChange={e => update('name', e.target.value)}
             className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-tfs-navy mb-1">Email *</label>
-          <input required type="email" value={form.email} onChange={e => update('email', e.target.value)}
+          <label htmlFor="contact-email" className="block text-sm font-medium text-tfs-navy mb-1">Email *</label>
+          <input id="contact-email" required type="email" value={form.email} onChange={e => update('email', e.target.value)}
             className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal" />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-tfs-navy mb-1">Phone</label>
-        <input type="tel" value={form.phone} onChange={e => update('phone', e.target.value)}
+        <label htmlFor="contact-phone" className="block text-sm font-medium text-tfs-navy mb-1">Phone</label>
+        <input id="contact-phone" type="tel" value={form.phone} onChange={e => update('phone', e.target.value)}
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal" />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-tfs-navy mb-1">Inquiry Type *</label>
-        <select required value={form.type} onChange={e => update('type', e.target.value)}
+        <label htmlFor="contact-type" className="block text-sm font-medium text-tfs-navy mb-1">Inquiry Type *</label>
+        <select id="contact-type" required value={form.type} onChange={e => update('type', e.target.value)}
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal bg-white">
           {INQUIRY_TYPES.map(t => (
             <option key={t.value} value={t.value}>{t.label}</option>
@@ -95,8 +95,8 @@ function ContactFormInner() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-tfs-navy mb-1">Message *</label>
-        <textarea required rows={5} value={form.message} onChange={e => update('message', e.target.value)}
+        <label htmlFor="contact-message" className="block text-sm font-medium text-tfs-navy mb-1">Message *</label>
+        <textarea id="contact-message" required rows={5} value={form.message} onChange={e => update('message', e.target.value)}
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none" />
       </div>
 
