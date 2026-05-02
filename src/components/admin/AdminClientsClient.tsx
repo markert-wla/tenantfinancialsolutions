@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2, PlusCircle } from 'lucide-react'
+import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2, PlusCircle, Search, DollarSign, X } from 'lucide-react'
 
 const TIER_LABEL: Record<string, string> = {
   free: 'Free', bronze: 'Starter', silver: 'Advantage',
@@ -37,6 +37,7 @@ interface Client {
   last_active_at: string
   is_active: boolean
   created_at: string
+  stripe_customer_id: string | null
 }
 
 interface PMCode {
@@ -59,7 +60,9 @@ function daysSince(iso: string) {
 
 export default function AdminClientsClient({ clients: initial, pmCodes }: Props) {
   const [clients, setClients]           = useState<Client[]>(initial)
+  const [searchQuery, setSearchQuery]   = useState('')
   const [typeFilter, setTypeFilter]     = useState<string>('all')
+  const [tierFilter, setTierFilter]     = useState<string>('all')
   const [pmFilter, setPmFilter]         = useState<string>('all')
   const [selected, setSelected]         = useState<Set<string>>(new Set())
   const [bulkDate, setBulkDate]         = useState('')
@@ -69,6 +72,10 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
   const [bulkSaving, setBulkSaving]     = useState(false)
   const [grantingId, setGrantingId]     = useState<string | null>(null)
   const [grantAmount, setGrantAmount]   = useState<Record<string, string>>({})
+  const [creditClient, setCreditClient] = useState<Client | null>(null)
+  const [creditAmount, setCreditAmount] = useState('')
+  const [creditNote, setCreditNote]     = useState('')
+  const [crediting, setCrediting]       = useState(false)
   const [toast, setToast]               = useState('')
 
   function showToast(msg: string) {
@@ -78,12 +85,19 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
 
   // ── Filtering ────────────────────────────────────────────────
   const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
     return clients.filter(c => {
+      if (q) {
+        const name = `${c.first_name} ${c.last_name}`.toLowerCase()
+        const matchesSearch = name.includes(q) || c.email.toLowerCase().includes(q) || (c.promo_code_used ?? '').toLowerCase().includes(q)
+        if (!matchesSearch) return false
+      }
       if (typeFilter !== 'all' && c.client_type !== typeFilter) return false
-      if (pmFilter  !== 'all' && c.promo_code_used !== pmFilter)   return false
+      if (tierFilter !== 'all' && c.plan_tier !== tierFilter) return false
+      if (pmFilter   !== 'all' && c.promo_code_used !== pmFilter) return false
       return true
     })
-  }, [clients, typeFilter, pmFilter])
+  }, [clients, searchQuery, typeFilter, tierFilter, pmFilter])
 
   // ── Selection ────────────────────────────────────────────────
   function toggleAll() {
@@ -155,7 +169,6 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
 
-      // Refresh local state
       const updatedExpiry = bulkDate ? bulkDate + 'T00:00:00Z' : null
       if (bulkPM) {
         setClients(prev => prev.map(c =>
@@ -177,7 +190,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
     }
   }
 
-  // ── Grant extra session ──────────────────────────────────
+  // ── Grant extra session ──────────────────────────────────────
   async function grantSession(clientId: string) {
     const amount = parseInt(grantAmount[clientId] ?? '1', 10)
     if (isNaN(amount) || amount <= 0) return
@@ -202,49 +215,114 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
     }
   }
 
+  // ── Apply Stripe credit ──────────────────────────────────────
+  async function applyCredit() {
+    if (!creditClient || !creditAmount) return
+    const dollars = parseFloat(creditAmount)
+    if (isNaN(dollars) || dollars <= 0) return
+    setCrediting(true)
+    try {
+      const res = await fetch('/api/admin/clients/credit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: creditClient.id, amountDollars: dollars, note: creditNote }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      showToast(`$${dollars.toFixed(2)} credit applied to ${creditClient.first_name}'s next invoice`)
+      setCreditClient(null)
+      setCreditAmount('')
+      setCreditNote('')
+    } catch (e: any) {
+      showToast(e.message ?? 'Failed to apply credit')
+    } finally {
+      setCrediting(false)
+    }
+  }
+
   const allSelected = filtered.length > 0 && selected.size === filtered.length
 
   return (
     <div>
-      {/* ── Filter toolbar ─────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-3 mb-5">
-        <div className="flex items-center gap-1.5 text-sm text-tfs-slate">
-          <Filter size={14} /> Filter:
-        </div>
-
-        {/* Client type */}
-        <div className="flex gap-1">
-          {[['all', 'All Types'], ['individual', 'Individual'], ['couple', 'Couple'],
-            ['property_tenant', 'PM Tenant'], ['nonprofit_individual', 'Non-Profit']].map(([val, label]) => (
+      {/* ── Search + Filter toolbar ─────────────────────────────── */}
+      <div className="space-y-3 mb-5">
+        {/* Search */}
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search by name, email, or promo code…"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-tfs-teal bg-white"
+          />
+          {searchQuery && (
             <button
-              key={val}
-              onClick={() => setTypeFilter(val)}
-              className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
-                typeFilter === val
-                  ? 'bg-tfs-teal text-white border-tfs-teal'
-                  : 'bg-white text-tfs-slate border-gray-200 hover:border-tfs-teal'
-              }`}
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
-              {label}
+              <X size={14} />
             </button>
-          ))}
+          )}
         </div>
 
-        {/* PM group */}
-        {pmCodes.length > 0 && (
-          <select
-            value={pmFilter}
-            onChange={e => setPmFilter(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-tfs-slate focus:outline-none focus:ring-2 focus:ring-tfs-teal bg-white"
-          >
-            <option value="all">All PM Groups</option>
-            {pmCodes.map(p => (
-              <option key={p.code} value={p.code}>{p.partner_name} ({p.code})</option>
-            ))}
-          </select>
-        )}
+        {/* Filters row */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 text-sm text-tfs-slate">
+            <Filter size={14} /> Filter:
+          </div>
 
-        <span className="text-xs text-tfs-slate ml-auto">{filtered.length} client{filtered.length !== 1 ? 's' : ''}</span>
+          {/* Client type */}
+          <div className="flex gap-1 flex-wrap">
+            {[['all', 'All Types'], ['individual', 'Individual'], ['couple', 'Couple'],
+              ['property_tenant', 'PM Tenant'], ['nonprofit_individual', 'Non-Profit']].map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setTypeFilter(val)}
+                className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
+                  typeFilter === val
+                    ? 'bg-tfs-teal text-white border-tfs-teal'
+                    : 'bg-white text-tfs-slate border-gray-200 hover:border-tfs-teal'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Plan tier */}
+          <div className="flex gap-1 flex-wrap">
+            {[['all', 'All Plans'], ['free', 'Free'], ['bronze', 'Starter'], ['silver', 'Advantage']].map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setTierFilter(val)}
+                className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
+                  tierFilter === val
+                    ? 'bg-tfs-navy text-white border-tfs-navy'
+                    : 'bg-white text-tfs-slate border-gray-200 hover:border-tfs-navy'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* PM group */}
+          {pmCodes.length > 0 && (
+            <select
+              value={pmFilter}
+              onChange={e => setPmFilter(e.target.value)}
+              className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-tfs-slate focus:outline-none focus:ring-2 focus:ring-tfs-teal bg-white"
+            >
+              <option value="all">All PM Groups</option>
+              {pmCodes.map(p => (
+                <option key={p.code} value={p.code}>{p.partner_name} ({p.code})</option>
+              ))}
+            </select>
+          )}
+
+          <span className="text-xs text-tfs-slate ml-auto">{filtered.length} client{filtered.length !== 1 ? 's' : ''}</span>
+        </div>
       </div>
 
       {/* ── Bulk action bar ─────────────────────────────────── */}
@@ -294,10 +372,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
               <tr>
                 <th className="px-4 py-3">
                   <button onClick={toggleAll} className="text-tfs-navy hover:text-tfs-teal">
-                    {allSelected
-                      ? <CheckSquare size={16} />
-                      : <Square size={16} />
-                    }
+                    {allSelected ? <CheckSquare size={16} /> : <Square size={16} />}
                   </button>
                 </th>
                 <th className="text-left px-4 py-3 font-semibold">Client</th>
@@ -323,8 +398,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                 const days   = daysSince(c.last_active_at)
                 const flag   = days >= 120 ? 'critical' : days >= 90 ? 'warning' : null
                 const isSelected = selected.has(c.id)
-                const trialDate  = c.free_trial_expires_at
-                const trialExpired = trialDate ? new Date(trialDate) < new Date() : false
+                const trialExpired = c.free_trial_expires_at ? new Date(c.free_trial_expires_at) < new Date() : false
 
                 return (
                   <tr
@@ -339,6 +413,9 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                     <td className="px-4 py-3">
                       <p className="font-medium text-tfs-navy">{c.first_name} {c.last_name}</p>
                       <p className="text-xs text-tfs-slate">{c.email}</p>
+                      {c.promo_code_used && (
+                        <p className="text-xs text-gray-400 font-mono">{c.promo_code_used}</p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       {c.client_type && (
@@ -418,14 +495,25 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => deleteClient(c.id, `${c.first_name} ${c.last_name}`.trim() || c.email)}
-                        disabled={deleting === c.id}
-                        className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
-                        title="Delete client"
-                      >
-                        {deleting === c.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        {c.stripe_customer_id && (
+                          <button
+                            onClick={() => { setCreditClient(c); setCreditAmount(''); setCreditNote('') }}
+                            className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                            title="Apply invoice credit"
+                          >
+                            <DollarSign size={15} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteClient(c.id, `${c.first_name} ${c.last_name}`.trim() || c.email)}
+                          disabled={deleting === c.id}
+                          className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+                          title="Delete client"
+                        >
+                          {deleting === c.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -434,6 +522,60 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
           </table>
         </div>
       </div>
+
+      {/* ── Credit modal ────────────────────────────────────── */}
+      {creditClient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="font-serif font-bold text-tfs-navy text-lg">Apply Invoice Credit</h3>
+              <button onClick={() => setCreditClient(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-sm text-tfs-slate">
+                A credit will be applied to <strong className="text-tfs-navy">{creditClient.first_name} {creditClient.last_name}</strong>&apos;s Stripe account and automatically deducted from their next invoice.
+              </p>
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Credit Amount (USD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-tfs-slate text-sm">$</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={creditAmount}
+                    onChange={e => setCreditAmount(e.target.value)}
+                    className="w-full pl-7 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                    autoFocus
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Reason <span className="text-gray-400 font-normal">(optional)</span></label>
+                <input
+                  type="text"
+                  placeholder="e.g. Courtesy discount, referral reward…"
+                  value={creditNote}
+                  onChange={e => setCreditNote(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button onClick={() => setCreditClient(null)} className="btn-outline text-sm">Cancel</button>
+                <button
+                  onClick={applyCredit}
+                  disabled={crediting || !creditAmount || parseFloat(creditAmount) <= 0}
+                  className="btn-primary text-sm flex items-center gap-2 disabled:opacity-50"
+                >
+                  {crediting && <Loader2 size={14} className="animate-spin" />}
+                  Apply Credit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Toast ──────────────────────────────────────────── */}
       {toast && (

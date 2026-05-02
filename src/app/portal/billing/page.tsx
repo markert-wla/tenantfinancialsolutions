@@ -89,7 +89,7 @@ export default async function PortalBillingPage() {
         )}
       </div>
 
-      {!isPaid && <ApplyPromoCode />}
+      <ApplyPromoCode />
 
       {isPaid && (
         <p className="text-xs text-tfs-slate text-center">

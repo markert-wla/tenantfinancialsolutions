@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   let body: {
     code: string
     partner_id: string
-    assigned_tier: string
+    assigned_tier: string | null
     code_type: string
     discount_percent?: number | null
     max_uses: number
@@ -27,17 +27,21 @@ export async function POST(req: NextRequest) {
 
   const { code, partner_id, assigned_tier, code_type, discount_percent, max_uses, expires_at } = body
 
-  if (!code || !partner_id || !assigned_tier) {
+  if (!code || !partner_id) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
-  }
-
-  const validTiers = ['free', 'bronze', 'silver']
-  if (!validTiers.includes(assigned_tier)) {
-    return NextResponse.json({ error: 'Gold tier cannot be assigned via promo code' }, { status: 400 })
   }
 
   const validCodeTypes = ['tier_assignment', 'affiliate_discount', 'full_comp', 'group_comp']
   const resolvedCodeType = validCodeTypes.includes(code_type) ? code_type : 'tier_assignment'
+
+  // affiliate_discount allows null assigned_tier ("all tiers"); other types require a specific tier
+  const validTiers = ['free', 'bronze', 'silver']
+  if (resolvedCodeType !== 'affiliate_discount' && (!assigned_tier || !validTiers.includes(assigned_tier))) {
+    return NextResponse.json({ error: 'Missing or invalid assigned tier.' }, { status: 400 })
+  }
+  if (resolvedCodeType === 'affiliate_discount' && assigned_tier && !validTiers.includes(assigned_tier)) {
+    return NextResponse.json({ error: 'Gold tier cannot be assigned via promo code' }, { status: 400 })
+  }
 
   if (resolvedCodeType === 'affiliate_discount' && (!discount_percent || discount_percent <= 0 || discount_percent > 100)) {
     return NextResponse.json({ error: 'Affiliate discount codes require a valid discount percentage (1–100).' }, { status: 400 })
@@ -56,12 +60,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Partner not found' }, { status: 400 })
   }
 
+  const resolvedTier = (resolvedCodeType === 'affiliate_discount' && !assigned_tier) ? null : assigned_tier
+
   const { error } = await service.from('promo_codes').insert({
     code:             code.toUpperCase().trim(),
     partner_id,
     partner_name:     partner.partner_name,
     partner_type:     partner.partner_type,
-    assigned_tier,
+    assigned_tier:    resolvedTier,
     code_type:        resolvedCodeType,
     discount_percent: resolvedCodeType === 'affiliate_discount' ? Number(discount_percent) : null,
     max_uses:         Math.max(1, Number(max_uses)),
@@ -81,7 +87,7 @@ export async function POST(req: NextRequest) {
     const siteUrl     = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tenantfinancialsolutions.com'
     const firstName   = (partner.contact_name as string | null)?.split(' ')[0] ?? 'there'
     const tierLabels: Record<string, string> = { free: 'Free', bronze: 'Starter Plan', silver: 'Advantage Plan' }
-    const tierLabel   = tierLabels[assigned_tier] ?? assigned_tier
+    const tierLabel   = resolvedTier ? (tierLabels[resolvedTier] ?? resolvedTier) : 'All Plans'
     const expiryLine  = expires_at
       ? `<p style="margin:0 0 16px;color:#6B7E8F;"><strong style="color:#1A2B4A;">Expires:</strong> ${new Date(expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>`
       : ''

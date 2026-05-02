@@ -15,7 +15,7 @@ type PromoCode = {
   partner_id: string | null
   partner_type: 'property_management' | 'nonprofit' | 'trial'
   partner_name: string
-  assigned_tier: 'free' | 'bronze' | 'silver'
+  assigned_tier: 'free' | 'bronze' | 'silver' | null
   code_type: 'tier_assignment' | 'affiliate_discount' | 'full_comp' | 'group_comp'
   discount_percent: number | null
   max_uses: number
@@ -29,6 +29,7 @@ const TIER_LABELS: Record<string, string> = {
   free:   'Free',
   bronze: 'Starter',
   silver: 'Advantage',
+  all:    'All',
 }
 
 const CODE_TYPE_LABELS: Record<string, string> = {
@@ -48,6 +49,7 @@ const TIER_COLORS: Record<string, string> = {
   free:   'bg-gray-100 text-gray-600',
   bronze: 'bg-orange-100 text-orange-700',
   silver: 'bg-slate-100 text-slate-600',
+  all:    'bg-tfs-teal/10 text-tfs-teal',
 }
 
 const CODE_TYPE_COLORS: Record<string, string> = {
@@ -270,6 +272,9 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
                   required
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
                 >
+                  {codeType === 'affiliate_discount' && (
+                    <option value="">All Tiers</option>
+                  )}
                   <option value="free">Free</option>
                   <option value="bronze">Starter</option>
                   <option value="silver">Advantage</option>
@@ -418,8 +423,8 @@ function CodeTable({
                       )}
                     </td>
                     <td className="py-2.5 pr-4">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TIER_COLORS[c.assigned_tier]}`}>
-                        {TIER_LABELS[c.assigned_tier]}
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TIER_COLORS[c.assigned_tier ?? 'all']}`}>
+                        {c.assigned_tier ? TIER_LABELS[c.assigned_tier] : 'All'}
                       </span>
                     </td>
                     <td className="py-2.5 pr-4 text-tfs-slate">

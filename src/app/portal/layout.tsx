@@ -17,10 +17,11 @@ export default async function PortalLayout({ children }: { children: React.React
     .eq('id', user.id)
     .single()
 
-  // Only clients belong in the client portal
-  if (profile?.role === 'admin')            redirect('/admin/dashboard')
+  // Non-admin non-clients don't belong in the portal
   if (profile?.role === 'coach')            redirect('/coach/dashboard')
   if (profile?.role === 'property_manager') redirect('/manager/dashboard')
+
+  const isAdminPreview = profile?.role === 'admin'
 
   const tier = profile?.plan_tier ?? 'free'
   const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Starter Plan', silver: 'Advantage Plan' }
@@ -55,6 +56,11 @@ export default async function PortalLayout({ children }: { children: React.React
 
       {/* Main content area */}
       <div className="flex-1 ml-56 bg-tfs-teal-light min-h-screen">
+        {isAdminPreview && (
+          <div className="bg-amber-400 text-amber-900 text-xs font-semibold text-center py-1.5 tracking-wide">
+            Admin Preview — viewing client portal as admin
+          </div>
+        )}
         {children}
       </div>
     </div>

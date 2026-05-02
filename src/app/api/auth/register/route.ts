@@ -89,7 +89,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Promo code has expired' }, { status: 400 })
     }
 
-    effectiveTier   = code.assigned_tier
+    // null assigned_tier means "all tiers" — keep the user's chosen tier
+    effectiveTier   = code.assigned_tier ?? effectiveTier
     codeType        = code.code_type ?? 'tier_assignment'
     discountPercent = code.discount_percent ?? null
     promoPartnerId  = code.partner_id ?? null

@@ -23,14 +23,16 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, plan_tier, sessions_used_this_month, timezone')
+    .select('first_name, plan_tier, sessions_used_this_month, extra_sessions, timezone')
     .eq('id', user.id)
     .single()
 
-  const tier   = profile?.plan_tier ?? 'free'
-  const used   = profile?.sessions_used_this_month ?? 0
-  const limit  = LIMITS[tier] ?? 0
-  const userTz = profile?.timezone ?? 'America/New_York'
+  const tier    = profile?.plan_tier ?? 'free'
+  const used    = profile?.sessions_used_this_month ?? 0
+  const limit   = LIMITS[tier] ?? 0
+  const extras  = profile?.extra_sessions ?? 0
+  const userTz  = profile?.timezone ?? 'America/New_York'
+  const isTopTier = tier === 'silver'
 
   // Upcoming confirmed bookings
   const { data: upcomingBookings } = await supabase
@@ -63,8 +65,8 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
     }).format(new Date(iso))
   }
 
-  const canBook  = limit > 0 && used < limit
-  const atLimit  = limit > 0 && used >= limit
+  const canBook  = (limit > 0 && used < limit) || extras > 0
+  const atLimit  = limit > 0 && used >= limit && extras === 0
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
@@ -96,8 +98,10 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
             <span className="text-lg font-normal text-tfs-slate"> / {limit === 0 ? '—' : limit}</span>
           </p>
           {atLimit && (
-            <p className="text-xs text-orange-600 mt-1">Monthly limit reached —{' '}
-              <Link href="/portal/billing" className="underline">Upgrade</Link>
+            <p className="text-xs text-orange-600 mt-1">
+              Monthly limit reached{!isTopTier && (
+                <> — <Link href="/portal/billing" className="underline">Upgrade</Link></>
+              )}
             </p>
           )}
         </div>
@@ -107,26 +111,39 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
           <div>
             <p className="text-sm text-tfs-slate mb-1">Ready to meet with a coach?</p>
             {atLimit ? (
-              <p className="text-tfs-navy font-medium text-sm">
-                Monthly sessions used.{' '}
-                <Link href="/portal/billing" className="text-tfs-teal hover:underline">Upgrade</Link> or wait for the monthly reset.
-              </p>
+              isTopTier ? (
+                <p className="text-tfs-navy font-medium text-sm">
+                  Monthly sessions used. Buy a single session or wait for the monthly reset.
+                </p>
+              ) : (
+                <p className="text-tfs-navy font-medium text-sm">
+                  Monthly sessions used.{' '}
+                  <Link href="/portal/billing" className="text-tfs-teal hover:underline">Upgrade</Link> or wait for the monthly reset.
+                </p>
+              )
             ) : (
               <p className="text-tfs-navy font-medium">
                 You have{' '}
-                <span className="text-tfs-teal font-bold">{limit - used}</span>{' '}
-                session{limit - used !== 1 ? 's' : ''} remaining this month.
+                <span className="text-tfs-teal font-bold">{extras > 0 ? extras : limit - used}</span>{' '}
+                session{(extras > 0 ? extras : limit - used) !== 1 ? 's' : ''} remaining this month.
               </p>
             )}
           </div>
-          <Link
-            href="/portal/book"
-            className={canBook ? 'btn-primary text-sm shrink-0' : 'btn-outline text-sm shrink-0 opacity-50 pointer-events-none'}
-            aria-disabled={!canBook}
-          >
-            <CalendarPlus size={16} className="mr-1 inline-block" />
-            Book a Session
-          </Link>
+          {atLimit && isTopTier ? (
+            <Link href="/portal/book?buy=1" className="btn-primary text-sm shrink-0">
+              <CalendarPlus size={16} className="mr-1 inline-block" />
+              Buy a Single Session
+            </Link>
+          ) : (
+            <Link
+              href="/portal/book"
+              className={canBook ? 'btn-primary text-sm shrink-0' : 'btn-outline text-sm shrink-0 opacity-50 pointer-events-none'}
+              aria-disabled={!canBook}
+            >
+              <CalendarPlus size={16} className="mr-1 inline-block" />
+              Book a Session
+            </Link>
+          )}
         </div>
       </div>
 

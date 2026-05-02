@@ -33,12 +33,18 @@ export default function ApplyPromoCode() {
 
     if (!res.ok) {
       setError(data.error ?? 'Failed to apply code.')
-    } else {
-      const label = TIER_LABEL[data.newTier] ?? data.newTier
-      setSuccess(`Code applied! Your plan has been upgraded to ${label}.`)
-      setCode('')
-      router.refresh()
+      return
     }
+
+    if (data.checkoutUrl) {
+      window.location.href = data.checkoutUrl
+      return
+    }
+
+    const label = TIER_LABEL[data.newTier] ?? data.newTier
+    setSuccess(`Code applied! Your plan has been upgraded to ${label}.`)
+    setCode('')
+    router.refresh()
   }
 
   return (
@@ -48,7 +54,7 @@ export default function ApplyPromoCode() {
         <p className="font-semibold text-tfs-navy text-sm">Have a promo code?</p>
       </div>
       <p className="text-xs text-tfs-slate mb-4">
-        If your property manager or organisation provided a code, enter it here to unlock your plan.
+        Enter a promo code to unlock or upgrade your plan.
       </p>
 
       {success ? (
