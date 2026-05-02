@@ -72,7 +72,7 @@ const INDIVIDUAL_PLANS = [
 
 const BADGE_STYLES: Record<string, string> = {
   amber: 'bg-amber-100 text-amber-700',
-  teal:  'bg-tfs-teal/10 text-tfs-teal',
+  teal:  'bg-tfs-teal/10 text-tfs-navy',
 }
 
 const NONPROFIT_ORGS = [
@@ -105,7 +105,7 @@ export default function ServicesPage() {
         </div>
         <div className="relative z-10 max-w-3xl mx-auto">
           <h1 className="text-5xl font-serif font-bold mb-4">Services & Plans</h1>
-          <p className="text-white/80 text-xl mb-8">
+          <p className="text-white text-xl mb-8">
             Coaching plans for individuals, couples, property managers, and community organizations.
             Transparent pricing. No hidden fees.
           </p>
@@ -123,7 +123,7 @@ export default function ServicesPage() {
       <section className="py-14 bg-tfs-teal-light px-4 border-b border-tfs-teal/20">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl font-serif font-bold text-tfs-navy mb-2">What Free Includes</h2>
-          <p className="text-tfs-teal font-semibold mb-6">Individuals / Couples — Start for Free</p>
+          <p className="text-tfs-navy font-semibold mb-6">Individuals / Couples — Start for Free</p>
           <div className="inline-flex flex-col gap-3 text-left mx-auto">
             <div className="flex items-start gap-3">
               <Check className="text-tfs-teal shrink-0 mt-0.5" size={18} />
@@ -166,7 +166,7 @@ export default function ServicesPage() {
               >
                 {plan.popular && (
                   <div className="absolute -top-3 inset-x-0 flex justify-center">
-                    <span className="bg-tfs-teal text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wide">
+                    <span className="bg-tfs-teal-button text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wide">
                       Most Popular
                     </span>
                   </div>
@@ -229,10 +229,10 @@ export default function ServicesPage() {
         </div>
         <div className="relative z-10 max-w-5xl mx-auto text-white">
           <div className="flex items-center gap-3 mb-4">
-            <Building2 className="text-white/80" size={28} />
+            <Building2 className="text-white" size={28} />
             <h2 className="text-3xl md:text-4xl font-serif font-bold">Property Management Partners</h2>
           </div>
-          <div className="text-white/80 text-lg mb-8 max-w-3xl space-y-3">
+          <div className="text-white text-lg mb-8 max-w-3xl space-y-3">
             <p>
               Money stress doesn&apos;t have to define your tenants&apos; lives. With{' '}
               <strong className="text-white">one-on-one coaching</strong>, they gain clarity, confidence, and control.
@@ -268,7 +268,7 @@ export default function ServicesPage() {
             {/* Tenant Partner Membership */}
             <div className="bg-white rounded-2xl p-8 text-tfs-navy">
               <h3 className="text-xl font-bold font-serif mb-2">Tenant Partner Membership</h3>
-              <p className="text-tfs-teal font-semibold text-lg mb-1">Custom Pricing</p>
+              <p className="text-tfs-navy font-semibold text-lg mb-1">Custom Pricing</p>
               <p className="text-tfs-slate text-sm mb-5">You pay — your tenants get Advantage Plan coaching</p>
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Admin generates promo codes — 1 per unit</li>
@@ -352,7 +352,7 @@ export default function ServicesPage() {
         </div>
         <div className="relative z-10 max-w-2xl mx-auto">
           <h2 className="text-3xl font-serif font-bold mb-4">Ready to get started?</h2>
-          <p className="text-white/80 mb-8">No credit card required. Your first Connection Session is on us.</p>
+          <p className="text-white mb-8">No credit card required. Your first Connection Session is on us.</p>
           <Link href="/register" className="btn-primary px-8 py-4">
             Step into your free Connection Session
           </Link>

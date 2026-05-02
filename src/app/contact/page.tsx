@@ -28,7 +28,7 @@ export default function ContactPage() {
       >
         <div className="max-w-2xl mx-auto">
           <h1 className="text-5xl font-serif font-bold mb-4">Get in Touch</h1>
-          <p className="text-white/80 text-xl mb-8">Questions? Ready to partner? We&apos;d love to hear from you.</p>
+          <p className="text-white text-xl mb-8">Questions? Ready to partner? We&apos;d love to hear from you.</p>
           <Link
             href="/register?tier=free"
             data-hero-cta="true"

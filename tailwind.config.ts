@@ -12,10 +12,11 @@ const config: Config = {
         tfs: {
           teal:          '#1D9E75',
           'teal-dark':   '#158A63',
+          'teal-button': '#107A58',
           'teal-light':  '#E8F7F2',
           navy:          '#1A2B4A',
           'navy-light':  '#2C3E6B',
-          slate:         '#6B7E8F',
+          slate:         '#50647A',
           gold:          '#F5C842',
           purple:        '#5B2D8E',
           'purple-dark': '#4A2478',

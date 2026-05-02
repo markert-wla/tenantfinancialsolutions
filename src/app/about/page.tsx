@@ -131,7 +131,7 @@ export default async function AboutPage() {
                   <div className="w-9 h-9 rounded-lg bg-tfs-gold flex items-center justify-center shrink-0">
                     <span className="text-tfs-navy font-bold text-base font-serif">{letter}</span>
                   </div>
-                  <h3 className="font-bold text-tfs-navy text-base font-serif">{word}</h3>
+                  <p className="font-bold text-tfs-navy text-base font-serif">{word}</p>
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed pl-12">{desc}</p>
               </div>
@@ -210,7 +210,7 @@ export default async function AboutPage() {
           <h2 className="text-3xl font-serif font-bold mb-4">
             Ready to work with one of our coaches?
           </h2>
-          <p className="text-white/80 mb-8">No credit card required. Your first Connection Session is on us.</p>
+          <p className="text-white mb-8">No credit card required. Your first Connection Session is on us.</p>
           <Link href="/register" className="btn-primary px-8 py-4">
             Step into your free Connection Session
           </Link>

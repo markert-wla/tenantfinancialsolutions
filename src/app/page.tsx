@@ -157,9 +157,9 @@ export default async function HomePage({
                 href={href}
                 className={`rounded-xl p-6 text-left hover:scale-105 transition-transform duration-200 group bg-white/10 backdrop-blur-sm border border-white/20`}
               >
-                <Icon className="mb-3 text-white/80" size={28} />
+                <Icon className="mb-3 text-white" size={28} />
                 <p className="font-semibold text-white text-base mb-1">{label}</p>
-                <p className="text-sm text-white/70">{desc}</p>
+                <p className="text-sm text-white">{desc}</p>
                 <ChevronRight
                   className="mt-3 text-white/60 group-hover:text-white transition-colors"
                   size={16}
@@ -317,9 +317,9 @@ export default async function HomePage({
               href={href}
               className={`${bg} rounded-2xl p-8 text-left hover:scale-105 transition-transform duration-200 group`}
             >
-              <Icon className="mb-4 text-white/80" size={32} />
+              <Icon className="mb-4 text-white" size={32} />
               <p className="font-bold text-white text-xl mb-2">{label}</p>
-              <p className="text-sm text-white/80 mb-4">{desc}</p>
+              <p className="text-sm text-white mb-4">{desc}</p>
               <span className="inline-flex items-center text-white text-sm font-medium group-hover:gap-2 gap-1 transition-all">
                 Learn more <ChevronRight size={16} />
               </span>
@@ -337,7 +337,7 @@ export default async function HomePage({
       >
         <div className="max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-serif font-bold text-tfs-navy mb-4">
-            <span className="line-through opacity-60">Money Stigma</span> – No More
+            <span className="line-through">Money Stigma</span> – No More
           </h2>
           <p className="text-tfs-navy text-lg mb-8">
             Real People – Real Coaching
@@ -385,7 +385,7 @@ export default async function HomePage({
           <h2 className="text-4xl font-serif font-bold mb-4">
             Ready to Take Ownership of Your Financial Future?
           </h2>
-          <p className="text-white/80 text-lg mb-8">
+          <p className="text-white text-lg mb-8">
             Start for free. No credit card required. Your first Connection Session is on us.
           </p>
           <Link href="/register" className="btn-primary text-base px-8 py-4">

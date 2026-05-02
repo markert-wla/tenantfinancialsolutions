@@ -94,7 +94,7 @@ export default function Footer() {
             <h3 className="font-semibold text-white mb-4 uppercase tracking-wider text-xs">Subscribe</h3>
             <p className="text-sm text-gray-300 mb-3">Sign up to receive news and updates.</p>
             {status === 'done' ? (
-              <p className="text-tfs-teal text-sm font-medium">You&apos;re subscribed!</p>
+              <p className="text-tfs-gold text-sm font-medium">You&apos;re subscribed!</p>
             ) : (
               <form onSubmit={handleSubscribe} className="flex gap-2">
                 <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
@@ -102,8 +102,8 @@ export default function Footer() {
                   className="flex-1 min-w-0 px-3 py-2 rounded-lg text-sm text-tfs-navy bg-white
                              focus:outline-none focus:ring-2 focus:ring-tfs-teal" />
                 <button type="submit" disabled={status === 'loading'}
-                  className="px-4 py-2 rounded-lg border border-tfs-teal text-tfs-teal text-sm font-semibold
-                             hover:bg-tfs-teal hover:text-white transition-colors disabled:opacity-50">
+                  className="px-4 py-2 rounded-lg border border-white text-white text-sm font-semibold
+                             hover:bg-white hover:text-tfs-navy transition-colors disabled:opacity-50">
                   {status === 'loading' ? '...' : 'Sign Up'}
                 </button>
               </form>
