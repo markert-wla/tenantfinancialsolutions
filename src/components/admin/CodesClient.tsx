@@ -52,6 +52,14 @@ const TIER_COLORS: Record<string, string> = {
   all:    'bg-tfs-teal/10 text-tfs-teal',
 }
 
+function partnershipLabel(code: PromoCode): { label: string; color: string } | null {
+  if (code.code_type === 'affiliate_discount') return { label: 'Affiliate', color: 'bg-tfs-teal/10 text-tfs-teal' }
+  if (code.assigned_tier === 'silver') return { label: 'Full Amenity', color: 'bg-tfs-navy/10 text-tfs-navy' }
+  if (code.code_type === 'full_comp' || code.code_type === 'group_comp') return null
+  if (code.assigned_tier === 'bronze') return { label: 'Affiliate', color: 'bg-tfs-teal/10 text-tfs-teal' }
+  return null
+}
+
 const CODE_TYPE_COLORS: Record<string, string> = {
   tier_assignment:    'bg-gray-100 text-gray-600',
   affiliate_discount: 'bg-tfs-teal/10 text-tfs-teal',
@@ -396,6 +404,7 @@ function CodeTable({
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Code</th>
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Partner</th>
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Type</th>
+                <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Partnership</th>
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Tier</th>
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Uses</th>
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Expires</th>
@@ -421,6 +430,11 @@ function CodeTable({
                       {c.code_type === 'affiliate_discount' && c.discount_percent && (
                         <span className="ml-1 text-xs text-tfs-teal font-semibold">{c.discount_percent}%</span>
                       )}
+                    </td>
+                    <td className="py-2.5 pr-4">
+                      {(() => { const p = partnershipLabel(c); return p ? (
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${p.color}`}>{p.label}</span>
+                      ) : <span className="text-gray-300">—</span> })()}
                     </td>
                     <td className="py-2.5 pr-4">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TIER_COLORS[c.assigned_tier ?? 'all']}`}>

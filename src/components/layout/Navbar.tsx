@@ -8,13 +8,14 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/cn'
 
 const NAV_LINKS = [
-  { label: 'Home',     href: '/' },
-  { label: 'About',    href: '/about' },
-  { label: 'Services', href: '/services' },
-  { label: 'Contact',  href: '/contact' },
+  { label: 'Home',      href: '/' },
+  { label: 'About',     href: '/about' },
+  { label: 'Our Story', href: '/our-story' },
+  { label: 'Services',  href: '/services' },
+  { label: 'Contact',   href: '/contact' },
 ]
 
-const PUBLIC_PAGES = new Set(['/', '/about', '/services', '/contact'])
+const PUBLIC_PAGES = new Set(['/', '/about', '/our-story', '/services', '/contact'])
 
 export default function Navbar() {
   const pathname = usePathname()

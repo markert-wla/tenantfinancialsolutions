@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Users, CalendarCheck, UserCheck, Tag } from 'lucide-react'
 import Link from 'next/link'
-import QuickGenerateButton from '@/components/manager/QuickGenerateButton'
 
 export const metadata: Metadata = { title: 'PM Dashboard' }
 
@@ -73,17 +72,7 @@ export default async function ManagerDashboardPage() {
       </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card">
-          <h2 className="font-serif font-bold text-tfs-navy text-lg mb-3 flex items-center gap-2">
-            <Tag size={18} className="text-tfs-teal" /> Quick Generate Code
-          </h2>
-          <p className="text-sm text-tfs-slate mb-4">
-            One click generates a new enrollment code with default settings. Share it with your tenants.
-          </p>
-          <QuickGenerateButton partnerName={codes?.[0]?.partner_name ?? ''} />
-        </div>
-
+      <div className="grid grid-cols-1 gap-6">
         <div className="card">
           <h2 className="font-serif font-bold text-tfs-navy text-lg mb-3 flex items-center gap-2">
             <Users size={18} className="text-tfs-teal" /> My Promo Codes

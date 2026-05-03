@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AdminProfileForm from '@/components/settings/AdminProfileForm'
+import SiteSettingsForm from '@/components/admin/SiteSettingsForm'
 
 export const metadata: Metadata = { title: 'Settings — Admin' }
 
@@ -12,13 +13,15 @@ export default async function AdminSettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('first_name, last_name, timezone, contact_email, role, photo_url, bio')
-    .eq('id', user.id)
-    .single()
+  const [profileResult, settingsResult] = await Promise.all([
+    supabase.from('profiles').select('first_name, last_name, timezone, contact_email, role, photo_url, bio').eq('id', user.id).single(),
+    supabase.from('site_settings').select('key, value'),
+  ])
 
+  const profile = profileResult.data
   if (!profile || profile.role !== 'admin') redirect('/login')
+
+  const settingsMap = Object.fromEntries((settingsResult.data ?? []).map(r => [r.key, r.value]))
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
@@ -31,6 +34,7 @@ export default async function AdminSettingsPage() {
         userId={user.id}
         profile={profile}
       />
+      <SiteSettingsForm youtubeVideoId={settingsMap['youtube_video_id'] ?? ''} />
     </div>
   )
 }

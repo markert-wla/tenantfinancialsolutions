@@ -33,16 +33,14 @@ const CORE_VALUES = [
 ]
 
 async function getCoaches() {
-  try {
-    const supabase = createClient()
-    const { data } = await supabase
-      .from('coaches')
-      .select('id, display_name, photo_url, bio, bio_short, specialty')
-      .eq('is_active', true)
-    return data ?? []
-  } catch {
-    return []
-  }
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('coaches')
+    .select('id, display_name, photo_url, bio, bio_short, specialty')
+    .eq('is_active', true)
+    .order('display_name')
+  if (error) console.error('[getCoaches about] Supabase error:', error.message, error.details)
+  return data ?? []
 }
 
 export default async function AboutPage() {

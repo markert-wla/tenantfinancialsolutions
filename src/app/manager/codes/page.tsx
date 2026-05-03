@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import QuickGenerateButton from '@/components/manager/QuickGenerateButton'
 import { CheckCircle2, XCircle } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Promo Codes — PM' }
@@ -25,10 +24,6 @@ export default async function ManagerCodesPage() {
         .order('created_at', { ascending: false })
     : { data: [] }
 
-  const partnerName = codes?.[0]?.partner_name
-    ?? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
-    ?? ''
-
   function fmtDate(iso: string | null) {
     if (!iso) return 'No expiry'
     return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -37,20 +32,15 @@ export default async function ManagerCodesPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-1">Promo Codes</h1>
-          <p className="text-sm text-tfs-slate">{codes?.length ?? 0} code{codes?.length !== 1 ? 's' : ''} assigned to you</p>
-        </div>
-        <div>
-          <QuickGenerateButton partnerName={partnerName} />
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-1">Promo Codes</h1>
+        <p className="text-sm text-tfs-slate">{codes?.length ?? 0} code{codes?.length !== 1 ? 's' : ''} assigned to your account</p>
       </div>
 
       {!codes?.length ? (
         <div className="card text-center py-16 text-tfs-slate">
-          <p className="text-lg mb-2">No codes yet.</p>
-          <p className="text-sm">Use the Generate Code button to create your first enrollment code.</p>
+          <p className="text-lg mb-2">No codes assigned yet.</p>
+          <p className="text-sm">Contact your administrator to have promo codes assigned to your account.</p>
         </div>
       ) : (
         <div className="card overflow-hidden p-0">

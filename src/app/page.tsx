@@ -27,16 +27,24 @@ export const metadata: Metadata = {
 }
 
 async function getCoaches() {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('coaches')
+    .select('id, display_name, photo_url, bio, bio_short, specialty')
+    .eq('is_active', true)
+    .order('display_name')
+    .limit(6)
+  if (error) console.error('[getCoaches] Supabase error:', error.message, error.details)
+  return data ?? []
+}
+
+async function getYouTubeVideoId() {
   try {
     const supabase = createClient()
-    const { data } = await supabase
-      .from('coaches')
-      .select('id, display_name, photo_url, bio, bio_short, specialty')
-      .eq('is_active', true)
-      .limit(3)
-    return data ?? []
+    const { data } = await supabase.from('site_settings').select('value').eq('key', 'youtube_video_id').single()
+    return data?.value?.trim() ?? ''
   } catch {
-    return []
+    return ''
   }
 }
 
@@ -104,9 +112,10 @@ export default async function HomePage({
     redirect(`/auth/callback?code=${encodeURIComponent(code)}`)
   }
 
-  const [testimonials, coaches] = await Promise.all([
+  const [testimonials, coaches, youtubeVideoId] = await Promise.all([
     getApprovedTestimonials(),
     getCoaches(),
+    getYouTubeVideoId(),
   ])
 
   return (
@@ -205,6 +214,30 @@ export default async function HomePage({
       </section>
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
+      {/* ── FEATURED VIDEO ───────────────────────────────────── */}
+      {youtubeVideoId && (
+        <>
+          <section className="py-20 bg-white px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="section-heading mb-4">See How TFS Coaching Works</h2>
+              <p className="text-tfs-slate text-lg mb-10 max-w-xl mx-auto">
+                Watch how our coaches help tenants build lasting financial clarity.
+              </p>
+              <div className="relative w-full rounded-2xl overflow-hidden shadow-xl" style={{ paddingBottom: '56.25%' }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+                  title="TFS Featured Video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+            </div>
+          </section>
+          <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+        </>
+      )}
 
       {/* ── MEET THE COACHES ─────────────────────────────────── */}
       <section className="py-20 bg-tfs-teal-light px-4">
