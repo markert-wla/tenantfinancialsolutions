@@ -35,7 +35,7 @@ export default function PopupManager() {
   if (visible.length === 0) return null
 
   function dismiss(id: string) {
-    setDismissed(prev => new Set([...prev, id]))
+    setDismissed(prev => { const next = new Set(prev); next.add(id); return next })
   }
 
   return (
