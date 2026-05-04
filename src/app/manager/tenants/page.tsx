@@ -74,7 +74,7 @@ export default async function ManagerTenantsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {(tenants as any[]).map(t => {
+                {(tenants as { id: string; first_name: string; last_name: string; email: string; promo_code_used: string | null; plan_tier: string; sessions_used_this_month: number; last_active_at: string; is_active: boolean }[]).map(t => {
                   const lastActive = new Date(t.last_active_at)
                   const isInactive = lastActive < ninetyDaysAgo
                   return (

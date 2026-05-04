@@ -19,7 +19,7 @@ export async function GET() {
     .eq('coach_id', user.id)
     .neq('status', 'cancelled')
 
-  const clientIds = Array.from(new Set((bookings ?? []).map((b: any) => b.client_id as string)))
+  const clientIds = Array.from(new Set((bookings ?? []).map((b: { client_id: string }) => b.client_id)))
   if (!clientIds.length) return NextResponse.json([])
 
   const { data: clients } = await supabase

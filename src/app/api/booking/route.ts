@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
     .eq('day_of_week', utcDow)
 
   const inAvailability = (availBlocks ?? []).some(
-    (b: any) => b.start_time_utc <= slotStartTime && b.end_time_utc >= slotEndTime
+    (b: { start_time_utc: string; end_time_utc: string }) => b.start_time_utc <= slotStartTime && b.end_time_utc >= slotEndTime
   )
   if (!inAvailability) {
     return NextResponse.json({ error: 'Selected slot is outside coach availability' }, { status: 400 })

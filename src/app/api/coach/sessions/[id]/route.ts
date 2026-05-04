@@ -81,7 +81,7 @@ export async function PATCH(
 
   // Email client when coach cancels a future session
   if (update.status === 'cancelled') {
-    const client = booking.client as any
+    const client = booking.client as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null
     if (client?.email) {
       const sessionTime = fmtTime(booking.start_time_utc, client.timezone ?? 'America/New_York')
       const coachName = `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() || 'Your coach'

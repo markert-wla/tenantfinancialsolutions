@@ -35,7 +35,7 @@ export default async function CoachSessionsPage() {
           All sessions in your timezone ({coachTz}). Past 90 days + all upcoming.
         </p>
       </div>
-      <SessionsClient sessions={(sessions ?? []) as any} coachTz={coachTz} />
+      <SessionsClient sessions={(sessions ?? []) as unknown as { id: string; start_time_utc: string; end_time_utc: string; status: 'confirmed' | 'pending' | 'cancelled'; notes: string | null; client_notes: string | null; attended: boolean | null; flagged: boolean; flag_reason: string | null; profiles: { first_name: string; last_name: string; email: string; plan_tier: string } | null }[]} coachTz={coachTz} />
     </div>
   )
 }

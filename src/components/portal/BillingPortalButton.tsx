@@ -14,8 +14,8 @@ export default function BillingPortalButton() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed')
       window.location.href = data.url
-    } catch (err: any) {
-      setError(err.message ?? 'Could not open billing portal. Please try again.')
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : null) ?? 'Could not open billing portal. Please try again.')
       setLoading(false)
     }
   }

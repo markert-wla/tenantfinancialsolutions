@@ -42,7 +42,7 @@ export default async function CoachClientsPage() {
     .eq('coach_id', user.id)
     .neq('status', 'cancelled')
 
-  const clientIds = Array.from(new Set((bookings ?? []).map((b: any) => b.client_id as string)))
+  const clientIds = Array.from(new Set((bookings ?? []).map((b: { client_id: string }) => b.client_id)))
 
   const clients = clientIds.length > 0
     ? (await supabase
@@ -88,7 +88,7 @@ export default async function CoachClientsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {(clients as any[]).map(c => {
+                {(clients as { id: string; first_name: string; last_name: string; email: string; plan_tier: string; client_type: string | null; last_active_at: string; sessions_used_this_month: number; is_active: boolean }[]).map(c => {
                   const lastActive  = new Date(c.last_active_at)
                   const isInactive  = lastActive < ninetyDaysAgo
                   return (

@@ -59,9 +59,9 @@ export default async function CoachClientDetailPage({ params }: { params: { id: 
       </div>
 
       <ClientDetailClient
-        client={client as any}
-        bookings={(bookings ?? []) as any}
-        clientNotes={(clientNotes ?? []) as any}
+        client={client as { id: string; first_name: string; last_name: string; email: string; plan_tier: string; client_type: string; sessions_used_this_month: number; is_active: boolean; last_active_at: string }}
+        bookings={(bookings ?? []) as { id: string; start_time_utc: string; status: 'confirmed' | 'pending' | 'cancelled'; notes: string | null; client_notes: string | null; attended: boolean | null; flagged: boolean; flag_reason: string | null }[]}
+        clientNotes={(clientNotes ?? []) as { id: string; note: string; created_at: string }[]}
         coachTz={coachTz}
       />
     </div>

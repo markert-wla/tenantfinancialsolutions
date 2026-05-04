@@ -42,8 +42,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { error } = await service.from('bookings').update({ status: 'cancelled', cancelled_by: 'admin' }).eq('id', params.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    const client = booking.client as any
-    const coach  = booking.coach as any
+    const client = booking.client as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null
+    const coach  = booking.coach as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
 
     const emailPromises = []

@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     }).eq('id', pmId)
 
     return NextResponse.json({ ok: true, id: pmId })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('POST /api/admin/managers', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

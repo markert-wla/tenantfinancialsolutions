@@ -53,6 +53,13 @@ export default async function AdminDashboardPage() {
       .limit(50),
   ])
 
+  type CancellationRow = { id: string; start_time_utc: string; client: { id: string; first_name: string; last_name: string; email: string } | null; coach: { display_name: string } | null }
+  type FlaggedRow      = { id: string; start_time_utc: string; flag_reason: string | null; profiles: { first_name: string; last_name: string } | null; coaches: { display_name: string } | null }
+  type InactiveRow     = { id: string; first_name: string; last_name: string; email: string; plan_tier: string; last_active_at: string }
+  const cancellations  = (coachCancellations ?? []) as unknown as CancellationRow[]
+  const flagged        = (flaggedSessions    ?? []) as unknown as FlaggedRow[]
+  const inactive       = (inactiveClients    ?? []) as unknown as InactiveRow[]
+
   function daysSince(iso: string) {
     return Math.floor((now.getTime() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24))
   }
@@ -101,7 +108,7 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {(coachCancellations ?? []).map((b: any) => (
+                {cancellations.map((b) => (
                   <tr key={b.id}>
                     <td className="py-2.5 pr-4 text-xs text-tfs-navy whitespace-nowrap">
                       {fmtET(b.start_time_utc)}
@@ -153,7 +160,7 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {(flaggedSessions ?? []).map((b: any) => (
+                {flagged.map((b) => (
                   <tr key={b.id}>
                     <td className="py-2.5 pr-4 text-xs text-tfs-navy whitespace-nowrap">
                       {fmtET(b.start_time_utc)}
@@ -195,7 +202,7 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {inactiveClients.map((c: any) => {
+                {inactive.map((c) => {
                   const days = daysSince(c.last_active_at)
                   const isCritical = days >= 120
                   return (

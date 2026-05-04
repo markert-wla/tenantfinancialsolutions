@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
   try {
     const stripe = getStripe()
     event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!)
-  } catch (err: any) {
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: `Webhook Error: ${(err as Error).message}` }, { status: 400 })
   }
 
   const supabase = createServiceClient()

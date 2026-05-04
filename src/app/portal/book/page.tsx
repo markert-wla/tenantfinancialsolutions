@@ -42,7 +42,7 @@ export default async function BookPage({
     .eq('is_active', true)
     .order('display_name', { ascending: true })
 
-  const coaches = (coachRows ?? []).map((c: any) => ({
+  const coaches = (coachRows ?? []).map((c: { id: string; display_name: string }) => ({
     id:          c.id,
     displayName: c.display_name,
   }))

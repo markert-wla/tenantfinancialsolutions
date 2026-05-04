@@ -253,7 +253,7 @@ export default async function HomePage({
           </div>
           {coaches.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {coaches.map((coach: any) => (
+              {coaches.map((coach: { id: string; display_name: string; photo_url: string | null; bio: string | null; bio_short: string | null; specialty: string | null }) => (
                 <CoachCard key={coach.id} coach={coach} />
               ))}
             </div>
@@ -348,7 +348,7 @@ export default async function HomePage({
             <div className="max-w-6xl mx-auto">
               <h2 className="section-heading text-center mb-12">What Our Clients Say</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {testimonials.map((t: any) => (
+                {testimonials.map((t: { id: string; quote: string; client_name: string }) => (
                   <div key={t.id} className="rounded-2xl p-6 bg-tfs-navy shadow-md">
                     <p className="text-white italic mb-4 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
                     <p className="font-semibold text-tfs-gold text-lg">{t.client_name}</p>

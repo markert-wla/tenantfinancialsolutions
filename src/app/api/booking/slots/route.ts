@@ -59,9 +59,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json([], { status: 200 })
   }
 
-  const coachIds = coaches.map((c: any) => c.id)
+  const coachIds = coaches.map((c: { id: string; display_name: string }) => c.id)
   const coachMap: Record<string, string> = {}
-  coaches.forEach((c: any) => { coachMap[c.id] = c.display_name })
+  coaches.forEach((c: { id: string; display_name: string }) => { coachMap[c.id] = c.display_name })
 
   // --- Fetch availability blocks ---
   const { data: availability } = await supabase
@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
 
   // Build a set of "coachId|YYYY-MM-DD" for O(1) lookup
   const unavailableSet = new Set<string>(
-    (unavailableDates ?? []).map((r: any) => `${r.coach_id}|${r.date}`)
+    (unavailableDates ?? []).map((r: { coach_id: string; date: string }) => `${r.coach_id}|${r.date}`)
   )
 
   // Build a set of booked intervals per coach for quick lookup

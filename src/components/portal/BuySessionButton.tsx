@@ -14,8 +14,8 @@ export default function BuySessionButton() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed')
       window.location.href = data.checkoutUrl
-    } catch (err: any) {
-      setError(err.message ?? 'Something went wrong. Please try again.')
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : null) ?? 'Something went wrong. Please try again.')
       setLoading(false)
     }
   }

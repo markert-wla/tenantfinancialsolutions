@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   let stripe: ReturnType<typeof getStripe>
   try {
     stripe = getStripe()
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ error: 'Payment system not configured' }, { status: 500 })
   }
 
@@ -70,8 +70,9 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ checkoutUrl: session.url })
-  } catch (err: any) {
-    console.error('[session-checkout]', err.message)
-    return NextResponse.json({ error: err.message ?? 'Stripe error' }, { status: 500 })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Stripe error'
+    console.error('[session-checkout]', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

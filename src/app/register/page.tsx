@@ -42,7 +42,7 @@ function RegisterInner() {
     promoCode: '', unitNumber: '', birthdayMonth: '', anniversaryMonth: '',
   })
   const [codeStatus, setCodeStatus] = useState<'idle'|'checking'|'valid'|'invalid'>('idle')
-  const [codeInfo, setCodeInfo]     = useState<any>(null)
+  const [codeInfo, setCodeInfo]     = useState<{ assigned_tier: string; discount_percent: number | null; partner_name: string | null } | null>(null)
   const [error, setError]           = useState(
     params.get('cancelled') === '1'
       ? 'Payment was cancelled. You can try again or choose a free plan.'
@@ -252,7 +252,7 @@ function RegisterInner() {
               {codeStatus === 'valid' && (
                 <div className="mt-2 flex items-center gap-2 text-green-600 text-sm">
                   <Check size={16} />
-                  Code valid — {TIER_LABELS[codeInfo?.assigned_tier] ?? codeInfo?.assigned_tier} assigned
+                  Code valid — {codeInfo ? (TIER_LABELS[codeInfo.assigned_tier] ?? codeInfo.assigned_tier) : ''} assigned
                 </div>
               )}
               {codeStatus === 'invalid' && (

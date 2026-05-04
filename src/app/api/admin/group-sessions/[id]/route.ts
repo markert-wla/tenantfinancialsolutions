@@ -9,13 +9,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  let body: Record<string, any>
+  let body: Record<string, unknown>
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
   const allowed = ['join_link', 'recording_url', 'partner_ids']
-  const updates: Record<string, any> = {}
+  const updates: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) updates[key] = body[key]
   }

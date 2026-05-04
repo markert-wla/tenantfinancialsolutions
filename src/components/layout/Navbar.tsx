@@ -22,7 +22,7 @@ export default function Navbar() {
   const [open, setOpen]               = useState(false)
   const [scrolled, setScrolled]       = useState(false)
   const [sessionVisible, setSessionVisible] = useState(false)
-  const [user, setUser]               = useState<any>(null)
+  const [user, setUser]               = useState<{ id: string; email?: string } | null>(null)
   const [role, setRole]               = useState<string | null>(null)
   const supabase = useMemo(() => createClient(), [])
 

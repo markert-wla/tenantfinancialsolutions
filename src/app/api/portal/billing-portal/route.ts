@@ -27,7 +27,7 @@ export async function GET() {
     })
 
     return NextResponse.json({ url: session.url })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('GET /api/portal/billing-portal', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

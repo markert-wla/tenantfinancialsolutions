@@ -56,7 +56,7 @@ export default async function ManagerCodesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {(codes as any[]).map(c => {
+                {(codes as { code: string; partner_name: string; assigned_tier: string; uses_count: number; max_uses: number; expires_at: string | null; is_active: boolean; created_at: string }[]).map(c => {
                   const isExpired = c.expires_at && new Date(c.expires_at) < new Date()
                   return (
                     <tr key={c.code} className="hover:bg-gray-50">

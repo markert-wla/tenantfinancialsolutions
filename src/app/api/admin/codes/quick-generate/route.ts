@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     if (error) throw error
 
     return NextResponse.json({ code, expires_at: expiresAt })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('POST /api/admin/codes/quick-generate', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

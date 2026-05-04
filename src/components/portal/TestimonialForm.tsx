@@ -33,8 +33,8 @@ export default function TestimonialForm({ defaultName }: { defaultName: string }
       })
       if (!res.ok) throw new Error((await res.json()).error ?? 'Failed')
       setStatus('done')
-    } catch (err: any) {
-      setError(err.message ?? 'Something went wrong. Please try again.')
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : null) ?? 'Something went wrong. Please try again.')
       setStatus('error')
     }
   }

@@ -34,7 +34,7 @@ export default async function CoachAttendancePage() {
     .eq('coach_id', user.id)
     .neq('status', 'cancelled')
 
-  const clientIds = Array.from(new Set((bookings ?? []).map((b: any) => b.client_id as string)))
+  const clientIds = Array.from(new Set((bookings ?? []).map((b: { client_id: string }) => b.client_id)))
 
   const clients = clientIds.length > 0
     ? (await supabase
@@ -66,9 +66,9 @@ export default async function CoachAttendancePage() {
         </p>
       </div>
       <AttendanceClient
-        groupSessions={(groupSessions ?? []) as any}
-        clients={(clients ?? []) as any}
-        attendance={(attendance ?? []) as any}
+        groupSessions={(groupSessions ?? []) as { id: string; session_date: string }[]}
+        clients={(clients ?? []) as { id: string; first_name: string; last_name: string; plan_tier: string }[]}
+        attendance={(attendance ?? []) as { session_id: string; client_id: string; attended: boolean }[]}
       />
     </div>
   )

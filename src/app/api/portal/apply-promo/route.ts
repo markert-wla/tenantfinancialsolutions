@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'This code type can only be applied to free accounts.' }, { status: 400 })
   }
 
-  const profilePatch: Record<string, any> = {
+  const profilePatch: Record<string, unknown> = {
     plan_tier:       promoCode.assigned_tier,
     promo_code_used: code,
   }

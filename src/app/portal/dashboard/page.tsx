@@ -168,11 +168,11 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
           </p>
         ) : (
           <div className="divide-y divide-gray-100">
-            {upcomingBookings.map((b: any) => (
+            {(upcomingBookings as unknown as { id: string; start_time_utc: string; coaches: { display_name: string } | null }[]).map((b) => (
               <div key={b.id} className="py-3 flex items-center justify-between">
                 <div>
                   <p className="font-medium text-tfs-navy text-sm">
-                    {(b.coaches as any)?.display_name ?? 'TFS Coach'}
+                    {b.coaches?.display_name ?? 'TFS Coach'}
                   </p>
                   <p className="text-xs text-tfs-slate mt-0.5">{formatTime(b.start_time_utc)}</p>
                 </div>

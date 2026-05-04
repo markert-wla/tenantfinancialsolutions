@@ -23,7 +23,7 @@ export default async function AdminBookingsPage() {
     .limit(200)
 
   // Normalize join shape for the client component
-  const normalized = (bookings ?? []).map((b: any) => ({
+  const normalized = (bookings ?? []).map((b) => ({
     id:             b.id,
     start_time_utc: b.start_time_utc,
     end_time_utc:   b.end_time_utc,
@@ -38,7 +38,7 @@ export default async function AdminBookingsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <BookingsClient bookings={normalized} />
+      <BookingsClient bookings={normalized as unknown as Parameters<typeof BookingsClient>[0]['bookings']} />
     </div>
   )
 }

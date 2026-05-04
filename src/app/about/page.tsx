@@ -151,7 +151,7 @@ export default async function AboutPage() {
 
             {coaches.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {coaches.map((coach: any) => (
+                {coaches.map((coach: { id: string; display_name: string; photo_url: string | null; bio: string | null; bio_short: string | null; specialty: string | null }) => (
                   <CoachCard key={coach.id} coach={coach} />
                 ))}
               </div>

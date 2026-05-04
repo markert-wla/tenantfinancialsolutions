@@ -34,10 +34,12 @@ export default async function HistoryPage() {
     .order('start_time_utc', { ascending: false })
 
   const now      = new Date()
-  const upcoming = (bookings ?? []).filter((b: any) => new Date(b.start_time_utc) >= now && b.status !== 'cancelled')
-  const past     = (bookings ?? []).filter((b: any) => new Date(b.start_time_utc) <  now || b.status === 'cancelled')
+  type BookingRow = { id: string; start_time_utc: string; end_time_utc: string; status: string; client_notes: string | null; coaches: { display_name: string } | null }
+  const typedBookings = (bookings ?? []) as unknown as BookingRow[]
+  const upcoming = typedBookings.filter((b) => new Date(b.start_time_utc) >= now && b.status !== 'cancelled')
+  const past     = typedBookings.filter((b) => new Date(b.start_time_utc) <  now || b.status === 'cancelled')
 
-  const normalize = (b: any) => ({
+  const normalize = (b: BookingRow) => ({
     id:             b.id,
     start_time_utc: b.start_time_utc,
     end_time_utc:   b.end_time_utc,

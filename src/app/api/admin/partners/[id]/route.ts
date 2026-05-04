@@ -12,13 +12,13 @@ async function requireAdmin() {
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  let body: Record<string, any>
+  let body: Record<string, unknown>
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
   const allowed = ['partner_name', 'partner_type', 'contact_name', 'contact_email', 'model']
-  const updates: Record<string, any> = {}
+  const updates: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) updates[key] = body[key]
   }

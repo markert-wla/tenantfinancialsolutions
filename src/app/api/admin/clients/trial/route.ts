@@ -60,7 +60,7 @@ export async function PATCH(req: Request) {
     if (error) throw error
 
     return NextResponse.json({ updated: count ?? ids.length })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('PATCH /api/admin/clients/trial', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

@@ -23,8 +23,8 @@ export default function InviteManagerForm() {
       if (!res.ok) throw new Error(data.error ?? 'Failed')
       setStatus('done')
       setForm({ email: '', first_name: '', last_name: '' })
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err as Error).message)
       setStatus('error')
     }
   }

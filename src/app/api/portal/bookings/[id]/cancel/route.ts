@@ -45,8 +45,8 @@ export async function POST(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Email coach
-  const coach = booking.coach as any
-  const client = booking.client as any
+  const coach = booking.coach as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null
+  const client = booking.client as unknown as { first_name: string; last_name: string } | null
   if (coach?.email) {
     const sessionTime = fmtTime(booking.start_time_utc, coach.timezone ?? 'America/New_York')
     const clientName = `${client?.first_name ?? ''} ${client?.last_name ?? ''}`.trim() || 'A client'

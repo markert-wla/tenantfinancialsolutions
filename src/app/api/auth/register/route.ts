@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
   // For paid checkouts (billedTier !== 'free'), set plan_tier to 'free' initially.
   // The webhook updates it to the paid tier once payment is confirmed.
   // Comp/tier_assignment codes grant the tier directly (billedTier === 'free') — keep effectiveTier.
-  const profileUpdate: Record<string, any> = {
+  const profileUpdate: Record<string, unknown> = {
     first_name: firstName,
     last_name:  lastName,
     timezone,
@@ -230,8 +230,8 @@ export async function POST(req: NextRequest) {
           checkoutUrl = session.url
           console.log('[Stripe] Checkout session created:', session.id, 'for user:', userId)
         }
-      } catch (stripeErr: any) {
-        console.error('[Stripe] Checkout session creation failed:', stripeErr.message)
+      } catch (stripeErr: unknown) {
+        console.error('[Stripe] Checkout session creation failed:', (stripeErr as Error).message)
       }
     }
   }

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Lock, Share2, FileText, Calendar } from 'lucide-react'
-import Link from 'next/link'
 
 type SessionNote = {
   id: string

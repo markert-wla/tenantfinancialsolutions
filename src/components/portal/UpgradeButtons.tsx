@@ -25,8 +25,8 @@ export default function UpgradeButtons({ currentTier }: { currentTier: string })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed')
       window.location.href = data.checkoutUrl
-    } catch (err: any) {
-      setError(err.message ?? 'Could not start upgrade. Please try again.')
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : null) ?? 'Could not start upgrade. Please try again.')
       setLoading(null)
     }
   }

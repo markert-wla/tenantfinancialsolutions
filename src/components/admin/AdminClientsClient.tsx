@@ -155,7 +155,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
     if (!bulkDate && !bulkPM) return
     setBulkSaving(true)
     try {
-      const body: any = { expiresAt: bulkDate || null }
+      const body: Record<string, unknown> = { expiresAt: bulkDate || null }
       if (bulkPM) {
         body.pmCode = bulkPM
       } else {
@@ -183,8 +183,8 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
       setBulkDate('')
       setBulkPM('')
       showToast(`Updated ${data.updated} client${data.updated !== 1 ? 's' : ''}`)
-    } catch (e: any) {
-      showToast(e.message ?? 'Bulk update failed')
+    } catch (e: unknown) {
+      showToast((e as Error).message ?? 'Bulk update failed')
     } finally {
       setBulkSaving(false)
     }
@@ -233,8 +233,8 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
       setCreditClient(null)
       setCreditAmount('')
       setCreditNote('')
-    } catch (e: any) {
-      showToast(e.message ?? 'Failed to apply credit')
+    } catch (e: unknown) {
+      showToast((e as Error).message ?? 'Failed to apply credit')
     } finally {
       setCrediting(false)
     }

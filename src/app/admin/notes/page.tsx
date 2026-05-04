@@ -41,7 +41,12 @@ export default async function AdminNotesPage() {
     `)
     .order('created_at', { ascending: false })
 
-  const normalizeSession = (b: any) => ({
+  type SessionRow = { id: string; start_time_utc: string; notes: string | null; client_notes: string | null; client: { id: string; first_name: string; last_name: string; email: string } | null; coach: { display_name: string } | null }
+  type GeneralRow = { id: string; note: string; created_at: string; client: { id: string; first_name: string; last_name: string; email: string } | null; coach: { first_name: string | null; last_name: string | null } | null }
+  const typedSessionNotes = (sessionNotes ?? []) as unknown as SessionRow[]
+  const typedGeneralNotes = (generalNotes ?? []) as unknown as GeneralRow[]
+
+  const normalizeSession = (b: SessionRow) => ({
     id:             b.id,
     start_time_utc: b.start_time_utc,
     notes:          b.notes ?? null,
@@ -50,7 +55,7 @@ export default async function AdminNotesPage() {
     coach_name:     b.coach?.display_name ?? null,
   })
 
-  const normalizeGeneral = (n: any) => ({
+  const normalizeGeneral = (n: GeneralRow) => ({
     id:         n.id,
     note:       n.note,
     created_at: n.created_at,
@@ -61,8 +66,8 @@ export default async function AdminNotesPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
       <AdminNotesClient
-        sessionNotes={(sessionNotes ?? []).map(normalizeSession)}
-        generalNotes={(generalNotes ?? []).map(normalizeGeneral)}
+        sessionNotes={typedSessionNotes.map(normalizeSession)}
+        generalNotes={typedGeneralNotes.map(normalizeGeneral)}
       />
     </div>
   )

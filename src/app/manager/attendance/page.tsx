@@ -83,7 +83,7 @@ export default async function ManagerAttendancePage() {
               <p className="text-sm text-tfs-slate">No group session records yet.</p>
             ) : (
               <div className="divide-y divide-gray-100">
-                {(groupAttendance as any[]).map((a, i) => (
+                {(groupAttendance as { client_id: string; attended: boolean | null; group_sessions: { session_date: string } | null }[]).map((a, i) => (
                   <div key={i} className="py-2.5 flex items-center justify-between gap-2">
                     <div>
                       <p className="text-sm font-medium text-tfs-navy">{nameMap[a.client_id] ?? 'Unknown'}</p>
@@ -105,7 +105,7 @@ export default async function ManagerAttendancePage() {
               <p className="text-sm text-tfs-slate">No 1-on-1 attendance records yet.</p>
             ) : (
               <div className="divide-y divide-gray-100">
-                {(bookings as any[]).map(b => (
+                {(bookings as { client_id: string; attended: boolean | null; start_time_utc: string; id?: string }[]).map(b => (
                   <div key={b.id ?? b.start_time_utc + b.client_id} className="py-2.5 flex items-center justify-between gap-2">
                     <div>
                       <p className="text-sm font-medium text-tfs-navy">{nameMap[b.client_id] ?? 'Unknown'}</p>

@@ -72,7 +72,18 @@ export default async function CoachDashboardPage() {
       .order('submitted_at', { ascending: false }),
   ])
 
-  const uniqueClientIds = Array.from(new Set((allBookings ?? []).map((b: any) => b.client_id as string)))
+  type AllBookingRow   = { client_id: string }
+  type NewBookingRow   = { id: string; start_time_utc: string; created_at: string; profiles: { first_name: string; last_name: string } | null }
+  type InquiryRow      = { id: string; name: string; email: string; inquiry_type: string; message: string; submitted_at: string }
+  type UpcomingRow     = { id: string; start_time_utc: string; created_at: string; notes: string | null; profiles: { first_name: string; last_name: string; plan_tier: string } | null }
+  type InactiveRow     = { id: string; first_name: string; last_name: string; last_active_at: string }
+
+  const typedAllBookings      = (allBookings      ?? []) as unknown as AllBookingRow[]
+  const typedNewBookings      = (newBookings      ?? []) as unknown as NewBookingRow[]
+  const typedAssignedInquiries = (assignedInquiries ?? []) as unknown as InquiryRow[]
+  const typedUpcoming         = (upcoming         ?? []) as unknown as UpcomingRow[]
+
+  const uniqueClientIds = Array.from(new Set(typedAllBookings.map((b) => b.client_id)))
   const totalClients    = uniqueClientIds.length
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
@@ -84,6 +95,8 @@ export default async function CoachDashboardPage() {
         .lt('last_active_at', ninetyDaysAgo)
         .eq('is_active', true)
     : { data: [] }
+
+  const typedInactiveClients  = (inactiveClients  ?? []) as unknown as InactiveRow[]
 
   const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
   const todayCount = (upcoming ?? []).filter(
@@ -160,7 +173,7 @@ export default async function CoachDashboardPage() {
                 New Bookings (last 48 hrs)
               </p>
               <div className="space-y-2">
-                {(newBookings ?? []).map((b: any) => (
+                {typedNewBookings.map((b) => (
                   <div key={b.id} className="flex items-center justify-between bg-white rounded-xl px-4 py-2.5 shadow-sm">
                     <div>
                       <p className="text-sm font-medium text-tfs-navy">
@@ -182,7 +195,7 @@ export default async function CoachDashboardPage() {
                 Assigned Contact Inquiries
               </p>
               <div className="space-y-2">
-                {(assignedInquiries ?? []).map((s: any) => (
+                {typedAssignedInquiries.map((s) => (
                   <div key={s.id} className="bg-white rounded-xl px-4 py-3 shadow-sm">
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-sm font-medium text-tfs-navy">{s.name}</p>
@@ -223,7 +236,7 @@ export default async function CoachDashboardPage() {
             </p>
           ) : (
             <div className="divide-y divide-gray-100">
-              {(upcoming ?? []).slice(0, 8).map((b: any) => {
+              {typedUpcoming.slice(0, 8).map((b) => {
                 const client  = b.profiles
                 const isNew   = new Date(b.created_at) >= new Date(fortyEightAgo)
                 return (
@@ -264,7 +277,7 @@ export default async function CoachDashboardPage() {
             <p className="text-tfs-slate text-sm">No clients inactive 90+ days.</p>
           ) : (
             <div className="divide-y divide-gray-100">
-              {inactiveClients.map((c: any) => (
+              {typedInactiveClients.map((c) => (
                 <div key={c.id} className="py-2.5">
                   <p className="text-sm font-medium text-tfs-navy">
                     {c.first_name} {c.last_name}

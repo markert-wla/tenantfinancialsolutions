@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     if (error) throw error
 
     return NextResponse.json({ ok: true })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('POST /api/portal/testimonial', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

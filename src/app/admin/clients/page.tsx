@@ -47,8 +47,8 @@ export default async function AdminClientsPage() {
       </div>
 
       <AdminClientsClient
-        clients={(clients ?? []) as any}
-        pmCodes={(pmCodes ?? []) as any}
+        clients={clients ?? []}
+        pmCodes={pmCodes ?? []}
       />
     </div>
   )

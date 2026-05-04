@@ -18,7 +18,8 @@ function getRedis() {
 function createLimiter(requests: number, window: string) {
   const r = getRedis()
   if (!r) return null
-  return new Ratelimit({ redis: r, limiter: Ratelimit.slidingWindow(requests, window as any) })
+  type Duration = `${number} ${'ms' | 's' | 'm' | 'h' | 'd'}` | `${number}${'ms' | 's' | 'm' | 'h' | 'd'}`
+  return new Ratelimit({ redis: r, limiter: Ratelimit.slidingWindow(requests, window as Duration) })
 }
 
 export const contactLimiter = createLimiter(5, '1 h')
