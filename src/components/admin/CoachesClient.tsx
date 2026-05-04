@@ -10,8 +10,8 @@ type Coach = {
   email: string
   specialty: string | null
   bio: string | null
+  bio_short: string | null
   timezone: string
-  photo_url: string | null
   is_active: boolean
 }
 
@@ -48,9 +48,9 @@ export default function CoachesClient({ coaches }: { coaches: Coach[] }) {
         email:        fd.get('email'),
         display_name: fd.get('display_name'),
         specialty:    fd.get('specialty')  || null,
-        bio:          fd.get('bio')        || null,
+        bio_short:    fd.get('bio_short'),
+        bio:          fd.get('bio'),
         timezone:     fd.get('timezone'),
-        photo_url:    fd.get('photo_url')  || null,
       }),
     })
     const data = await res.json()
@@ -72,9 +72,9 @@ export default function CoachesClient({ coaches }: { coaches: Coach[] }) {
       body: JSON.stringify({
         display_name: fd.get('display_name'),
         specialty:    fd.get('specialty')  || null,
-        bio:          fd.get('bio')        || null,
+        bio_short:    fd.get('bio_short'),
+        bio:          fd.get('bio'),
         timezone:     fd.get('timezone'),
-        photo_url:    fd.get('photo_url')  || null,
       }),
     })
     const data = await res.json()
@@ -237,26 +237,45 @@ function CoachForm({
         placeholder="Jane Smith"
       />
       <Field
-        label="Specialty"
+        label="Specialty (optional)"
         name="specialty"
         defaultValue={coach?.specialty ?? ''}
         placeholder="e.g. Budgeting, Credit Repair"
       />
       <div>
-        <label className="block text-sm font-medium text-tfs-navy mb-1">Bio</label>
+        <label className="block text-sm font-medium text-tfs-navy mb-1">
+          Summary Bio <span className="text-red-500">*</span>
+        </label>
         <textarea
-          name="bio"
-          defaultValue={coach?.bio ?? ''}
-          rows={3}
-          placeholder="Short bio shown on the About page…"
+          name="bio_short"
+          defaultValue={coach?.bio_short ?? ''}
+          rows={2}
+          required
+          placeholder="1–2 sentence preview shown on the home page and /about…"
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-tfs-navy mb-1">Timezone</label>
+        <label className="block text-sm font-medium text-tfs-navy mb-1">
+          Bio <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          name="bio"
+          defaultValue={coach?.bio ?? ''}
+          rows={4}
+          required
+          placeholder="Full bio shown when a visitor clicks the coach's profile…"
+          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-tfs-navy mb-1">
+          Timezone <span className="text-red-500">*</span>
+        </label>
         <select
           name="timezone"
           defaultValue={coach?.timezone ?? 'America/New_York'}
+          required
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
         >
           {TIMEZONES.map(tz => (
@@ -266,12 +285,6 @@ function CoachForm({
           ))}
         </select>
       </div>
-      <Field
-        label="Photo URL (optional)"
-        name="photo_url"
-        defaultValue={coach?.photo_url ?? ''}
-        placeholder="https://…"
-      />
 
       {error && (
         <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>

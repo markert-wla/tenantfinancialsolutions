@@ -83,8 +83,8 @@ export default function Footer() {
               </a>
             </div>
             <div className="mt-4 text-sm text-gray-300">
-              <a href="mailto:tenantfinancialsolutions@gmail.com" className="hover:text-tfs-teal transition-colors">
-                tenantfinancialsolutions@gmail.com
+              <a href="mailto:michael@tenantfinancialsolutions.com" className="hover:text-tfs-teal transition-colors">
+                michael@tenantfinancialsolutions.com
               </a>
             </div>
           </div>

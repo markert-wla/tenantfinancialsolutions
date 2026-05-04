@@ -13,18 +13,21 @@ export async function POST(req: NextRequest) {
     email: string
     display_name: string
     specialty?: string | null
+    bio_short?: string | null
     bio?: string | null
     timezone?: string
-    photo_url?: string | null
   }
 
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { email, display_name, specialty, bio, timezone, photo_url } = body
+  const { email, display_name, specialty, bio_short, bio, timezone } = body
   if (!email || !display_name) {
     return NextResponse.json({ error: 'Email and display name are required' }, { status: 400 })
+  }
+  if (!bio_short || !bio) {
+    return NextResponse.json({ error: 'Summary Bio and Bio are required' }, { status: 400 })
   }
 
   const service = createServiceClient()
@@ -86,10 +89,10 @@ export async function POST(req: NextRequest) {
     id:           coachId,
     email,
     display_name,
-    specialty:    specialty ?? null,
-    bio:          bio       ?? null,
+    specialty:    specialty  ?? null,
+    bio_short:    bio_short  ?? null,
+    bio:          bio        ?? null,
     timezone:     tz,
-    photo_url:    photo_url ?? null,
     is_active:    true,
   })
 
