@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 
-export const FROM = process.env.RESEND_FROM_EMAIL ?? 'noreply@tenantfinancialsolutions.com'
+export const FROM = process.env.RESEND_FROM_EMAIL ?? 'hello@tenantfinancialsolutions.com'
 const ADMIN_EMAILS_LIST = (process.env.ADMIN_EMAILS ?? 'tenantfinancialsolutions@gmail.com')
   .split(',')
   .map(e => e.trim())
