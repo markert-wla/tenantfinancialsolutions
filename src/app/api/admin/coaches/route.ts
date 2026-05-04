@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { sendEmail } from '@/lib/resend'
+import { brandedEmail, emailButton } from '@/lib/email-template'
 
 export async function POST(req: NextRequest) {
   const supabase = createClient()
@@ -63,17 +65,21 @@ export async function POST(req: NextRequest) {
 
     // Don't change the admin's role — just add the coaches row
   } else {
-    // New user — send invite
-    const { data: invite, error: inviteErr } = await service.auth.admin.inviteUserByEmail(email, {
-      data: { role: 'coach' },
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+    // New user — create the account then send invite via Resend
+    const { data: linkData, error: linkErr } = await service.auth.admin.generateLink({
+      type: 'invite',
+      email,
+      options: {
+        data: { role: 'coach' },
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+      },
     })
 
-    if (inviteErr || !invite.user) {
-      return NextResponse.json({ error: inviteErr?.message ?? 'Failed to create coach account' }, { status: 500 })
+    if (linkErr || !linkData?.user || !linkData?.properties?.action_link) {
+      return NextResponse.json({ error: linkErr?.message ?? 'Failed to create coach account' }, { status: 500 })
     }
 
-    coachId = invite.user.id
+    coachId = linkData.user.id
 
     await service.from('profiles').update({
       role:       'coach',
@@ -82,6 +88,23 @@ export async function POST(req: NextRequest) {
       timezone:   tz,
       email,
     }).eq('id', coachId)
+
+    const firstName = nameParts[0]
+    await sendEmail({
+      to: email,
+      subject: 'You've been invited to join Tenant Financial Solutions as a Coach',
+      html: brandedEmail(`
+        <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">Welcome, ${firstName}!</h1>
+        <p style="margin:0 0 20px;color:#6B7E8F;">
+          You've been invited to join Tenant Financial Solutions as a financial coach.
+          Click the button below to set your password and access your coach dashboard.
+        </p>
+        ${emailButton(linkData.properties.action_link, 'Accept Invitation & Set Password')}
+        <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">
+          This link expires in 24 hours. If you didn't expect this email, you can safely ignore it.
+        </p>
+      `),
+    })
   }
 
   // Create coaches row
