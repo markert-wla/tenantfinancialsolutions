@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AdminProfileForm from '@/components/settings/AdminProfileForm'
 import SiteSettingsForm from '@/components/admin/SiteSettingsForm'
+import PopupsManagerForm from '@/components/admin/PopupsManagerForm'
 
 export const metadata: Metadata = { title: 'Settings — Admin' }
 
@@ -13,9 +14,10 @@ export default async function AdminSettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profileResult, settingsResult] = await Promise.all([
+  const [profileResult, settingsResult, popupsResult] = await Promise.all([
     supabase.from('profiles').select('first_name, last_name, timezone, contact_email, role, photo_url, bio').eq('id', user.id).single(),
     supabase.from('site_settings').select('key, value'),
+    supabase.from('public_popups').select('id, type, content, label, is_active').order('created_at', { ascending: true }),
   ])
 
   const profile = profileResult.data
@@ -35,6 +37,7 @@ export default async function AdminSettingsPage() {
         profile={profile}
       />
       <SiteSettingsForm youtubeVideoId={settingsMap['youtube_video_id'] ?? ''} />
+      <PopupsManagerForm initialPopups={popupsResult.data ?? []} />
     </div>
   )
 }
