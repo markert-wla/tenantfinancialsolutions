@@ -104,6 +104,11 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
               )}
             </p>
           )}
+          {extras > 0 && (
+            <p className="text-xs text-tfs-teal font-medium mt-1">
+              + {extras} gifted from admin
+            </p>
+          )}
         </div>
 
         {/* Book CTA */}
