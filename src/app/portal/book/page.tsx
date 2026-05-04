@@ -34,6 +34,7 @@ export default async function BookPage({
   const userTz          = profile?.timezone ?? 'America/New_York'
   // Prefer coach from post-purchase redirect, then profile's saved coach
   const defaultCoachId  = searchParams.coachId ?? profile?.coach_id ?? null
+  const assignedCoachId = profile?.coach_id ?? null
   const buyMode         = searchParams.buy === '1'
 
   // Active coaches
@@ -74,6 +75,7 @@ export default async function BookPage({
         sessionsRemaining={remaining}
         tier={tier}
         defaultCoachId={defaultCoachId}
+        assignedCoachId={assignedCoachId}
         buyMode={buyMode}
       />
     </div>

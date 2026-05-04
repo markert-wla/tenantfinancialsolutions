@@ -30,12 +30,13 @@ interface Props {
   sessionsRemaining: number
   tier:              string
   defaultCoachId:    string | null
+  assignedCoachId:   string | null
   buyMode?:          boolean
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export default function BookingClient({ coaches, userTimezone, canBook, sessionsRemaining, tier, defaultCoachId, buyMode = false }: Props) {
+export default function BookingClient({ coaches, userTimezone, canBook, sessionsRemaining, tier, defaultCoachId, assignedCoachId, buyMode = false }: Props) {
   const [selectedCoachId, setSelectedCoachId] = useState<string>(defaultCoachId ?? 'any')
   const [weekOffset,      setWeekOffset]      = useState(0)
   const [slotDays,        setSlotDays]        = useState<SlotDay[]>([])
@@ -302,6 +303,14 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
       {/* Selected slot + confirm */}
       {selectedSlot && (
         <div className="mt-6 card border-2 border-tfs-teal">
+          {assignedCoachId && selectedSlot.coachId !== assignedCoachId && (
+            <div className="flex items-start gap-2 mb-4 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+              <AlertCircle size={15} className="shrink-0 mt-0.5" />
+              <span>
+                <strong>{selectedSlot.coachName}</strong> is different from your usual coach. You can still book this session.
+              </span>
+            </div>
+          )}
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm text-tfs-slate mb-0.5">Selected session</p>
