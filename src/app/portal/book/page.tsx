@@ -21,15 +21,16 @@ export default async function BookPage({
   // Profile
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan_tier, sessions_used_this_month, timezone, coach_id')
+    .select('plan_tier, sessions_used_this_month, timezone, coach_id, extra_sessions')
     .eq('id', user.id)
     .single()
 
   const tier            = profile?.plan_tier ?? 'free'
   const used            = profile?.sessions_used_this_month ?? 0
+  const extraSessions   = profile?.extra_sessions ?? 0
   const limit           = LIMITS[tier] ?? 0
-  const canBook         = limit > 0 && used < limit
-  const remaining       = Math.max(0, limit - used)
+  const canBook         = extraSessions > 0 || (limit > 0 && used < limit)
+  const remaining       = extraSessions > 0 ? extraSessions : Math.max(0, limit - used)
   const userTz          = profile?.timezone ?? 'America/New_York'
   // Prefer coach from post-purchase redirect, then profile's saved coach
   const defaultCoachId  = searchParams.coachId ?? profile?.coach_id ?? null
