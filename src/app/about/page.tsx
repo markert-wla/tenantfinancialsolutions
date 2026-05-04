@@ -112,7 +112,7 @@ export default async function AboutPage() {
           src="/images/lighthouse-image-optimized.webp"
           alt=""
           fill
-          className="object-cover object-top select-none"
+          className="object-contain object-top sm:object-cover select-none"
           aria-hidden="true"
         />
         {/* Dark overlay */}
