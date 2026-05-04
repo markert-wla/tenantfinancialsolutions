@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
     const firstName = nameParts[0]
     await sendEmail({
       to: email,
-      subject: 'You've been invited to join Tenant Financial Solutions as a Coach',
+      subject: "You've been invited to join Tenant Financial Solutions as a Coach",
       html: brandedEmail(`
         <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">Welcome, ${firstName}!</h1>
         <p style="margin:0 0 20px;color:#6B7E8F;">

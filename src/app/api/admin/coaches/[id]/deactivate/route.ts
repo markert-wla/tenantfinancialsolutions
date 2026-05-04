@@ -53,7 +53,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     await sendEmail({
       to: coach.email,
-      subject: 'You've been reactivated — set your password to get started',
+      subject: "You've been reactivated — set your password to get started",
       html: brandedEmail(`
         <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">Welcome back, ${firstName}!</h1>
         <p style="margin:0 0 20px;color:#6B7E8F;">
