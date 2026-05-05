@@ -34,33 +34,38 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Session button — uses IntersectionObserver on the hero CTA button
-  // When [data-hero-cta] leaves the viewport the nav Session button fades in
+  // Session button — appears in the nav when [data-hero-cta] scrolls behind the navbar.
+  // Note: only shown for logged-out visitors on public pages (showSessionBtn below).
   useEffect(() => {
     setSessionVisible(false)
     if (!PUBLIC_PAGES.has(pathname)) return
 
     let observer: IntersectionObserver | null = null
+    let retryTimer: ReturnType<typeof setTimeout> | null = null
 
-    // rAF defers until after new page content has painted.
-    // We watch the hero section rather than the CTA button: the section starts
-    // in the viewport so the observer initialises with isIntersecting=true
-    // (Session hidden), then fires false once the hero scrolls fully past the
-    // navbar — at which point the CTA button below the hero is also near the
-    // top of the screen, giving a natural "you've scrolled past the hero" feel.
-    const raf = requestAnimationFrame(() => {
-      const heroEl = document.querySelector('[data-hero-section]')
-      if (!heroEl) return
-
+    const setup = () => {
+      const el = document.querySelector('[data-hero-cta]')
+      if (!el) return
+      observer?.disconnect()
       observer = new IntersectionObserver(
         ([entry]) => setSessionVisible(!entry.isIntersecting),
+        // rootMargin shrinks the effective viewport by the navbar height so the
+        // trigger fires the moment the button slides behind the navbar bar.
         { rootMargin: '-80px 0px 0px 0px', threshold: 0 }
       )
-      observer.observe(heroEl)
+      observer.observe(el)
+    }
+
+    // rAF waits for the first paint; if the page's client components haven't
+    // committed yet, retry after 300 ms (covers Next.js streaming / hydration lag).
+    const raf = requestAnimationFrame(() => {
+      setup()
+      if (!observer) retryTimer = setTimeout(setup, 300)
     })
 
     return () => {
       cancelAnimationFrame(raf)
+      if (retryTimer !== null) clearTimeout(retryTimer)
       observer?.disconnect()
     }
   }, [pathname])

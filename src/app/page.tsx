@@ -121,15 +121,7 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      {/*
-        h-[70vh]: keeps the CTA below in the initial viewport on all screen sizes,
-        which is required for the IntersectionObserver Session-button trigger to work
-        correctly (element must start intersecting so we can detect when it stops).
-      */}
-      <section
-        className="relative mt-20 h-[70vh] min-h-[300px] overflow-hidden"
-        data-hero-section="true"
-      >
+      <section className="relative mt-20 h-[calc(100vh-5rem)] overflow-hidden">
         <Image
           src="/images/homepage-image.webp"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
@@ -137,32 +129,13 @@ export default async function HomePage({
           className="object-cover object-top select-none"
           priority
         />
-        {/* Narrow gradient at the very top — keeps nav links readable over any image */}
+        {/* Narrow gradient at very top only — keeps nav links readable over any image */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
-      </section>
-
-      {/* CTA + Audience cards — below the hero image so the image is completely clean.
-          HeroCTAButton carries data-hero-cta which is still observed by the Navbar's
-          IntersectionObserver; when it scrolls behind the navbar, "Session" appears. */}
-      <div className="bg-tfs-navy py-10 px-4">
-        <div className="flex justify-center mb-8">
+        {/* CTA pinned to bottom of the image */}
+        <div className="absolute bottom-0 inset-x-0 z-10 pb-12 flex justify-center">
           <HeroCTAButton />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-          {AUDIENCE_CARDS.map(({ icon: Icon, label, href, desc }) => (
-            <Link
-              key={href}
-              href={href}
-              className="rounded-xl p-6 text-left hover:scale-105 transition-transform duration-200 group bg-white/10 backdrop-blur-sm border border-white/20"
-            >
-              <Icon className="mb-3 text-white" size={28} />
-              <p className="font-semibold text-white text-base mb-1">{label}</p>
-              <p className="text-sm text-white/80">{desc}</p>
-              <ChevronRight className="mt-3 text-white/60 group-hover:text-white transition-colors" size={16} />
-            </Link>
-          ))}
-        </div>
-      </div>
+      </section>
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
