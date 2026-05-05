@@ -42,13 +42,11 @@ export default function Navbar() {
     setSessionVisible(false)
     if (!PUBLIC_PAGES.has(pathname)) return
 
-    const NAVBAR_H = 80
-
     const checkCta = () => {
       const el = document.querySelector('[data-hero-cta]')
       if (!el) { setSessionVisible(false); return }
-      // Session appears when the bottom of the CTA has risen above the navbar
-      setSessionVisible(el.getBoundingClientRect().bottom < NAVBAR_H)
+      // Session appears when the CTA button's bottom edge enters the navbar zone
+      setSessionVisible(el.getBoundingClientRect().bottom < 100)
     }
 
     window.addEventListener('scroll', checkCta, { passive: true })
@@ -95,8 +93,9 @@ export default function Navbar() {
 
   const dashboardLabel = role === 'client' || role === null ? 'My Portal' : 'Dashboard'
 
-  // Show the sliding Session button only for logged-out users on public pages
-  const showSessionBtn = !user && PUBLIC_PAGES.has(pathname)
+  // Show the sliding Session button on public pages for all visitors.
+  // Logged-in users who click it are redirected to their dashboard anyway.
+  const showSessionBtn = PUBLIC_PAGES.has(pathname)
   const sessionActive  = showSessionBtn && sessionVisible
 
   return (
