@@ -10,9 +10,10 @@ const TZ = 'America/New_York'
 function etToUtcTime(dateStr: string, etTime: string): string {
   const [y, mo, d] = dateStr.split('-').map(Number)
   const [h, m]     = etTime.split(':').map(Number)
-  // Use noon UTC as reference to get the ET offset for this date (avoids DST edge cases)
+  // Use noon UTC as DST-safe reference; extract hour via formatToParts to avoid AM/PM parsing issues
   const noonUtc    = new Date(Date.UTC(y, mo - 1, d, 12, 0))
-  const nyNoonH    = Number(new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: '2-digit', hour12: false }).format(noonUtc))
+  const parts      = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(noonUtc)
+  const nyNoonH    = parseInt(parts.find(p => p.type === 'hour')?.value ?? '8', 10)
   const offsetH    = 12 - nyNoonH          // e.g. 5 in EST, 4 in EDT
   const utc        = new Date(Date.UTC(y, mo - 1, d, h + offsetH, m))
   return `${String(utc.getUTCHours()).padStart(2, '0')}:${String(utc.getUTCMinutes()).padStart(2, '0')}`
