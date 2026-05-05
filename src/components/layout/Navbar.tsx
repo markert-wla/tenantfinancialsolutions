@@ -34,39 +34,30 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Session button — appears in the nav when [data-hero-cta] scrolls behind the navbar.
+  // Session button — slides into the nav the moment [data-hero-cta] scrolls
+  // behind the navbar. Uses getBoundingClientRect on every scroll tick rather
+  // than IntersectionObserver, which avoids querySelector-timing races entirely.
   // Note: only shown for logged-out visitors on public pages (showSessionBtn below).
   useEffect(() => {
     setSessionVisible(false)
     if (!PUBLIC_PAGES.has(pathname)) return
 
-    let observer: IntersectionObserver | null = null
-    let retryTimer: ReturnType<typeof setTimeout> | null = null
+    const NAVBAR_H = 80
 
-    const setup = () => {
+    const checkCta = () => {
       const el = document.querySelector('[data-hero-cta]')
-      if (!el) return
-      observer?.disconnect()
-      observer = new IntersectionObserver(
-        ([entry]) => setSessionVisible(!entry.isIntersecting),
-        // rootMargin shrinks the effective viewport by the navbar height so the
-        // trigger fires the moment the button slides behind the navbar bar.
-        { rootMargin: '-80px 0px 0px 0px', threshold: 0 }
-      )
-      observer.observe(el)
+      if (!el) { setSessionVisible(false); return }
+      // Session appears when the bottom of the CTA has risen above the navbar
+      setSessionVisible(el.getBoundingClientRect().bottom < NAVBAR_H)
     }
 
-    // rAF waits for the first paint; if the page's client components haven't
-    // committed yet, retry after 300 ms (covers Next.js streaming / hydration lag).
-    const raf = requestAnimationFrame(() => {
-      setup()
-      if (!observer) retryTimer = setTimeout(setup, 300)
-    })
+    window.addEventListener('scroll', checkCta, { passive: true })
+    // Run once after paint so the initial state is correct even without scrolling
+    const timer = setTimeout(checkCta, 50)
 
     return () => {
-      cancelAnimationFrame(raf)
-      if (retryTimer !== null) clearTimeout(retryTimer)
-      observer?.disconnect()
+      window.removeEventListener('scroll', checkCta)
+      clearTimeout(timer)
     }
   }, [pathname])
 

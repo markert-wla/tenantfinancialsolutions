@@ -126,7 +126,7 @@ export default async function HomePage({
           src="/images/homepage-image.webp"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
           fill
-          className="object-cover object-top select-none"
+          className="object-cover object-bottom select-none"
           priority
         />
         {/* Narrow gradient at very top only — keeps nav links readable over any image */}
