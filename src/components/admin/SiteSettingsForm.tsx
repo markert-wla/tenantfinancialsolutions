@@ -1,17 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Video, Save } from 'lucide-react'
 
 const INPUT = 'w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-tfs-teal'
 
+type VideoStatus = 'idle' | 'checking' | 'ok' | 'error'
+
+async function checkOembed(id: string): Promise<VideoStatus> {
+  if (!id) return 'idle'
+  try {
+    const res = await fetch(
+      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${encodeURIComponent(id)}&format=json`
+    )
+    return res.ok ? 'ok' : 'error'
+  } catch {
+    return 'error'
+  }
+}
+
 export default function SiteSettingsForm({ youtubeVideoId }: { youtubeVideoId: string }) {
   const router = useRouter()
-  const [videoInput, setVideoInput] = useState(youtubeVideoId)
-  const [saving, setSaving]         = useState(false)
-  const [saved, setSaved]           = useState(false)
-  const [error, setError]           = useState('')
+  const [videoInput,   setVideoInput]   = useState(youtubeVideoId)
+  const [saving,       setSaving]       = useState(false)
+  const [saved,        setSaved]        = useState(false)
+  const [error,        setError]        = useState('')
+  const [videoStatus,  setVideoStatus]  = useState<VideoStatus>('idle')
+
+  // Check the currently-saved video on mount
+  useEffect(() => {
+    const id = extractId(youtubeVideoId)
+    if (!id) return
+    setVideoStatus('checking')
+    checkOembed(id).then(setVideoStatus)
+  }, [youtubeVideoId])
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -30,6 +53,14 @@ export default function SiteSettingsForm({ youtubeVideoId }: { youtubeVideoId: s
     }
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
+    // Validate the newly-saved video
+    const id = extractId(videoInput)
+    if (id) {
+      setVideoStatus('checking')
+      checkOembed(id).then(setVideoStatus)
+    } else {
+      setVideoStatus('idle')
+    }
     router.refresh()
   }
 
@@ -58,6 +89,17 @@ export default function SiteSettingsForm({ youtubeVideoId }: { youtubeVideoId: s
           {videoInput.trim() && (
             <p className="text-xs text-tfs-teal mt-1 font-mono">
               Video ID: {extractId(videoInput)}
+            </p>
+          )}
+          {videoStatus === 'checking' && (
+            <p className="text-xs text-tfs-slate mt-1">Checking video availability…</p>
+          )}
+          {videoStatus === 'ok' && (
+            <p className="text-xs text-green-600 mt-1">✓ Video is accessible — section is live on the homepage.</p>
+          )}
+          {videoStatus === 'error' && (
+            <p className="text-xs text-amber-600 mt-1 font-medium">
+              ⚠ Video is unavailable or embedding is restricted. The video section is hidden on the homepage until a valid video is set.
             </p>
           )}
         </div>

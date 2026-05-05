@@ -42,7 +42,14 @@ async function getYouTubeVideoId() {
   try {
     const supabase = createClient()
     const { data } = await supabase.from('site_settings').select('value').eq('key', 'youtube_video_id').single()
-    return data?.value?.trim() ?? ''
+    const id = data?.value?.trim() ?? ''
+    if (!id) return ''
+    // Validate via oEmbed — returns 404 for unavailable/private, 401 for embed-restricted
+    const check = await fetch(
+      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${encodeURIComponent(id)}&format=json`,
+      { signal: AbortSignal.timeout(5000) }
+    ).catch(() => null)
+    return check?.ok ? id : ''
   } catch {
     return ''
   }
