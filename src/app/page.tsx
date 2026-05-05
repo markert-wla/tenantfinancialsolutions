@@ -121,10 +121,7 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      {/* mt-[60px]: section slides 20px under the fixed navbar (80px tall), so the navbar
-          covers the top 20px of the image and acts as a buffer between its shadow and the
-          image text. h-[calc(100vh-10px)] compensates so the bottom edge stays the same. */}
-      <section className="relative mt-[60px] h-[calc(100vh-10px)] overflow-hidden">
+      <section className="relative mt-20 h-[calc(100vh-30px)] overflow-hidden">
         <Image
           src="/images/homepage-image.webp"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
