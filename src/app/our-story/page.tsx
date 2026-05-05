@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import HeroCTAButton from '@/components/layout/HeroCTAButton'
 
 export const metadata: Metadata = {
   title: 'Our Story',
@@ -48,6 +49,9 @@ export default function OurStoryPage() {
           <p className="text-white/80 text-lg leading-relaxed">
             Built on a belief that every tenant deserves a real partner on their financial journey.
           </p>
+          <div className="mt-8">
+            <HeroCTAButton />
+          </div>
         </div>
       </section>
 

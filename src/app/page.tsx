@@ -121,12 +121,16 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative mt-20 h-[calc(100vh-5rem)] overflow-hidden">
+      {/* h-[calc(100vh-30px)] = full viewport minus navbar (80px) plus 50px extra at bottom.
+          objectPosition shifts focal point 20px above center so the image shifts visually
+          downward, revealing more of the upper text while the +50px extends the bottom. */}
+      <section className="relative mt-20 h-[calc(100vh-30px)] overflow-hidden">
         <Image
           src="/images/homepage-image.webp"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
           fill
-          className="object-cover object-center select-none"
+          className="object-cover select-none"
+          style={{ objectPosition: 'center calc(50% - 20px)' }}
           priority
         />
         {/* Narrow gradient at very top only — keeps nav links readable over any image */}
