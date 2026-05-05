@@ -58,7 +58,7 @@ export default function UnavailableDatesClient({
     setStartTime('')
     setEndTime('')
     router.refresh()
-    const fakeId = Math.random().toString(36).slice(2)
+    const fakeId = crypto.randomUUID()
     setDates(prev => [...prev, {
       id:         fakeId,
       date:       newDate,
