@@ -4,6 +4,30 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CalendarX, Plus, Trash2 } from 'lucide-react'
 
+const TZ = 'America/New_York'
+
+// Convert "HH:MM" Eastern time on a given date to "HH:MM" UTC
+function etToUtcTime(dateStr: string, etTime: string): string {
+  const [y, mo, d] = dateStr.split('-').map(Number)
+  const [h, m]     = etTime.split(':').map(Number)
+  // Use noon UTC as reference to get the ET offset for this date (avoids DST edge cases)
+  const noonUtc    = new Date(Date.UTC(y, mo - 1, d, 12, 0))
+  const nyNoonH    = Number(new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: '2-digit', hour12: false }).format(noonUtc))
+  const offsetH    = 12 - nyNoonH          // e.g. 5 in EST, 4 in EDT
+  const utc        = new Date(Date.UTC(y, mo - 1, d, h + offsetH, m))
+  return `${String(utc.getUTCHours()).padStart(2, '0')}:${String(utc.getUTCMinutes()).padStart(2, '0')}`
+}
+
+// Convert "HH:MM:SS" UTC (from DB) on a given date to a display string in ET
+function utcToEtDisplay(dateStr: string, utcTime: string): string {
+  const [y, mo, d] = dateStr.split('-').map(Number)
+  const [h, m]     = utcTime.split(':').map(Number)
+  const utcDate    = new Date(Date.UTC(y, mo - 1, d, h, m))
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: TZ, hour: 'numeric', minute: '2-digit', hour12: true,
+  }).format(utcDate)
+}
+
 type UnavailableDate = {
   id:         string
   date:       string
@@ -36,6 +60,9 @@ export default function UnavailableDatesClient({
     }
     setError('')
     setSaving(true)
+    // Convert ET picker values to UTC before sending
+    const startUtc = allDay ? undefined : etToUtcTime(newDate, startTime)
+    const endUtc   = allDay ? undefined : etToUtcTime(newDate, endTime)
     const res = await fetch('/api/coach/unavailable-dates', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -43,8 +70,8 @@ export default function UnavailableDatesClient({
         date:       newDate,
         note:       newNote.trim() || undefined,
         all_day:    allDay,
-        start_time: allDay ? undefined : startTime,
-        end_time:   allDay ? undefined : endTime,
+        start_time: startUtc,
+        end_time:   endUtc,
       }),
     })
     setSaving(false)
@@ -64,8 +91,8 @@ export default function UnavailableDatesClient({
       date:       newDate,
       note:       newNote.trim() || null,
       all_day:    allDay,
-      start_time: allDay ? null : startTime,
-      end_time:   allDay ? null : endTime,
+      start_time: allDay ? null : (startUtc ?? null),
+      end_time:   allDay ? null : (endUtc   ?? null),
     }].sort((a, b) => a.date.localeCompare(b.date)))
   }
 
@@ -89,13 +116,6 @@ export default function UnavailableDatesClient({
     return new Date(y, m - 1, d).toLocaleDateString('en-US', {
       weekday: 'short', month: 'long', day: 'numeric', year: 'numeric',
     })
-  }
-
-  function formatTime(t: string) {
-    const [h, m] = t.split(':').map(Number)
-    const ampm = h >= 12 ? 'PM' : 'AM'
-    const hr = h % 12 || 12
-    return `${hr}:${String(m).padStart(2, '0')} ${ampm}`
   }
 
   const today = new Date().toISOString().split('T')[0]
@@ -123,7 +143,7 @@ export default function UnavailableDatesClient({
                   ? <span className="text-xs text-tfs-slate ml-2">All day</span>
                   : d.start_time && d.end_time && (
                       <span className="text-xs text-tfs-slate ml-2">
-                        {formatTime(d.start_time)} – {formatTime(d.end_time)}
+                        {utcToEtDisplay(d.date, d.start_time)} – {utcToEtDisplay(d.date, d.end_time)} ET
                       </span>
                     )
                 }
@@ -180,31 +200,30 @@ export default function UnavailableDatesClient({
           <span className="text-sm text-tfs-navy">All day</span>
         </div>
 
-        {/* Time pickers — only shown for time blocks */}
+        {/* Time pickers — Eastern Time, converted to UTC on save */}
         {!allDay && (
-          <div className="space-y-2">
-            <p className="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 leading-snug">
-              Enter times in <strong>UTC</strong> — the same timezone used for your weekly availability schedule. For example, if your availability starts at 13:00 UTC, a block ending at 13:00 UTC will suppress that slot.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <div>
-                <label className="block text-xs font-medium text-tfs-navy mb-1">Start Time <span className="text-tfs-slate font-normal">(UTC)</span></label>
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={e => setStartTime(e.target.value)}
-                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-tfs-navy mb-1">End Time <span className="text-tfs-slate font-normal">(UTC)</span></label>
-                <input
-                  type="time"
-                  value={endTime}
-                  onChange={e => setEndTime(e.target.value)}
-                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
-                />
-              </div>
+          <div className="flex flex-wrap gap-3">
+            <div>
+              <label className="block text-xs font-medium text-tfs-navy mb-1">
+                Start Time <span className="text-tfs-slate font-normal">(Eastern Time)</span>
+              </label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={e => setStartTime(e.target.value)}
+                className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-tfs-navy mb-1">
+                End Time <span className="text-tfs-slate font-normal">(Eastern Time)</span>
+              </label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={e => setEndTime(e.target.value)}
+                className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+              />
             </div>
           </div>
         )}
