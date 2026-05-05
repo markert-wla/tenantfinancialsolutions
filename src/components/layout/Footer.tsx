@@ -2,6 +2,9 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
+const PORTAL_PREFIXES = ['/admin', '/coach', '/portal', '/manager']
 
 function IconInstagram() {
   return (
@@ -21,6 +24,8 @@ function IconFacebook() {
 }
 
 export default function Footer() {
+  const pathname = usePathname()
+  const isPortal = PORTAL_PREFIXES.some(p => pathname.startsWith(p))
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle'|'loading'|'done'|'error'>('idle')
 
@@ -37,6 +42,27 @@ export default function Footer() {
     } catch {
       setStatus('error')
     }
+  }
+
+  if (isPortal) {
+    return (
+      <footer className="bg-tfs-navy text-white">
+        <div className="md:pl-56">
+          <div className="px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-400">
+            <p>
+              &copy; {new Date().getFullYear()} Tenant Financial Solutions. All rights reserved.{' '}
+              <Link href="/privacy" className="hover:text-tfs-teal transition-colors underline underline-offset-2">Privacy Policy</Link>
+              {' · '}
+              <Link href="/terms" className="hover:text-tfs-teal transition-colors underline underline-offset-2">Terms of Service</Link>
+            </p>
+            <div className="flex gap-4">
+              <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-tfs-teal transition-colors"><IconInstagram /></a>
+              <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-tfs-teal transition-colors"><IconFacebook /></a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    )
   }
 
   return (

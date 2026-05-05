@@ -85,15 +85,25 @@ export async function GET(req: NextRequest) {
   const weekEndDate   = new Date(weekEnd.getTime() - 1).toISOString().split('T')[0]
   const { data: unavailableDates } = await supabase
     .from('coach_unavailable_dates')
-    .select('coach_id, date')
+    .select('coach_id, date, all_day, start_time, end_time')
     .in('coach_id', coachIds)
     .gte('date', weekStartDate)
     .lte('date', weekEndDate)
 
-  // Build a set of "coachId|YYYY-MM-DD" for O(1) lookup
-  const unavailableSet = new Set<string>(
-    (unavailableDates ?? []).map((r: { coach_id: string; date: string }) => `${r.coach_id}|${r.date}`)
-  )
+  // All-day blocks: "coachId|date" set for O(1) lookup
+  const unavailableSet = new Set<string>()
+  // Time blocks: "coachId|date" → [{start_time, end_time}]
+  const timeBlockMap: Record<string, Array<{ start_time: string; end_time: string }>> = {}
+
+  for (const r of unavailableDates ?? []) {
+    const key = `${r.coach_id}|${r.date}`
+    if (r.all_day !== false) {
+      unavailableSet.add(key)
+    } else if (r.start_time && r.end_time) {
+      if (!timeBlockMap[key]) timeBlockMap[key] = []
+      timeBlockMap[key].push({ start_time: r.start_time, end_time: r.end_time })
+    }
+  }
 
   // Build a set of booked intervals per coach for quick lookup
   const bookedByCoach: Record<string, Array<{ start: Date; end: Date }>> = {}
@@ -147,7 +157,17 @@ export async function GET(req: NextRequest) {
             bk => bk.start < slotEnd && bk.end > slotStart
           )
 
-          if (!hasConflict) {
+          // Check for time-block unavailability on this date
+          const tbKey = `${block.coach_id}|${dateStr}`
+          const blockedByTime = (timeBlockMap[tbKey] ?? []).some(tb => {
+            const [tbsh, tbsm] = tb.start_time.split(':').map(Number)
+            const [tbeh, tbem] = tb.end_time.split(':').map(Number)
+            const tbStart = new Date(Date.UTC(dayDate.getUTCFullYear(), dayDate.getUTCMonth(), dayDate.getUTCDate(), tbsh, tbsm))
+            const tbEnd   = new Date(Date.UTC(dayDate.getUTCFullYear(), dayDate.getUTCMonth(), dayDate.getUTCDate(), tbeh, tbem))
+            return slotStart < tbEnd && slotEnd > tbStart
+          })
+
+          if (!hasConflict && !blockedByTime) {
             daySlots.push({
               coachId:   block.coach_id,
               coachName: coachMap[block.coach_id] ?? 'Coach',

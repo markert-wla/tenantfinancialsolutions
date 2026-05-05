@@ -28,7 +28,7 @@ export default async function CoachAvailabilityPage() {
 
   const { data: unavailableDates } = await supabase
     .from('coach_unavailable_dates')
-    .select('id, date, note')
+    .select('id, date, note, all_day, start_time, end_time')
     .eq('coach_id', user.id)
     .order('date')
 

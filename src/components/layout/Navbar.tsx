@@ -17,6 +17,14 @@ const NAV_LINKS = [
 
 const PUBLIC_PAGES = new Set(['/', '/about', '/our-story', '/services', '/contact'])
 
+// Portal links shown in place of public nav when logged in as admin
+const ADMIN_PORTAL_LINKS = [
+  { label: 'Admin Dashboard', href: '/admin/dashboard',   bg: 'bg-tfs-purple', text: 'text-white'     },
+  { label: 'Coach View',      href: '/coach/dashboard',   bg: 'bg-tfs-teal',   text: 'text-white'     },
+  { label: 'Client View',     href: '/portal/dashboard',  bg: 'bg-tfs-navy',   text: 'text-white'     },
+  { label: 'Manager View',    href: '/manager/dashboard', bg: 'bg-tfs-gold',   text: 'text-tfs-navy'  },
+]
+
 export default function Navbar() {
   const pathname = usePathname()
   const [open, setOpen]               = useState(false)
@@ -98,6 +106,8 @@ export default function Navbar() {
   const showSessionBtn = PUBLIC_PAGES.has(pathname)
   const sessionActive  = showSessionBtn && sessionVisible
 
+  const isAdmin = role === 'admin'
+
   return (
     <header
       className={cn(
@@ -105,139 +115,205 @@ export default function Navbar() {
         scrolled ? 'bg-white/95 backdrop-blur shadow-sm' : 'bg-tfs-navy/80 backdrop-blur-sm'
       )}
     >
-      {/* Three-column layout: logo | nav (centered) | auth */}
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center gap-6">
 
-        {/* Left — Logo */}
-        <div className="flex-1 flex items-center">
-          <Link href="/" className="flex flex-col items-start gap-0.5">
-            <Image
-              src="/images/logo.png"
-              alt="Tenant Financial Solutions"
-              width={220}
-              height={64}
-              className="h-14 w-auto object-contain"
-              priority
-            />
-            <span className={cn(
-              'text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase leading-none pl-0.5',
-              scrolled ? 'text-tfs-gold' : 'text-tfs-gold'
-            )}>
-              Tenant Focused – Community Impact
-            </span>
-          </Link>
-        </div>
+        {/* Left — Logo (always) */}
+        <Link href="/" className="flex flex-col items-start gap-0.5 shrink-0">
+          <Image
+            src="/images/logo.png"
+            alt="Tenant Financial Solutions"
+            width={220}
+            height={64}
+            className="h-14 w-auto object-contain"
+            priority
+          />
+          <span className="text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase leading-none pl-0.5 text-tfs-gold">
+            Tenant Focused – Community Impact
+          </span>
+        </Link>
 
-        {/* Center — Nav links + sliding Session CTA */}
-        <ul className="hidden md:flex items-center gap-6">
-          {NAV_LINKS.map(({ label, href }) => (
-            <li key={href}>
-              <Link
-                href={href}
-                className={cn(
-                  'text-sm font-medium transition-colors',
-                  scrolled ? 'text-tfs-navy hover:text-tfs-teal' : 'text-white hover:text-tfs-gold'
-                )}
-              >
-                {label}
-              </Link>
-            </li>
-          ))}
+        {isAdmin ? (
+          /* ── ADMIN PORTAL SWITCHER ────────────────────────── */
+          <>
+            {/* Desktop portal links */}
+            <ul className="hidden md:flex items-center gap-2 ml-auto">
+              <li className="mr-2">
+                <span className={cn(
+                  'text-xs font-semibold tracking-widest uppercase',
+                  scrolled ? 'text-tfs-slate' : 'text-white/60'
+                )}>
+                  View as:
+                </span>
+              </li>
+              {ADMIN_PORTAL_LINKS.map(({ label, href, bg, text }) => {
+                const isActive = pathname.startsWith(href.split('/').slice(0, 3).join('/'))
+                return (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className={cn(
+                        'inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150',
+                        bg, text,
+                        isActive ? 'ring-2 ring-white/60 ring-offset-1 ring-offset-transparent' : 'opacity-80 hover:opacity-100 hover:scale-105'
+                      )}
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
 
-          {/*
-            Always in the DOM so the CSS transition has a start state.
-            max-w-0 → max-w-[140px] slides open and pushes nav links left.
-            opacity-0 → opacity-100 fades it in simultaneously.
-          */}
-          <li
-            className={cn(
-              'overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out',
-              sessionActive
-                ? 'max-w-[140px] opacity-100 pointer-events-auto'
-                : 'max-w-0 opacity-0 pointer-events-none'
-            )}
-            aria-hidden={!sessionActive}
-          >
-            <Link
-              href="/register?tier=free"
-              tabIndex={sessionActive ? 0 : -1}
-              className="bg-tfs-gold text-tfs-navy font-bold text-sm px-5 py-2 rounded-lg whitespace-nowrap hover:brightness-105 hover:scale-105 block"
+            {/* Mobile burger */}
+            <button
+              className="md:hidden ml-auto p-2 rounded-lg"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
             >
-              Session
-            </Link>
-          </li>
-        </ul>
+              {open
+                ? <X className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
+                : <Menu className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
+              }
+            </button>
+          </>
+        ) : (
+          /* ── STANDARD PUBLIC NAV ──────────────────────────── */
+          <>
+            {/* Center — Nav links + sliding Session CTA */}
+            <ul className="hidden md:flex items-center gap-6 mx-auto">
+              {NAV_LINKS.map(({ label, href }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={cn(
+                      'text-sm font-medium transition-colors',
+                      scrolled ? 'text-tfs-navy hover:text-tfs-teal' : 'text-white hover:text-tfs-gold'
+                    )}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
 
-        {/* Right — Auth */}
-        <div className="flex-1 hidden md:flex items-center justify-end gap-3">
-          {user ? (
-            <Link href={dashboardHref} className="btn-primary text-sm py-2">
-              {dashboardLabel}
-            </Link>
-          ) : (
-            <>
-              <Link
-                href="/login"
+              {/*
+                Always in the DOM so the CSS transition has a start state.
+                max-w-0 → max-w-[140px] slides open and pushes nav links left.
+                opacity-0 → opacity-100 fades it in simultaneously.
+              */}
+              <li
                 className={cn(
-                  'text-sm font-medium transition-colors',
-                  scrolled ? 'text-tfs-navy hover:text-tfs-teal' : 'text-white hover:text-tfs-gold'
+                  'overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out',
+                  sessionActive
+                    ? 'max-w-[140px] opacity-100 pointer-events-auto'
+                    : 'max-w-0 opacity-0 pointer-events-none'
                 )}
+                aria-hidden={!sessionActive}
               >
-                Login
-              </Link>
-              <Link href="/register" className="btn-primary text-sm py-2">
-                Get Started
-              </Link>
-            </>
-          )}
-        </div>
+                <Link
+                  href="/register?tier=free"
+                  tabIndex={sessionActive ? 0 : -1}
+                  className="bg-tfs-gold text-tfs-navy font-bold text-sm px-5 py-2 rounded-lg whitespace-nowrap hover:brightness-105 hover:scale-105 block"
+                >
+                  Session
+                </Link>
+              </li>
+            </ul>
 
-        {/* Mobile burger */}
-        <button
-          className="md:hidden ml-auto p-2 rounded-lg"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
-          {open
-            ? <X className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
-            : <Menu className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
-          }
-        </button>
+            {/* Right — Auth */}
+            <div className="hidden md:flex items-center gap-3 ml-auto">
+              {user ? (
+                <Link href={dashboardHref} className="btn-primary text-sm py-2">
+                  {dashboardLabel}
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className={cn(
+                      'text-sm font-medium transition-colors',
+                      scrolled ? 'text-tfs-navy hover:text-tfs-teal' : 'text-white hover:text-tfs-gold'
+                    )}
+                  >
+                    Login
+                  </Link>
+                  <Link href="/register" className="btn-primary text-sm py-2">
+                    Get Started
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* Mobile burger */}
+            <button
+              className="md:hidden ml-auto p-2 rounded-lg"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
+            >
+              {open
+                ? <X className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
+                : <Menu className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
+              }
+            </button>
+          </>
+        )}
       </nav>
 
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3">
-          {NAV_LINKS.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              className="block py-2 text-tfs-navy font-medium hover:text-tfs-teal"
-              onClick={() => setOpen(false)}
-            >
-              {label}
-            </Link>
-          ))}
-          <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
-            {user ? (
-              <Link href={dashboardHref} className="btn-primary text-sm text-center" onClick={() => setOpen(false)}>
-                {dashboardLabel}
-              </Link>
-            ) : (
-              <>
-                <Link href="/login" className="btn-outline text-sm text-center" onClick={() => setOpen(false)}>
-                  Login
-                </Link>
+          {isAdmin ? (
+            <>
+              <p className="text-xs font-semibold text-tfs-slate uppercase tracking-widest pb-1">View as:</p>
+              {ADMIN_PORTAL_LINKS.map(({ label, href, bg, text }) => (
                 <Link
-                  href="/register?tier=free"
-                  className="block bg-tfs-gold text-tfs-navy font-bold text-sm text-center px-5 py-2.5 rounded-xl hover:brightness-105 transition-all"
+                  key={href}
+                  href={href}
+                  className={cn('block py-2.5 px-4 rounded-xl font-semibold text-sm text-center', bg, text)}
                   onClick={() => setOpen(false)}
                 >
-                  Step into your free Connection Session
+                  {label}
                 </Link>
-              </>
-            )}
-          </div>
+              ))}
+              <div className="pt-2 border-t border-gray-100">
+                <Link href="/" className="block py-2 text-tfs-navy font-medium hover:text-tfs-teal text-sm" onClick={() => setOpen(false)}>
+                  ← Public Site
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              {NAV_LINKS.map(({ label, href }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="block py-2 text-tfs-navy font-medium hover:text-tfs-teal"
+                  onClick={() => setOpen(false)}
+                >
+                  {label}
+                </Link>
+              ))}
+              <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
+                {user ? (
+                  <Link href={dashboardHref} className="btn-primary text-sm text-center" onClick={() => setOpen(false)}>
+                    {dashboardLabel}
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/login" className="btn-outline text-sm text-center" onClick={() => setOpen(false)}>
+                      Login
+                    </Link>
+                    <Link
+                      href="/register?tier=free"
+                      className="block bg-tfs-gold text-tfs-navy font-bold text-sm text-center px-5 py-2.5 rounded-xl hover:brightness-105 transition-all"
+                      onClick={() => setOpen(false)}
+                    >
+                      Step into your free Connection Session
+                    </Link>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
     </header>
