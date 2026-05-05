@@ -42,18 +42,21 @@ export default function Navbar() {
 
     let observer: IntersectionObserver | null = null
 
-    // rAF defers until after new page content has painted
+    // rAF defers until after new page content has painted.
+    // We watch the hero section rather than the CTA button: the section starts
+    // in the viewport so the observer initialises with isIntersecting=true
+    // (Session hidden), then fires false once the hero scrolls fully past the
+    // navbar — at which point the CTA button below the hero is also near the
+    // top of the screen, giving a natural "you've scrolled past the hero" feel.
     const raf = requestAnimationFrame(() => {
-      const heroCtaEl = document.querySelector('[data-hero-cta]')
-      if (!heroCtaEl) return
+      const heroEl = document.querySelector('[data-hero-section]')
+      if (!heroEl) return
 
       observer = new IntersectionObserver(
         ([entry]) => setSessionVisible(!entry.isIntersecting),
-        // rootMargin top offset = navbar height so the trigger fires when
-        // the button slides behind the navbar, not when it hits the raw top
         { rootMargin: '-80px 0px 0px 0px', threshold: 0 }
       )
-      observer.observe(heroCtaEl)
+      observer.observe(heroEl)
     })
 
     return () => {
@@ -104,7 +107,7 @@ export default function Navbar() {
     <header
       className={cn(
         'fixed top-0 inset-x-0 z-50 transition-all duration-300',
-        scrolled ? 'bg-white/95 backdrop-blur shadow-sm' : 'bg-transparent'
+        scrolled ? 'bg-white/95 backdrop-blur shadow-sm' : 'bg-tfs-navy/80 backdrop-blur-sm'
       )}
     >
       {/* Three-column layout: logo | nav (centered) | auth */}

@@ -121,24 +121,33 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative mt-20 h-[calc(100vh-5rem)] flex flex-col overflow-hidden">
-        {/* Hero background image — no overlay, image text is readable as-is */}
+      {/*
+        h-[70vh]: keeps the CTA below in the initial viewport on all screen sizes,
+        which is required for the IntersectionObserver Session-button trigger to work
+        correctly (element must start intersecting so we can detect when it stops).
+      */}
+      <section
+        className="relative mt-20 h-[70vh] min-h-[300px] overflow-hidden"
+        data-hero-section="true"
+      >
         <Image
           src="/images/homepage-image.webp"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
           fill
-          className="object-cover object-center select-none"
+          className="object-cover object-top select-none"
           priority
         />
-
-        {/* CTA pinned to the bottom of the hero image */}
-        <div className="relative z-10 mt-auto pb-12 flex justify-center">
-          <HeroCTAButton />
-        </div>
+        {/* Narrow gradient at the very top — keeps nav links readable over any image */}
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
       </section>
 
-      {/* Audience cards — below hero so they don't compete with the image */}
+      {/* CTA + Audience cards — below the hero image so the image is completely clean.
+          HeroCTAButton carries data-hero-cta which is still observed by the Navbar's
+          IntersectionObserver; when it scrolls behind the navbar, "Session" appears. */}
       <div className="bg-tfs-navy py-10 px-4">
+        <div className="flex justify-center mb-8">
+          <HeroCTAButton />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
           {AUDIENCE_CARDS.map(({ icon: Icon, label, href, desc }) => (
             <Link
