@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   // --- Load client profile ---
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
-    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone, free_trial_expires_at, coach_id, extra_sessions')
+    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone, free_trial_expires_at, coach_id, extra_sessions, applied_code_type, promo_expires_at')
     .eq('id', user.id)
     .single()
 
@@ -60,10 +60,21 @@ export async function POST(req: NextRequest) {
   const used          = profile.sessions_used_this_month ?? 0
   const extraSessions = profile.extra_sessions ?? 0
 
+  // --- Promo code type enforcement ---
+  const promoActive = !profile.promo_expires_at || new Date(profile.promo_expires_at) >= new Date()
+  const activeCodeType = promoActive ? (profile.applied_code_type ?? null) : null
+
+  if (activeCodeType === 'group_comp') {
+    return NextResponse.json(
+      { error: 'Your plan includes group coaching sessions only. Contact us to upgrade for individual coaching.' },
+      { status: 403 }
+    )
+  }
+
   // --- Plan / free trial check ---
-  // Extra purchased sessions bypass the normal plan limits.
-  if (extraSessions > 0) {
-    // Allow — will consume one extra session credit below.
+  // full_comp and extra purchased sessions bypass normal plan limits.
+  if (activeCodeType === 'full_comp' || extraSessions > 0) {
+    // Allow — full comp or purchased credit covers this booking.
   } else if (tier === 'free') {
     const trialExpiry = profile.free_trial_expires_at
       ? new Date(profile.free_trial_expires_at)

@@ -23,16 +23,23 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, plan_tier, sessions_used_this_month, extra_sessions, timezone')
+    .select('first_name, plan_tier, sessions_used_this_month, extra_sessions, timezone, applied_code_type, promo_expires_at')
     .eq('id', user.id)
     .single()
 
   const tier    = profile?.plan_tier ?? 'free'
   const used    = profile?.sessions_used_this_month ?? 0
-  const limit   = LIMITS[tier] ?? 0
   const extras  = profile?.extra_sessions ?? 0
   const userTz  = profile?.timezone ?? 'America/New_York'
   const isTopTier = tier === 'silver'
+
+  const promoActive = !profile?.promo_expires_at || new Date(profile.promo_expires_at) >= new Date()
+  const activeCodeType = promoActive ? (profile?.applied_code_type ?? null) : null
+
+  const isGroupComp = activeCodeType === 'group_comp'
+  const isFullComp  = activeCodeType === 'full_comp'
+
+  const limit = isGroupComp ? 0 : isFullComp ? 99 : (LIMITS[tier] ?? 0)
 
   // Upcoming confirmed bookings
   const { data: upcomingBookings } = await supabase
@@ -65,8 +72,8 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
     }).format(new Date(iso))
   }
 
-  const canBook  = (limit > 0 && used < limit) || extras > 0
-  const atLimit  = limit > 0 && used >= limit && extras === 0
+  const canBook  = isFullComp || (limit > 0 && used < limit) || extras > 0
+  const atLimit  = !isFullComp && !isGroupComp && limit > 0 && used >= limit && extras === 0
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
@@ -93,21 +100,30 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
         {/* Sessions used */}
         <div className="card">
           <p className="text-sm text-tfs-slate mb-1">Sessions this month</p>
-          <p className="text-3xl font-bold text-tfs-navy">
-            {used}
-            <span className="text-lg font-normal text-tfs-slate"> / {limit === 0 ? '—' : limit}</span>
-          </p>
-          {atLimit && (
-            <p className="text-xs text-orange-600 mt-1">
-              Monthly limit reached{!isTopTier && (
-                <> — <Link href="/portal/billing" className="underline">Upgrade</Link></>
+          {isGroupComp ? (
+            <p className="text-sm text-tfs-slate italic mt-1">Group coaching plan — individual sessions not included.</p>
+          ) : (
+            <>
+              <p className="text-3xl font-bold text-tfs-navy">
+                {used}
+                <span className="text-lg font-normal text-tfs-slate"> / {isFullComp ? '∞' : limit === 0 ? '—' : limit}</span>
+              </p>
+              {atLimit && (
+                <p className="text-xs text-orange-600 mt-1">
+                  Monthly limit reached{!isTopTier && (
+                    <> — <Link href="/portal/billing" className="underline">Upgrade</Link></>
+                  )}
+                </p>
               )}
-            </p>
-          )}
-          {extras > 0 && (
-            <p className="text-xs text-tfs-teal font-medium mt-1">
-              + {extras} gifted from admin
-            </p>
+              {isFullComp && (
+                <p className="text-xs text-tfs-teal font-medium mt-1">Complimentary coaching included</p>
+              )}
+              {extras > 0 && (
+                <p className="text-xs text-tfs-teal font-medium mt-1">
+                  + {extras} gifted from admin
+                </p>
+              )}
+            </>
           )}
         </div>
 
@@ -115,7 +131,16 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
         <div className="card col-span-2 flex items-center justify-between gap-4">
           <div>
             <p className="text-sm text-tfs-slate mb-1">Ready to meet with a coach?</p>
-            {atLimit ? (
+            {isGroupComp ? (
+              <p className="text-tfs-navy font-medium text-sm">
+                Your plan includes group coaching. Join a group session below or{' '}
+                <Link href="/portal/billing" className="text-tfs-teal hover:underline">upgrade</Link> for individual sessions.
+              </p>
+            ) : isFullComp ? (
+              <p className="text-tfs-navy font-medium">
+                Individual coaching is included in your partnership plan.
+              </p>
+            ) : atLimit ? (
               isTopTier ? (
                 <p className="text-tfs-navy font-medium text-sm">
                   Monthly sessions used. Buy a single session or wait for the monthly reset.
@@ -134,7 +159,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
               </p>
             )}
           </div>
-          {atLimit && isTopTier ? (
+          {!isGroupComp && (atLimit && isTopTier ? (
             <Link href="/portal/book?buy=1" className="btn-primary text-sm shrink-0">
               <CalendarPlus size={16} className="mr-1 inline-block" />
               Buy a Single Session
@@ -148,7 +173,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
               <CalendarPlus size={16} className="mr-1 inline-block" />
               Book a Session
             </Link>
-          )}
+          ))}
         </div>
       </div>
 

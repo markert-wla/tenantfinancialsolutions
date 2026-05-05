@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BookingClient from '@/components/portal/BookingClient'
+import IntakeQuestionnaire from '@/components/portal/IntakeQuestionnaire'
 
 export const metadata: Metadata = { title: 'Book a Session' }
 
@@ -18,26 +19,40 @@ export default async function BookPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Profile
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan_tier, sessions_used_this_month, timezone, coach_id, extra_sessions')
+    .select('plan_tier, sessions_used_this_month, timezone, coach_id, extra_sessions, applied_code_type, promo_expires_at, intake_completed_at')
     .eq('id', user.id)
     .single()
 
-  const tier            = profile?.plan_tier ?? 'free'
-  const used            = profile?.sessions_used_this_month ?? 0
-  const extraSessions   = profile?.extra_sessions ?? 0
-  const limit           = LIMITS[tier] ?? 0
-  const canBook         = extraSessions > 0 || (limit > 0 && used < limit)
-  const remaining       = extraSessions > 0 ? extraSessions : Math.max(0, limit - used)
-  const userTz          = profile?.timezone ?? 'America/New_York'
-  // Prefer coach from post-purchase redirect, then profile's saved coach
+  const tier          = profile?.plan_tier ?? 'free'
+  const used          = profile?.sessions_used_this_month ?? 0
+  const extraSessions = profile?.extra_sessions ?? 0
+  const userTz        = profile?.timezone ?? 'America/New_York'
+  const buyMode       = searchParams.buy === '1'
+
+  // Promo code type enforcement
+  const promoActive = !profile?.promo_expires_at || new Date(profile.promo_expires_at) >= new Date()
+  const activeCodeType = promoActive ? (profile?.applied_code_type ?? null) : null
+
+  let canBook: boolean
+  let remaining: number
+
+  if (activeCodeType === 'group_comp') {
+    canBook   = false
+    remaining = 0
+  } else if (activeCodeType === 'full_comp') {
+    canBook   = true
+    remaining = 99
+  } else {
+    const limit = LIMITS[tier] ?? 0
+    canBook     = extraSessions > 0 || (limit > 0 && used < limit)
+    remaining   = extraSessions > 0 ? extraSessions : Math.max(0, limit - used)
+  }
+
   const defaultCoachId  = searchParams.coachId ?? profile?.coach_id ?? null
   const assignedCoachId = profile?.coach_id ?? null
-  const buyMode         = searchParams.buy === '1'
 
-  // Active coaches
   const { data: coachRows } = await supabase
     .from('coaches')
     .select('id, display_name')
@@ -48,6 +63,9 @@ export default async function BookPage({
     id:          c.id,
     displayName: c.display_name,
   }))
+
+  // Show intake questionnaire on first booking
+  const needsIntake = !profile?.intake_completed_at && activeCodeType !== 'group_comp'
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
@@ -68,16 +86,21 @@ export default async function BookPage({
         </div>
       )}
 
-      <BookingClient
-        coaches={coaches}
-        userTimezone={userTz}
-        canBook={buyMode ? true : canBook}
-        sessionsRemaining={remaining}
-        tier={tier}
-        defaultCoachId={defaultCoachId}
-        assignedCoachId={assignedCoachId}
-        buyMode={buyMode}
-      />
+      {needsIntake ? (
+        <IntakeQuestionnaire />
+      ) : (
+        <BookingClient
+          coaches={coaches}
+          userTimezone={userTz}
+          canBook={buyMode ? true : canBook}
+          sessionsRemaining={remaining}
+          tier={tier}
+          activeCodeType={activeCodeType}
+          defaultCoachId={defaultCoachId}
+          assignedCoachId={assignedCoachId}
+          buyMode={buyMode}
+        />
+      )}
     </div>
   )
 }

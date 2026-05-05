@@ -29,6 +29,7 @@ interface Props {
   canBook:           boolean
   sessionsRemaining: number
   tier:              string
+  activeCodeType:    string | null
   defaultCoachId:    string | null
   assignedCoachId:   string | null
   buyMode?:          boolean
@@ -36,7 +37,7 @@ interface Props {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export default function BookingClient({ coaches, userTimezone, canBook, sessionsRemaining, tier, defaultCoachId, assignedCoachId, buyMode = false }: Props) {
+export default function BookingClient({ coaches, userTimezone, canBook, sessionsRemaining, tier, activeCodeType, defaultCoachId, assignedCoachId, buyMode = false }: Props) {
   const [selectedCoachId, setSelectedCoachId] = useState<string>(defaultCoachId ?? 'any')
   const [weekOffset,      setWeekOffset]      = useState(0)
   const [slotDays,        setSlotDays]        = useState<SlotDay[]>([])
@@ -165,18 +166,24 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
 
   // ── Plan gate ─────────────────────────────────────────────────────────────
   if (!canBook) {
+    const isGroupComp = activeCodeType === 'group_comp'
     return (
       <div className="flex flex-col items-center text-center py-16 px-4">
         <AlertCircle className="text-tfs-gold mb-4" size={48} />
         <h2 className="text-2xl font-serif font-bold text-tfs-navy mb-2">
-          {tier === 'free' ? 'Upgrade to Book Sessions' : 'Monthly Limit Reached'}
+          {isGroupComp
+            ? 'Group Coaching Access'
+            : tier === 'free' ? 'Upgrade to Book Sessions' : 'Monthly Limit Reached'}
         </h2>
         <p className="text-tfs-slate mb-6 max-w-sm">
-          {tier === 'free'
-            ? 'Individual coaching sessions are available on Starter, Advantage, and Gold plans.'
-            : `You've used all your sessions for this month. Upgrade for more, or check back next month.`}
+          {isGroupComp
+            ? 'Your partnership plan includes group coaching sessions. Individual one-on-one sessions require an upgraded plan.'
+            : tier === 'free'
+              ? 'Individual coaching sessions are available on Starter, Advantage, and Gold plans.'
+              : `You've used all your sessions for this month. Upgrade for more, or check back next month.`}
         </p>
-        <a href="/services" className="btn-primary text-sm">View Plans</a>
+        {!isGroupComp && <a href="/services" className="btn-primary text-sm">View Plans</a>}
+        {isGroupComp && <a href="/portal/group-sessions" className="btn-primary text-sm">View Group Sessions</a>}
       </div>
     )
   }

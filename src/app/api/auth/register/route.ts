@@ -156,8 +156,13 @@ export async function POST(req: NextRequest) {
     profileUpdate.free_trial_expires_at = trialExpiry.toISOString()
   }
 
-  if (promoCode)        profileUpdate.promo_code_used   = promoCode
-  if (promoPartnerId)   profileUpdate.partner_id         = promoPartnerId
+  if (promoCode) {
+    const { data: codeRow } = await supabase.from('promo_codes').select('expires_at').eq('code', promoCode).single()
+    profileUpdate.promo_code_used   = promoCode
+    profileUpdate.applied_code_type = codeType
+    profileUpdate.promo_expires_at  = codeRow?.expires_at ?? null
+  }
+  if (promoPartnerId) profileUpdate.partner_id = promoPartnerId
   if (unitNumber)       profileUpdate.unit_number        = unitNumber
   if (coachId) {
     const { data: coachExists } = await supabase.from('coaches').select('id').eq('id', coachId).eq('is_active', true).single()

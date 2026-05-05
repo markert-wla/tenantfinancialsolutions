@@ -138,8 +138,10 @@ export async function POST(req: NextRequest) {
   }
 
   const profilePatch: Record<string, unknown> = {
-    plan_tier:       promoCode.assigned_tier,
-    promo_code_used: code,
+    plan_tier:         promoCode.assigned_tier,
+    promo_code_used:   code,
+    applied_code_type: promoCode.code_type,
+    promo_expires_at:  promoCode.expires_at ?? null,
   }
   if (promoCode.partner_id) profilePatch.partner_id = promoCode.partner_id
 
