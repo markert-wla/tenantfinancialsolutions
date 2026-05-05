@@ -83,12 +83,13 @@ export async function GET(req: NextRequest) {
   // --- Fetch unavailable dates in the window ---
   const weekStartDate = weekStart.toISOString().split('T')[0]
   const weekEndDate   = new Date(weekEnd.getTime() - 1).toISOString().split('T')[0]
-  const { data: unavailableDates } = await supabase
+  const { data: unavailableDates, error: unavailErr } = await supabase
     .from('coach_unavailable_dates')
     .select('coach_id, date, all_day, start_time, end_time')
     .in('coach_id', coachIds)
     .gte('date', weekStartDate)
     .lte('date', weekEndDate)
+  if (unavailErr) console.error('[slots] unavailable_dates error:', unavailErr.message, unavailErr.details)
 
   // All-day blocks: "coachId|date" set for O(1) lookup
   const unavailableSet = new Set<string>()
