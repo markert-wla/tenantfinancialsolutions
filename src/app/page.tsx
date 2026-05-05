@@ -121,29 +121,18 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col items-center text-white text-center px-4 overflow-hidden pt-20">
-        {/* Hero background image */}
+      <section className="relative mt-20 h-[calc(100vh-5rem)] flex flex-col overflow-hidden">
+        {/* Hero background image — no overlay, image text is readable as-is */}
         <Image
           src="/images/homepage-image.webp"
-          alt=""
+          alt="Tenant Financial Solutions — Real People, Real Coaching"
           fill
           className="object-cover object-center select-none"
           priority
-          aria-hidden="true"
         />
-        {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-tfs-navy/55" aria-hidden="true" />
-
-        {/* Heading — vertically centered in available space */}
-        <div className="relative z-10 max-w-4xl mx-auto flex-1 flex items-center justify-center py-12">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight">
-            Your residents want clarity. Your team wants fewer financial emergencies.{' '}
-            Our individual financial coaching delivers both.
-          </h1>
-        </div>
 
         {/* CTA pinned to the bottom of the hero image */}
-        <div className="relative z-10 pb-12">
+        <div className="relative z-10 mt-auto pb-12 flex justify-center">
           <HeroCTAButton />
         </div>
       </section>
