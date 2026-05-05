@@ -127,7 +127,7 @@ export default async function HomePage({
           alt="Tenant Financial Solutions — Real People, Real Coaching"
           fill
           className="object-cover select-none"
-          style={{ objectPosition: 'center calc(50% - 20px)' }}
+          style={{ objectPosition: 'center calc(50% - 50px)' }}
           priority
         />
         {/* Narrow gradient at very top only — keeps nav links readable over any image */}
