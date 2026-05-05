@@ -121,65 +121,50 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section
-        className="relative min-h-screen flex flex-col items-center justify-center text-white text-center px-4 overflow-hidden pt-20"
-        style={{
-          background: 'linear-gradient(135deg, #1D9E75 0%, #1A2B4A 60%, #0F1B30 100%)',
-        }}
-      >
-        {/* Logo watermark background */}
-        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <Image
-            src="/images/logo.png"
-            alt=""
-            fill
-            className="object-contain select-none opacity-[0.13] mix-blend-screen"
-            style={{ filter: 'grayscale(1) invert(1)' }}
-            priority
-          />
-        </div>
-
-        {/* subtle grid overlay */}
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 25% 25%, white 1px, transparent 1px), radial-gradient(circle at 75% 75%, white 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
+      <section className="relative min-h-screen flex flex-col items-center text-white text-center px-4 overflow-hidden pt-20">
+        {/* Hero background image */}
+        <Image
+          src="/images/homepage-image.webp"
+          alt=""
+          fill
+          className="object-cover object-center select-none"
+          priority
+          aria-hidden="true"
         />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-tfs-navy/55" aria-hidden="true" />
 
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight mb-6">
+        {/* Heading — vertically centered in available space */}
+        <div className="relative z-10 max-w-4xl mx-auto flex-1 flex items-center justify-center py-12">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold leading-tight">
             Your residents want clarity. Your team wants fewer financial emergencies.{' '}
             Our individual financial coaching delivers both.
           </h1>
-          {/* Primary CTA */}
-          <div className="mb-8">
-            <HeroCTAButton />
-          </div>
-
-          {/* Three CTA cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-            {AUDIENCE_CARDS.map(({ icon: Icon, label, href, desc }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`rounded-xl p-6 text-left hover:scale-105 transition-transform duration-200 group bg-white/10 backdrop-blur-sm border border-white/20`}
-              >
-                <Icon className="mb-3 text-white" size={28} />
-                <p className="font-semibold text-white text-base mb-1">{label}</p>
-                <p className="text-sm text-white">{desc}</p>
-                <ChevronRight
-                  className="mt-3 text-white/60 group-hover:text-white transition-colors"
-                  size={16}
-                />
-              </Link>
-            ))}
-          </div>
         </div>
 
+        {/* CTA pinned to the bottom of the hero image */}
+        <div className="relative z-10 pb-12">
+          <HeroCTAButton />
+        </div>
       </section>
+
+      {/* Audience cards — below hero so they don't compete with the image */}
+      <div className="bg-tfs-navy py-10 px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+          {AUDIENCE_CARDS.map(({ icon: Icon, label, href, desc }) => (
+            <Link
+              key={href}
+              href={href}
+              className="rounded-xl p-6 text-left hover:scale-105 transition-transform duration-200 group bg-white/10 backdrop-blur-sm border border-white/20"
+            >
+              <Icon className="mb-3 text-white" size={28} />
+              <p className="font-semibold text-white text-base mb-1">{label}</p>
+              <p className="text-sm text-white/80">{desc}</p>
+              <ChevronRight className="mt-3 text-white/60 group-hover:text-white transition-colors" size={16} />
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 

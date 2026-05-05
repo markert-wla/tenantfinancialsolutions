@@ -97,11 +97,9 @@ export default async function AboutPage() {
               <strong className="text-tfs-gold">one-on-one coaching</strong>, they gain clarity, confidence, and control.
             </p>
           </div>
-          <div className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-6 py-5 max-w-sm">
-            <p className="font-bold text-white font-serif text-lg leading-snug">
-              Financial Clarity That Supports On-Time Payments.
-            </p>
-          </div>
+          <p className="text-tfs-gold font-bold text-xl sm:text-2xl font-serif text-center leading-snug">
+            Your Coaching on Your Time with Your Preferred Coach
+          </p>
         </div>
       </section>
 
