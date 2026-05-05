@@ -107,7 +107,7 @@ export default function UnavailableDatesClient({
         <h2 className="font-semibold text-tfs-navy text-lg">Unavailable Days</h2>
       </div>
       <p className="text-sm text-tfs-slate mb-5">
-        Block out specific dates or time windows — these override your regular weekly schedule.
+        Block out specific dates or time windows — these override your regular weekly schedule. Time blocks only suppress slots on days you have availability set up.
       </p>
 
       {/* Existing blocked dates */}
@@ -182,24 +182,29 @@ export default function UnavailableDatesClient({
 
         {/* Time pickers — only shown for time blocks */}
         {!allDay && (
-          <div className="flex flex-wrap gap-3">
-            <div>
-              <label className="block text-xs font-medium text-tfs-navy mb-1">Start Time</label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={e => setStartTime(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-tfs-navy mb-1">End Time</label>
-              <input
-                type="time"
-                value={endTime}
-                onChange={e => setEndTime(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
-              />
+          <div className="space-y-2">
+            <p className="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 leading-snug">
+              Enter times in <strong>UTC</strong> — the same timezone used for your weekly availability schedule. For example, if your availability starts at 13:00 UTC, a block ending at 13:00 UTC will suppress that slot.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <div>
+                <label className="block text-xs font-medium text-tfs-navy mb-1">Start Time <span className="text-tfs-slate font-normal">(UTC)</span></label>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={e => setStartTime(e.target.value)}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-tfs-navy mb-1">End Time <span className="text-tfs-slate font-normal">(UTC)</span></label>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={e => setEndTime(e.target.value)}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                />
+              </div>
             </div>
           </div>
         )}
