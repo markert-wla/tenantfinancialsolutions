@@ -121,10 +121,10 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      {/* h-[calc(100vh-30px)] = full viewport minus navbar (80px) plus 50px extra at bottom.
-          objectPosition shifts focal point 20px above center so the image shifts visually
-          downward, revealing more of the upper text while the +50px extends the bottom. */}
-      <section className="relative mt-20 h-[calc(100vh-30px)] overflow-hidden">
+      {/* mt-[60px]: section slides 20px under the fixed navbar (80px tall), so the navbar
+          covers the top 20px of the image and acts as a buffer between its shadow and the
+          image text. h-[calc(100vh-10px)] compensates so the bottom edge stays the same. */}
+      <section className="relative mt-[60px] h-[calc(100vh-10px)] overflow-hidden">
         <Image
           src="/images/homepage-image.webp"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
