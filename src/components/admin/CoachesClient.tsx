@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, PowerOff, Power } from 'lucide-react'
+import { Plus, Pencil, PowerOff, Power, AlertTriangle, Send, CheckCircle } from 'lucide-react'
 
 type Coach = {
   id: string
@@ -11,8 +11,10 @@ type Coach = {
   specialty: string | null
   bio: string | null
   bio_short: string | null
+  photo_url: string | null
   timezone: string
   is_active: boolean
+  email_confirmed: boolean
 }
 
 const TIMEZONES = [
@@ -25,13 +27,23 @@ const TIMEZONES = [
   'Pacific/Honolulu',
 ]
 
+function getSetupIssues(coach: Coach): string[] {
+  const issues: string[] = []
+  if (!coach.email_confirmed) issues.push('Invite not accepted')
+  if (!coach.photo_url)       issues.push('No profile photo')
+  if (!coach.bio)             issues.push('No bio')
+  return issues
+}
+
 export default function CoachesClient({ coaches }: { coaches: Coach[] }) {
   const router = useRouter()
-  const [showAdd, setShowAdd]             = useState(false)
-  const [editCoach, setEditCoach]         = useState<Coach | null>(null)
-  const [confirmDeactivate, setConfirm]   = useState<Coach | null>(null)
-  const [loading, setLoading]             = useState(false)
-  const [error, setError]                 = useState('')
+  const [showAdd, setShowAdd]           = useState(false)
+  const [editCoach, setEditCoach]       = useState<Coach | null>(null)
+  const [confirmDeactivate, setConfirm] = useState<Coach | null>(null)
+  const [loading, setLoading]           = useState(false)
+  const [error, setError]               = useState('')
+  const [resendingId, setResendingId]   = useState<string | null>(null)
+  const [resendDoneId, setResendDoneId] = useState<string | null>(null)
 
   function closeAdd()  { setShowAdd(false);  setError('') }
   function closeEdit() { setEditCoach(null); setError('') }
@@ -96,6 +108,20 @@ export default function CoachesClient({ coaches }: { coaches: Coach[] }) {
     router.refresh()
   }
 
+  async function handleResendInvite(coach: Coach) {
+    setResendingId(coach.id)
+    setError('')
+    const res = await fetch(`/api/admin/coaches/${coach.id}/resend-invite`, { method: 'POST' })
+    const data = await res.json()
+    setResendingId(null)
+    if (res.ok) {
+      setResendDoneId(coach.id)
+      setTimeout(() => setResendDoneId(null), 4000)
+    } else {
+      setError(data.error ?? 'Failed to resend invite')
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -104,6 +130,20 @@ export default function CoachesClient({ coaches }: { coaches: Coach[] }) {
           <Plus size={16} /> Add Coach
         </button>
       </div>
+
+      {/* Resend success banner */}
+      {resendDoneId && (
+        <div className="mb-4 flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800">
+          <CheckCircle size={16} className="text-green-600 shrink-0" />
+          Invite email resent successfully. Remind the coach to click the link within 24 hours.
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
       <div className="card overflow-hidden">
         {coaches.length === 0 ? (
@@ -121,52 +161,101 @@ export default function CoachesClient({ coaches }: { coaches: Coach[] }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {coaches.map(coach => (
-                  <tr key={coach.id}>
-                    <td className="py-3 pr-4">
-                      <p className="font-medium text-tfs-navy">{coach.display_name}</p>
-                      <p className="text-xs text-tfs-slate">{coach.email}</p>
-                    </td>
-                    <td className="py-3 pr-4 text-tfs-slate">{coach.specialty ?? '—'}</td>
-                    <td className="py-3 pr-4 text-xs text-tfs-slate">{coach.timezone}</td>
-                    <td className="py-3 pr-4">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        coach.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                      }`}>
-                        {coach.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => setEditCoach(coach)}
-                          className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
-                          title="Edit"
-                        >
-                          <Pencil size={15} />
-                        </button>
-                        {coach.is_active ? (
+                {coaches.map(coach => {
+                  const issues  = getSetupIssues(coach)
+                  const hasIssue = issues.length > 0
+                  return (
+                    <tr key={coach.id}>
+
+                      {/* Name + email + warning */}
+                      <td className="py-3 pr-4">
+                        <div className="flex items-start gap-1.5">
+                          {hasIssue && (
+                            <span
+                              title={`Setup incomplete — ${issues.join(' · ')}`}
+                              className="mt-0.5 shrink-0"
+                            >
+                              <AlertTriangle size={14} className="text-amber-500" />
+                            </span>
+                          )}
+                          <div>
+                            <p className="font-medium text-tfs-navy">{coach.display_name}</p>
+                            <p className="text-xs text-tfs-slate">{coach.email}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-3 pr-4 text-tfs-slate">{coach.specialty ?? '—'}</td>
+                      <td className="py-3 pr-4 text-xs text-tfs-slate">{coach.timezone}</td>
+
+                      {/* Status: booking state + account state */}
+                      <td className="py-3 pr-4">
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            coach.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                          }`}>
+                            {coach.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                          {!coach.email_confirmed && (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                              Invite Pending
+                            </span>
+                          )}
+                          {coach.email_confirmed && !coach.photo_url && (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-600">
+                              No Photo
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+
+                          {/* Resend invite — only for coaches who haven't confirmed */}
+                          {!coach.email_confirmed && (
+                            <button
+                              onClick={() => handleResendInvite(coach)}
+                              disabled={resendingId === coach.id}
+                              className="p-1.5 rounded-lg text-tfs-slate hover:text-amber-600 hover:bg-amber-50 transition-colors disabled:opacity-50"
+                              title="Resend invite email"
+                            >
+                              <Send size={14} className={resendingId === coach.id ? 'animate-pulse' : ''} />
+                            </button>
+                          )}
+
                           <button
-                            onClick={() => setConfirm(coach)}
-                            className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
-                            title="Deactivate"
+                            onClick={() => setEditCoach(coach)}
+                            className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                            title="Edit"
                           >
-                            <PowerOff size={15} />
+                            <Pencil size={15} />
                           </button>
-                        ) : (
-                          <button
-                            onClick={() => toggleActive(coach, true)}
-                            disabled={loading}
-                            className="p-1.5 rounded-lg text-tfs-slate hover:text-green-600 hover:bg-green-50 transition-colors"
-                            title="Activate"
-                          >
-                            <Power size={15} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+
+                          {coach.is_active ? (
+                            <button
+                              onClick={() => setConfirm(coach)}
+                              className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
+                              title="Deactivate"
+                            >
+                              <PowerOff size={15} />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => toggleActive(coach, true)}
+                              disabled={loading}
+                              className="p-1.5 rounded-lg text-tfs-slate hover:text-green-600 hover:bg-green-50 transition-colors"
+                              title="Activate"
+                            >
+                              <Power size={15} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

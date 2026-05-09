@@ -22,7 +22,7 @@ export default async function CoachSessionsPage() {
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
   const { data: sessions } = await supabase
     .from('bookings')
-    .select('id, start_time_utc, end_time_utc, status, notes, client_notes, attended, flagged, flag_reason, profiles!bookings_client_id_fkey(first_name, last_name, email, plan_tier)')
+    .select('id, start_time_utc, end_time_utc, status, notes, client_notes, client_message, attended, flagged, flag_reason, profiles!bookings_client_id_fkey(first_name, last_name, email, plan_tier)')
     .eq('coach_id', user.id)
     .gte('start_time_utc', ninetyDaysAgo)
     .order('start_time_utc', { ascending: false })
@@ -35,7 +35,7 @@ export default async function CoachSessionsPage() {
           All sessions in your timezone ({coachTz}). Past 90 days + all upcoming.
         </p>
       </div>
-      <SessionsClient sessions={(sessions ?? []) as unknown as { id: string; start_time_utc: string; end_time_utc: string; status: 'confirmed' | 'pending' | 'cancelled'; notes: string | null; client_notes: string | null; attended: boolean | null; flagged: boolean; flag_reason: string | null; profiles: { first_name: string; last_name: string; email: string; plan_tier: string } | null }[]} coachTz={coachTz} />
+      <SessionsClient sessions={(sessions ?? []) as unknown as { id: string; start_time_utc: string; end_time_utc: string; status: 'confirmed' | 'pending' | 'cancelled'; notes: string | null; client_notes: string | null; client_message: string | null; attended: boolean | null; flagged: boolean; flag_reason: string | null; profiles: { first_name: string; last_name: string; email: string; plan_tier: string } | null }[]} coachTz={coachTz} />
     </div>
   )
 }

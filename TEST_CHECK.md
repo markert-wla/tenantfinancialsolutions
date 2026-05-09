@@ -688,3 +688,177 @@ WHERE email = 'your-test-client@gmail.com';
 UPDATE profiles SET role = 'admin'
 WHERE email = 'someone@example.com';
 ```
+
+---
+
+## 13 · Zoom Link Feature
+
+### 13.1 Coach Sets Their Zoom Link (`/coach/profile`)
+1. Log in as a coach
+2. Go to `/coach/profile`
+3. Find the new **Personal Zoom Link** field under "Coach Profile"
+4. Enter a Zoom link (e.g. `https://zoom.us/j/123456789`)
+5. Click **Save Changes**
+
+**Expected:**
+- [ ] Success message shown
+- [ ] Link persists on page reload
+
+**DB check:**
+```sql
+SELECT display_name, zoom_link FROM coaches WHERE id = 'your-coach-uuid';
+-- zoom_link should contain the URL you entered
+```
+
+### 13.2 Zoom Link Included in Client Booking Email
+1. As a client, book a session with the coach who set a zoom link (Section 13.1)
+2. Check the client's booking confirmation email
+
+**Expected:**
+- [ ] Email contains a **Session Link** row in the session details table
+- [ ] "Join Session →" link is clickable and opens the correct Zoom URL
+- [ ] If the coach has NOT set a zoom link, the Session Link row is absent (no broken link)
+
+### 13.3 Coach Without Zoom Link
+1. Book a session with a coach whose `zoom_link` is null/empty
+2. Check the client's confirmation email
+
+**Expected:**
+- [ ] Email does not show a Session Link row
+- [ ] No broken links or empty rows in the email
+
+---
+
+## 14 · Intake Questionnaire Improvements
+
+### 14.1 Character Limits Updated
+1. As a client, go to `/portal/book` and fill out the intake questionnaire
+2. On Question 7 ("What is one thing that has motivated you…"): type a long answer
+
+**Expected:**
+- [ ] Allows up to **100 characters** (was 50)
+- [ ] Character counter shows `X / 100`
+
+3. On Question 10 ("What is your primary financial goal…"): type a long answer
+
+**Expected:**
+- [ ] Allows up to **200 characters** (was 50)
+- [ ] Character counter shows `X / 200`
+
+4. Verify Spanish version (`Español` toggle) has the same limits:
+- [ ] Q7 shows `X / 100`
+- [ ] Q10 shows `X / 200`
+
+### 14.2 Questionnaire Visible on Coach Client Detail Page
+**Pre-condition:** A client must have submitted the intake questionnaire (completes it on the booking page).
+
+1. Log in as a coach
+2. Go to `/coach/clients` → click on the client who completed the questionnaire
+3. On the client detail page, scroll to the **Intake Questionnaire** section
+
+**Expected:**
+- [ ] Section shows all 10 Q&A responses
+- [ ] Submission date is displayed
+- [ ] Checkbox questions (Q2, Q5) show as bullet lists
+- [ ] Text questions (Q7, Q10) show as plain text
+- [ ] If language was Spanish, a "· Spanish" tag appears
+
+**If client has NOT completed the questionnaire:**
+- [ ] Section shows "Client has not completed the intake questionnaire."
+
+**DB check to confirm the response is stored:**
+```sql
+SELECT client_id, language, created_at, responses
+FROM intake_responses
+WHERE client_id = 'the-client-uuid'
+ORDER BY created_at DESC LIMIT 1;
+```
+
+---
+
+## 15 · Client Dashboard Session Status
+
+### 15.1 Session Counter Breakdown
+1. As a client, book a session (future date)
+2. Go to `/portal/dashboard`
+
+**Expected:**
+- [ ] Sessions this month stat card shows `1 / 2` (or `1 / 1` for free)
+- [ ] Below the counter, a breakdown line shows: **"0 completed · 1 upcoming"**
+- [ ] After the session date passes, the breakdown updates to **"1 completed · 0 upcoming"**
+
+This makes it clear that the counter tracks bookings (not completed sessions) and shows what's upcoming vs already happened.
+
+---
+
+## 16 · Admin Coach Setup Indicators & Resend Invite
+
+### 16.1 Warning Icons on Coaches List (`/admin/coaches`)
+
+Log in as admin and go to `/admin/coaches`.
+
+**Expected for a coach with issues (e.g. no photo, invite not accepted):**
+- [ ] Yellow ⚠️ triangle appears to the left of the coach's name
+- [ ] Hovering over the triangle shows a tooltip: "Setup incomplete — [list of issues]"
+- [ ] Issues shown in tooltip can include: "Invite not accepted", "No profile photo", "No bio"
+
+**Expected for a fully set-up coach:**
+- [ ] No warning icon appears next to their name
+
+### 16.2 Status Badges
+
+**For a coach who accepted invite + has photo:**
+- [ ] Only the green **"Active"** badge shows (or gray **"Inactive"** if deactivated)
+
+**For a coach who has NOT accepted their invite (email_confirmed_at is null):**
+- [ ] Active/Inactive badge still shows (existing booking-active state)
+- [ ] A second amber **"Invite Pending"** badge appears below it
+- [ ] ⚠️ icon appears next to their name
+
+**For a confirmed coach with no profile photo:**
+- [ ] Orange **"No Photo"** badge appears below the Active/Inactive badge
+- [ ] ⚠️ icon appears next to their name
+
+### 16.3 Resend Invite Button
+
+**Pre-condition:** A coach whose invite has not been accepted (Status shows "Invite Pending").
+
+1. Find the coach in the `/admin/coaches` list
+2. In their Actions column, click the paper-plane **Send** icon (tooltip: "Resend invite email")
+
+**Expected:**
+- [ ] Button shows a pulsing animation while sending
+- [ ] Green success banner appears at the top: "Invite email resent successfully. Remind the coach to click the link within 24 hours."
+- [ ] Banner dismisses automatically after ~4 seconds
+- [ ] The invite email arrives in the coach's inbox with a fresh "Set My Password & Get Started" link
+- [ ] Coach can click the link (within 24 hours) and is directed to `/auth/set-password`
+
+**If coach has ALREADY confirmed their account:**
+- [ ] Clicking Resend shows an error: "This coach has already confirmed their account. They can log in at /login."
+- [ ] No email is sent
+
+**DB check after coach accepts invite:**
+```sql
+SELECT email_confirmed_at, last_sign_in_at
+FROM auth.users WHERE email = 'the-coach@email.com';
+-- email_confirmed_at should now be populated
+-- Warning icon and "Invite Pending" badge should disappear on next page load
+```
+
+## 17 · Coach Jasper Auth Workaround
+
+**Background:** Coach Jasper (`Coachedwardjasper@gmail.com`) has a complete profile in the DB but has never confirmed his email. His invite tokens have all expired (tokens are valid for ~24 hours).
+
+**Resolution steps:**
+1. Go to **Supabase Dashboard → Authentication → Users**
+2. Find `Coachedwardjasper@gmail.com`
+3. Click **"Send magic link"** or **"Send password recovery"** to generate a fresh link
+4. Tell Jasper to click the link **within 1 hour** and set his password
+
+**Expected after he sets his password:**
+- [ ] `email_confirmed_at` and `confirmed_at` populate in `auth.users`
+- [ ] `last_sign_in_at` updates
+- [ ] Jasper can log in at `/login` and reaches `/coach/dashboard`
+- [ ] His pre-filled bio, bio_short, and display name are already present
+
+**Note:** His coach data is already saved — he just needs to get past the auth gate. Do NOT delete and re-add him (it would create a new UUID and lose his existing profile/coach rows).

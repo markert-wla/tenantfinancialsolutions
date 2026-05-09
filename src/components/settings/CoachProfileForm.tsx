@@ -23,6 +23,7 @@ type Props = {
     specialty: string | null
     photo_url: string | null
     timezone: string
+    zoom_link: string | null
   }
 }
 
@@ -40,6 +41,7 @@ export default function CoachProfileForm({ authEmail, userId, profile, coach }: 
     specialty:     coach.specialty ?? '',
     photo_url:     coach.photo_url ?? '',
     timezone:      coach.timezone || profile.timezone,
+    zoom_link:     coach.zoom_link ?? '',
   })
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -69,6 +71,7 @@ export default function CoachProfileForm({ authEmail, userId, profile, coach }: 
         bio_short:     form.bio_short.trim() || null,
         specialty:     form.specialty.trim() || null,
         photo_url:     form.photo_url.trim() || null,
+        zoom_link:     form.zoom_link.trim() || null,
         timezone:      form.timezone,
       }),
     })
@@ -168,6 +171,20 @@ export default function CoachProfileForm({ authEmail, userId, profile, coach }: 
             />
             <p className="text-xs text-tfs-slate mt-1 text-right">{form.bio_short.length}/200</p>
           </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-tfs-slate mb-1">
+              Personal Zoom Link <span className="font-normal">(optional — sent to clients in booking confirmation emails)</span>
+            </label>
+            <input
+              type="url"
+              value={form.zoom_link}
+              onChange={e => set('zoom_link', e.target.value)}
+              placeholder="https://zoom.us/j/your-meeting-id"
+              className={INPUT}
+            />
+            <p className="text-xs text-tfs-slate mt-1">Clients will receive this link in their booking confirmation so they can join without waiting for you to send it.</p>
+          </div>
+
           <div className="sm:col-span-2">
             <label className="block text-xs font-medium text-tfs-slate mb-1">
               Full Bio <span className="font-normal">(optional — shown when clients click your card)</span>

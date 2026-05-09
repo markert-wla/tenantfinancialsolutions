@@ -11,6 +11,7 @@ type Session = {
   status: 'confirmed' | 'pending' | 'cancelled'
   notes: string | null
   client_notes: string | null
+  client_message: string | null
   attended: boolean | null
   flagged: boolean
   flag_reason: string | null
@@ -164,6 +165,12 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                         <Share2 size={10} className="shrink-0 mt-0.5" />{s.client_notes}
                       </p>
                     )}
+                    {s.client_message && (
+                      <div className="mt-1 border-l-2 border-gray-300 pl-2">
+                        <p className="text-xs font-medium text-tfs-slate mb-0.5">Client</p>
+                        <p className="text-xs text-tfs-slate italic">{s.client_message}</p>
+                      </div>
+                    )}
                     {s.flagged && s.flag_reason && (
                       <p className="text-xs text-red-600 mt-1 border-l-2 border-red-300 pl-2 italic">
                         Flag reason: {s.flag_reason}
@@ -190,7 +197,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
 
                     {/* Edit note */}
                     <button
-                      onClick={() => { setEditingNote(s.id); setCoachNoteText(s.notes ?? ''); setClientNoteText(s.client_notes ?? '') }}
+                      onClick={() => { setEditingNote(s.id); setCoachNoteText(s.notes ?? ''); setClientNoteText(s.client_notes ?? ''); }}
                       className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
                       title="Edit note"
                     >
@@ -239,13 +246,13 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                     </div>
                     <div>
                       <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal uppercase tracking-wide mb-1">
-                        <Share2 size={11} /> Client Notes <span className="font-normal normal-case text-tfs-slate">(shared with client)</span>
+                        <Share2 size={11} /> Message to Client <span className="font-normal normal-case text-tfs-slate">(visible to client)</span>
                       </label>
                       <textarea
                         value={clientNoteText}
                         onChange={e => setClientNoteText(e.target.value)}
                         rows={2}
-                        placeholder="Notes visible to the client, coach, and admin…"
+                        placeholder="Write a message or note for the client to see…"
                         className="w-full border border-tfs-teal/40 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
                       />
                     </div>

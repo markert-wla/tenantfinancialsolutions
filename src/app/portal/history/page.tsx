@@ -28,13 +28,14 @@ export default async function HistoryPage() {
       end_time_utc,
       status,
       client_notes,
-      coaches ( display_name )
+      client_message,
+      coaches ( display_name, zoom_link )
     `)
     .eq('client_id', user.id)
     .order('start_time_utc', { ascending: false })
 
   const now      = new Date()
-  type BookingRow = { id: string; start_time_utc: string; end_time_utc: string; status: string; client_notes: string | null; coaches: { display_name: string } | null }
+  type BookingRow = { id: string; start_time_utc: string; end_time_utc: string; status: string; client_notes: string | null; client_message: string | null; coaches: { display_name: string; zoom_link: string | null } | null }
   const typedBookings = (bookings ?? []) as unknown as BookingRow[]
   const upcoming = typedBookings.filter((b) => new Date(b.start_time_utc) >= now && b.status !== 'cancelled')
   const past     = typedBookings.filter((b) => new Date(b.start_time_utc) <  now || b.status === 'cancelled')
@@ -45,7 +46,8 @@ export default async function HistoryPage() {
     end_time_utc:   b.end_time_utc,
     status:         b.status,
     client_notes:   b.client_notes ?? null,
-    coaches:        b.coaches ?? null,
+    client_message: b.client_message ?? null,
+    coaches:        b.coaches ? { display_name: b.coaches.display_name, zoom_link: b.coaches.zoom_link ?? null } : null,
   })
 
   return (

@@ -11,7 +11,8 @@ type Booking = {
   end_time_utc: string
   status: string
   client_notes: string | null
-  coaches: { display_name: string } | null
+  client_message: string | null
+  coaches: { display_name: string; zoom_link: string | null } | null
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -55,7 +56,7 @@ export default function HistoryClient({
 
   function openNote(b: Booking) {
     setEditingNote(b.id)
-    setNoteText(b.client_notes ?? '')
+    setNoteText(b.client_message ?? '')
     setNoteError('')
   }
 
@@ -65,13 +66,13 @@ export default function HistoryClient({
     const res = await fetch(`/api/portal/bookings/${id}/notes`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ client_notes: noteText || null }),
+      body: JSON.stringify({ client_message: noteText || null }),
     })
     setSavingNote(false)
     if (res.ok) {
       const saved = noteText.trim() || null
       const update = (list: Booking[]) =>
-        list.map(b => b.id === id ? { ...b, client_notes: saved } : b)
+        list.map(b => b.id === id ? { ...b, client_message: saved } : b)
       setBookings(prev => ({ upcoming: update(prev.upcoming), past: update(prev.past) }))
       setEditingNote(null)
     } else {
@@ -113,14 +114,35 @@ export default function HistoryClient({
               {fmt(b.start_time_utc)}
               <span className="text-xs ml-1 opacity-60">({userTz})</span>
             </p>
-            {b.client_notes && !isEditing && (
-              <p className="text-sm text-tfs-slate mt-2 italic border-l-2 border-gray-200 pl-2">
-                {b.client_notes}
-              </p>
+
+            {/* Coach's note — read-only */}
+            {b.client_notes && (
+              <div className="mt-2 border-l-2 border-tfs-teal/50 pl-2">
+                <p className="text-xs font-medium text-tfs-teal mb-0.5">Coach</p>
+                <p className="text-sm text-tfs-slate italic">{b.client_notes}</p>
+              </div>
+            )}
+
+            {/* Client's own message — read-only (shown when not editing) */}
+            {b.client_message && !isEditing && (
+              <div className="mt-2 border-l-2 border-gray-300 pl-2">
+                <p className="text-xs font-medium text-tfs-slate mb-0.5">Me</p>
+                <p className="text-sm text-tfs-slate italic">{b.client_message}</p>
+              </div>
             )}
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
+            {b.coaches?.zoom_link && isFuture && !isCancelled && (
+              <a
+                href={b.coaches.zoom_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs px-3 py-1 rounded-full bg-tfs-teal text-white font-medium hover:bg-tfs-teal/90 transition-colors"
+              >
+                Join
+              </a>
+            )}
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${badge.cls}`}>
               {badge.label}
             </span>
@@ -128,7 +150,7 @@ export default function HistoryClient({
               <button
                 onClick={() => openNote(b)}
                 className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
-                title={b.client_notes ? 'Edit your note' : 'Add a note'}
+                title={b.client_message ? 'Edit your note' : 'Add your note'}
               >
                 <Edit3 size={15} />
               </button>
@@ -147,12 +169,12 @@ export default function HistoryClient({
 
         {isEditing && (
           <div className="mt-4 pt-4 border-t border-gray-100">
-            <label className="block text-xs font-medium text-tfs-navy mb-1">My Notes</label>
+            <label className="block text-xs font-medium text-tfs-navy mb-1">My Note</label>
             <textarea
               value={noteText}
               onChange={e => setNoteText(e.target.value)}
               rows={4}
-              placeholder="Jot down questions, action items, or anything you want to remember…"
+              placeholder="Jot down questions, action items, or anything you want to share with your coach…"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none mb-2"
               autoFocus
             />

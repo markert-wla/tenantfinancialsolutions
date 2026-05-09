@@ -21,6 +21,8 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const now = new Date()
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('first_name, plan_tier, sessions_used_this_month, extra_sessions, timezone, applied_code_type, promo_expires_at')
@@ -44,12 +46,22 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
   // Upcoming confirmed bookings
   const { data: upcomingBookings } = await supabase
     .from('bookings')
-    .select('id, start_time_utc, end_time_utc, coaches ( display_name )')
+    .select('id, start_time_utc, end_time_utc, coaches ( display_name, zoom_link )')
     .eq('client_id', user.id)
     .eq('status', 'confirmed')
-    .gte('start_time_utc', new Date().toISOString())
+    .gte('start_time_utc', now.toISOString())
     .order('start_time_utc', { ascending: true })
     .limit(3)
+
+  // Count completed sessions this month (past start time, confirmed)
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const { count: completedThisMonth } = await supabase
+    .from('bookings')
+    .select('*', { count: 'exact', head: true })
+    .eq('client_id', user.id)
+    .eq('status', 'confirmed')
+    .gte('start_time_utc', firstOfMonth)
+    .lt('start_time_utc', now.toISOString())
 
   // Next group session
   const { data: nextGroup } = await supabase
@@ -121,6 +133,11 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
               {extras > 0 && (
                 <p className="text-xs text-tfs-teal font-medium mt-1">
                   + {extras} gifted from admin
+                </p>
+              )}
+              {!isFullComp && used > 0 && (
+                <p className="text-xs text-tfs-slate mt-1">
+                  {completedThisMonth ?? 0} completed · {Math.max(0, used - (completedThisMonth ?? 0))} upcoming
                 </p>
               )}
             </>
@@ -198,17 +215,29 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
           </p>
         ) : (
           <div className="divide-y divide-gray-100">
-            {(upcomingBookings as unknown as { id: string; start_time_utc: string; coaches: { display_name: string } | null }[]).map((b) => (
-              <div key={b.id} className="py-3 flex items-center justify-between">
+            {(upcomingBookings as unknown as { id: string; start_time_utc: string; coaches: { display_name: string; zoom_link: string | null } | null }[]).map((b) => (
+              <div key={b.id} className="py-3 flex items-center justify-between gap-3">
                 <div>
                   <p className="font-medium text-tfs-navy text-sm">
                     {b.coaches?.display_name ?? 'TFS Coach'}
                   </p>
                   <p className="text-xs text-tfs-slate mt-0.5">{formatTime(b.start_time_utc)}</p>
                 </div>
-                <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium">
-                  Confirmed
-                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  {b.coaches?.zoom_link && (
+                    <a
+                      href={b.coaches.zoom_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs px-3 py-1 rounded-full bg-tfs-teal text-white font-medium hover:bg-tfs-teal/90 transition-colors"
+                    >
+                      Join Session
+                    </a>
+                  )}
+                  <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium">
+                    Confirmed
+                  </span>
+                </div>
               </div>
             ))}
           </div>

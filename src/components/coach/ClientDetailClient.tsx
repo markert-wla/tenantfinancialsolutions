@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock, Share2, Edit3, X, CheckCircle, Trash2, Plus, FileText } from 'lucide-react'
+import { Lock, Share2, Edit3, X, CheckCircle, Trash2, Plus, FileText, ClipboardList } from 'lucide-react'
 
 type Client = {
   id: string
@@ -22,6 +22,7 @@ type Booking = {
   status: 'confirmed' | 'pending' | 'cancelled'
   notes: string | null
   client_notes: string | null
+  client_message: string | null
   attended: boolean | null
   flagged: boolean
   flag_reason: string | null
@@ -33,7 +34,27 @@ type ClientNote = {
   created_at: string
 }
 
+type IntakeResponse = {
+  id: string
+  language: string
+  responses: Record<string, string | string[]>
+  created_at: string
+}
+
 const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Starter', silver: 'Advantage' }
+
+const QUESTION_LABELS: [string, string][] = [
+  ['q1',  'Comfort managing personal finances'],
+  ['q2',  'Current employment status'],
+  ['q3',  'Confidence paying rent on time'],
+  ['q4',  'Follows a monthly budget'],
+  ['q5',  'Financial challenges (last 12 months)'],
+  ['q6',  'Current savings situation'],
+  ['q7',  'Motivation to manage finances differently'],
+  ['q8',  'Growing up around money'],
+  ['q9',  'Money decision-making process'],
+  ['q10', 'Primary financial goal (next 12 months)'],
+]
 const STATUS_BADGE: Record<string, string> = {
   confirmed: 'bg-green-100 text-green-700',
   pending:   'bg-yellow-100 text-yellow-700',
@@ -45,11 +66,13 @@ export default function ClientDetailClient({
   bookings: initial,
   clientNotes: initialNotes,
   coachTz,
+  intakeResponse,
 }: {
-  client:       Client
-  bookings:     Booking[]
-  clientNotes:  ClientNote[]
-  coachTz:      string
+  client:         Client
+  bookings:       Booking[]
+  clientNotes:    ClientNote[]
+  coachTz:        string
+  intakeResponse: IntakeResponse | null
 }) {
   const router = useRouter()
 
@@ -169,6 +192,46 @@ export default function ClientDetailClient({
           </div>
         </div>
       </div>
+
+      {/* Intake Questionnaire */}
+      {intakeResponse ? (
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <ClipboardList size={16} className="text-tfs-teal" />
+            <h2 className="font-serif font-bold text-tfs-navy text-lg">Intake Questionnaire</h2>
+            <span className="text-xs text-tfs-slate">
+              Submitted {fmtDate(intakeResponse.created_at)}{intakeResponse.language === 'es' ? ' · Spanish' : ''}
+            </span>
+          </div>
+          <div className="card space-y-4">
+            {QUESTION_LABELS.map(([id, label], idx) => {
+              const answer = intakeResponse.responses[id]
+              if (!answer) return null
+              return (
+                <div key={id} className="space-y-1">
+                  <p className="text-xs font-semibold text-tfs-slate uppercase tracking-wide">
+                    {idx + 1}. {label}
+                  </p>
+                  {Array.isArray(answer) ? (
+                    <ul className="list-disc list-inside space-y-0.5">
+                      {(answer as string[]).map((a, i) => (
+                        <li key={i} className="text-sm text-tfs-navy">{a}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-tfs-navy">{answer as string}</p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      ) : (
+        <div className="card flex items-center gap-3 text-tfs-slate text-sm">
+          <ClipboardList size={16} className="text-gray-300 shrink-0" />
+          Client has not completed the intake questionnaire.
+        </div>
+      )}
 
       {/* General client notes */}
       <section>
@@ -304,6 +367,12 @@ function SessionList({
                   <Share2 size={10} className="shrink-0 mt-0.5" />{b.client_notes}
                 </p>
               )}
+              {b.client_message && (
+                <div className="mt-1 border-l-2 border-gray-300 pl-2">
+                  <p className="text-xs font-medium text-tfs-slate mb-0.5">Client</p>
+                  <p className="text-xs text-tfs-slate italic">{b.client_message}</p>
+                </div>
+              )}
             </div>
             <button
               onClick={() => onEdit(b)}
@@ -330,13 +399,13 @@ function SessionList({
               </div>
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal uppercase tracking-wide mb-1">
-                  <Share2 size={11} /> Client Notes <span className="font-normal normal-case text-tfs-slate">(shared with client)</span>
+                  <Share2 size={11} /> Message to Client <span className="font-normal normal-case text-tfs-slate">(visible to client)</span>
                 </label>
                 <textarea
                   value={clientNoteText}
                   onChange={e => setClientNoteText(e.target.value)}
                   rows={2}
-                  placeholder="Notes visible to the client, coach, and admin…"
+                  placeholder="Write a message or note for the client to see…"
                   className="w-full border border-tfs-teal/40 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
                 />
               </div>

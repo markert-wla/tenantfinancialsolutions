@@ -9,19 +9,19 @@ export async function PATCH(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let body: { client_notes?: string | null }
+  let body: { client_message?: string | null }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const clientNotes = typeof body.client_notes === 'string'
-    ? body.client_notes.trim().slice(0, 2000) || null
+  const clientMessage = typeof body.client_message === 'string'
+    ? body.client_message.trim().slice(0, 2000) || null
     : null
 
   // Verify this booking belongs to the client, then update
   const { error } = await supabase
     .from('bookings')
-    .update({ client_notes: clientNotes })
+    .update({ client_message: clientMessage })
     .eq('id', params.id)
     .eq('client_id', user.id)
 

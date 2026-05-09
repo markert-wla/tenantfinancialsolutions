@@ -30,7 +30,7 @@ export default async function CoachClientDetailPage({ params }: { params: { id: 
   // All bookings between this coach and client
   const { data: bookings } = await supabase
     .from('bookings')
-    .select('id, start_time_utc, end_time_utc, status, notes, client_notes, attended, flagged, flag_reason')
+    .select('id, start_time_utc, end_time_utc, status, notes, client_notes, client_message, attended, flagged, flag_reason')
     .eq('coach_id', user.id)
     .eq('client_id', params.id)
     .order('start_time_utc', { ascending: false })
@@ -42,6 +42,15 @@ export default async function CoachClientDetailPage({ params }: { params: { id: 
     .eq('coach_id', user.id)
     .eq('client_id', params.id)
     .order('created_at', { ascending: false })
+
+  // Client's intake questionnaire response (most recent)
+  const { data: intakeResponse } = await supabase
+    .from('intake_responses')
+    .select('id, language, responses, created_at')
+    .eq('client_id', params.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   const coachTz = profile.timezone ?? 'America/New_York'
 
@@ -60,9 +69,10 @@ export default async function CoachClientDetailPage({ params }: { params: { id: 
 
       <ClientDetailClient
         client={client as { id: string; first_name: string; last_name: string; email: string; plan_tier: string; client_type: string; sessions_used_this_month: number; is_active: boolean; last_active_at: string }}
-        bookings={(bookings ?? []) as { id: string; start_time_utc: string; status: 'confirmed' | 'pending' | 'cancelled'; notes: string | null; client_notes: string | null; attended: boolean | null; flagged: boolean; flag_reason: string | null }[]}
+        bookings={(bookings ?? []) as { id: string; start_time_utc: string; status: 'confirmed' | 'pending' | 'cancelled'; notes: string | null; client_notes: string | null; client_message: string | null; attended: boolean | null; flagged: boolean; flag_reason: string | null }[]}
         clientNotes={(clientNotes ?? []) as { id: string; note: string; created_at: string }[]}
         coachTz={coachTz}
+        intakeResponse={intakeResponse as { id: string; language: string; responses: Record<string, string | string[]>; created_at: string } | null}
       />
     </div>
   )

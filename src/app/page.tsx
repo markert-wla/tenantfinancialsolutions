@@ -128,7 +128,7 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative mt-20 h-[calc(100vh+80px)] overflow-hidden">
+      <section className="relative mt-20 h-[66.67vw] sm:h-[calc(100vh+80px)] overflow-hidden">
         <Image
           src="/images/homepage-image.webp"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
@@ -139,7 +139,7 @@ export default async function HomePage({
         {/* Narrow gradient at very top only — keeps nav links readable over any image */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
         {/* CTA pinned to bottom of the image */}
-        <div className="absolute bottom-0 inset-x-0 z-10 pb-12 flex justify-center">
+        <div className="absolute bottom-0 inset-x-0 z-10 pb-4 sm:pb-12 flex justify-center">
           <HeroCTAButton />
         </div>
       </section>

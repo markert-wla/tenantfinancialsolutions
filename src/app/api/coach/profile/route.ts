@@ -48,6 +48,8 @@ export async function PATCH(req: NextRequest) {
   if (typeof body.bio_short    === 'string') coachUpdate.bio_short    = body.bio_short.trim().slice(0, 200) || null
   if (typeof body.specialty    === 'string') coachUpdate.specialty    = body.specialty.trim().slice(0, 200) || null
   if (typeof body.photo_url    === 'string') coachUpdate.photo_url    = body.photo_url.trim() || null
+  if (typeof body.zoom_link    === 'string') coachUpdate.zoom_link    = body.zoom_link.trim().slice(0, 500) || null
+  else if (body.zoom_link === null)          coachUpdate.zoom_link    = null
 
   if (!coachUpdate.display_name) {
     return NextResponse.json({ error: 'Display name is required' }, { status: 400 })
