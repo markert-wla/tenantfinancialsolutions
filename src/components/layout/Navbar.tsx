@@ -118,19 +118,31 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center gap-6">
 
         {/* Left — Logo (always) */}
-        <Link href="/" className="flex flex-col items-start gap-0.5 shrink-0">
-          <Image
-            src="/images/logo.png"
-            alt="Tenant Financial Solutions"
-            width={220}
-            height={64}
-            className="h-14 w-auto object-contain"
-            priority
-          />
+        <div className="flex flex-col items-start gap-0.5 shrink-0">
+          <div className="flex items-center gap-2">
+            <Link href="/">
+              <Image
+                src="/images/logo.png"
+                alt="Tenant Financial Solutions"
+                width={220}
+                height={64}
+                className="h-14 w-auto object-contain"
+                priority
+              />
+            </Link>
+            {showSessionBtn && !user && (
+              <Link
+                href="/register?tier=free"
+                className="sm:hidden bg-tfs-gold text-tfs-navy text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap hover:brightness-105 transition-all"
+              >
+                Free Session
+              </Link>
+            )}
+          </div>
           <span className="text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase leading-none pl-0.5 text-tfs-gold">
             Tenant Focused – Community Impact
           </span>
-        </Link>
+        </div>
 
         {isAdmin ? (
           /* ── ADMIN PORTAL SWITCHER ────────────────────────── */
@@ -243,27 +255,17 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile: Free Session pill + hamburger */}
-            <div className="md:hidden ml-auto flex items-center gap-2">
-              {showSessionBtn && !user && (
-                <Link
-                  href="/register?tier=free"
-                  className="bg-tfs-gold text-tfs-navy text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap hover:brightness-105 transition-all"
-                >
-                  Free Session
-                </Link>
-              )}
-              <button
-                className="p-2 rounded-lg"
-                onClick={() => setOpen(!open)}
-                aria-label="Toggle menu"
-              >
-                {open
-                  ? <X className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
-                  : <Menu className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
-                }
-              </button>
-            </div>
+            {/* Mobile burger */}
+            <button
+              className="md:hidden ml-auto p-2 rounded-lg"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
+            >
+              {open
+                ? <X className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
+                : <Menu className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
+              }
+            </button>
           </>
         )}
       </nav>
