@@ -243,17 +243,27 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile burger */}
-            <button
-              className="md:hidden ml-auto p-2 rounded-lg"
-              onClick={() => setOpen(!open)}
-              aria-label="Toggle menu"
-            >
-              {open
-                ? <X className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
-                : <Menu className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
-              }
-            </button>
+            {/* Mobile: Free Session pill + hamburger */}
+            <div className="md:hidden ml-auto flex items-center gap-2">
+              {showSessionBtn && !user && (
+                <Link
+                  href="/register?tier=free"
+                  className="bg-tfs-gold text-tfs-navy text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap hover:brightness-105 transition-all"
+                >
+                  Free Session
+                </Link>
+              )}
+              <button
+                className="p-2 rounded-lg"
+                onClick={() => setOpen(!open)}
+                aria-label="Toggle menu"
+              >
+                {open
+                  ? <X className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
+                  : <Menu className={scrolled ? 'text-tfs-navy' : 'text-white'} size={24} />
+                }
+              </button>
+            </div>
           </>
         )}
       </nav>
