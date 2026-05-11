@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 }
 
 export default function PrivacyPage() {
-  const updated = 'April 26, 2026'
+  const updated = 'May 11, 2026'
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-20">
@@ -25,8 +25,8 @@ export default function PrivacyPage() {
           </p>
           <p className="mt-3">
             Questions about this policy can be directed to:{' '}
-            <a href="mailto:tenantfinancialsolutions@gmail.com" className="text-tfs-teal hover:underline">
-              tenantfinancialsolutions@gmail.com
+            <a href="mailto:Michael@tenantfinancialsolutions.com" className="text-tfs-teal hover:underline">
+              Michael@tenantfinancialsolutions.com
             </a>
           </p>
         </section>
@@ -128,8 +128,8 @@ export default function PrivacyPage() {
           </ul>
           <p className="mt-3">
             To exercise any of these rights, contact us at{' '}
-            <a href="mailto:tenantfinancialsolutions@gmail.com" className="text-tfs-teal hover:underline">
-              tenantfinancialsolutions@gmail.com
+            <a href="mailto:Michael@tenantfinancialsolutions.com" className="text-tfs-teal hover:underline">
+              Michael@tenantfinancialsolutions.com
             </a>.
           </p>
         </section>
@@ -147,8 +147,8 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-serif font-bold text-tfs-navy mb-3">8. Children&apos;s Privacy</h2>
           <p>
             Our services are intended for adults 18 and older. We do not knowingly collect personal information
-            from children under 13. If you believe a child has provided us with personal information, please
-            contact us and we will delete it promptly.
+            from persons under the age of 18. If you believe someone under 18 has provided us with personal
+            information, please contact us and we will delete it promptly.
           </p>
         </section>
 
@@ -170,8 +170,8 @@ export default function PrivacyPage() {
             <p className="font-medium text-tfs-navy">Tenant Financial Solutions</p>
             <p>
               Email:{' '}
-              <a href="mailto:tenantfinancialsolutions@gmail.com" className="text-tfs-teal hover:underline">
-                tenantfinancialsolutions@gmail.com
+              <a href="mailto:Michael@tenantfinancialsolutions.com" className="text-tfs-teal hover:underline">
+                Michael@tenantfinancialsolutions.com
               </a>
             </p>
             <p>Website: <Link href="/" className="text-tfs-teal hover:underline">tenantfinancialsolutions.com</Link></p>
