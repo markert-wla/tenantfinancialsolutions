@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
             ${emailButton(`${process.env.NEXT_PUBLIC_SITE_URL}/portal/billing`, 'Update Payment Method')}
             <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">
               If you have questions, reply to this email or contact us at
-              <a href="mailto:tenantfinancialsolutions@gmail.com" style="color:#1D9E75;">tenantfinancialsolutions@gmail.com</a>.
+              <a href="mailto:michael@tenantfinancialsolutions.com" style="color:#1D9E75;">michael@tenantfinancialsolutions.com</a>.
             </p>
           `),
         })

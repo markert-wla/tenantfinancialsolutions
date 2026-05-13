@@ -46,8 +46,8 @@ export default function ContactPage() {
             <div className="space-y-5 text-tfs-slate">
               <div className="flex items-center gap-3">
                 <Mail className="text-tfs-teal shrink-0" size={20} />
-                <a href="mailto:tenantfinancialsolutions@gmail.com" className="hover:text-tfs-teal transition-colors">
-                  tenantfinancialsolutions@gmail.com
+                <a href="mailto:michael@tenantfinancialsolutions.com" className="hover:text-tfs-teal transition-colors">
+                  michael@tenantfinancialsolutions.com
                 </a>
               </div>
             </div>

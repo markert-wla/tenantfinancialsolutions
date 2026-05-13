@@ -182,8 +182,8 @@ export default function TermsPage() {
             <p className="font-medium text-tfs-navy">Tenant Financial Solutions</p>
             <p>
               Email:{' '}
-              <a href="mailto:tenantfinancialsolutions@gmail.com" className="text-tfs-teal hover:underline">
-                tenantfinancialsolutions@gmail.com
+              <a href="mailto:michael@tenantfinancialsolutions.com" className="text-tfs-teal hover:underline">
+                michael@tenantfinancialsolutions.com
               </a>
             </p>
             <p>Website: <Link href="/" className="text-tfs-teal hover:underline">tenantfinancialsolutions.com</Link></p>

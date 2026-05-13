@@ -39,13 +39,17 @@ export async function POST(req: NextRequest) {
   }
 
   // Validate
+  const timeRe = /^\d{2}:\d{2}$/
   for (const s of slots) {
     if (s.day_of_week < 0 || s.day_of_week > 6) {
       return NextResponse.json({ error: 'Invalid day_of_week' }, { status: 400 })
     }
-    if (s.start_time_utc >= s.end_time_utc) {
-      return NextResponse.json({ error: 'Start time must be before end time' }, { status: 400 })
+    if (!timeRe.test(s.start_time_utc) || !timeRe.test(s.end_time_utc)) {
+      return NextResponse.json({ error: 'Invalid time format' }, { status: 400 })
     }
+    // Note: we intentionally skip UTC ordering check here — slots that cross
+    // midnight UTC (e.g. 23:30–00:30 for a Mountain-time 5:30–6:30 PM block)
+    // are valid and handled correctly by the booking slots generator.
   }
 
   const service = createServiceClient()

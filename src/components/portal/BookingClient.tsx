@@ -179,7 +179,7 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
           {isGroupComp
             ? 'Your partnership plan includes group coaching sessions. Individual one-on-one sessions require an upgraded plan.'
             : tier === 'free'
-              ? 'Individual coaching sessions are available on Starter, Advantage, and Gold plans.'
+              ? 'Individual coaching sessions are available on Starter and Advantage plans.'
               : `You've used all your sessions for this month. Upgrade for more, or check back next month.`}
         </p>
         {!isGroupComp && <a href="/services" className="btn-primary text-sm">View Plans</a>}

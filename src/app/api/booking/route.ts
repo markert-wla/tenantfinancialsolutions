@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   // --- Load client profile ---
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
-    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone, free_trial_expires_at, coach_id, extra_sessions, applied_code_type, promo_expires_at')
+    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone, free_trial_expires_at, coach_id, extra_sessions, applied_code_type, promo_expires_at, client_type')
     .eq('id', user.id)
     .single()
 
@@ -72,9 +72,18 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Plan / free trial check ---
-  // full_comp and extra purchased sessions bypass normal plan limits.
-  if (activeCodeType === 'full_comp' || extraSessions > 0) {
-    // Allow — full comp or purchased credit covers this booking.
+  const isTenantPartner = profile.client_type === 'property_tenant'
+
+  if (activeCodeType === 'full_comp' && isTenantPartner) {
+    // Tenant partner benefit: capped at 2 sessions/month; admin-gifted extras override.
+    if (used >= 2 && extraSessions === 0) {
+      return NextResponse.json(
+        { error: "You've used your 2 sessions for this month. Your Tenant Partner benefit resets monthly. Contact your property manager if you need additional support." },
+        { status: 403 }
+      )
+    }
+  } else if (activeCodeType === 'full_comp' || extraSessions > 0) {
+    // Non-tenant full comp or admin-gifted extra sessions: no monthly limit.
   } else if (tier === 'free') {
     const trialExpiry = profile.free_trial_expires_at
       ? new Date(profile.free_trial_expires_at)

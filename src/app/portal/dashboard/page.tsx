@@ -25,7 +25,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, plan_tier, sessions_used_this_month, extra_sessions, timezone, applied_code_type, promo_expires_at')
+    .select('first_name, plan_tier, sessions_used_this_month, extra_sessions, timezone, applied_code_type, promo_expires_at, client_type')
     .eq('id', user.id)
     .single()
 
@@ -38,10 +38,14 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
   const promoActive = !profile?.promo_expires_at || new Date(profile.promo_expires_at) >= new Date()
   const activeCodeType = promoActive ? (profile?.applied_code_type ?? null) : null
 
-  const isGroupComp = activeCodeType === 'group_comp'
-  const isFullComp  = activeCodeType === 'full_comp'
+  const isGroupComp    = activeCodeType === 'group_comp'
+  const isFullComp     = activeCodeType === 'full_comp'
+  const isTenantPartner = profile?.client_type === 'property_tenant'
 
-  const limit = isGroupComp ? 0 : isFullComp ? 99 : (LIMITS[tier] ?? 0)
+  const limit = isGroupComp ? 0
+    : (isFullComp && isTenantPartner) ? 2
+    : isFullComp ? 99
+    : (LIMITS[tier] ?? 0)
 
   // Upcoming confirmed bookings
   const { data: upcomingBookings } = await supabase
@@ -84,8 +88,8 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
     }).format(new Date(iso))
   }
 
-  const canBook  = isFullComp || (limit > 0 && used < limit) || extras > 0
-  const atLimit  = !isFullComp && !isGroupComp && limit > 0 && used >= limit && extras === 0
+  const canBook  = (isFullComp && !isTenantPartner) || (limit > 0 && used < limit) || extras > 0
+  const atLimit  = !(isFullComp && !isTenantPartner) && !isGroupComp && limit > 0 && used >= limit && extras === 0
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
@@ -118,17 +122,20 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
             <>
               <p className="text-3xl font-bold text-tfs-navy">
                 {used}
-                <span className="text-lg font-normal text-tfs-slate"> / {isFullComp ? '∞' : limit === 0 ? '—' : limit}</span>
+                <span className="text-lg font-normal text-tfs-slate"> / {(isFullComp && !isTenantPartner) ? '∞' : limit === 0 ? '—' : limit}</span>
               </p>
               {atLimit && (
                 <p className="text-xs text-orange-600 mt-1">
-                  Monthly limit reached{!isTopTier && (
+                  Monthly limit reached{!isTopTier && !isTenantPartner && (
                     <> — <Link href="/portal/billing" className="underline">Upgrade</Link></>
                   )}
                 </p>
               )}
-              {isFullComp && (
+              {isFullComp && !isTenantPartner && (
                 <p className="text-xs text-tfs-teal font-medium mt-1">Complimentary coaching included</p>
+              )}
+              {isTenantPartner && isFullComp && (
+                <p className="text-xs text-tfs-teal font-medium mt-1">Tenant Partner benefit — 2 sessions/month</p>
               )}
               {extras > 0 && (
                 <p className="text-xs text-tfs-teal font-medium mt-1">
@@ -153,7 +160,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
                 Your plan includes group coaching. Join a group session below or{' '}
                 <Link href="/portal/billing" className="text-tfs-teal hover:underline">upgrade</Link> for individual sessions.
               </p>
-            ) : isFullComp ? (
+            ) : isFullComp && !isTenantPartner ? (
               <p className="text-tfs-navy font-medium">
                 Individual coaching is included in your partnership plan.
               </p>

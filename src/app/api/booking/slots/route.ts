@@ -143,9 +143,11 @@ export async function GET(req: NextRequest) {
       let slotStart = new Date(Date.UTC(
         dayDate.getUTCFullYear(), dayDate.getUTCMonth(), dayDate.getUTCDate(), sh, sm
       ))
-      const blockEnd = new Date(Date.UTC(
+      let blockEnd = new Date(Date.UTC(
         dayDate.getUTCFullYear(), dayDate.getUTCMonth(), dayDate.getUTCDate(), eh, em
       ))
+      // Handle blocks that cross UTC midnight (e.g. 23:30–00:30 for US Mountain-time evening slots)
+      if (blockEnd <= slotStart) blockEnd = new Date(blockEnd.getTime() + 24 * 60 * 60_000)
 
       while (slotStart.getTime() + SLOT_MINUTES * 60_000 <= blockEnd.getTime()) {
         const slotEnd = new Date(slotStart.getTime() + SLOT_MINUTES * 60_000)
