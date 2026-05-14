@@ -248,7 +248,7 @@ export default function ServicesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
             {/* Affiliate Member Partnership */}
             <div className="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20">
-              <h3 className="text-xl font-bold font-serif mb-2">Affiliate Member Partnership</h3>
+              <h3 className="text-xl font-bold font-serif mb-2">Affiliate Level</h3>
               <p className="text-white/60 text-sm mb-5">No cost to you — your tenants save on day one</p>
               <ul className="space-y-3 text-white/90 text-sm mb-6">
                 <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Refer tenants to TFS with your affiliate code</li>
@@ -267,7 +267,7 @@ export default function ServicesPage() {
 
             {/* Tenant Partner Membership */}
             <div className="bg-white rounded-2xl p-8 text-tfs-navy">
-              <h3 className="text-xl font-bold font-serif mb-2">Tenant Partner Membership</h3>
+              <h3 className="text-xl font-bold font-serif mb-2">Strategic Partner Level</h3>
               <p className="text-tfs-navy font-semibold text-lg mb-1">Custom Pricing</p>
               <p className="text-tfs-slate text-sm mb-5">You pay — your tenants get Advantage Plan coaching</p>
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">

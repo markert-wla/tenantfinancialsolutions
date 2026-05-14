@@ -20,6 +20,11 @@ const TYPE_LABELS: Record<string, string> = {
   trial:               'Trial',
 }
 
+const MODEL_LABELS: Record<string, string> = {
+  affiliate: 'Affiliate Level',
+  paying:    'Strategic Partner Level',
+}
+
 const TYPE_COLORS: Record<string, string> = {
   property_management: 'bg-blue-100 text-blue-700',
   nonprofit:           'bg-purple-100 text-purple-700',
@@ -101,7 +106,7 @@ export default function PartnersClient({ partners }: { partners: Partner[] }) {
                         {TYPE_LABELS[p.partner_type]}
                       </span>
                     </td>
-                    <td className="py-3 pr-4 text-tfs-slate capitalize">{p.model ?? '—'}</td>
+                    <td className="py-3 pr-4 text-tfs-slate">{p.model ? (MODEL_LABELS[p.model] ?? p.model) : '—'}</td>
                     <td className="py-3 pr-4 text-tfs-slate text-xs">
                       {p.contact_name && <p>{p.contact_name}</p>}
                       {p.contact_email && <p>{p.contact_email}</p>}
@@ -156,8 +161,8 @@ export default function PartnersClient({ partners }: { partners: Partner[] }) {
                 <select name="model" defaultValue={editP?.model ?? ''}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal">
                   <option value="">—</option>
-                  <option value="affiliate">Affiliate</option>
-                  <option value="paying">Paying</option>
+                  <option value="affiliate">Affiliate Level</option>
+                  <option value="paying">Strategic Partner Level</option>
                 </select>
               </div>
             </div>
