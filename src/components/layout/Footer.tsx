@@ -55,7 +55,10 @@ export default function Footer() {
               {' · '}
               <Link href="/terms" className="hover:text-tfs-teal transition-colors underline underline-offset-2">Terms of Service</Link>
             </p>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
+              <a href="https://www.weblaunchacademy.com/" target="_blank" rel="noopener noreferrer" className="hover:text-tfs-teal transition-colors">
+                Built with Web Launch Academy
+              </a>
               <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-tfs-teal transition-colors"><IconInstagram /></a>
               <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-tfs-teal transition-colors"><IconFacebook /></a>
             </div>
@@ -151,7 +154,10 @@ export default function Footer() {
               Terms of Service
             </Link>
           </p>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
+            <a href="https://www.weblaunchacademy.com/" target="_blank" rel="noopener noreferrer" className="hover:text-tfs-teal transition-colors">
+              Built with Web Launch Academy
+            </a>
             <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer"
                aria-label="Instagram" className="hover:text-tfs-teal transition-colors"><IconInstagram /></a>
             <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer"
