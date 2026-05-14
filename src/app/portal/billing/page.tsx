@@ -13,8 +13,8 @@ export const metadata: Metadata = { title: 'Billing — Portal' }
 
 const TIER_LABEL: Record<string, string> = {
   free:   'Free',
-  bronze: 'Affiliate Level ($50/mo)',
-  silver: 'Strategic Partner Level ($100/mo)',
+  bronze: 'Starter Plan ($50/mo)',
+  silver: 'Advantage Plan ($100/mo)',
 }
 
 export default async function PortalBillingPage() {

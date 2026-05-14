@@ -11,8 +11,8 @@ type Path = 'individual' | 'partner' | 'nonprofit'
 
 const TIER_LABELS: Record<string, string> = {
   free:   'Free',
-  bronze: 'Affiliate Level ($50/mo)',
-  silver: 'Strategic Partner Level ($100/mo)',
+  bronze: 'Starter Plan ($50/mo)',
+  silver: 'Advantage Plan ($100/mo)',
 }
 
 const MONTHS = [
@@ -169,8 +169,8 @@ function RegisterInner() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { id: 'individual', couple: false, title: 'Individual',          desc: "I'm signing up for myself",               note: 'Free, Affiliate, or Strategic Partner level' },
-              { id: 'individual', couple: true,  title: 'Couples',             desc: "I'm signing up with my partner",          note: 'Free, Affiliate, or Strategic Partner level' },
+              { id: 'individual', couple: false, title: 'Individual',          desc: "I'm signing up for myself",               note: 'Free, Starter, or Advantage plan' },
+              { id: 'individual', couple: true,  title: 'Couples',             desc: "I'm signing up with my partner",          note: 'Free, Starter, or Advantage plan' },
               { id: 'partner',    couple: false, title: 'Property Tenant',     desc: 'My property manager provided a code',     note: 'Requires promo code + unit #' },
               { id: 'nonprofit',  couple: false, title: 'Non-Profit Resident', desc: 'My organization provided a code',         note: 'Requires promo code' },
             ].map(opt => (

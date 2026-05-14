@@ -120,7 +120,7 @@ export default async function CoachDashboardPage() {
     return Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24))
   }
 
-  const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Affiliate', silver: 'Strategic Partner' }
+  const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Starter', silver: 'Advantage' }
 
   const TYPE_LABEL: Record<string, string> = {
     individual: 'Individual', 'property-manager': 'Property Mgmt',

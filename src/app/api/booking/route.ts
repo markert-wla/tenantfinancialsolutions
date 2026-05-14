@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
     if (!trialExpiry || trialExpiry < new Date()) {
       return NextResponse.json(
-        { error: 'Your 30-day free trial has expired. Upgrade to Affiliate Level or Strategic Partner Level to continue booking sessions.', upgrade: true },
+        { error: 'Your 30-day free trial has expired. Upgrade to a Starter or Advantage Plan to continue booking sessions.', upgrade: true },
         { status: 403 }
       )
     }

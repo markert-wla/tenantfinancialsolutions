@@ -55,16 +55,6 @@ function makeKey() {
   return Math.random().toString(36).slice(2)
 }
 
-function hasOverlap(daySlots: LocalSlot[]): boolean {
-  for (let i = 0; i < daySlots.length; i++) {
-    for (let j = i + 1; j < daySlots.length; j++) {
-      const a = daySlots[i], b = daySlots[j]
-      if (a.start_local < b.end_local && b.start_local < a.end_local) return true
-    }
-  }
-  return false
-}
-
 function slotsToLocal(slots: Slot[], tz: string): LocalSlot[] {
   return slots.map(s => ({
     key:         s.id ?? makeKey(),
@@ -142,9 +132,8 @@ export default function AvailabilityClient({
     <div className="space-y-4">
       {DAYS.map((dayName, dayIndex) => {
         const daySlots = slots.filter(s => s.day_of_week === dayIndex)
-        const overlapping = daySlots.length > 1 && hasOverlap(daySlots)
         return (
-          <div key={dayIndex} className={`card${overlapping ? ' border-2 border-amber-400' : ''}`}>
+          <div key={dayIndex} className="card">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-tfs-navy">{dayName}</h3>
               <button
@@ -183,11 +172,6 @@ export default function AvailabilityClient({
                     </button>
                   </div>
                 ))}
-                {overlapping && (
-                  <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-1">
-                    These blocks overlap — clients may be double-booked. Adjust the times so they don&apos;t conflict.
-                  </p>
-                )}
               </div>
             )}
           </div>

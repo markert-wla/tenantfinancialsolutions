@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
   if (partner.contact_email) {
     const siteUrl     = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tenantfinancialsolutions.com'
     const firstName   = (partner.contact_name as string | null)?.split(' ')[0] ?? 'there'
-    const tierLabels: Record<string, string> = { free: 'Free', bronze: 'Affiliate Level', silver: 'Strategic Partner Level' }
+    const tierLabels: Record<string, string> = { free: 'Free', bronze: 'Starter Plan', silver: 'Advantage Plan' }
     const tierLabel   = resolvedTier ? (tierLabels[resolvedTier] ?? resolvedTier) : 'All Plans'
     const expiryLine  = expires_at
       ? `<p style="margin:0 0 16px;color:#6B7E8F;"><strong style="color:#1A2B4A;">Expires:</strong> ${new Date(expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>`

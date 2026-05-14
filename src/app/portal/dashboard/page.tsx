@@ -12,8 +12,8 @@ export const metadata: Metadata = { title: 'Dashboard' }
 const LIMITS: Record<string, number> = { free: 1, bronze: 1, silver: 2 }
 const TIER_LABEL: Record<string, string> = {
   free:   'Free',
-  bronze: 'Affiliate Level',
-  silver: 'Strategic Partner Level',
+  bronze: 'Starter Plan',
+  silver: 'Advantage Plan',
 }
 
 export default async function PortalDashboard({ searchParams }: { searchParams: { welcome?: string } }) {

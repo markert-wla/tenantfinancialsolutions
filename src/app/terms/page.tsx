@@ -64,7 +64,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-serif font-bold text-tfs-navy mb-3">4. Subscriptions and Billing</h2>
           <p>
-            Paid plans (Affiliate Level and Strategic Partner Level) are billed on a monthly recurring basis through Stripe.
+            Paid plans (Starter and Advantage) are billed on a monthly recurring basis through Stripe.
             By subscribing, you authorize us to charge your payment method on a monthly cycle until you cancel.
           </p>
           <ul className="list-disc pl-6 mt-3 space-y-1">
