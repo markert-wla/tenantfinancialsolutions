@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'My Clients — Coach' }
 
-const TIER_LABEL: Record<string, string>  = { free: 'Free', bronze: 'Starter', silver: 'Advantage' }
+const TIER_LABEL: Record<string, string>  = { free: 'Free', bronze: 'Affiliate', silver: 'Strategic Partner' }
 const TIER_COLOR: Record<string, string>  = {
   free:   'bg-gray-100 text-gray-600',
   bronze: 'bg-amber-100 text-amber-700',

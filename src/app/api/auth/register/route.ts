@@ -17,8 +17,8 @@ type ClientType = typeof VALID_CLIENT_TYPES[number]
 
 const TIER_DISPLAY: Record<string, string> = {
   free:   'Free',
-  bronze: 'Starter Plan',
-  silver: 'Advantage Plan',
+  bronze: 'Affiliate Level',
+  silver: 'Strategic Partner Level',
 }
 
 export async function POST(req: NextRequest) {

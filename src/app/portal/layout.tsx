@@ -25,7 +25,7 @@ export default async function PortalLayout({ children }: { children: React.React
   const isAdminPreview = profile?.role === 'admin'
 
   const tier = profile?.plan_tier ?? 'free'
-  const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Starter Plan', silver: 'Advantage Plan' }
+  const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Affiliate Level', silver: 'Strategic Partner Level' }
   const tierLabel = TIER_LABEL[tier] ?? tier
   const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || user.email
 

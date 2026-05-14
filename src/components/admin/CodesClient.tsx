@@ -27,8 +27,8 @@ type PromoCode = {
 
 const TIER_LABELS: Record<string, string> = {
   free:   'Free',
-  bronze: 'Starter',
-  silver: 'Advantage',
+  bronze: 'Affiliate',
+  silver: 'Strategic Partner',
   all:    'All',
 }
 
@@ -284,8 +284,8 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
                     <option value="">All Tiers</option>
                   )}
                   <option value="free">Free</option>
-                  <option value="bronze">Starter</option>
-                  <option value="silver">Advantage</option>
+                  <option value="bronze">Affiliate</option>
+                  <option value="silver">Strategic Partner</option>
                 </select>
               </div>
             </div>

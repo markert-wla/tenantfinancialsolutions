@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 
 const PLANS = [
-  { tier: 'bronze', label: 'Starter Plan', price: '$50/mo' },
-  { tier: 'silver', label: 'Advantage Plan', price: '$100/mo' },
+  { tier: 'bronze', label: 'Affiliate Level', price: '$50/mo' },
+  { tier: 'silver', label: 'Strategic Partner Level', price: '$100/mo' },
 ] as const
 
 export default function UpgradeButtons({ currentTier }: { currentTier: string }) {

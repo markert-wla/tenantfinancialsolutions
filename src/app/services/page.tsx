@@ -6,7 +6,7 @@ import { Check, Building2, HeartHandshake, Users, ArrowRight } from 'lucide-reac
 export const metadata: Metadata = {
   title: 'Services & Membership Plans',
   description:
-    'Financial coaching for individuals, couples, property managers, and non-profits. Starter Plan $50/mo, Advantage Plan $100/mo. Start free — no credit card required.',
+    'Financial coaching for individuals, couples, property managers, and non-profits. Affiliate Level $50/mo, Strategic Partner Level $100/mo. Start free — no credit card required.',
   openGraph: {
     title: 'Services & Plans | Tenant Financial Solutions',
     description: 'Coaching plans for every need. Start free, upgrade anytime. Individual, couple, property manager, and non-profit options.',
@@ -36,7 +36,7 @@ const INDIVIDUAL_PLANS = [
     ctaStyle: 'btn-primary text-sm text-center',
   },
   {
-    name: 'Starter Plan',
+    name: 'Affiliate Level',
     price: 50,
     tier: 'bronze',
     tagline: 'Best for tenants new to coaching',
@@ -51,7 +51,7 @@ const INDIVIDUAL_PLANS = [
     ctaStyle: 'btn-primary text-sm text-center',
   },
   {
-    name: 'Advantage Plan',
+    name: 'Strategic Partner Level',
     price: 100,
     tier: 'silver',
     tagline: 'For tenants who want real momentum',
@@ -253,7 +253,7 @@ export default function ServicesPage() {
               <ul className="space-y-3 text-white/90 text-sm mb-6">
                 <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Refer tenants to TFS with your affiliate code</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Tenants receive <strong className="text-white">10% off their first month</strong> of coaching</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Applies to both Starter ($50/mo) and Advantage ($100/mo) plans</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> Applies to both Affiliate Level ($50/mo) and Strategic Partner Level ($100/mo)</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> You benefit through improved tenant financial wellness and on-time payments</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-gold shrink-0 mt-0.5" /> No administrative burden</li>
               </ul>
@@ -269,10 +269,10 @@ export default function ServicesPage() {
             <div className="bg-white rounded-2xl p-8 text-tfs-navy">
               <h3 className="text-xl font-bold font-serif mb-2">Tenant Partner Membership</h3>
               <p className="text-tfs-navy font-semibold text-lg mb-1">Custom Pricing</p>
-              <p className="text-tfs-slate text-sm mb-5">You pay — your tenants get Advantage Plan coaching</p>
+              <p className="text-tfs-slate text-sm mb-5">You pay — your tenants get Strategic Partner Level coaching</p>
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Admin generates promo codes — 1 per unit</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Tenants register with their code → Advantage Plan unlocked</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Tenants register with their code → Strategic Partner Level unlocked</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> 2 individual sessions + group session per tenant/mo</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> No cost or billing to your tenants</li>
               </ul>

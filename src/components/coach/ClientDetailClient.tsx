@@ -41,7 +41,7 @@ type IntakeResponse = {
   created_at: string
 }
 
-const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Starter', silver: 'Advantage' }
+const TIER_LABEL: Record<string, string> = { free: 'Free', bronze: 'Affiliate', silver: 'Strategic Partner' }
 
 const QUESTION_LABELS: [string, string][] = [
   ['q1',  'Comfort managing personal finances'],
