@@ -27,7 +27,7 @@ const STATUS_BADGE: Record<string, string> = {
 }
 
 const TYPE_BADGE: Record<string, string> = {
-  individual:         'bg-tfs-teal/10 text-tfs-teal',
+  individual:         'bg-tfs-teal/10 text-tfs-teal-button',
   'property-manager': 'bg-amber-100 text-amber-700',
   nonprofit:          'bg-purple-100 text-purple-700',
   workshops:          'bg-orange-100 text-orange-700',
@@ -145,7 +145,7 @@ export default function ContactsClient({
 
                   {/* Contact info */}
                   <div className="flex flex-wrap gap-4 text-sm text-tfs-slate mb-2">
-                    <a href={`mailto:${s.email}`} className="flex items-center gap-1 hover:text-tfs-teal transition-colors">
+                    <a href={`mailto:${s.email}`} className="flex items-center gap-1 hover:text-tfs-teal-button transition-colors">
                       <Mail size={13} /> {s.email}
                     </a>
                     {s.phone && (
@@ -168,7 +168,7 @@ export default function ContactsClient({
                     {s.message.length > 120 && (
                       <button
                         onClick={() => setExpanded(expanded === s.id ? null : s.id)}
-                        className="text-xs text-tfs-teal hover:underline mt-1 flex items-center gap-0.5"
+                        className="text-xs text-tfs-teal-button hover:underline mt-1 flex items-center gap-0.5"
                       >
                         {expanded === s.id ? <><ChevronUp size={12} /> Show less</> : <><ChevronDown size={12} /> Read more</>}
                       </button>

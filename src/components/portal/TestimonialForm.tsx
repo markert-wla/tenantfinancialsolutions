@@ -11,7 +11,7 @@ export default function TestimonialForm({ defaultName }: { defaultName: string }
   if (status === 'done') {
     return (
       <div className="card text-center py-12">
-        <CheckCircle2 className="text-tfs-teal mx-auto mb-3" size={40} />
+        <CheckCircle2 className="text-tfs-teal-button mx-auto mb-3" size={40} />
         <h2 className="text-xl font-bold text-tfs-navy font-serif mb-2">Thank you!</h2>
         <p className="text-tfs-slate text-sm">
           Your story is pending review and will appear on our homepage once approved.
@@ -42,7 +42,7 @@ export default function TestimonialForm({ defaultName }: { defaultName: string }
   return (
     <form onSubmit={handleSubmit} className="card space-y-5">
       <div className="flex items-center gap-2 mb-2">
-        <MessageSquare size={20} className="text-tfs-teal" />
+        <MessageSquare size={20} className="text-tfs-teal-button" />
         <span className="font-semibold text-tfs-navy">Your testimonial</span>
       </div>
 

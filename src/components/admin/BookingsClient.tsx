@@ -173,7 +173,7 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                           </p>
                         )}
                         {b.client_notes && (
-                          <p className="text-xs text-tfs-teal truncate flex items-center gap-1 mt-0.5">
+                          <p className="text-xs text-tfs-teal-button truncate flex items-center gap-1 mt-0.5">
                             <Share2 size={10} className="shrink-0" />{b.client_notes}
                           </p>
                         )}
@@ -185,7 +185,7 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => openNotes(b)}
-                            className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                            className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
                             title="Edit notes"
                           >
                             <StickyNote size={15} />
@@ -281,7 +281,7 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
               />
             </div>
             <div>
-              <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal uppercase tracking-wide mb-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal-button uppercase tracking-wide mb-1.5">
                 <Share2 size={11} /> Client Notes <span className="font-normal normal-case text-tfs-slate">(shared with client)</span>
               </label>
               <textarea

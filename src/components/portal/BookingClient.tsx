@@ -133,7 +133,7 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
   if (booked && bookedSlot) {
     return (
       <div className="flex flex-col items-center text-center py-16 px-4">
-        <CheckCircle className="text-tfs-teal mb-4" size={56} />
+        <CheckCircle className="text-tfs-teal-button mb-4" size={56} />
         <h2 className="text-2xl font-serif font-bold text-tfs-navy mb-2">Session Booked!</h2>
         <p className="text-tfs-slate mb-1">
           <span className="font-semibold">{bookedSlot.coachName}</span>
@@ -204,7 +204,7 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
           Select a coach and time slot below, then complete payment to confirm your session.
         </div>
       ) : (
-        <div className="mb-6 px-4 py-3 rounded-lg bg-tfs-teal/10 border border-tfs-teal/20 text-tfs-teal text-sm font-medium">
+        <div className="mb-6 px-4 py-3 rounded-lg bg-tfs-teal/10 border border-tfs-teal/20 text-tfs-teal-button text-sm font-medium">
           You have <strong>{sessionsRemaining}</strong> session{sessionsRemaining !== 1 ? 's' : ''} remaining this month.
         </div>
       )}
@@ -267,7 +267,7 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
       {/* Slot grid */}
       {loadingSlots ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="animate-spin text-tfs-teal" size={32} />
+          <Loader2 className="animate-spin text-tfs-teal-button" size={32} />
         </div>
       ) : slotDays.length === 0 ? (
         <div className="card text-center py-12">

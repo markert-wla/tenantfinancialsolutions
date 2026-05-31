@@ -199,7 +199,7 @@ export default function Navbar() {
                     href={href}
                     className={cn(
                       'text-sm font-medium transition-colors',
-                      scrolled ? 'text-tfs-navy hover:text-tfs-teal' : 'text-white hover:text-tfs-gold'
+                      scrolled ? 'text-tfs-navy hover:text-tfs-teal-button' : 'text-white hover:text-tfs-gold'
                     )}
                   >
                     {label}
@@ -243,7 +243,7 @@ export default function Navbar() {
                     href="/login"
                     className={cn(
                       'text-sm font-medium transition-colors',
-                      scrolled ? 'text-tfs-navy hover:text-tfs-teal' : 'text-white hover:text-tfs-gold'
+                      scrolled ? 'text-tfs-navy hover:text-tfs-teal-button' : 'text-white hover:text-tfs-gold'
                     )}
                   >
                     Login
@@ -287,7 +287,7 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="pt-2 border-t border-gray-100">
-                <Link href="/" className="block py-2 text-tfs-navy font-medium hover:text-tfs-teal text-sm" onClick={() => setOpen(false)}>
+                <Link href="/" className="block py-2 text-tfs-navy font-medium hover:text-tfs-teal-button text-sm" onClick={() => setOpen(false)}>
                   ← Public Site
                 </Link>
               </div>
@@ -298,7 +298,7 @@ export default function Navbar() {
                 <Link
                   key={href}
                   href={href}
-                  className="block py-2 text-tfs-navy font-medium hover:text-tfs-teal"
+                  className="block py-2 text-tfs-navy font-medium hover:text-tfs-teal-button"
                   onClick={() => setOpen(false)}
                 >
                   {label}

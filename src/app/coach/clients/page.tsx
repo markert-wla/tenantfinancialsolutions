@@ -126,7 +126,7 @@ export default async function CoachClientsPage() {
                       <td className="px-4 py-3 text-right">
                         <Link
                           href={`/coach/clients/${c.id}`}
-                          className="text-xs font-medium text-tfs-teal hover:underline whitespace-nowrap"
+                          className="text-xs font-medium text-tfs-teal-button hover:underline whitespace-nowrap"
                         >
                           View →
                         </Link>

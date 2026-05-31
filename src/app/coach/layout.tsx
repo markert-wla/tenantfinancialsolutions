@@ -26,7 +26,7 @@ export default async function CoachLayout({ children }: { children: React.ReactN
     <>
       <div className="px-5 py-5 border-b border-white/10">
         <p className="font-semibold text-white text-sm truncate">{name}</p>
-        <span className="mt-1 inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-tfs-teal/30 text-tfs-teal">
+        <span className="mt-1 inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-tfs-teal/30 text-tfs-teal-button">
           Coach
         </span>
       </div>

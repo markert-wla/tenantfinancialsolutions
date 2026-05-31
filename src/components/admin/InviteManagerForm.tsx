@@ -32,10 +32,10 @@ export default function InviteManagerForm() {
   if (status === 'done') {
     return (
       <div className="text-center py-6">
-        <CheckCircle2 className="text-tfs-teal mx-auto mb-2" size={32} />
+        <CheckCircle2 className="text-tfs-teal-button mx-auto mb-2" size={32} />
         <p className="font-semibold text-tfs-navy">Invitation sent!</p>
         <p className="text-sm text-tfs-slate mt-1">They&apos;ll receive an email to set their password.</p>
-        <button onClick={() => setStatus('idle')} className="mt-4 text-sm text-tfs-teal hover:underline">
+        <button onClick={() => setStatus('idle')} className="mt-4 text-sm text-tfs-teal-button hover:underline">
           Invite another
         </button>
       </div>

@@ -206,7 +206,7 @@ function RegisterInner() {
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 md:p-10">
         <button
           onClick={() => { setPath(null); setIsCouple(false); setCodeStatus('idle'); setCodeInfo(null) }}
-          className="text-tfs-teal text-sm mb-6 hover:underline"
+          className="text-tfs-teal-button text-sm mb-6 hover:underline"
         >
           ← Back
         </button>
@@ -298,7 +298,7 @@ function RegisterInner() {
                       className={cn(
                         'p-3 rounded-lg border-2 text-sm font-medium transition-colors text-left',
                         tier === t
-                          ? 'border-tfs-teal bg-tfs-teal/10 text-tfs-teal'
+                          ? 'border-tfs-teal bg-tfs-teal/10 text-tfs-teal-button'
                           : 'border-gray-200 text-tfs-slate hover:border-tfs-teal/50'
                       )}
                     >
@@ -414,7 +414,7 @@ function RegisterInner() {
 
         <p className="text-center text-tfs-slate text-sm mt-5">
           Already have an account?{' '}
-          <Link href="/login" className="text-tfs-teal hover:underline font-medium">Log in</Link>
+          <Link href="/login" className="text-tfs-teal-button hover:underline font-medium">Log in</Link>
         </p>
       </div>
     </div>

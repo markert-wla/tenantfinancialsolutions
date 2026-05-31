@@ -93,7 +93,7 @@ export default async function AdminDashboardPage() {
               <h2 className="font-serif font-bold text-tfs-navy text-xl">Coach Cancellations</h2>
               <span className="text-sm text-tfs-slate">({coachCancellations?.length} total) — review and grant sessions as needed</span>
             </div>
-            <Link href="/admin/clients" className="text-sm text-tfs-teal hover:underline">
+            <Link href="/admin/clients" className="text-sm text-tfs-teal-button hover:underline">
               Grant Sessions →
             </Link>
           </div>
@@ -122,7 +122,7 @@ export default async function AdminDashboardPage() {
                       {b.client?.id && (
                         <Link
                           href="/admin/clients"
-                          className="text-xs text-tfs-teal hover:underline"
+                          className="text-xs text-tfs-teal-button hover:underline"
                         >
                           Grant session →
                         </Link>
@@ -145,7 +145,7 @@ export default async function AdminDashboardPage() {
               <h2 className="font-serif font-bold text-tfs-navy text-xl">Flagged Sessions</h2>
               <span className="text-sm text-tfs-slate">({flaggedSessions?.length} open)</span>
             </div>
-            <Link href="/admin/bookings" className="text-sm text-tfs-teal hover:underline">
+            <Link href="/admin/bookings" className="text-sm text-tfs-teal-button hover:underline">
               View in Bookings →
             </Link>
           </div>
@@ -245,7 +245,7 @@ function StatCard({
   href?: string
 }) {
   const colors = {
-    teal: 'text-tfs-teal bg-tfs-teal/10',
+    teal: 'text-tfs-teal-button bg-tfs-teal/10',
     navy: 'text-tfs-navy bg-tfs-navy/10',
     gold: 'text-tfs-gold bg-tfs-gold/10',
     red:  'text-red-500 bg-red-50',

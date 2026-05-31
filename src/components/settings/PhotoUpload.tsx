@@ -123,7 +123,7 @@ export default function PhotoUpload({ userId, currentUrl, onUpload, onRemove }: 
           }`}
         >
           <p className="text-sm text-tfs-slate">
-            <span className="text-tfs-teal font-medium">Click to upload</span> or drag and drop
+            <span className="text-tfs-teal-button font-medium">Click to upload</span> or drag and drop
           </p>
           <p className="text-xs text-tfs-slate/70 mt-0.5">PNG, JPG, WEBP — max 5 MB</p>
           <input

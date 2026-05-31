@@ -126,13 +126,13 @@ export default function ServicesPage() {
           <p className="text-tfs-navy font-semibold mb-6">Individuals / Couples — Start for Free</p>
           <div className="inline-flex flex-col gap-3 text-left mx-auto">
             <div className="flex items-start gap-3">
-              <Check className="text-tfs-teal shrink-0 mt-0.5" size={18} />
+              <Check className="text-tfs-teal-button shrink-0 mt-0.5" size={18} />
               <span className="text-tfs-slate text-base">
                 <strong className="text-tfs-navy">Free Connection Session</strong> with your selected coach
               </span>
             </div>
             <div className="flex items-start gap-3">
-              <Check className="text-tfs-teal shrink-0 mt-0.5" size={18} />
+              <Check className="text-tfs-teal-button shrink-0 mt-0.5" size={18} />
               <span className="text-tfs-slate text-base">
                 <strong className="text-tfs-navy">One group coaching session</strong> during the first week of the month
               </span>
@@ -150,7 +150,7 @@ export default function ServicesPage() {
       <section id="individual" className="py-20 bg-white px-4 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
-            <Users className="text-tfs-teal" size={28} />
+            <Users className="text-tfs-teal-button" size={28} />
             <h2 className="section-heading">Individual and/or Couples Membership Plans</h2>
           </div>
           <p className="text-tfs-slate mb-12 text-lg max-w-2xl">
@@ -196,7 +196,7 @@ export default function ServicesPage() {
                 <ul className="space-y-3 flex-1 mb-7">
                   {plan.features.map(f => (
                     <li key={f} className="flex gap-2 text-sm text-tfs-slate">
-                      <Check className="text-tfs-teal shrink-0 mt-0.5" size={16} />
+                      <Check className="text-tfs-teal-button shrink-0 mt-0.5" size={16} />
                       {f}
                     </li>
                   ))}
@@ -271,10 +271,10 @@ export default function ServicesPage() {
               <p className="text-tfs-navy font-semibold text-lg mb-1">Custom Pricing</p>
               <p className="text-tfs-slate text-sm mb-5">You pay — your tenants get Advantage Plan coaching</p>
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Admin generates promo codes — 1 per unit</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Tenants register with their code → Advantage Plan unlocked</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> 2 individual sessions + group session per tenant/mo</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> No cost or billing to your tenants</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Admin generates promo codes — 1 per unit</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Tenants register with their code → Advantage Plan unlocked</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> 2 individual sessions + group session per tenant/mo</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> No cost or billing to your tenants</li>
               </ul>
               <Link href="/contact?type=property-manager" className="btn-primary text-sm">
                 Contact us for pricing
@@ -299,7 +299,7 @@ export default function ServicesPage() {
       <section id="nonprofit" className="py-20 bg-tfs-teal-light px-4 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
-            <HeartHandshake className="text-tfs-teal" size={28} />
+            <HeartHandshake className="text-tfs-teal-button" size={28} />
             <h2 className="section-heading">Non-Profit & Community Partners</h2>
           </div>
           <p className="text-tfs-slate text-lg mb-12 max-w-2xl">
@@ -313,7 +313,7 @@ export default function ServicesPage() {
               <ul className="space-y-2">
                 {NONPROFIT_ORGS.map(org => (
                   <li key={org} className="flex gap-2 text-tfs-slate">
-                    <Check className="text-tfs-teal shrink-0 mt-0.5" size={16} />
+                    <Check className="text-tfs-teal-button shrink-0 mt-0.5" size={16} />
                     {org}
                   </li>
                 ))}
@@ -323,10 +323,10 @@ export default function ServicesPage() {
             <div className="card">
               <h3 className="font-bold text-tfs-navy text-xl mb-4 font-serif">What Your Residents Get</h3>
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Complimentary group coaching session with your organization&apos;s promo code</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Custom pricing options available for individual coaching thereafter</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Register with a non-profit code — no billing to resident</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal shrink-0 mt-0.5" /> Private group session link provided to your organization</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Complimentary group coaching session with your organization&apos;s promo code</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Custom pricing options available for individual coaching thereafter</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Register with a non-profit code — no billing to resident</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Private group session link provided to your organization</li>
               </ul>
               <Link href="/contact?type=nonprofit" className="btn-primary text-sm block text-center">
                 Partner with us
@@ -334,7 +334,7 @@ export default function ServicesPage() {
               <div className="mt-4 text-center">
                 <Link
                   href="/contact?type=workshops"
-                  className="inline-flex items-center gap-2 text-tfs-teal text-sm font-medium hover:underline"
+                  className="inline-flex items-center gap-2 text-tfs-teal-button text-sm font-medium hover:underline"
                 >
                   Ask About Our Workshops <ArrowRight size={13} />
                 </Link>

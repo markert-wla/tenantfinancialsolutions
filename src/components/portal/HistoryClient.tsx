@@ -18,7 +18,7 @@ type Booking = {
 const STATUS_COLORS: Record<string, string> = {
   confirmed: 'bg-green-100 text-green-700',
   cancelled:  'bg-red-100 text-red-700',
-  completed:  'bg-tfs-teal/10 text-tfs-teal',
+  completed:  'bg-tfs-teal/10 text-tfs-teal-button',
 }
 
 export default function HistoryClient({
@@ -118,7 +118,7 @@ export default function HistoryClient({
             {/* Coach's note — read-only */}
             {b.client_notes && (
               <div className="mt-2 border-l-2 border-tfs-teal/50 pl-2">
-                <p className="text-xs font-medium text-tfs-teal mb-0.5">Coach</p>
+                <p className="text-xs font-medium text-tfs-teal-button mb-0.5">Coach</p>
                 <p className="text-sm text-tfs-slate italic">{b.client_notes}</p>
               </div>
             )}
@@ -149,7 +149,7 @@ export default function HistoryClient({
             {!isCancelled && (
               <button
                 onClick={() => openNote(b)}
-                className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
                 title={b.client_message ? 'Edit your note' : 'Add your note'}
               >
                 <Edit3 size={15} />

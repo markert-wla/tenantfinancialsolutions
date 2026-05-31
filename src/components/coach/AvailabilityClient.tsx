@@ -149,7 +149,7 @@ export default function AvailabilityClient({
               <h3 className="font-semibold text-tfs-navy">{dayName}</h3>
               <button
                 onClick={() => addSlot(dayIndex)}
-                className="flex items-center gap-1 text-xs text-tfs-teal hover:text-tfs-teal/80 font-medium transition-colors"
+                className="flex items-center gap-1 text-xs text-tfs-teal-button hover:text-tfs-teal-button/80 font-medium transition-colors"
               >
                 <Plus size={14} /> Add block
               </button>

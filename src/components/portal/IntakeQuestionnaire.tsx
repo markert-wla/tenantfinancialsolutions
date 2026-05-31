@@ -306,7 +306,7 @@ export default function IntakeQuestionnaire() {
         <button
           type="button"
           onClick={() => { setLang(l => l === 'en' ? 'es' : 'en'); setAnswers({}) }}
-          className="text-sm text-tfs-teal hover:underline font-medium"
+          className="text-sm text-tfs-teal-button hover:underline font-medium"
         >
           {t.langLabel}
         </button>
@@ -350,7 +350,7 @@ export default function IntakeQuestionnaire() {
                             onChange={() => setRadio(q.id, opt)}
                             className="accent-tfs-teal w-4 h-4 shrink-0"
                           />
-                          <span className="text-sm text-tfs-navy group-hover:text-tfs-teal transition-colors">
+                          <span className="text-sm text-tfs-navy group-hover:text-tfs-teal-button transition-colors">
                             {opt}
                           </span>
                         </label>
@@ -370,7 +370,7 @@ export default function IntakeQuestionnaire() {
                               onChange={() => toggleCheckbox(q.id, opt)}
                               className="accent-tfs-teal w-4 h-4 shrink-0"
                             />
-                            <span className="text-sm text-tfs-navy group-hover:text-tfs-teal transition-colors">
+                            <span className="text-sm text-tfs-navy group-hover:text-tfs-teal-button transition-colors">
                               {opt}
                             </span>
                           </label>

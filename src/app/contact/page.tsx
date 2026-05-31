@@ -45,8 +45,8 @@ export default function ContactPage() {
             <h2 className="section-heading mb-6">Contact Information</h2>
             <div className="space-y-5 text-tfs-slate">
               <div className="flex items-center gap-3">
-                <Mail className="text-tfs-teal shrink-0" size={20} />
-                <a href="mailto:michael@tenantfinancialsolutions.com" className="hover:text-tfs-teal transition-colors">
+                <Mail className="text-tfs-teal-button shrink-0" size={20} />
+                <a href="mailto:michael@tenantfinancialsolutions.com" className="hover:text-tfs-teal-button transition-colors">
                   michael@tenantfinancialsolutions.com
                 </a>
               </div>

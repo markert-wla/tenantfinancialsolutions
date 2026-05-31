@@ -38,7 +38,7 @@ export default function CoachCard({ coach }: { coach: Coach }) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="text-3xl font-bold text-tfs-teal font-serif">
+              <span className="text-3xl font-bold text-tfs-teal-button font-serif">
                 {coach.display_name?.charAt(0) ?? '?'}
               </span>
             </div>
@@ -46,12 +46,12 @@ export default function CoachCard({ coach }: { coach: Coach }) {
         </div>
         <h3 className="font-bold text-tfs-navy text-xl mb-1 font-serif">{coach.display_name}</h3>
         {coach.specialty && (
-          <p className="text-tfs-teal text-sm font-medium mb-2">{coach.specialty}</p>
+          <p className="text-tfs-teal-button text-sm font-medium mb-2">{coach.specialty}</p>
         )}
         {summary && (
           <p className="text-tfs-slate text-sm leading-relaxed">{summary}</p>
         )}
-        <p className="text-xs text-tfs-teal mt-3 font-medium group-hover:underline">
+        <p className="text-xs text-tfs-teal-button mt-3 font-medium group-hover:underline">
           View profile & sign up →
         </p>
       </button>
@@ -81,7 +81,7 @@ export default function CoachCard({ coach }: { coach: Coach }) {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-2xl font-bold text-tfs-teal font-serif">
+                      <span className="text-2xl font-bold text-tfs-teal-button font-serif">
                         {coach.display_name?.charAt(0) ?? '?'}
                       </span>
                     </div>
@@ -90,7 +90,7 @@ export default function CoachCard({ coach }: { coach: Coach }) {
                 <div>
                   <p className="font-bold text-tfs-navy text-lg font-serif">{coach.display_name}</p>
                   {coach.specialty && (
-                    <p className="text-tfs-teal text-sm font-medium">{coach.specialty}</p>
+                    <p className="text-tfs-teal-button text-sm font-medium">{coach.specialty}</p>
                   )}
                 </div>
               </div>

@@ -67,7 +67,7 @@ export default function SiteSettingsForm({ youtubeVideoId }: { youtubeVideoId: s
   return (
     <div className="card mt-8">
       <h2 className="font-serif font-bold text-tfs-navy text-xl mb-1 flex items-center gap-2">
-        <Video size={20} className="text-tfs-teal" /> Site Content Settings
+        <Video size={20} className="text-tfs-teal-button" /> Site Content Settings
       </h2>
       <p className="text-sm text-tfs-slate mb-6">Control content that appears publicly on the home page.</p>
 
@@ -87,7 +87,7 @@ export default function SiteSettingsForm({ youtubeVideoId }: { youtubeVideoId: s
             Accepts a full YouTube URL or bare video ID. Leave blank to hide the video section.
           </p>
           {videoInput.trim() && (
-            <p className="text-xs text-tfs-teal mt-1 font-mono">
+            <p className="text-xs text-tfs-teal-button mt-1 font-mono">
               Video ID: {extractId(videoInput)}
             </p>
           )}
@@ -111,7 +111,7 @@ export default function SiteSettingsForm({ youtubeVideoId }: { youtubeVideoId: s
             <Save size={15} />
             {saving ? 'Saving…' : 'Save Settings'}
           </button>
-          {saved && <span className="text-sm text-tfs-teal font-medium">Saved!</span>}
+          {saved && <span className="text-sm text-tfs-teal-button font-medium">Saved!</span>}
         </div>
       </form>
     </div>

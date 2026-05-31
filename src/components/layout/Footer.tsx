@@ -51,16 +51,16 @@ export default function Footer() {
           <div className="px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-400">
             <p>
               &copy; {new Date().getFullYear()} Tenant Financial Solutions. All rights reserved.{' '}
-              <Link href="/privacy" className="hover:text-tfs-teal transition-colors underline underline-offset-2">Privacy Policy</Link>
+              <Link href="/privacy" className="hover:text-tfs-teal-button transition-colors underline underline-offset-2">Privacy Policy</Link>
               {' · '}
-              <Link href="/terms" className="hover:text-tfs-teal transition-colors underline underline-offset-2">Terms of Service</Link>
+              <Link href="/terms" className="hover:text-tfs-teal-button transition-colors underline underline-offset-2">Terms of Service</Link>
             </p>
             <div className="flex items-center gap-4">
-              <a href="https://www.weblaunchacademy.com/" target="_blank" rel="noopener noreferrer" className="hover:text-tfs-teal transition-colors">
+              <a href="https://www.weblaunchacademy.com/" target="_blank" rel="noopener noreferrer" className="hover:text-tfs-teal-button transition-colors">
                 Built with Web Launch Academy
               </a>
-              <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-tfs-teal transition-colors"><IconInstagram /></a>
-              <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-tfs-teal transition-colors"><IconFacebook /></a>
+              <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-tfs-teal-button transition-colors"><IconInstagram /></a>
+              <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-tfs-teal-button transition-colors"><IconFacebook /></a>
             </div>
           </div>
         </div>
@@ -92,9 +92,9 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4 uppercase tracking-wider text-xs">About Us</h3>
             <ul className="space-y-2 text-sm text-gray-300">
-              <li><Link href="/our-story" className="hover:text-tfs-teal transition-colors">Our Story</Link></li>
-              <li><Link href="/services" className="hover:text-tfs-teal transition-colors">Services</Link></li>
-              <li><Link href="/contact" className="hover:text-tfs-teal transition-colors">Contact Us</Link></li>
+              <li><Link href="/our-story" className="hover:text-tfs-teal-button transition-colors">Our Story</Link></li>
+              <li><Link href="/services" className="hover:text-tfs-teal-button transition-colors">Services</Link></li>
+              <li><Link href="/contact" className="hover:text-tfs-teal-button transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -103,16 +103,16 @@ export default function Footer() {
             <h3 className="font-semibold text-white mb-4 uppercase tracking-wider text-xs">Follow Us</h3>
             <div className="flex gap-4">
               <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer"
-                 aria-label="Instagram" className="text-gray-300 hover:text-tfs-teal transition-colors">
+                 aria-label="Instagram" className="text-gray-300 hover:text-tfs-teal-button transition-colors">
                 <IconInstagram />
               </a>
               <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer"
-                 aria-label="Facebook" className="text-gray-300 hover:text-tfs-teal transition-colors">
+                 aria-label="Facebook" className="text-gray-300 hover:text-tfs-teal-button transition-colors">
                 <IconFacebook />
               </a>
             </div>
             <div className="mt-4 text-sm text-gray-300">
-              <a href="mailto:michael@tenantfinancialsolutions.com" className="hover:text-tfs-teal transition-colors">
+              <a href="mailto:michael@tenantfinancialsolutions.com" className="hover:text-tfs-teal-button transition-colors">
                 michael@tenantfinancialsolutions.com
               </a>
             </div>
@@ -146,22 +146,22 @@ export default function Footer() {
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
           <p>
             &copy; {new Date().getFullYear()} Tenant Financial Solutions. All rights reserved.{' '}
-            <Link href="/privacy" className="hover:text-tfs-teal transition-colors underline underline-offset-2">
+            <Link href="/privacy" className="hover:text-tfs-teal-button transition-colors underline underline-offset-2">
               Privacy Policy
             </Link>
             {' · '}
-            <Link href="/terms" className="hover:text-tfs-teal transition-colors underline underline-offset-2">
+            <Link href="/terms" className="hover:text-tfs-teal-button transition-colors underline underline-offset-2">
               Terms of Service
             </Link>
           </p>
           <div className="flex items-center gap-4">
-            <a href="https://www.weblaunchacademy.com/" target="_blank" rel="noopener noreferrer" className="hover:text-tfs-teal transition-colors">
+            <a href="https://www.weblaunchacademy.com/" target="_blank" rel="noopener noreferrer" className="hover:text-tfs-teal-button transition-colors">
               Built with Web Launch Academy
             </a>
             <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer"
-               aria-label="Instagram" className="hover:text-tfs-teal transition-colors"><IconInstagram /></a>
+               aria-label="Instagram" className="hover:text-tfs-teal-button transition-colors"><IconInstagram /></a>
             <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer"
-               aria-label="Facebook" className="hover:text-tfs-teal transition-colors"><IconFacebook /></a>
+               aria-label="Facebook" className="hover:text-tfs-teal-button transition-colors"><IconFacebook /></a>
           </div>
         </div>
       </div>

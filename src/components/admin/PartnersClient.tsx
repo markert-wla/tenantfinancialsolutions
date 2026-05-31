@@ -116,7 +116,7 @@ export default function PartnersClient({ partners }: { partners: Partner[] }) {
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => setEditP(p)}
-                          className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                          className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
                           title="Edit"
                         >
                           <Pencil size={15} />

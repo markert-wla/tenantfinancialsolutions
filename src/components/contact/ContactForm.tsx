@@ -55,7 +55,7 @@ function ContactFormInner() {
     return (
       <div className="card text-center py-12">
         <div className="w-14 h-14 rounded-full bg-tfs-teal/10 flex items-center justify-center mx-auto mb-4">
-          <Send className="text-tfs-teal" size={24} />
+          <Send className="text-tfs-teal-button" size={24} />
         </div>
         <h3 className="text-xl font-bold text-tfs-navy mb-2 font-serif">Message Received!</h3>
         <p className="text-tfs-slate">We&apos;ll be in touch within 1 business day.</p>

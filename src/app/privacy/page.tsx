@@ -25,7 +25,7 @@ export default function PrivacyPage() {
           </p>
           <p className="mt-3">
             Questions about this policy can be directed to:{' '}
-            <a href="mailto:Michael@tenantfinancialsolutions.com" className="text-tfs-teal hover:underline">
+            <a href="mailto:Michael@tenantfinancialsolutions.com" className="text-tfs-teal-button hover:underline">
               Michael@tenantfinancialsolutions.com
             </a>
           </p>
@@ -80,23 +80,23 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-6 mt-3 space-y-2">
             <li>
               <strong>Supabase</strong> — database and authentication hosting.{' '}
-              <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal hover:underline">supabase.com/privacy</a>
+              <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal-button hover:underline">supabase.com/privacy</a>
             </li>
             <li>
               <strong>Stripe</strong> — payment processing and subscription management.{' '}
-              <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal hover:underline">stripe.com/privacy</a>
+              <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal-button hover:underline">stripe.com/privacy</a>
             </li>
             <li>
               <strong>Resend</strong> — transactional email delivery.{' '}
-              <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal hover:underline">resend.com/legal/privacy-policy</a>
+              <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal-button hover:underline">resend.com/legal/privacy-policy</a>
             </li>
             <li>
               <strong>Google OAuth</strong> — optional sign-in via Google account.{' '}
-              <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal hover:underline">policies.google.com/privacy</a>
+              <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal-button hover:underline">policies.google.com/privacy</a>
             </li>
             <li>
               <strong>Vercel</strong> — website hosting and deployment.{' '}
-              <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal hover:underline">vercel.com/legal/privacy-policy</a>
+              <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-tfs-teal-button hover:underline">vercel.com/legal/privacy-policy</a>
             </li>
           </ul>
           <p className="mt-3">
@@ -128,7 +128,7 @@ export default function PrivacyPage() {
           </ul>
           <p className="mt-3">
             To exercise any of these rights, contact us at{' '}
-            <a href="mailto:Michael@tenantfinancialsolutions.com" className="text-tfs-teal hover:underline">
+            <a href="mailto:Michael@tenantfinancialsolutions.com" className="text-tfs-teal-button hover:underline">
               Michael@tenantfinancialsolutions.com
             </a>.
           </p>
@@ -170,11 +170,11 @@ export default function PrivacyPage() {
             <p className="font-medium text-tfs-navy">Tenant Financial Solutions</p>
             <p>
               Email:{' '}
-              <a href="mailto:Michael@tenantfinancialsolutions.com" className="text-tfs-teal hover:underline">
+              <a href="mailto:Michael@tenantfinancialsolutions.com" className="text-tfs-teal-button hover:underline">
                 Michael@tenantfinancialsolutions.com
               </a>
             </p>
-            <p>Website: <Link href="/" className="text-tfs-teal hover:underline">tenantfinancialsolutions.com</Link></p>
+            <p>Website: <Link href="/" className="text-tfs-teal-button hover:underline">tenantfinancialsolutions.com</Link></p>
           </div>
         </section>
 

@@ -132,13 +132,13 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
                 </p>
               )}
               {isFullComp && !isTenantPartner && (
-                <p className="text-xs text-tfs-teal font-medium mt-1">Complimentary coaching included</p>
+                <p className="text-xs text-tfs-teal-button font-medium mt-1">Complimentary coaching included</p>
               )}
               {isTenantPartner && isFullComp && (
-                <p className="text-xs text-tfs-teal font-medium mt-1">Tenant Partner benefit — 2 sessions/month</p>
+                <p className="text-xs text-tfs-teal-button font-medium mt-1">Tenant Partner benefit — 2 sessions/month</p>
               )}
               {extras > 0 && (
-                <p className="text-xs text-tfs-teal font-medium mt-1">
+                <p className="text-xs text-tfs-teal-button font-medium mt-1">
                   + {extras} gifted from admin
                 </p>
               )}
@@ -158,7 +158,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
             {isGroupComp ? (
               <p className="text-tfs-navy font-medium text-sm">
                 Your plan includes group coaching. Join a group session below or{' '}
-                <Link href="/portal/billing" className="text-tfs-teal hover:underline">upgrade</Link> for individual sessions.
+                <Link href="/portal/billing" className="text-tfs-teal-button hover:underline">upgrade</Link> for individual sessions.
               </p>
             ) : isFullComp && !isTenantPartner ? (
               <p className="text-tfs-navy font-medium">
@@ -172,13 +172,13 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
               ) : (
                 <p className="text-tfs-navy font-medium text-sm">
                   Monthly sessions used.{' '}
-                  <Link href="/portal/billing" className="text-tfs-teal hover:underline">Upgrade</Link> or wait for the monthly reset.
+                  <Link href="/portal/billing" className="text-tfs-teal-button hover:underline">Upgrade</Link> or wait for the monthly reset.
                 </p>
               )
             ) : (
               <p className="text-tfs-navy font-medium">
                 You have{' '}
-                <span className="text-tfs-teal font-bold">{extras > 0 ? extras : limit - used}</span>{' '}
+                <span className="text-tfs-teal-button font-bold">{extras > 0 ? extras : limit - used}</span>{' '}
                 session{(extras > 0 ? extras : limit - used) !== 1 ? 's' : ''} remaining this month.
               </p>
             )}
@@ -208,7 +208,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
             <CalendarCheck size={20} />
             Upcoming Sessions
           </h2>
-          <Link href="/portal/history" className="text-sm text-tfs-teal hover:underline">
+          <Link href="/portal/history" className="text-sm text-tfs-teal-button hover:underline">
             View all
           </Link>
         </div>
@@ -217,7 +217,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
           <p className="text-tfs-slate text-sm">
             No upcoming sessions.{' '}
             {canBook && (
-              <Link href="/portal/book" className="text-tfs-teal hover:underline">Book one now →</Link>
+              <Link href="/portal/book" className="text-tfs-teal-button hover:underline">Book one now →</Link>
             )}
           </p>
         ) : (
@@ -254,7 +254,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
       {/* Group session */}
       <div className="card">
         <div className="flex items-center gap-2 mb-3">
-          <Users size={20} className="text-tfs-teal" />
+          <Users size={20} className="text-tfs-teal-button" />
           <h2 className="font-serif font-bold text-tfs-navy text-xl">Monthly Group Session</h2>
         </div>
         {nextGroup ? (

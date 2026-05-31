@@ -182,15 +182,15 @@ export default function TermsPage() {
             <p className="font-medium text-tfs-navy">Tenant Financial Solutions</p>
             <p>
               Email:{' '}
-              <a href="mailto:michael@tenantfinancialsolutions.com" className="text-tfs-teal hover:underline">
+              <a href="mailto:michael@tenantfinancialsolutions.com" className="text-tfs-teal-button hover:underline">
                 michael@tenantfinancialsolutions.com
               </a>
             </p>
-            <p>Website: <Link href="/" className="text-tfs-teal hover:underline">tenantfinancialsolutions.com</Link></p>
+            <p>Website: <Link href="/" className="text-tfs-teal-button hover:underline">tenantfinancialsolutions.com</Link></p>
           </div>
           <p className="mt-4">
             For our privacy practices, see our{' '}
-            <Link href="/privacy" className="text-tfs-teal hover:underline">Privacy Policy</Link>.
+            <Link href="/privacy" className="text-tfs-teal-button hover:underline">Privacy Policy</Link>.
           </p>
         </section>
 

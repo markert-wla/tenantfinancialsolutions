@@ -50,7 +50,7 @@ export default function ApplyPromoCode() {
   return (
     <div className="card mt-6">
       <div className="flex items-center gap-2 mb-3">
-        <Tag size={16} className="text-tfs-teal" />
+        <Tag size={16} className="text-tfs-teal-button" />
         <p className="font-semibold text-tfs-navy text-sm">Have a promo code?</p>
       </div>
       <p className="text-xs text-tfs-slate mb-4">

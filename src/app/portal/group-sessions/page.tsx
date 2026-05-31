@@ -94,7 +94,7 @@ export default async function PortalGroupSessionsPage() {
       {/* ── UPCOMING ── */}
       <section className="mb-10">
         <h2 className="text-lg font-bold text-tfs-navy font-serif mb-4 flex items-center gap-2">
-          <CalendarDays size={18} className="text-tfs-teal" /> Upcoming Sessions
+          <CalendarDays size={18} className="text-tfs-teal-button" /> Upcoming Sessions
         </h2>
 
         {!upcoming?.length ? (
@@ -115,7 +115,7 @@ export default async function PortalGroupSessionsPage() {
                       href={s.recording_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 border border-tfs-teal text-tfs-teal text-sm font-semibold px-4 py-2 rounded-lg hover:bg-tfs-teal hover:text-white transition-colors"
+                      className="inline-flex items-center gap-1.5 border border-tfs-teal text-tfs-teal-button text-sm font-semibold px-4 py-2 rounded-lg hover:bg-tfs-teal hover:text-white transition-colors"
                     >
                       <Video size={14} /> Preview Recording
                     </a>
@@ -144,7 +144,7 @@ export default async function PortalGroupSessionsPage() {
       {/* ── PAST ── */}
       <section>
         <h2 className="text-lg font-bold text-tfs-navy font-serif mb-4 flex items-center gap-2">
-          <Video size={18} className="text-tfs-teal" /> Past Sessions (last 90 days)
+          <Video size={18} className="text-tfs-teal-button" /> Past Sessions (last 90 days)
         </h2>
 
         {!past?.length ? (
@@ -173,7 +173,7 @@ export default async function PortalGroupSessionsPage() {
                       href={s.recording_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="shrink-0 inline-flex items-center gap-1.5 border border-tfs-teal text-tfs-teal text-sm font-semibold px-4 py-2 rounded-lg hover:bg-tfs-teal hover:text-white transition-colors"
+                      className="shrink-0 inline-flex items-center gap-1.5 border border-tfs-teal text-tfs-teal-button text-sm font-semibold px-4 py-2 rounded-lg hover:bg-tfs-teal hover:text-white transition-colors"
                     >
                       <Video size={14} /> Watch
                     </a>
@@ -189,7 +189,7 @@ export default async function PortalGroupSessionsPage() {
 
       <p className="mt-8 text-xs text-tfs-slate text-center">
         Questions about group sessions?{' '}
-        <Link href="/contact" className="text-tfs-teal hover:underline">Contact us</Link>.
+        <Link href="/contact" className="text-tfs-teal-button hover:underline">Contact us</Link>.
       </p>
     </div>
   )

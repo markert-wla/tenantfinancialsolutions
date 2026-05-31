@@ -145,7 +145,7 @@ export default function AdminNotesClient({
                           </p>
                         )}
                         {n.client_notes && (
-                          <p className="text-xs text-tfs-teal flex items-start gap-1.5">
+                          <p className="text-xs text-tfs-teal-button flex items-start gap-1.5">
                             <Share2 size={11} className="shrink-0 mt-0.5" />
                             <span className="italic">{n.client_notes}</span>
                           </p>

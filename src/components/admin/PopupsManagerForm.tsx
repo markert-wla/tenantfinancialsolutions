@@ -59,7 +59,7 @@ export default function PopupsManagerForm({ initialPopups }: { initialPopups: Po
   return (
     <div className="card mt-8">
       <h2 className="font-serif font-bold text-tfs-navy text-xl mb-1 flex items-center gap-2">
-        <MessageSquare size={20} className="text-tfs-teal" /> Public Page Popups
+        <MessageSquare size={20} className="text-tfs-teal-button" /> Public Page Popups
       </h2>
       <p className="text-sm text-tfs-slate mb-6">
         Add YouTube videos or text messages that appear as subtle slide-in panels on public pages. Visitors can dismiss them.
@@ -70,7 +70,7 @@ export default function PopupsManagerForm({ initialPopups }: { initialPopups: Po
         <div className="space-y-2 mb-6">
           {popups.map(popup => (
             <div key={popup.id} className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50">
-              <div className="mt-0.5 text-tfs-teal shrink-0">
+              <div className="mt-0.5 text-tfs-teal-button shrink-0">
                 {popup.type === 'youtube' ? <Video size={16} /> : <MessageSquare size={16} />}
               </div>
               <div className="flex-1 min-w-0">
@@ -81,7 +81,7 @@ export default function PopupsManagerForm({ initialPopups }: { initialPopups: Po
                 <button
                   onClick={() => toggleActive(popup)}
                   title={popup.is_active ? 'Hide' : 'Show'}
-                  className={`p-1.5 rounded-lg transition-colors ${popup.is_active ? 'text-tfs-teal hover:bg-tfs-teal/10' : 'text-gray-400 hover:bg-gray-200'}`}
+                  className={`p-1.5 rounded-lg transition-colors ${popup.is_active ? 'text-tfs-teal-button hover:bg-tfs-teal/10' : 'text-gray-400 hover:bg-gray-200'}`}
                 >
                   {popup.is_active ? <Eye size={15} /> : <EyeOff size={15} />}
                 </button>

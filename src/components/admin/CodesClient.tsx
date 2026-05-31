@@ -49,20 +49,20 @@ const TIER_COLORS: Record<string, string> = {
   free:   'bg-gray-100 text-gray-600',
   bronze: 'bg-orange-100 text-orange-700',
   silver: 'bg-slate-100 text-slate-600',
-  all:    'bg-tfs-teal/10 text-tfs-teal',
+  all:    'bg-tfs-teal/10 text-tfs-teal-button',
 }
 
 function partnershipLabel(code: PromoCode): { label: string; color: string } | null {
-  if (code.code_type === 'affiliate_discount') return { label: 'Affiliate', color: 'bg-tfs-teal/10 text-tfs-teal' }
+  if (code.code_type === 'affiliate_discount') return { label: 'Affiliate', color: 'bg-tfs-teal/10 text-tfs-teal-button' }
   if (code.assigned_tier === 'silver') return { label: 'Full Amenity', color: 'bg-tfs-navy/10 text-tfs-navy' }
   if (code.code_type === 'full_comp' || code.code_type === 'group_comp') return null
-  if (code.assigned_tier === 'bronze') return { label: 'Affiliate', color: 'bg-tfs-teal/10 text-tfs-teal' }
+  if (code.assigned_tier === 'bronze') return { label: 'Affiliate', color: 'bg-tfs-teal/10 text-tfs-teal-button' }
   return null
 }
 
 const CODE_TYPE_COLORS: Record<string, string> = {
   tier_assignment:    'bg-gray-100 text-gray-600',
-  affiliate_discount: 'bg-tfs-teal/10 text-tfs-teal',
+  affiliate_discount: 'bg-tfs-teal/10 text-tfs-teal-button',
   full_comp:          'bg-purple-100 text-purple-700',
   group_comp:         'bg-blue-100 text-blue-700',
 }
@@ -231,7 +231,7 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
             {/* Inline new-partner fields */}
             {isNewPartner && (
               <div className="border border-tfs-teal/30 bg-tfs-teal/5 rounded-lg p-4 space-y-3">
-                <p className="text-xs font-semibold text-tfs-teal uppercase tracking-wide">New Partner Details</p>
+                <p className="text-xs font-semibold text-tfs-teal-button uppercase tracking-wide">New Partner Details</p>
                 <div>
                   <label className="block text-sm font-medium text-tfs-navy mb-1">Partner Name</label>
                   <input
@@ -428,7 +428,7 @@ function CodeTable({
                         {CODE_TYPE_LABELS[c.code_type ?? 'tier_assignment']}
                       </span>
                       {c.code_type === 'affiliate_discount' && c.discount_percent && (
-                        <span className="ml-1 text-xs text-tfs-teal font-semibold">{c.discount_percent}%</span>
+                        <span className="ml-1 text-xs text-tfs-teal-button font-semibold">{c.discount_percent}%</span>
                       )}
                     </td>
                     <td className="py-2.5 pr-4">

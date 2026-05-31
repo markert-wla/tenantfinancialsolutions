@@ -192,7 +192,7 @@ export default function GroupSessionsClient({
                         type="checkbox"
                         checked={selectedPartnerIds.includes(p.id)}
                         onChange={() => togglePartner(p.id)}
-                        className="rounded border-gray-300 text-tfs-teal focus:ring-tfs-teal"
+                        className="rounded border-gray-300 text-tfs-teal-button focus:ring-tfs-teal"
                       />
                       <span className="text-sm text-tfs-navy">{p.partner_name}</span>
                       <span className="text-xs text-gray-400 ml-auto">
@@ -203,7 +203,7 @@ export default function GroupSessionsClient({
                 </div>
               )}
               {selectedPartnerIds.length > 0 && (
-                <p className="text-xs text-tfs-teal mt-1.5">
+                <p className="text-xs text-tfs-teal-button mt-1.5">
                   Visible to tenants of {selectedPartnerIds.length} partner group{selectedPartnerIds.length > 1 ? 's' : ''} only.
                 </p>
               )}
@@ -311,7 +311,7 @@ function SessionList({
                   <div className="flex items-center gap-4 mt-1.5 flex-wrap">
                     {s.join_link ? (
                       <a href={s.join_link} target="_blank" rel="noopener noreferrer"
-                         className="flex items-center gap-1 text-xs text-tfs-teal hover:underline">
+                         className="flex items-center gap-1 text-xs text-tfs-teal-button hover:underline">
                         <LinkIcon size={12} /> Join link
                       </a>
                     ) : (
@@ -319,7 +319,7 @@ function SessionList({
                     )}
                     {s.recording_url && (
                       <a href={s.recording_url} target="_blank" rel="noopener noreferrer"
-                         className="flex items-center gap-1 text-xs text-tfs-teal hover:underline">
+                         className="flex items-center gap-1 text-xs text-tfs-teal-button hover:underline">
                         <Video size={12} /> Recording
                       </a>
                     )}
@@ -341,13 +341,13 @@ function SessionList({
                     <>
                       <button
                         onClick={() => onEditLink(s)}
-                        className="px-2.5 py-1 rounded-lg border border-gray-200 text-xs text-tfs-slate hover:border-tfs-teal hover:text-tfs-teal transition-colors"
+                        className="px-2.5 py-1 rounded-lg border border-gray-200 text-xs text-tfs-slate hover:border-tfs-teal hover:text-tfs-teal-button transition-colors"
                       >
                         {s.join_link ? 'Edit link' : 'Add link'}
                       </button>
                       <button
                         onClick={() => onEditRecording(s)}
-                        className="px-2.5 py-1 rounded-lg border border-gray-200 text-xs text-tfs-slate hover:border-tfs-teal hover:text-tfs-teal transition-colors"
+                        className="px-2.5 py-1 rounded-lg border border-gray-200 text-xs text-tfs-slate hover:border-tfs-teal hover:text-tfs-teal-button transition-colors"
                       >
                         {s.recording_url ? 'Edit recording' : 'Add recording'}
                       </button>

@@ -197,7 +197,7 @@ export default function ClientDetailClient({
       {intakeResponse ? (
         <section>
           <div className="flex items-center gap-2 mb-3">
-            <ClipboardList size={16} className="text-tfs-teal" />
+            <ClipboardList size={16} className="text-tfs-teal-button" />
             <h2 className="font-serif font-bold text-tfs-navy text-lg">Intake Questionnaire</h2>
             <span className="text-xs text-tfs-slate">
               Submitted {fmtDate(intakeResponse.created_at)}{intakeResponse.language === 'es' ? ' · Spanish' : ''}
@@ -236,7 +236,7 @@ export default function ClientDetailClient({
       {/* General client notes */}
       <section>
         <div className="flex items-center gap-2 mb-3">
-          <FileText size={16} className="text-tfs-teal" />
+          <FileText size={16} className="text-tfs-teal-button" />
           <h2 className="font-serif font-bold text-tfs-navy text-lg">Client Notes</h2>
           <span className="text-xs text-tfs-slate">General notes about this client</span>
         </div>
@@ -363,7 +363,7 @@ function SessionList({
                 </p>
               )}
               {b.client_notes && (
-                <p className="text-xs text-tfs-teal italic mt-1 border-l-2 border-tfs-teal/40 pl-2 flex items-start gap-1">
+                <p className="text-xs text-tfs-teal-button italic mt-1 border-l-2 border-tfs-teal/40 pl-2 flex items-start gap-1">
                   <Share2 size={10} className="shrink-0 mt-0.5" />{b.client_notes}
                 </p>
               )}
@@ -376,7 +376,7 @@ function SessionList({
             </div>
             <button
               onClick={() => onEdit(b)}
-              className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors shrink-0"
+              className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors shrink-0"
               title="Edit notes"
             >
               <Edit3 size={15} />
@@ -398,7 +398,7 @@ function SessionList({
                 />
               </div>
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal uppercase tracking-wide mb-1">
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal-button uppercase tracking-wide mb-1">
                   <Share2 size={11} /> Message to Client <span className="font-normal normal-case text-tfs-slate">(visible to client)</span>
                 </label>
                 <textarea

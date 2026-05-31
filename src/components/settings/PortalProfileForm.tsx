@@ -124,7 +124,7 @@ export default function PortalProfileForm({ authEmail, userId, profile }: Props)
         {profile.client_type && (
           <div className="mt-4 flex items-center gap-2">
             <span className="text-xs font-medium text-tfs-slate">Account type:</span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-tfs-teal/10 text-tfs-teal">
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-tfs-teal/10 text-tfs-teal-button">
               {CLIENT_TYPE_LABELS[profile.client_type] ?? profile.client_type}
             </span>
             <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-tfs-gold/20 text-tfs-navy capitalize ml-1">

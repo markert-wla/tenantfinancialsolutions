@@ -141,7 +141,7 @@ export default async function CoachDashboardPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { icon: CalendarCheck, label: 'Sessions This Month', value: monthCount ?? 0,                          color: 'text-tfs-teal bg-tfs-teal/10' },
+          { icon: CalendarCheck, label: 'Sessions This Month', value: monthCount ?? 0,                          color: 'text-tfs-teal-button bg-tfs-teal/10' },
           { icon: Users,         label: 'Total Clients',       value: totalClients,                             color: 'text-tfs-navy bg-tfs-navy/10' },
           { icon: Clock,         label: "Today's Sessions",    value: todayCount,                               color: 'text-tfs-gold bg-tfs-gold/10' },
           { icon: AlertTriangle, label: 'Inactivity Alerts',   value: inactiveClients?.length ?? 0,             color: inactiveClients?.length ? 'text-red-500 bg-red-50' : 'text-gray-400 bg-gray-50' },
@@ -179,7 +179,7 @@ export default async function CoachDashboardPage() {
                       <p className="text-sm font-medium text-tfs-navy">
                         {b.profiles?.first_name} {b.profiles?.last_name}
                       </p>
-                      <p className="text-xs text-tfs-teal">{fmt(b.start_time_utc)}</p>
+                      <p className="text-xs text-tfs-teal-button">{fmt(b.start_time_utc)}</p>
                     </div>
                     <span className="text-xs text-gray-400">Booked {fmtShort(b.created_at)}</span>
                   </div>
@@ -203,7 +203,7 @@ export default async function CoachDashboardPage() {
                         {TYPE_LABEL[s.inquiry_type] ?? s.inquiry_type}
                       </span>
                     </div>
-                    <a href={`mailto:${s.email}`} className="text-xs text-tfs-teal hover:underline block mb-1">{s.email}</a>
+                    <a href={`mailto:${s.email}`} className="text-xs text-tfs-teal-button hover:underline block mb-1">{s.email}</a>
                     <p className="text-xs text-tfs-slate line-clamp-2">{s.message}</p>
                     <p className="text-xs text-gray-400 mt-1">Submitted {fmtShort(s.submitted_at)}</p>
                   </div>
@@ -221,7 +221,7 @@ export default async function CoachDashboardPage() {
             <h2 className="font-serif font-bold text-tfs-navy text-xl flex items-center gap-2">
               <CalendarCheck size={20} /> Upcoming Sessions
             </h2>
-            <Link href="/coach/sessions" className="text-sm text-tfs-teal hover:underline">
+            <Link href="/coach/sessions" className="text-sm text-tfs-teal-button hover:underline">
               View all →
             </Link>
           </div>
@@ -229,7 +229,7 @@ export default async function CoachDashboardPage() {
           {!upcoming?.length ? (
             <p className="text-tfs-slate text-sm">
               No upcoming sessions.{' '}
-              <Link href="/coach/availability" className="text-tfs-teal hover:underline">
+              <Link href="/coach/availability" className="text-tfs-teal-button hover:underline">
                 Set your availability
               </Link>
               {' '}so clients can book with you.
@@ -255,7 +255,7 @@ export default async function CoachDashboardPage() {
                           </span>
                         )}
                       </p>
-                      <p className="text-xs text-tfs-teal mt-0.5 font-medium">{fmt(b.start_time_utc)}</p>
+                      <p className="text-xs text-tfs-teal-button mt-0.5 font-medium">{fmt(b.start_time_utc)}</p>
                       {b.notes && <p className="text-xs text-tfs-slate mt-0.5 italic">{b.notes}</p>}
                     </div>
                     <span className="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
@@ -289,7 +289,7 @@ export default async function CoachDashboardPage() {
               ))}
             </div>
           )}
-          <Link href="/coach/clients" className="mt-4 block text-sm text-tfs-teal hover:underline">
+          <Link href="/coach/clients" className="mt-4 block text-sm text-tfs-teal-button hover:underline">
             View all clients →
           </Link>
         </div>

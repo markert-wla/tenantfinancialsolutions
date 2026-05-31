@@ -150,7 +150,7 @@ function LoginInner() {
 
         <p className="text-center text-tfs-slate text-sm mt-6">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-tfs-teal hover:underline font-medium">Sign up free</Link>
+          <Link href="/register" className="text-tfs-teal-button hover:underline font-medium">Sign up free</Link>
         </p>
       </div>
     </div>

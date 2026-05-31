@@ -49,7 +49,7 @@ export default async function PortalBillingPage() {
       <div className="card mb-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 rounded-lg bg-tfs-teal/10">
-            <CreditCard className="text-tfs-teal" size={20} />
+            <CreditCard className="text-tfs-teal-button" size={20} />
           </div>
           <div>
             <p className="text-xs text-tfs-slate">Current plan</p>
@@ -82,7 +82,7 @@ export default async function PortalBillingPage() {
         ) : isPaid && !hasStripe ? (
           <p className="text-sm text-tfs-slate">
             Billing portal not yet linked. Contact{' '}
-            <Link href="/contact" className="text-tfs-teal hover:underline">support</Link>.
+            <Link href="/contact" className="text-tfs-teal-button hover:underline">support</Link>.
           </p>
         ) : (
           <UpgradeButtons currentTier={tier} />
@@ -95,7 +95,7 @@ export default async function PortalBillingPage() {
         <p className="text-xs text-tfs-slate text-center">
           Changes take effect at the start of your next billing cycle.
           Need help?{' '}
-          <Link href="/contact" className="text-tfs-teal hover:underline">Contact us</Link>.
+          <Link href="/contact" className="text-tfs-teal-button hover:underline">Contact us</Link>.
         </p>
       )}
     </div>

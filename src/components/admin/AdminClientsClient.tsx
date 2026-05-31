@@ -328,7 +328,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
       {/* ── Bulk action bar ─────────────────────────────────── */}
       <div className="mb-4 p-4 rounded-xl bg-tfs-teal-light border border-tfs-teal/20">
         <p className="text-sm font-semibold text-tfs-navy mb-3 flex items-center gap-2">
-          <CalendarClock size={16} className="text-tfs-teal" /> Bulk Extend Trial
+          <CalendarClock size={16} className="text-tfs-teal-button" /> Bulk Extend Trial
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <div>
@@ -371,7 +371,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
             <thead className="bg-tfs-teal-light text-tfs-navy border-b border-gray-100">
               <tr>
                 <th className="px-4 py-3">
-                  <button onClick={toggleAll} className="text-tfs-navy hover:text-tfs-teal">
+                  <button onClick={toggleAll} className="text-tfs-navy hover:text-tfs-teal-button">
                     {allSelected ? <CheckSquare size={16} /> : <Square size={16} />}
                   </button>
                 </th>
@@ -406,7 +406,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                     className={`transition-colors ${isSelected ? 'bg-tfs-teal/5' : 'hover:bg-gray-50'} ${!c.is_active ? 'opacity-50' : ''}`}
                   >
                     <td className="px-4 py-3">
-                      <button onClick={() => toggleOne(c.id)} className="text-tfs-navy hover:text-tfs-teal">
+                      <button onClick={() => toggleOne(c.id)} className="text-tfs-navy hover:text-tfs-teal-button">
                         {isSelected ? <CheckSquare size={16} /> : <Square size={16} />}
                       </button>
                     </td>
@@ -444,7 +444,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                               trialExpired ? 'border-red-300 text-red-600' : 'border-gray-200 text-tfs-navy'
                             }`}
                           />
-                          {savingId === c.id && <Loader2 size={12} className="animate-spin text-tfs-teal" />}
+                          {savingId === c.id && <Loader2 size={12} className="animate-spin text-tfs-teal-button" />}
                         </div>
                       ) : (
                         <span className="text-xs text-tfs-slate">Paid plan</span>
@@ -453,7 +453,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                     <td className="px-4 py-3 text-tfs-slate text-center">{c.sessions_used_this_month}</td>
                     <td className="px-4 py-3 text-center">
                       {(c.extra_sessions ?? 0) > 0 ? (
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-tfs-teal/10 text-tfs-teal">
+                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-tfs-teal/10 text-tfs-teal-button">
                           +{c.extra_sessions}
                         </span>
                       ) : (
@@ -473,7 +473,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                         <button
                           onClick={() => grantSession(c.id)}
                           disabled={grantingId === c.id}
-                          className="p-1 rounded-lg text-tfs-teal hover:bg-tfs-teal/10 transition-colors disabled:opacity-40"
+                          className="p-1 rounded-lg text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors disabled:opacity-40"
                           title="Grant extra sessions"
                         >
                           {grantingId === c.id
@@ -499,7 +499,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                         {c.stripe_customer_id && (
                           <button
                             onClick={() => { setCreditClient(c); setCreditAmount(''); setCreditNote('') }}
-                            className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                            className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
                             title="Apply invoice credit"
                           >
                             <DollarSign size={15} />

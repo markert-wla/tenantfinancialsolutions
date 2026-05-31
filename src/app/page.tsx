@@ -74,7 +74,7 @@ const AUDIENCE_CARDS = [
     icon: Users,
     label: "I'm an Individual and/or Couple",
     href: '/services#individual',
-    bg: 'bg-tfs-teal',
+    bg: 'bg-tfs-teal-button',
     desc: 'Personal coaching plans starting free',
   },
   {

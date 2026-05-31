@@ -54,7 +54,7 @@ export default async function ManagerDashboardPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { icon: Users,        label: 'Tenants Enrolled', value: totalTenants,  color: 'text-tfs-teal bg-tfs-teal/10' },
+          { icon: Users,        label: 'Tenants Enrolled', value: totalTenants,  color: 'text-tfs-teal-button bg-tfs-teal/10' },
           { icon: UserCheck,    label: 'Active Tenants',   value: activeTenants, color: 'text-tfs-navy bg-tfs-navy/10' },
           { icon: CalendarCheck,label: 'Sessions This Mo', value: sessionsMonth, color: 'text-tfs-gold bg-tfs-gold/10' },
           { icon: Tag,          label: 'Code Uses (total)',value: totalUses,     color: 'text-purple-500 bg-purple-50' },
@@ -75,7 +75,7 @@ export default async function ManagerDashboardPage() {
       <div className="grid grid-cols-1 gap-6">
         <div className="card">
           <h2 className="font-serif font-bold text-tfs-navy text-lg mb-3 flex items-center gap-2">
-            <Users size={18} className="text-tfs-teal" /> My Promo Codes
+            <Users size={18} className="text-tfs-teal-button" /> My Promo Codes
           </h2>
           {myCodes.length === 0 ? (
             <p className="text-sm text-tfs-slate">No active codes yet.</p>
@@ -89,7 +89,7 @@ export default async function ManagerDashboardPage() {
               ))}
             </ul>
           )}
-          <Link href="/manager/codes" className="mt-3 block text-sm text-tfs-teal hover:underline">
+          <Link href="/manager/codes" className="mt-3 block text-sm text-tfs-teal-button hover:underline">
             View all codes →
           </Link>
         </div>

@@ -151,7 +151,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-tfs-teal font-medium mb-1">{fmt(s.start_time_utc)}</p>
+                    <p className="text-xs text-tfs-teal-button font-medium mb-1">{fmt(s.start_time_utc)}</p>
                     {client?.email && (
                       <p className="text-xs text-tfs-slate">{client.email}</p>
                     )}
@@ -161,7 +161,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                       </p>
                     )}
                     {s.client_notes && (
-                      <p className="text-xs text-tfs-teal italic mt-1 border-l-2 border-tfs-teal/40 pl-2 flex items-start gap-1">
+                      <p className="text-xs text-tfs-teal-button italic mt-1 border-l-2 border-tfs-teal/40 pl-2 flex items-start gap-1">
                         <Share2 size={10} className="shrink-0 mt-0.5" />{s.client_notes}
                       </p>
                     )}
@@ -198,7 +198,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                     {/* Edit note */}
                     <button
                       onClick={() => { setEditingNote(s.id); setCoachNoteText(s.notes ?? ''); setClientNoteText(s.client_notes ?? ''); }}
-                      className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal hover:bg-tfs-teal/10 transition-colors"
+                      className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
                       title="Edit note"
                     >
                       <Edit3 size={15} />
@@ -245,7 +245,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                       />
                     </div>
                     <div>
-                      <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal uppercase tracking-wide mb-1">
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-tfs-teal-button uppercase tracking-wide mb-1">
                         <Share2 size={11} /> Message to Client <span className="font-normal normal-case text-tfs-slate">(visible to client)</span>
                       </label>
                       <textarea

@@ -56,7 +56,7 @@ export default async function CoachClientDetailPage({ params }: { params: { id: 
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <Link href="/coach/clients" className="inline-flex items-center gap-1.5 text-sm text-tfs-teal hover:underline mb-6">
+      <Link href="/coach/clients" className="inline-flex items-center gap-1.5 text-sm text-tfs-teal-button hover:underline mb-6">
         <ChevronLeft size={15} /> Back to Clients
       </Link>
 
