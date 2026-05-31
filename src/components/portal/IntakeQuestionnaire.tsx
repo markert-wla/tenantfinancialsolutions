@@ -324,7 +324,7 @@ export default function IntakeQuestionnaire() {
               Section {String.fromCharCode(65 + sectionIdx)}. {t.sections[sectionIdx]}
             </h2>
 
-            {sectionQs.map((q, qIdx) => {
+            {sectionQs.map((q, _qIdx) => {
               const globalIdx = t.questions.findIndex(gq => gq.id === q.id)
               return (
                 <div key={q.id} className="space-y-3">
