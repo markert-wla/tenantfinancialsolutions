@@ -52,6 +52,13 @@ export default async function CoachClientDetailPage({ params }: { params: { id: 
     .limit(1)
     .maybeSingle()
 
+  // Messages sent by the client via the portal
+  const { data: portalMessages } = await supabase
+    .from('portal_messages')
+    .select('id, body, created_at, read_at')
+    .eq('client_id', params.id)
+    .order('created_at', { ascending: false })
+
   const coachTz = profile.timezone ?? 'America/New_York'
 
   return (
@@ -73,6 +80,7 @@ export default async function CoachClientDetailPage({ params }: { params: { id: 
         clientNotes={(clientNotes ?? []) as { id: string; note: string; created_at: string }[]}
         coachTz={coachTz}
         intakeResponse={intakeResponse as { id: string; language: string; responses: Record<string, string | string[]>; created_at: string } | null}
+        portalMessages={(portalMessages ?? []) as { id: string; body: string; created_at: string; read_at: string | null }[]}
       />
     </div>
   )

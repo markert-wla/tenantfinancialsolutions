@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { LayoutDashboard, CalendarPlus, History, UserCircle, Users, MessageSquare, CreditCard } from 'lucide-react'
+import { LayoutDashboard, CalendarPlus, History, UserCircle, Users, MessageSquare, Send, CreditCard } from 'lucide-react'
 import SignOutButton from '@/components/portal/SignOutButton'
 import DashboardShell from '@/components/layout/DashboardShell'
 
@@ -43,6 +43,7 @@ export default async function PortalLayout({ children }: { children: React.React
         <NavLink href="/portal/history"        icon={History}         label="My Sessions" />
         <NavLink href="/portal/group-sessions" icon={Users}           label="Group Sessions" />
         <NavLink href="/portal/profile"        icon={UserCircle}      label="Profile" />
+        <NavLink href="/portal/messages"       icon={Send}            label="Message Coach" />
         <NavLink href="/portal/testimonial"    icon={MessageSquare}   label="Share Story" />
         <NavLink href="/portal/billing"        icon={CreditCard}      label="Billing" />
       </nav>

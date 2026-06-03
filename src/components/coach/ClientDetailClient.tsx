@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock, Share2, Edit3, X, CheckCircle, Trash2, Plus, FileText, ClipboardList } from 'lucide-react'
+import { Lock, Share2, Edit3, X, CheckCircle, Trash2, Plus, FileText, ClipboardList, MessageCircle, Check } from 'lucide-react'
 
 type Client = {
   id: string
@@ -32,6 +32,13 @@ type ClientNote = {
   id: string
   note: string
   created_at: string
+}
+
+type PortalMessage = {
+  id: string
+  body: string
+  created_at: string
+  read_at: string | null
 }
 
 type IntakeResponse = {
@@ -67,12 +74,14 @@ export default function ClientDetailClient({
   clientNotes: initialNotes,
   coachTz,
   intakeResponse,
+  portalMessages: initialMessages,
 }: {
-  client:         Client
-  bookings:       Booking[]
-  clientNotes:    ClientNote[]
-  coachTz:        string
-  intakeResponse: IntakeResponse | null
+  client:          Client
+  bookings:        Booking[]
+  clientNotes:     ClientNote[]
+  coachTz:         string
+  intakeResponse:  IntakeResponse | null
+  portalMessages:  PortalMessage[]
 }) {
   const router = useRouter()
 
@@ -90,6 +99,10 @@ export default function ClientDetailClient({
   const [addingNote,   setAddingNote]   = useState(false)
   const [deletingId,   setDeletingId]   = useState<string | null>(null)
   const [noteError,    setNoteError]    = useState('')
+
+  // Portal messages state
+  const [messages,     setMessages]     = useState<PortalMessage[]>(initialMessages)
+  const [markingId,    setMarkingId]    = useState<string | null>(null)
 
   function fmt(iso: string) {
     return new Intl.DateTimeFormat('en-US', {
@@ -163,6 +176,15 @@ export default function ClientDetailClient({
     }
   }
 
+  async function markRead(id: string) {
+    setMarkingId(id)
+    const res = await fetch(`/api/coach/portal-messages/${id}/read`, { method: 'PATCH' })
+    setMarkingId(null)
+    if (res.ok) {
+      setMessages(prev => prev.map(m => m.id === id ? { ...m, read_at: new Date().toISOString() } : m))
+    }
+  }
+
   const past     = bookings.filter(b => new Date(b.start_time_utc) < new Date())
   const upcoming = bookings.filter(b => new Date(b.start_time_utc) >= new Date())
   const total    = bookings.filter(b => b.status !== 'cancelled').length
@@ -232,6 +254,55 @@ export default function ClientDetailClient({
           Client has not completed the intake questionnaire.
         </div>
       )}
+
+      {/* Portal messages from client */}
+      <section>
+        <div className="flex items-center gap-2 mb-3">
+          <MessageCircle size={16} className="text-tfs-teal-button" />
+          <h2 className="font-serif font-bold text-tfs-navy text-lg">Messages from Client</h2>
+          {messages.filter(m => !m.read_at).length > 0 && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-tfs-teal text-white font-semibold">
+              {messages.filter(m => !m.read_at).length} new
+            </span>
+          )}
+        </div>
+
+        {messages.length === 0 ? (
+          <div className="card flex items-center gap-3 text-tfs-slate text-sm">
+            <MessageCircle size={16} className="text-gray-300 shrink-0" />
+            No messages from this client yet.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {messages.map(m => (
+              <div key={m.id} className={`card ${!m.read_at ? 'border-l-4 border-l-tfs-teal' : ''}`}>
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-tfs-navy whitespace-pre-wrap">{m.body}</p>
+                    <p className="text-xs text-tfs-slate mt-1.5">{fmtDate(m.created_at)}</p>
+                  </div>
+                  {!m.read_at && (
+                    <button
+                      onClick={() => markRead(m.id)}
+                      disabled={markingId === m.id}
+                      title="Mark as read"
+                      className="shrink-0 flex items-center gap-1 text-xs text-tfs-teal-button hover:text-tfs-teal border border-tfs-teal/40 rounded px-2 py-1 transition-colors disabled:opacity-50"
+                    >
+                      <Check size={12} />
+                      {markingId === m.id ? '…' : 'Mark read'}
+                    </button>
+                  )}
+                  {m.read_at && (
+                    <span className="shrink-0 text-xs text-gray-400 flex items-center gap-1">
+                      <Check size={11} /> Read
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* General client notes */}
       <section>
