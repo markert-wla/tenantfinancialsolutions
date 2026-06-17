@@ -10,7 +10,6 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
@@ -28,6 +27,7 @@ const nextConfig = {
               "img-src 'self' data: blob: https://*.supabase.co",
               "connect-src 'self' https://*.supabase.co https://api.stripe.com https://api.resend.com",
               "frame-src https://js.stripe.com https://hooks.stripe.com",
+              "frame-ancestors 'self' https://www.weblaunchacademy.com http://localhost:*",
             ].join('; '),
           },
         ],

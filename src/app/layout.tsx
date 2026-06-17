@@ -7,6 +7,7 @@ import Footer from '@/components/layout/Footer'
 import PopupManager from '@/components/public/PopupManager'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import ConsoleCapture from '@/components/ConsoleCapture'
 
 export const metadata: Metadata = {
   title: {
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <ConsoleCapture />
         <Navbar />
         <main>{children}</main>
         <Footer />
