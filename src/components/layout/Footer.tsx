@@ -59,7 +59,7 @@ export default function Footer() {
               <a href="https://www.weblaunchacademy.com/" target="_blank" rel="noopener noreferrer" className="hover:text-tfs-teal-button transition-colors">
                 Built with Web Launch Academy
               </a>
-              <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-tfs-teal-button transition-colors"><IconInstagram /></a>
+              <a href="https://www.instagram.com/tenant_financial_solutions/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-tfs-teal-button transition-colors"><IconInstagram /></a>
               <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-tfs-teal-button transition-colors"><IconFacebook /></a>
             </div>
           </div>
@@ -102,7 +102,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4 uppercase tracking-wider text-xs">Follow Us</h3>
             <div className="flex gap-4">
-              <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/tenant_financial_solutions/" target="_blank" rel="noopener noreferrer"
                  aria-label="Instagram" className="text-gray-300 hover:text-tfs-teal-button transition-colors">
                 <IconInstagram />
               </a>
@@ -158,7 +158,7 @@ export default function Footer() {
             <a href="https://www.weblaunchacademy.com/" target="_blank" rel="noopener noreferrer" className="hover:text-tfs-teal-button transition-colors">
               Built with Web Launch Academy
             </a>
-            <a href="https://www.instagram.com/mjmfinancialcoaching/" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.instagram.com/tenant_financial_solutions/" target="_blank" rel="noopener noreferrer"
                aria-label="Instagram" className="hover:text-tfs-teal-button transition-colors"><IconInstagram /></a>
             <a href="https://www.facebook.com/profile.php?id=61578631015293" target="_blank" rel="noopener noreferrer"
                aria-label="Facebook" className="hover:text-tfs-teal-button transition-colors"><IconFacebook /></a>
