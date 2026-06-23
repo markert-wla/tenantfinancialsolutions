@@ -1,5 +1,10 @@
 export const dynamic = 'force-dynamic'
 
+// ⚠️ INTENTIONAL BUILD ERROR — safe to delete this branch
+// This import references a module that does not exist, triggering a
+// "Module not found" error during `next build` to test the error flow.
+import { INTENTIONAL_BUILD_ERROR_DO_NOT_SHIP } from '@/this-module-does-not-exist'
+
 import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
