@@ -93,18 +93,6 @@ const AUDIENCE_CARDS = [
   },
 ]
 
-const COACH_BENEFITS = [
-  'Build financial clarity',
-  'Reduce financial stress',
-  'Improve decision making',
-]
-
-const MGMT_BENEFITS = [
-  'Fewer delinquencies',
-  'Improved tenant relationships',
-  'More time for core responsibilities',
-]
-
 export default async function HomePage({
   searchParams,
 }: {
@@ -130,7 +118,7 @@ export default async function HomePage({
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative mt-20 h-[66.67vw] sm:h-[calc(100vh+80px)] overflow-hidden">
         <Image
-          src="/images/homepage-image.webp"
+          src="/images/home-page-top-section.png"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
           fill
           className="object-cover object-center select-none"
@@ -230,46 +218,6 @@ export default async function HomePage({
             <Link href="/about#coaches" className="btn-navy">
               Learn More About Our Team
             </Link>
-          </div>
-        </div>
-      </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
-
-      {/* ── BENEFITS ─────────────────────────────────────────── */}
-      <section className="relative">
-        {/* Lighthouse-style full-width teal-to-navy section */}
-        <div
-          className="py-20 px-4 text-white"
-          style={{ background: 'linear-gradient(180deg, #1A2B4A 0%, #1D9E75 100%)' }}
-        >
-          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">
-                • Coaching empowers tenants to:
-              </h2>
-              <ul className="space-y-3">
-                {COACH_BENEFITS.map(b => (
-                  <li key={b} className="flex items-center gap-3 text-lg text-white/90">
-                    <span className="w-2 h-2 rounded-full bg-tfs-gold shrink-0" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">
-                • Coaching that lightens the load on management by:
-              </h2>
-              <ul className="space-y-3">
-                {MGMT_BENEFITS.map(b => (
-                  <li key={b} className="flex items-center gap-3 text-lg text-white/90">
-                    <span className="w-2 h-2 rounded-full bg-tfs-gold shrink-0" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       </section>
