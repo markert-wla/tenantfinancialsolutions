@@ -12,10 +12,11 @@ const NAV_LINKS = [
   { label: 'About',     href: '/about' },
   { label: 'Our Story', href: '/our-story' },
   { label: 'Services',  href: '/services' },
+  { label: 'FAQ',       href: '/faq' },
   { label: 'Contact',   href: '/contact' },
 ]
 
-const PUBLIC_PAGES = new Set(['/', '/about', '/our-story', '/services', '/contact'])
+const PUBLIC_PAGES = new Set(['/', '/about', '/our-story', '/services', '/faq', '/contact'])
 
 // Portal links shown in place of public nav when logged in as admin
 const ADMIN_PORTAL_LINKS = [
