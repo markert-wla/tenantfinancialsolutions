@@ -126,8 +126,31 @@ export default async function HomePage({
         />
         {/* Narrow gradient at very top only — keeps nav links readable over any image */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
-        {/* CTA pinned to bottom of the image — hidden on mobile (button lives in navbar instead) */}
-        <div className="absolute bottom-0 inset-x-0 z-10 pb-12 hidden sm:flex justify-center">
+
+        {/* ── WHY IT MATTERS panel — desktop only, pinned to bottom of hero ── */}
+        <div className="absolute bottom-0 inset-x-0 z-10 hidden sm:block bg-gradient-to-t from-black/85 via-black/60 to-transparent pt-24 pb-10 px-8">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-tfs-gold font-serif text-3xl font-bold mb-6">Why It Matters</h2>
+            <div className="flex items-center gap-6 mb-8">
+              {/* People icon in circle */}
+              <div className="shrink-0 w-16 h-16 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-2 border-white/20">
+                <Users className="text-white" size={30} />
+              </div>
+              {/* Descriptive text */}
+              <p className="text-white text-base leading-relaxed">
+                Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
+                confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
+              </p>
+            </div>
+            {/* Gold CTA button */}
+            <div className="flex justify-center">
+              <HeroCTAButton />
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile fallback CTA — shown only on small screens (no Why It Matters panel) */}
+        <div className="absolute bottom-0 inset-x-0 z-10 pb-6 flex sm:hidden justify-center">
           <HeroCTAButton />
         </div>
       </section>
