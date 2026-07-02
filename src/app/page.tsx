@@ -180,12 +180,12 @@ export default async function HomePage({
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
       {/* ── WHY IT MATTERS ───────────────────────────────────── */}
-      <section className="py-20 bg-tfs-teal-light px-4">
+      <section className="py-10 md:py-14 bg-tfs-teal-light px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="section-heading text-center mb-12">Why It Matters</h2>
+          <h2 className="section-heading text-center mb-8">Why It Matters</h2>
 
           {/* Three benefit columns */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 rounded-full bg-tfs-teal flex items-center justify-center mb-4 shadow-md">
@@ -197,14 +197,21 @@ export default async function HomePage({
             ))}
           </div>
 
-          {/* People image + descriptive text */}
-          <div className="flex flex-col sm:flex-row items-center gap-8 bg-white rounded-2xl shadow-md p-8">
+          {/* People image + button (desktop: right of image) + descriptive text */}
+          <div className="flex flex-col sm:flex-row items-center gap-6 bg-white rounded-2xl shadow-md p-6 md:p-8">
             {/* Two people in green circle */}
             <div className="shrink-0 w-28 h-28 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
               <Users className="text-white" size={52} />
             </div>
+            {/* Free Session button — desktop only, sits directly to the right of the image */}
+            <Link
+              href="/register?tier=free"
+              className="btn-primary text-sm px-5 py-3 shrink-0 hidden md:inline-flex whitespace-nowrap"
+            >
+              Step into your free Connection Session
+            </Link>
             {/* Descriptive text */}
-            <p className="text-tfs-slate text-base leading-relaxed">
+            <p className="text-tfs-slate text-base leading-relaxed text-center sm:text-left">
               Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
               confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
             </p>
