@@ -183,7 +183,17 @@ export default async function HomePage({
       {/* Mobile: normal stacked layout. Desktop: compact so entire section fits in one view */}
       <section className="pt-6 pb-8 md:pt-4 md:pb-10 bg-tfs-teal-light px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="section-heading text-center mb-3 md:mb-2">Why It Matters</h2>
+
+          {/* Mobile heading — simple */}
+          <h2 className="section-heading text-center mb-3 md:hidden">Why It Matters</h2>
+
+          {/* Desktop heading — large uppercase with gold underline bar */}
+          <div className="hidden md:block text-center mb-4">
+            <h2 className="text-5xl font-serif font-bold text-tfs-navy uppercase tracking-wide">
+              Why It Matters
+            </h2>
+            <div className="w-28 h-1 bg-tfs-gold mx-auto mt-3" />
+          </div>
 
           {/* Descriptive text — desktop only, shown directly below heading */}
           <p className="hidden md:block text-white text-center text-base leading-relaxed mb-5 max-w-2xl mx-auto">
@@ -204,19 +214,12 @@ export default async function HomePage({
             ))}
           </div>
 
-          {/* People image + button (desktop: right of image) + descriptive text (mobile only) */}
+          {/* People image + descriptive text (mobile only) */}
           <div className="flex flex-col sm:flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5 md:p-6">
             {/* Two people silhouette circle */}
             <div className="shrink-0 w-24 h-24 md:w-20 md:h-20 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
               <Users className="text-white" size={44} />
             </div>
-            {/* Free Session button — desktop only, sits directly to the right of the image */}
-            <Link
-              href="/register?tier=free"
-              className="btn-primary text-sm px-5 py-3 shrink-0 hidden md:inline-flex whitespace-nowrap"
-            >
-              Step into your free Connection Session
-            </Link>
             {/* Descriptive text — mobile only (desktop sees it above the 3 columns) */}
             <p className="text-tfs-slate text-sm leading-relaxed text-center sm:text-left md:hidden">
               Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
