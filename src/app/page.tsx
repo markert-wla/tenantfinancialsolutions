@@ -180,28 +180,29 @@ export default async function HomePage({
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
       {/* ── WHY IT MATTERS ───────────────────────────────────── */}
-      <section className="py-10 md:py-14 bg-tfs-teal-light px-4">
+      {/* Mobile: normal stacked layout. Desktop: compact so entire section fits in one view */}
+      <section className="pt-6 pb-8 md:pt-8 md:pb-10 bg-tfs-teal-light px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="section-heading text-center mb-8">Why It Matters</h2>
+          <h2 className="section-heading text-center mb-5 md:mb-6">Why It Matters</h2>
 
           {/* Three benefit columns */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full bg-tfs-teal flex items-center justify-center mb-4 shadow-md">
-                  <Icon className="text-white" size={28} />
+                <div className="w-14 h-14 md:w-12 md:h-12 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
+                  <Icon className="text-white" size={24} />
                 </div>
-                <h3 className="font-bold text-tfs-navy text-xl font-serif mb-2">{title}</h3>
+                <h3 className="font-bold text-tfs-navy text-lg md:text-base font-serif mb-1">{title}</h3>
                 <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
 
           {/* People image + button (desktop: right of image) + descriptive text */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 bg-white rounded-2xl shadow-md p-6 md:p-8">
-            {/* Two people in green circle */}
-            <div className="shrink-0 w-28 h-28 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
-              <Users className="text-white" size={52} />
+          <div className="flex flex-col sm:flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5 md:p-6">
+            {/* Two people silhouette circle */}
+            <div className="shrink-0 w-24 h-24 md:w-20 md:h-20 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
+              <Users className="text-white" size={44} />
             </div>
             {/* Free Session button — desktop only, sits directly to the right of the image */}
             <Link
@@ -211,7 +212,7 @@ export default async function HomePage({
               Step into your free Connection Session
             </Link>
             {/* Descriptive text */}
-            <p className="text-tfs-slate text-base leading-relaxed text-center sm:text-left">
+            <p className="text-tfs-slate text-sm md:text-base leading-relaxed text-center sm:text-left">
               Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
               confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
             </p>
