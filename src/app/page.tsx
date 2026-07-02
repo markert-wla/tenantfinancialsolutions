@@ -181,9 +181,15 @@ export default async function HomePage({
 
       {/* ── WHY IT MATTERS ───────────────────────────────────── */}
       {/* Mobile: normal stacked layout. Desktop: compact so entire section fits in one view */}
-      <section className="pt-6 pb-8 md:pt-8 md:pb-10 bg-tfs-teal-light px-4">
+      <section className="pt-6 pb-8 md:pt-4 md:pb-10 bg-tfs-teal-light px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="section-heading text-center mb-5 md:mb-6">Why It Matters</h2>
+          <h2 className="section-heading text-center mb-3 md:mb-2">Why It Matters</h2>
+
+          {/* Descriptive text — desktop only, shown directly below heading */}
+          <p className="hidden md:block text-white text-center text-base leading-relaxed mb-5 max-w-2xl mx-auto">
+            Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
+            confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
+          </p>
 
           {/* Three benefit columns */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -198,7 +204,7 @@ export default async function HomePage({
             ))}
           </div>
 
-          {/* People image + button (desktop: right of image) + descriptive text */}
+          {/* People image + button (desktop: right of image) + descriptive text (mobile only) */}
           <div className="flex flex-col sm:flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5 md:p-6">
             {/* Two people silhouette circle */}
             <div className="shrink-0 w-24 h-24 md:w-20 md:h-20 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
@@ -211,8 +217,8 @@ export default async function HomePage({
             >
               Step into your free Connection Session
             </Link>
-            {/* Descriptive text */}
-            <p className="text-tfs-slate text-sm md:text-base leading-relaxed text-center sm:text-left">
+            {/* Descriptive text — mobile only (desktop sees it above the 3 columns) */}
+            <p className="text-tfs-slate text-sm leading-relaxed text-center sm:text-left md:hidden">
               Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
               confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
             </p>
