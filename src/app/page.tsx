@@ -4,8 +4,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { ChevronRight, Users, Building2, HeartHandshake } from 'lucide-react'
-import HeroCTAButton from '@/components/layout/HeroCTAButton'
+import { ChevronRight, Users, Building2, HeartHandshake, GraduationCap, TrendingUp, Star } from 'lucide-react'
 import CoachCard from '@/components/public/CoachCard'
 
 export const metadata: Metadata = {
@@ -93,6 +92,24 @@ const AUDIENCE_CARDS = [
   },
 ]
 
+const WHY_IT_MATTERS_BENEFITS = [
+  {
+    icon: GraduationCap,
+    title: 'Personalized Coaching',
+    desc: 'Every session is tailored to your unique financial situation — no one-size-fits-all scripts, just real guidance built around your goals.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Stronger Financial Habits',
+    desc: 'We help you build the daily habits and mindset shifts that create lasting change — from budgeting basics to long-term planning.',
+  },
+  {
+    icon: Star,
+    title: 'Lasting Financial Freedom',
+    desc: 'Our coaching goes beyond quick fixes. We equip you with the tools and confidence to take ownership of your financial future.',
+  },
+]
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -126,33 +143,6 @@ export default async function HomePage({
         />
         {/* Narrow gradient at very top only — keeps nav links readable over any image */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
-
-        {/* ── WHY IT MATTERS panel — desktop only, pinned to bottom of hero ── */}
-        <div className="absolute bottom-0 inset-x-0 z-10 hidden sm:block bg-gradient-to-t from-black/85 via-black/60 to-transparent pt-24 pb-10 px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-tfs-gold font-serif text-3xl font-bold mb-6">Why It Matters</h2>
-            <div className="flex items-center gap-6 mb-8">
-              {/* People icon in circle */}
-              <div className="shrink-0 w-16 h-16 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-2 border-white/20">
-                <Users className="text-white" size={30} />
-              </div>
-              {/* Descriptive text */}
-              <p className="text-white text-base leading-relaxed">
-                Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
-                confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
-              </p>
-            </div>
-            {/* Gold CTA button */}
-            <div className="flex justify-center">
-              <HeroCTAButton />
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile fallback CTA — shown only on small screens (no Why It Matters panel) */}
-        <div className="absolute bottom-0 inset-x-0 z-10 pb-6 flex sm:hidden justify-center">
-          <HeroCTAButton />
-        </div>
       </section>
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
@@ -183,6 +173,41 @@ export default async function HomePage({
             <Link href="/register?tier=free" className="btn-primary px-8 py-4">
               Start with a Free Connection Session
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
+      {/* ── WHY IT MATTERS ───────────────────────────────────── */}
+      <section className="py-20 bg-tfs-teal-light px-4">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="section-heading text-center mb-12">Why It Matters</h2>
+
+          {/* Three benefit columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
+            {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-tfs-teal flex items-center justify-center mb-4 shadow-md">
+                  <Icon className="text-white" size={28} />
+                </div>
+                <h3 className="font-bold text-tfs-navy text-xl font-serif mb-2">{title}</h3>
+                <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* People image + descriptive text */}
+          <div className="flex flex-col sm:flex-row items-center gap-8 bg-white rounded-2xl shadow-md p-8">
+            {/* Two people in green circle */}
+            <div className="shrink-0 w-28 h-28 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
+              <Users className="text-white" size={52} />
+            </div>
+            {/* Descriptive text */}
+            <p className="text-tfs-slate text-base leading-relaxed">
+              Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
+              confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
+            </p>
           </div>
         </div>
       </section>
