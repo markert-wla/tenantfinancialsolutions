@@ -4,8 +4,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { ChevronRight, Users, Building2, HeartHandshake } from 'lucide-react'
-import HeroCTAButton from '@/components/layout/HeroCTAButton'
+import { ChevronRight, Users, Building2, HeartHandshake, GraduationCap, TrendingUp, Star } from 'lucide-react'
 import CoachCard from '@/components/public/CoachCard'
 
 export const metadata: Metadata = {
@@ -93,16 +92,22 @@ const AUDIENCE_CARDS = [
   },
 ]
 
-const COACH_BENEFITS = [
-  'Build financial clarity',
-  'Reduce financial stress',
-  'Improve decision making',
-]
-
-const MGMT_BENEFITS = [
-  'Fewer delinquencies',
-  'Improved tenant relationships',
-  'More time for core responsibilities',
+const WHY_IT_MATTERS_BENEFITS = [
+  {
+    icon: GraduationCap,
+    title: 'Personalized Coaching',
+    desc: 'Every session is tailored to your unique financial situation — no one-size-fits-all scripts, just real guidance built around your goals.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Stronger Financial Habits',
+    desc: 'We help you build the daily habits and mindset shifts that create lasting change — from budgeting basics to long-term planning.',
+  },
+  {
+    icon: Star,
+    title: 'Lasting Financial Freedom',
+    desc: 'Our coaching goes beyond quick fixes. We equip you with the tools and confidence to take ownership of your financial future.',
+  },
 ]
 
 export default async function HomePage({
@@ -130,7 +135,7 @@ export default async function HomePage({
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative mt-20 h-[66.67vw] sm:h-[calc(100vh+80px)] overflow-hidden">
         <Image
-          src="/images/homepage-image.webp"
+          src="/images/home-page-top-section.png"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
           fill
           className="object-cover object-center select-none"
@@ -138,9 +143,39 @@ export default async function HomePage({
         />
         {/* Narrow gradient at very top only — keeps nav links readable over any image */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
-        {/* CTA pinned to bottom of the image — hidden on mobile (button lives in navbar instead) */}
-        <div className="absolute bottom-0 inset-x-0 z-10 pb-12 hidden sm:flex justify-center">
-          <HeroCTAButton />
+
+        {/* ── DESKTOP ONLY: Why It Matters overlay inside hero ── */}
+        <div className="hidden md:block absolute bottom-0 inset-x-0 bg-tfs-teal-light/95 px-4 py-6">
+          <div className="max-w-5xl mx-auto">
+
+            {/* Heading */}
+            <h2 className="section-heading text-center mb-3">Why It Matters</h2>
+
+            {/* Three benefit columns */}
+            <div className="grid grid-cols-3 gap-6 mb-5">
+              {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
+                <div key={title} className="flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
+                    <Icon className="text-white" size={22} />
+                  </div>
+                  <h3 className="font-bold text-tfs-navy text-base font-serif mb-1">{title}</h3>
+                  <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* People icon + descriptive text */}
+            <div className="flex flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5">
+              <div className="shrink-0 w-20 h-20 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
+                <Users className="text-white" size={40} />
+              </div>
+              <p className="text-tfs-slate text-sm leading-relaxed">
+                Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
+                confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
+              </p>
+            </div>
+
+          </div>
         </div>
       </section>
 
@@ -177,6 +212,41 @@ export default async function HomePage({
       </section>
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
+      {/* ── WHY IT MATTERS (mobile only) ─────────────────────── */}
+      <section className="pt-6 pb-8 bg-tfs-teal-light px-4 md:hidden">
+        <div className="max-w-5xl mx-auto">
+
+          {/* Mobile heading */}
+          <h2 className="section-heading text-center mb-3">Why It Matters</h2>
+
+          {/* Three benefit columns */}
+          <div className="grid grid-cols-1 gap-6 mb-6">
+            {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex flex-col items-center text-center">
+                <div className="w-14 h-14 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
+                  <Icon className="text-white" size={24} />
+                </div>
+                <h3 className="font-bold text-tfs-navy text-lg font-serif mb-1">{title}</h3>
+                <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* People image + descriptive text */}
+          <div className="flex flex-col sm:flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5">
+            <div className="shrink-0 w-24 h-24 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
+              <Users className="text-white" size={44} />
+            </div>
+            <p className="text-tfs-slate text-sm leading-relaxed text-center sm:text-left">
+              Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
+              confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent md:hidden" />
 
       {/* ── FEATURED VIDEO ───────────────────────────────────── */}
       {youtubeVideoId && (
@@ -230,46 +300,6 @@ export default async function HomePage({
             <Link href="/about#coaches" className="btn-navy">
               Learn More About Our Team
             </Link>
-          </div>
-        </div>
-      </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
-
-      {/* ── BENEFITS ─────────────────────────────────────────── */}
-      <section className="relative">
-        {/* Lighthouse-style full-width teal-to-navy section */}
-        <div
-          className="py-20 px-4 text-white"
-          style={{ background: 'linear-gradient(180deg, #1A2B4A 0%, #1D9E75 100%)' }}
-        >
-          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">
-                • Coaching empowers tenants to:
-              </h2>
-              <ul className="space-y-3">
-                {COACH_BENEFITS.map(b => (
-                  <li key={b} className="flex items-center gap-3 text-lg text-white/90">
-                    <span className="w-2 h-2 rounded-full bg-tfs-gold shrink-0" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">
-                • Coaching that lightens the load on management by:
-              </h2>
-              <ul className="space-y-3">
-                {MGMT_BENEFITS.map(b => (
-                  <li key={b} className="flex items-center gap-3 text-lg text-white/90">
-                    <span className="w-2 h-2 rounded-full bg-tfs-gold shrink-0" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       </section>
