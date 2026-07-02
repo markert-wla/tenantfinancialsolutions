@@ -143,6 +143,40 @@ export default async function HomePage({
         />
         {/* Narrow gradient at very top only — keeps nav links readable over any image */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
+
+        {/* ── DESKTOP ONLY: Why It Matters overlay inside hero ── */}
+        <div className="hidden md:block absolute bottom-0 inset-x-0 bg-tfs-teal-light/95 px-4 py-6">
+          <div className="max-w-5xl mx-auto">
+
+            {/* Heading */}
+            <h2 className="section-heading text-center mb-3">Why It Matters</h2>
+
+            {/* Three benefit columns */}
+            <div className="grid grid-cols-3 gap-6 mb-5">
+              {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
+                <div key={title} className="flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
+                    <Icon className="text-white" size={22} />
+                  </div>
+                  <h3 className="font-bold text-tfs-navy text-base font-serif mb-1">{title}</h3>
+                  <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* People icon + descriptive text */}
+            <div className="flex flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5">
+              <div className="shrink-0 w-20 h-20 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
+                <Users className="text-white" size={40} />
+              </div>
+              <p className="text-tfs-slate text-sm leading-relaxed">
+                Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
+                confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
+              </p>
+            </div>
+
+          </div>
+        </div>
       </section>
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
@@ -179,49 +213,32 @@ export default async function HomePage({
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
-      {/* ── WHY IT MATTERS ───────────────────────────────────── */}
-      {/* Mobile: normal stacked layout. Desktop: compact so entire section fits in one view */}
-      <section className="pt-6 pb-8 md:pt-4 md:pb-10 bg-tfs-teal-light px-4">
+      {/* ── WHY IT MATTERS (mobile only) ─────────────────────── */}
+      <section className="pt-6 pb-8 bg-tfs-teal-light px-4 md:hidden">
         <div className="max-w-5xl mx-auto">
 
-          {/* Mobile heading — simple */}
-          <h2 className="section-heading text-center mb-3 md:hidden">Why It Matters</h2>
-
-          {/* Desktop heading — large uppercase with gold underline bar */}
-          <div className="hidden md:block text-center mb-4">
-            <h2 className="text-5xl font-serif font-bold text-tfs-navy uppercase tracking-wide">
-              Why It Matters
-            </h2>
-            <div className="w-28 h-1 bg-tfs-gold mx-auto mt-3" />
-          </div>
-
-          {/* Descriptive text — desktop only, shown directly below heading */}
-          <p className="hidden md:block text-white text-center text-base leading-relaxed mb-5 max-w-2xl mx-auto">
-            Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
-            confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
-          </p>
+          {/* Mobile heading */}
+          <h2 className="section-heading text-center mb-3">Why It Matters</h2>
 
           {/* Three benefit columns */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 gap-6 mb-6">
             {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex flex-col items-center text-center">
-                <div className="w-14 h-14 md:w-12 md:h-12 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
+                <div className="w-14 h-14 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
                   <Icon className="text-white" size={24} />
                 </div>
-                <h3 className="font-bold text-tfs-navy text-lg md:text-base font-serif mb-1">{title}</h3>
+                <h3 className="font-bold text-tfs-navy text-lg font-serif mb-1">{title}</h3>
                 <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
 
-          {/* People image + descriptive text (mobile only) */}
-          <div className="flex flex-col sm:flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5 md:p-6">
-            {/* Two people silhouette circle */}
-            <div className="shrink-0 w-24 h-24 md:w-20 md:h-20 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
+          {/* People image + descriptive text */}
+          <div className="flex flex-col sm:flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5">
+            <div className="shrink-0 w-24 h-24 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
               <Users className="text-white" size={44} />
             </div>
-            {/* Descriptive text — mobile only (desktop sees it above the 3 columns) */}
-            <p className="text-tfs-slate text-sm leading-relaxed text-center sm:text-left md:hidden">
+            <p className="text-tfs-slate text-sm leading-relaxed text-center sm:text-left">
               Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
               confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
             </p>
@@ -229,7 +246,7 @@ export default async function HomePage({
         </div>
       </section>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent md:hidden" />
 
       {/* ── FEATURED VIDEO ───────────────────────────────────── */}
       {youtubeVideoId && (
