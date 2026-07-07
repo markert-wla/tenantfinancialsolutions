@@ -6,14 +6,15 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { CalendarPlus, Users, CalendarCheck } from 'lucide-react'
 import ExtraSessionCard from '@/components/portal/ExtraSessionCard'
+import { SESSION_LIMITS } from '@/lib/stripe'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
-const LIMITS: Record<string, number> = { free: 1, bronze: 1, silver: 2 }
 const TIER_LABEL: Record<string, string> = {
   free:   'Free',
   bronze: 'Starter Plan',
   silver: 'Advantage Plan',
+  gold:   'Gold Plan',
 }
 
 export default async function PortalDashboard({ searchParams }: { searchParams: { welcome?: string } }) {
@@ -45,7 +46,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
   const limit = isGroupComp ? 0
     : (isFullComp && isTenantPartner) ? 2
     : isFullComp ? 99
-    : (LIMITS[tier] ?? 0)
+    : (SESSION_LIMITS[tier] ?? 0)
 
   // Upcoming confirmed bookings
   const { data: upcomingBookings } = await supabase
@@ -191,8 +192,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
           ) : (
             <Link
               href="/portal/book"
-              className={canBook ? 'btn-primary text-sm shrink-0' : 'btn-outline text-sm shrink-0 opacity-50 pointer-events-none'}
-              aria-disabled={!canBook}
+              className={canBook ? 'btn-primary text-sm shrink-0' : 'btn-outline text-sm shrink-0'}
             >
               <CalendarPlus size={16} className="mr-1 inline-block" />
               Book a Session

@@ -23,8 +23,10 @@ export const PLAN_PRICE_IDS: Record<string, string | undefined> = {
 
 export const SESSION_PRICE_ID = process.env.STRIPE_PRICE_SESSION
 
-export const PLAN_SESSION_LIMITS: Record<string, number> = {
-  free:   0,
+/** Single source of truth for monthly session limits per plan tier — imported by
+ *  the dashboard, book page, and booking API so they can't drift out of sync. */
+export const SESSION_LIMITS: Record<string, number> = {
+  free:   1,
   bronze: 1,
   silver: 2,
   gold:   4,

@@ -2,17 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
+import { SESSION_LIMITS } from '@/lib/stripe'
 
 function esc(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
 export const dynamic = 'force-dynamic'
-
-const PLAN_LIMITS: Record<string, number> = {
-  bronze: 1,
-  silver: 2,
-}
 
 export async function POST(req: NextRequest) {
   // --- Auth ---
@@ -102,7 +98,7 @@ export async function POST(req: NextRequest) {
       )
     }
   } else {
-    const limit = PLAN_LIMITS[tier] ?? 0
+    const limit = SESSION_LIMITS[tier] ?? 0
     if (limit === 0) {
       return NextResponse.json(
         { error: 'Your current plan does not include individual sessions. Please upgrade.', upgrade: true },

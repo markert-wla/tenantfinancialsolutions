@@ -5,10 +5,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BookingClient from '@/components/portal/BookingClient'
 import IntakeQuestionnaire from '@/components/portal/IntakeQuestionnaire'
+import { SESSION_LIMITS } from '@/lib/stripe'
 
 export const metadata: Metadata = { title: 'Book a Session' }
-
-const LIMITS: Record<string, number> = { free: 1, bronze: 1, silver: 2, gold: 4 }
 
 export default async function BookPage({
   searchParams,
@@ -45,7 +44,7 @@ export default async function BookPage({
     canBook   = true
     remaining = 99
   } else {
-    const limit = LIMITS[tier] ?? 0
+    const limit = SESSION_LIMITS[tier] ?? 0
     canBook     = extraSessions > 0 || (limit > 0 && used < limit)
     remaining   = extraSessions > 0 ? extraSessions : Math.max(0, limit - used)
   }

@@ -4,13 +4,15 @@ import { createServiceClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 
 /**
- * POST /api/cron/reset-sessions
+ * GET /api/cron/reset-sessions
  *
  * Resets sessions_used_this_month to 0 for all clients.
  * Called automatically on the 1st of each month via Vercel Cron.
  * Secured with the CRON_SECRET env var that Vercel injects.
+ *
+ * Vercel Cron always dispatches a GET request — this must stay GET, not POST.
  */
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
   const secret     = process.env.CRON_SECRET
 
