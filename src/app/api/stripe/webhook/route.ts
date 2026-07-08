@@ -73,6 +73,14 @@ export async function POST(req: NextRequest) {
               .eq('id', coachId)
               .single()
 
+            // Coaches can set a notification email (profiles.contact_email) that overrides their login email
+            const { data: coachProfile } = await supabase
+              .from('profiles')
+              .select('contact_email')
+              .eq('id', coachId)
+              .single()
+            const coachNotifyEmail = coachProfile?.contact_email ?? coach?.email
+
             await supabase.from('bookings').insert({
               client_id:      userId,
               coach_id:       coachId,
@@ -109,7 +117,7 @@ export async function POST(req: NextRequest) {
                   `),
                 }),
                 sendEmail({
-                  to: coach.email,
+                  to: coachNotifyEmail ?? coach.email,
                   subject: `New Session Booked — ${displayTime}`,
                   html: brandedEmail(`
                     <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">New Session Booked</h1>

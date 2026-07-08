@@ -22,7 +22,7 @@ export async function POST(
     .from('bookings')
     .select(`
       id, client_id, coach_id, status, start_time_utc,
-      coach:profiles!bookings_coach_id_fkey(first_name, last_name, email, timezone),
+      coach:profiles!bookings_coach_id_fkey(first_name, last_name, email, contact_email, timezone),
       client:profiles!bookings_client_id_fkey(first_name, last_name)
     `)
     .eq('id', params.id)
@@ -45,13 +45,13 @@ export async function POST(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Email coach
-  const coach = booking.coach as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null
+  const coach = booking.coach as unknown as { first_name: string; last_name: string; email: string; contact_email: string | null; timezone: string } | null
   const client = booking.client as unknown as { first_name: string; last_name: string } | null
   if (coach?.email) {
     const sessionTime = fmtTime(booking.start_time_utc, coach.timezone ?? 'America/New_York')
     const clientName = `${client?.first_name ?? ''} ${client?.last_name ?? ''}`.trim() || 'A client'
     await sendEmail({
-      to: coach.email,
+      to: coach.contact_email ?? coach.email,
       subject: 'Session Cancelled by Client',
       html: brandedEmail(`
         <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:22px;color:#1A2B4A;">Session Cancelled</h1>

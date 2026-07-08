@@ -217,6 +217,14 @@ export async function POST(req: NextRequest) {
   const sessionLabel = tier === 'free' ? 'Connection Session' : 'coaching session'
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tenantfinancialsolutions.com'
 
+  // Coaches can set a notification email (profiles.contact_email) that overrides their login email
+  const { data: coachProfile } = await service
+    .from('profiles')
+    .select('contact_email')
+    .eq('id', coachId)
+    .single()
+  const coachNotifyEmail = coachProfile?.contact_email ?? coach.email
+
   await Promise.all([
     sendEmail({
       to: profile.email,
@@ -243,7 +251,7 @@ export async function POST(req: NextRequest) {
       `),
     }),
     sendEmail({
-      to: coach.email,
+      to: coachNotifyEmail,
       subject: `New Session Booked — ${displayTime}`,
       html: brandedEmail(`
         <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">New Session Booked</h1>
