@@ -29,7 +29,7 @@ const INDIVIDUAL_PLANS = [
     badge: '',
     features: [
       'Free Connection Session with your selected coach',
-      'One group coaching session during the first week of the month',
+      'One TFS Community Connect session during the first week of the month',
     ],
     cta: 'Step into your free Connection Session',
     ctaHref: '/register?tier=free',
@@ -44,7 +44,7 @@ const INDIVIDUAL_PLANS = [
     badge: 'amber',
     features: [
       '1 individual coaching session per month',
-      '1 complimentary group coaching session per month',
+      '1 complimentary TFS Community Connect session per month',
     ],
     cta: 'Get Started',
     ctaHref: '/register?tier=bronze',
@@ -60,7 +60,7 @@ const INDIVIDUAL_PLANS = [
     popular: true,
     features: [
       '2 individual coaching sessions per month',
-      '1 complimentary group coaching session per month',
+      '1 complimentary TFS Community Connect session per month',
       'Priority scheduling',
       'Text check-ins',
     ],
@@ -134,7 +134,7 @@ export default function ServicesPage() {
             <div className="flex items-start gap-3">
               <Check className="text-tfs-teal-button shrink-0 mt-0.5" size={18} />
               <span className="text-tfs-slate text-base">
-                <strong className="text-tfs-navy">One group coaching session</strong> during the first week of the month
+                <strong className="text-tfs-navy">One TFS Community Connect session</strong> during the first week of the month
               </span>
             </div>
           </div>
@@ -273,7 +273,7 @@ export default function ServicesPage() {
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Admin generates promo codes — 1 per unit</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Tenants register with their code → Advantage Plan unlocked</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> 2 individual sessions + group session per tenant/mo</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> 2 individual sessions + TFS Community Connect per tenant/mo</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> No cost or billing to your tenants</li>
               </ul>
               <Link href="/contact?type=property-manager" className="btn-primary text-sm">
@@ -323,10 +323,10 @@ export default function ServicesPage() {
             <div className="card">
               <h3 className="font-bold text-tfs-navy text-xl mb-4 font-serif">What Your Residents Get</h3>
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Complimentary group coaching session with your organization&apos;s promo code</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Complimentary TFS Community Connect session with your organization&apos;s promo code</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Custom pricing options available for individual coaching thereafter</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Register with a non-profit code — no billing to resident</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Private group session link provided to your organization</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Private TFS Community Connect link provided to your organization</li>
               </ul>
               <Link href="/contact?type=nonprofit" className="btn-primary text-sm block text-center">
                 Partner with us

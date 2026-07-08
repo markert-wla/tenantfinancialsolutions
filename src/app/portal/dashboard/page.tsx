@@ -118,7 +118,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
         <div className="card">
           <p className="text-sm text-tfs-slate mb-1">Sessions this month</p>
           {isGroupComp ? (
-            <p className="text-sm text-tfs-slate italic mt-1">Group coaching plan — individual sessions not included.</p>
+            <p className="text-sm text-tfs-slate italic mt-1">TFS Community Connect plan — individual sessions not included.</p>
           ) : (
             <>
               <p className="text-3xl font-bold text-tfs-navy">
@@ -158,7 +158,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
             <p className="text-sm text-tfs-slate mb-1">Ready to meet with a coach?</p>
             {isGroupComp ? (
               <p className="text-tfs-navy font-medium text-sm">
-                Your plan includes group coaching. Join a group session below or{' '}
+                Your plan includes TFS Community Connect. Join a session below or{' '}
                 <Link href="/portal/billing" className="text-tfs-teal-button hover:underline">upgrade</Link> for individual sessions.
               </p>
             ) : isFullComp && !isTenantPartner ? (
@@ -251,11 +251,11 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
         )}
       </div>
 
-      {/* Group session */}
+      {/* TFS Community Connect */}
       <div className="card">
         <div className="flex items-center gap-2 mb-3">
           <Users size={20} className="text-tfs-teal-button" />
-          <h2 className="font-serif font-bold text-tfs-navy text-xl">Monthly Group Session</h2>
+          <h2 className="font-serif font-bold text-tfs-navy text-xl">TFS Community Connect</h2>
         </div>
         {nextGroup ? (
           <div className="flex items-center justify-between">
@@ -288,7 +288,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
           </div>
         ) : (
           <p className="text-tfs-slate text-sm">
-            No group sessions scheduled yet. Check back soon!
+            No TFS Community Connect sessions scheduled yet. Check back soon!
           </p>
         )}
       </div>

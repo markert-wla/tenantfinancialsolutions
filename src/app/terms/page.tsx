@@ -34,7 +34,7 @@ export default function TermsPage() {
           <h2 className="text-xl font-serif font-bold text-tfs-navy mb-3">2. Description of Services</h2>
           <p>
             Tenant Financial Solutions provides personal financial coaching services, including one-on-one
-            coaching sessions, group sessions, and educational resources. Our coaches are financial educators,
+            coaching sessions, TFS Community Connect sessions, and educational resources. Our coaches are financial educators,
             not licensed financial advisors, investment advisors, attorneys, or accountants.
           </p>
           <p className="mt-3 font-medium text-tfs-navy">
@@ -87,7 +87,7 @@ export default function TermsPage() {
             <li>Session credits reset on the 1st of each month and do not roll over</li>
             <li>Cancellations made with less than 24 hours&apos; notice may be counted as used sessions at coach discretion</li>
             <li>No-shows without notice will be counted as used sessions</li>
-            <li>Group sessions are complimentary for all active members and do not count against session limits</li>
+            <li>TFS Community Connect sessions are complimentary for all active members and do not count against session limits</li>
           </ul>
         </section>
 

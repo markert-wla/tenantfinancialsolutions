@@ -172,18 +172,18 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
         <AlertCircle className="text-tfs-gold mb-4" size={48} />
         <h2 className="text-2xl font-serif font-bold text-tfs-navy mb-2">
           {isGroupComp
-            ? 'Group Coaching Access'
+            ? 'TFS Community Connect Access'
             : tier === 'free' ? 'Upgrade to Book Sessions' : 'Monthly Limit Reached'}
         </h2>
         <p className="text-tfs-slate mb-6 max-w-sm">
           {isGroupComp
-            ? 'Your partnership plan includes group coaching sessions. Individual one-on-one sessions require an upgraded plan.'
+            ? 'Your partnership plan includes TFS Community Connect sessions. Individual one-on-one sessions require an upgraded plan.'
             : tier === 'free'
               ? 'Individual coaching sessions are available on Starter and Advantage plans.'
               : `You've used all your sessions for this month. Upgrade for more, or check back next month.`}
         </p>
         {!isGroupComp && <a href="/services" className="btn-primary text-sm">View Plans</a>}
-        {isGroupComp && <a href="/portal/group-sessions" className="btn-primary text-sm">View Group Sessions</a>}
+        {isGroupComp && <a href="/portal/group-sessions" className="btn-primary text-sm">View TFS Community Connect</a>}
       </div>
     )
   }

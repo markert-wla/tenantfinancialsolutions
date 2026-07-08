@@ -77,10 +77,10 @@ export async function GET(req: NextRequest) {
     for (const client of clients) {
       await sendEmail({
         to: client.email,
-        subject: `Reminder: TFS Group Session on ${formattedDate}`,
+        subject: `Reminder: TFS Community Connect on ${formattedDate}`,
         html: brandedEmail(`
-          <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">Group Session Reminder</h1>
-          <p style="margin:0 0 24px;color:#6B7E8F;">Hi ${client.first_name}, your monthly group coaching session is coming up in <strong style="color:#1A2B4A;">3 days</strong>.</p>
+          <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">TFS Community Connect Reminder</h1>
+          <p style="margin:0 0 24px;color:#6B7E8F;">Hi ${client.first_name}, your TFS Community Connect session is coming up in <strong style="color:#1A2B4A;">3 days</strong>.</p>
           <table cellpadding="0" cellspacing="0" style="width:100%;background:#F8FFFE;border:1px solid #D1EFE6;border-radius:8px;margin-bottom:24px;">
             <tr><td style="padding:12px 16px;">
               <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Date</span><br>

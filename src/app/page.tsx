@@ -15,14 +15,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Tenant Financial Solutions — Real People, Real Coaching',
     description:
-      'Personal financial coaching for tenants. One-on-one sessions, group coaching, and property management partnerships.',
+      'Personal financial coaching for tenants. One-on-one sessions, TFS Community Connect, and property management partnerships.',
     url: '/',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Tenant Financial Solutions — Real People, Real Coaching',
     description:
-      'Personal financial coaching for tenants. One-on-one sessions, group coaching, and property management partnerships.',
+      'Personal financial coaching for tenants. One-on-one sessions, TFS Community Connect, and property management partnerships.',
   },
 }
 
@@ -89,7 +89,7 @@ const AUDIENCE_CARDS = [
     label: 'I Represent a Non-Profit',
     href: '/services#nonprofit',
     bg: 'bg-tfs-purple',
-    desc: 'Complimentary group coaching available',
+    desc: 'Complimentary TFS Community Connect available',
   },
 ]
 

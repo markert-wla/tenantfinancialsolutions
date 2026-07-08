@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   applicationName: 'Tenant Financial Solutions',
   description:
-    'Personal financial coaching for tenants. One-on-one sessions, group coaching, and property management partnerships. Real People – Real Coaching.',
+    'Personal financial coaching for tenants. One-on-one sessions, TFS Community Connect, and property management partnerships. Real People – Real Coaching.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tenantfinancialsolutions.com'),
   openGraph: {
     siteName: 'Tenant Financial Solutions',

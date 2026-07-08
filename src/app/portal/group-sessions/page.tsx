@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Video, ExternalLink, CalendarDays, CheckCircle2, XCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Group Sessions — Portal' }
+export const metadata: Metadata = { title: 'TFS Community Connect — Portal' }
 
 export default async function PortalGroupSessionsPage() {
   const supabase = createClient()
@@ -85,9 +85,9 @@ export default async function PortalGroupSessionsPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-1">Group Sessions</h1>
+        <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-1">TFS Community Connect</h1>
         <p className="text-sm text-tfs-slate">
-          Group coaching runs the first week of each month. All active members are welcome.
+          TFS Community Connect runs the first week of each month. All active members are welcome.
         </p>
       </div>
 
@@ -99,7 +99,7 @@ export default async function PortalGroupSessionsPage() {
 
         {!upcoming?.length ? (
           <div className="card text-center py-10 text-tfs-slate text-sm">
-            No upcoming group sessions scheduled yet. Check back soon.
+            No upcoming TFS Community Connect sessions scheduled yet. Check back soon.
           </div>
         ) : (
           <div className="space-y-3">
@@ -107,7 +107,7 @@ export default async function PortalGroupSessionsPage() {
               <div key={s.id} className="card flex items-center justify-between gap-4">
                 <div>
                   <p className="font-medium text-tfs-navy">{fmtDate(s.session_date)}</p>
-                  <p className="text-xs text-tfs-slate mt-0.5">Group Coaching Session</p>
+                  <p className="text-xs text-tfs-slate mt-0.5">TFS Community Connect</p>
                 </div>
                 <div className="shrink-0 flex items-center gap-2">
                   {s.recording_url && (
@@ -188,7 +188,7 @@ export default async function PortalGroupSessionsPage() {
       </section>
 
       <p className="mt-8 text-xs text-tfs-slate text-center">
-        Questions about group sessions?{' '}
+        Questions about TFS Community Connect?{' '}
         <Link href="/contact" className="text-tfs-teal-button hover:underline">Contact us</Link>.
       </p>
     </div>
