@@ -43,7 +43,6 @@ async function getYouTubeVideoId() {
     const { data } = await supabase.from('site_settings').select('value').eq('key', 'youtube_video_id').single()
     const id = data?.value?.trim() ?? ''
     if (!id) return ''
-    // Validate via oEmbed — returns 404 for unavailable/private, 401 for embed-restricted
     const check = await fetch(
       `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${encodeURIComponent(id)}&format=json`,
       { signal: AbortSignal.timeout(5000) }
@@ -115,9 +114,6 @@ export default async function HomePage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  // Supabase occasionally sends the OAuth ?code= to the Site URL (root) instead
-  // of /auth/callback when redirectTo validation fails. Catch it here as a
-  // second layer behind the middleware redirect.
   if (searchParams.code) {
     const { redirect } = await import('next/navigation')
     const code = Array.isArray(searchParams.code) ? searchParams.code[0] : searchParams.code
@@ -132,8 +128,8 @@ export default async function HomePage({
 
   return (
     <>
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative mt-20 h-[66.67vw] sm:h-[calc(100vh+80px)] overflow-hidden">
+      {/* ── HERO (mobile only) ──────────────────────────────── */}
+      <section className="relative mt-20 h-[66.67vw] sm:h-screen md:hidden overflow-hidden">
         <Image
           src="/images/home-page-top-section.png"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
@@ -141,41 +137,82 @@ export default async function HomePage({
           className="object-cover object-center select-none"
           priority
         />
-        {/* Narrow gradient at very top only — keeps nav links readable over any image */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
+      </section>
 
-        {/* ── DESKTOP ONLY: Why It Matters overlay inside hero ── */}
-        <div className="hidden md:block absolute bottom-0 inset-x-0 bg-tfs-teal-light/95 px-4 py-6">
-          <div className="max-w-5xl mx-auto">
+      {/* ── HERO (desktop only) ─────────────────────────────── */}
+      <section className="hidden md:flex flex-row mt-20 min-h-[calc(100vh-5rem)] overflow-hidden">
 
-            {/* Heading */}
-            <h2 className="section-heading text-center mb-3">Why It Matters</h2>
+        {/* ── Left content panel ── */}
+        <div className="w-1/2 bg-sky-100 flex flex-col justify-between px-10 lg:px-16 py-10">
 
-            {/* Three benefit columns */}
-            <div className="grid grid-cols-3 gap-6 mb-5">
-              {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
-                <div key={title} className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
-                    <Icon className="text-white" size={22} />
+          {/* TOP GROUP: headline + tagline + icons */}
+          <div>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-serif font-bold text-tfs-navy leading-tight">
+              Your financial future.
+            </h1>
+            <p className="text-3xl lg:text-4xl xl:text-5xl font-serif italic text-tfs-gold mt-1 leading-tight">
+              Our focused guidance.
+            </p>
+
+            {/* Gold divider */}
+            <div className="w-full h-px bg-tfs-gold my-4" />
+
+            {/* Tagline */}
+            <p className="text-tfs-gold font-medium text-sm tracking-wide">
+              Tenant Focused • Community Impact
+            </p>
+
+            {/* 3 mini feature icons */}
+            <div className="flex items-start gap-4 mt-5">
+              {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title }) => (
+                <div key={title} className="flex flex-col items-center text-center flex-1">
+                  <div className="w-10 h-10 rounded-full border-2 border-tfs-gold flex items-center justify-center mb-1.5">
+                    <Icon className="text-tfs-gold" size={18} />
                   </div>
-                  <h3 className="font-bold text-tfs-navy text-base font-serif mb-1">{title}</h3>
-                  <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
+                  <p className="text-tfs-navy text-xs font-semibold leading-tight">{title}</p>
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* BOTTOM GROUP: Why It Matters + people icon + button */}
+          <div>
+            <h2 className="text-4xl lg:text-5xl xl:text-6xl font-serif font-bold text-tfs-navy uppercase tracking-wide">
+              WHY IT MATTERS
+            </h2>
+            <div className="w-20 h-1.5 bg-tfs-gold mt-2 mb-5" />
 
             {/* People icon + descriptive text */}
-            <div className="flex flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5">
-              <div className="shrink-0 w-20 h-20 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
-                <Users className="text-white" size={40} />
+            <div className="flex items-center gap-5 mb-6">
+              <div className="shrink-0 w-16 h-16 lg:w-20 lg:h-20 rounded-full border-2 border-tfs-gold flex items-center justify-center">
+                <Users className="text-tfs-gold" size={32} />
               </div>
-              <p className="text-tfs-slate text-sm leading-relaxed">
+              <p className="text-tfs-slate text-sm lg:text-base leading-relaxed">
                 Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
                 confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
               </p>
             </div>
 
+            {/* CTA Button */}
+            <Link
+              href="/register?tier=free"
+              className="block w-full text-center bg-tfs-gold text-tfs-navy font-bold uppercase py-4 px-6 rounded-lg hover:brightness-105 transition-all text-sm tracking-widest"
+            >
+              STEP INTO YOUR FREE CONNECTION SESSION
+            </Link>
           </div>
+        </div>
+
+        {/* ── Right image panel ── */}
+        <div className="w-1/2 relative">
+          <Image
+            src="/images/home-page-top-section.png"
+            alt="Tenant Financial Solutions — Real People, Real Coaching"
+            fill
+            className="object-cover object-center"
+            priority
+          />
         </div>
       </section>
 
