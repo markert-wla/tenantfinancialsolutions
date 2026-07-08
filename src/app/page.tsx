@@ -129,16 +129,133 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      {/* Same proportional full-width image on all screen sizes */}
-      <section className="relative mt-20 h-[66.67vw] overflow-hidden">
-        <Image
-          src="/images/home-page-top-section.png"
-          alt="Tenant Financial Solutions — Real People, Real Coaching"
-          fill
-          className="object-cover object-center select-none"
-          priority
-        />
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
+      <section className="relative mt-20">
+
+        {/* ── MOBILE: proportional full-width image ── */}
+        <div className="md:hidden relative overflow-hidden" style={{ paddingBottom: '66.67%' }}>
+          <Image
+            src="/images/home-page-top-section.png"
+            alt="Tenant Financial Solutions — Real People, Real Coaching"
+            fill
+            className="object-cover object-center select-none"
+            priority
+          />
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
+        </div>
+
+        {/* ── DESKTOP: two-column — left text panel, right image ── */}
+        <div className="hidden md:flex" style={{ minHeight: '580px', maxHeight: '700px' }}>
+
+          {/* Left text panel */}
+          <div className="w-1/2 bg-tfs-teal-light flex flex-col justify-start pt-6 px-10 pb-6 overflow-hidden">
+
+            {/* Headline */}
+            <div className="mb-3">
+              <p className="font-serif font-bold text-tfs-navy text-3xl lg:text-4xl leading-tight">
+                Your financial future.
+              </p>
+              <p className="font-serif italic text-tfs-gold text-2xl lg:text-3xl leading-tight mt-1">
+                Our focused guidance.
+              </p>
+            </div>
+
+            {/* Gold divider */}
+            <div className="w-16 h-1 bg-tfs-gold rounded mb-2" />
+
+            {/* Tagline */}
+            <p className="text-xs font-semibold tracking-widest uppercase text-tfs-gold mb-5">
+              Tenant Focused • Community Impact
+            </p>
+
+            {/* WHY IT MATTERS heading */}
+            <div className="mb-3">
+              <h2 className="font-serif font-bold text-tfs-navy text-xl lg:text-2xl uppercase tracking-wide">
+                Why It Matters
+              </h2>
+              <div className="w-10 h-1 bg-tfs-gold rounded mt-1" />
+            </div>
+
+            {/* 3 Benefit items — compact vertical list */}
+            <div className="flex flex-col gap-2 mb-5">
+              {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
+                <div key={title} className="flex items-start gap-3">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-tfs-teal flex items-center justify-center shadow-sm">
+                    <Icon className="text-white" size={16} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-tfs-navy text-sm font-serif leading-tight">{title}</h3>
+                    <p className="text-tfs-slate text-xs leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* People icon + descriptive text */}
+            <div className="flex items-center gap-3 bg-white rounded-xl shadow p-4 mb-5">
+              <div className="shrink-0 w-11 h-11 rounded-full bg-tfs-teal flex items-center justify-center shadow border-2 border-tfs-teal/30">
+                <Users className="text-white" size={22} />
+              </div>
+              <p className="text-tfs-slate text-xs leading-relaxed">
+                Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
+                confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
+              </p>
+            </div>
+
+            {/* CTA Button */}
+            <Link
+              href="/register?tier=free"
+              className="self-start bg-tfs-gold text-tfs-navy font-bold text-xs uppercase tracking-widest px-5 py-2.5 rounded-full shadow hover:brightness-110 transition"
+            >
+              Step into your free Connection Session
+            </Link>
+          </div>
+
+          {/* Right image panel */}
+          <div className="relative w-1/2">
+            <Image
+              src="/images/home-page-top-section.png"
+              alt="Tenant Financial Solutions — Real People, Real Coaching"
+              fill
+              className="object-cover object-center select-none"
+              priority
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
+
+      {/* ── WHY IT MATTERS (mobile only — desktop shown in hero panel) ── */}
+      <section className="md:hidden pt-6 pb-8 bg-tfs-teal-light px-4">
+        <div className="max-w-5xl mx-auto">
+
+          {/* Heading */}
+          <h2 className="section-heading text-center mb-3">Why It Matters</h2>
+
+          {/* Benefit columns */}
+          <div className="grid grid-cols-1 gap-6 mb-6">
+            {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex flex-col items-center text-center">
+                <div className="w-14 h-14 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
+                  <Icon className="text-white" size={24} />
+                </div>
+                <h3 className="font-bold text-tfs-navy text-lg font-serif mb-1">{title}</h3>
+                <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* People icon + descriptive text */}
+          <div className="flex flex-col sm:flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5">
+            <div className="shrink-0 w-24 h-24 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
+              <Users className="text-white" size={44} />
+            </div>
+            <p className="text-tfs-slate text-sm leading-relaxed text-center sm:text-left">
+              Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
+              confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
+            </p>
+          </div>
+        </div>
       </section>
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
@@ -169,41 +286,6 @@ export default async function HomePage({
             <Link href="/register?tier=free" className="btn-primary px-8 py-4">
               Start with a Free Connection Session
             </Link>
-          </div>
-        </div>
-      </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
-
-      {/* ── WHY IT MATTERS (all screen sizes) ────────────────── */}
-      <section className="pt-6 pb-8 bg-tfs-teal-light px-4">
-        <div className="max-w-5xl mx-auto">
-
-          {/* Heading */}
-          <h2 className="section-heading text-center mb-3">Why It Matters</h2>
-
-          {/* Benefit columns — stacked on mobile, 3-col on desktop */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex flex-col items-center text-center">
-                <div className="w-14 h-14 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
-                  <Icon className="text-white" size={24} />
-                </div>
-                <h3 className="font-bold text-tfs-navy text-lg font-serif mb-1">{title}</h3>
-                <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* People icon + descriptive text */}
-          <div className="flex flex-col sm:flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5">
-            <div className="shrink-0 w-24 h-24 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
-              <Users className="text-white" size={44} />
-            </div>
-            <p className="text-tfs-slate text-sm leading-relaxed text-center sm:text-left">
-              Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
-              confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
-            </p>
           </div>
         </div>
       </section>
