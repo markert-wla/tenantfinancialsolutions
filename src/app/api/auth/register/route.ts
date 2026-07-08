@@ -250,11 +250,11 @@ export async function POST(req: NextRequest) {
       <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;color:#1A2B4A;">Welcome, ${esc(firstName)}!</h1>
       ${checkoutUrl
         ? `<p style="margin:0 0 16px;color:#6B7E8F;">Your account has been created. Complete your payment below to activate your <strong style="color:#1A2B4A;">${esc(tierDisplay)}</strong> membership.</p>
-           <p style="margin:0 0 24px;color:#6B7E8F;">Once payment is processed, you&rsquo;ll have full access to schedule coaching sessions and join group sessions.</p>
+           <p style="margin:0 0 24px;color:#6B7E8F;">Once payment is processed, you&rsquo;ll have full access to schedule coaching sessions and join TFS Community Connect.</p>
            ${emailButton(checkoutUrl, 'Complete Payment')}`
         : `<p style="margin:0 0 16px;color:#6B7E8F;">Your account has been created with the <strong style="color:#1A2B4A;">${esc(tierDisplay)}</strong> plan.</p>
            ${effectiveTier === 'free'
-             ? `<p style="margin:0 0 24px;color:#6B7E8F;">Your free Connection Session and group session access are ready &mdash; log in and book your first session.</p>`
+             ? `<p style="margin:0 0 24px;color:#6B7E8F;">Your free Connection Session and TFS Community Connect access are ready &mdash; log in and book your first session.</p>`
              : `<p style="margin:0 0 24px;color:#6B7E8F;">Your membership is active. Log in to schedule your coaching sessions and start your financial journey.</p>`
            }
            ${emailButton(`${process.env.NEXT_PUBLIC_SITE_URL}/portal/dashboard`, 'Go to My Portal')}`

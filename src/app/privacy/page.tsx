@@ -20,8 +20,8 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-serif font-bold text-tfs-navy mb-3">1. Who We Are</h2>
           <p>
             Tenant Financial Solutions (&ldquo;TFS,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) is a
-            financial coaching service operated by MJM Financial Coaching. We provide one-on-one and group financial
-            coaching sessions to individuals, couples, property management tenants, and nonprofit residents.
+            financial coaching service operated by MJM Financial Coaching. We provide one-on-one coaching sessions,
+            TFS Community Connect sessions, and individual coaching to individuals, couples, property management tenants, and nonprofit residents.
           </p>
           <p className="mt-3">
             Questions about this policy can be directed to:{' '}

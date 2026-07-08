@@ -85,8 +85,8 @@ export default function OurStoryPage() {
           <div className="flex gap-5 items-start">
             <div className="mt-1.5 shrink-0 w-1 self-stretch rounded-full bg-tfs-teal" aria-hidden="true" />
             <p className="text-tfs-slate text-lg leading-relaxed">
-              In addition to the individual coaching, members have access to one complimentary group session
-              lesson per month with multiple coaches present during the call. This is a great time to interact
+              In addition to the individual coaching, members have access to one complimentary TFS Community Connect
+              session per month with multiple coaches present during the call. This is a great time to interact
               outside of a one-on-one environment and a time to learn about topical discussions and present-day
               financial trends.
             </p>

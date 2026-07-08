@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
   if (activeCodeType === 'group_comp') {
     return NextResponse.json(
-      { error: 'Your plan includes group coaching sessions only. Contact us to upgrade for individual coaching.' },
+      { error: 'Your plan includes TFS Community Connect sessions only. Contact us to upgrade for individual coaching.' },
       { status: 403 }
     )
   }
