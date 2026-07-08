@@ -128,8 +128,9 @@ export default async function HomePage({
 
   return (
     <>
-      {/* ── HERO (mobile only) ──────────────────────────────── */}
-      <section className="relative mt-20 h-[66.67vw] sm:h-screen md:hidden overflow-hidden">
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      {/* Same proportional full-width image on all screen sizes */}
+      <section className="relative mt-20 h-[66.67vw] overflow-hidden">
         <Image
           src="/images/home-page-top-section.png"
           alt="Tenant Financial Solutions — Real People, Real Coaching"
@@ -138,82 +139,6 @@ export default async function HomePage({
           priority
         />
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
-      </section>
-
-      {/* ── HERO (desktop only) ─────────────────────────────── */}
-      <section className="hidden md:flex flex-row mt-20 min-h-[calc(100vh-5rem)] overflow-hidden">
-
-        {/* ── Left content panel ── */}
-        <div className="w-1/2 bg-sky-100 flex flex-col justify-between px-10 lg:px-16 py-10">
-
-          {/* TOP GROUP: headline + tagline + icons */}
-          <div>
-            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-serif font-bold text-tfs-navy leading-tight">
-              Your financial future.
-            </h1>
-            <p className="text-3xl lg:text-4xl xl:text-5xl font-serif italic text-tfs-gold mt-1 leading-tight">
-              Our focused guidance.
-            </p>
-
-            {/* Gold divider */}
-            <div className="w-full h-px bg-tfs-gold my-4" />
-
-            {/* Tagline */}
-            <p className="text-tfs-gold font-medium text-sm tracking-wide">
-              Tenant Focused • Community Impact
-            </p>
-
-            {/* 3 mini feature icons */}
-            <div className="flex items-start gap-4 mt-5">
-              {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title }) => (
-                <div key={title} className="flex flex-col items-center text-center flex-1">
-                  <div className="w-10 h-10 rounded-full border-2 border-tfs-gold flex items-center justify-center mb-1.5">
-                    <Icon className="text-tfs-gold" size={18} />
-                  </div>
-                  <p className="text-tfs-navy text-xs font-semibold leading-tight">{title}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* BOTTOM GROUP: Why It Matters + people icon + button */}
-          <div>
-            <h2 className="text-4xl lg:text-5xl xl:text-6xl font-serif font-bold text-tfs-navy uppercase tracking-wide">
-              WHY IT MATTERS
-            </h2>
-            <div className="w-20 h-1.5 bg-tfs-gold mt-2 mb-5" />
-
-            {/* People icon + descriptive text */}
-            <div className="flex items-center gap-5 mb-6">
-              <div className="shrink-0 w-16 h-16 lg:w-20 lg:h-20 rounded-full border-2 border-tfs-gold flex items-center justify-center">
-                <Users className="text-tfs-gold" size={32} />
-              </div>
-              <p className="text-tfs-slate text-sm lg:text-base leading-relaxed">
-                Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
-                confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
-              </p>
-            </div>
-
-            {/* CTA Button */}
-            <Link
-              href="/register?tier=free"
-              className="block w-full text-center bg-tfs-gold text-tfs-navy font-bold uppercase py-4 px-6 rounded-lg hover:brightness-105 transition-all text-sm tracking-widest"
-            >
-              STEP INTO YOUR FREE CONNECTION SESSION
-            </Link>
-          </div>
-        </div>
-
-        {/* ── Right image panel ── */}
-        <div className="w-1/2 relative">
-          <Image
-            src="/images/home-page-top-section.png"
-            alt="Tenant Financial Solutions — Real People, Real Coaching"
-            fill
-            className="object-cover object-center"
-            priority
-          />
-        </div>
       </section>
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
@@ -250,15 +175,15 @@ export default async function HomePage({
 
       <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
-      {/* ── WHY IT MATTERS (mobile only) ─────────────────────── */}
-      <section className="pt-6 pb-8 bg-tfs-teal-light px-4 md:hidden">
+      {/* ── WHY IT MATTERS (all screen sizes) ────────────────── */}
+      <section className="pt-6 pb-8 bg-tfs-teal-light px-4">
         <div className="max-w-5xl mx-auto">
 
-          {/* Mobile heading */}
+          {/* Heading */}
           <h2 className="section-heading text-center mb-3">Why It Matters</h2>
 
-          {/* Three benefit columns */}
-          <div className="grid grid-cols-1 gap-6 mb-6">
+          {/* Benefit columns — stacked on mobile, 3-col on desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex flex-col items-center text-center">
                 <div className="w-14 h-14 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
@@ -270,7 +195,7 @@ export default async function HomePage({
             ))}
           </div>
 
-          {/* People image + descriptive text */}
+          {/* People icon + descriptive text */}
           <div className="flex flex-col sm:flex-row items-center gap-5 bg-white rounded-2xl shadow-md p-5">
             <div className="shrink-0 w-24 h-24 rounded-full bg-tfs-teal flex items-center justify-center shadow-lg border-4 border-tfs-teal/30">
               <Users className="text-white" size={44} />
@@ -283,7 +208,7 @@ export default async function HomePage({
         </div>
       </section>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent md:hidden" />
+      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
 
       {/* ── FEATURED VIDEO ───────────────────────────────────── */}
       {youtubeVideoId && (
@@ -390,7 +315,6 @@ export default async function HomePage({
           <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
         </>
       )}
-
 
       {/* ── FINAL CTA ────────────────────────────────────────── */}
       <section
