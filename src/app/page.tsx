@@ -94,17 +94,17 @@ const AUDIENCE_CARDS = [
 const WHY_IT_MATTERS_BENEFITS = [
   {
     icon: GraduationCap,
-    title: 'Personalized Coaching',
+    title: 'Personalized\nCoaching',
     desc: 'Every session is tailored to your unique financial situation — no one-size-fits-all scripts, just real guidance built around your goals.',
   },
   {
     icon: TrendingUp,
-    title: 'Stronger Financial Habits',
+    title: 'Stronger Financial\nHabits',
     desc: 'We help you build the daily habits and mindset shifts that create lasting change — from budgeting basics to long-term planning.',
   },
   {
     icon: Star,
-    title: 'Lasting Financial Freedom',
+    title: 'Lasting Financial\nFreedom',
     desc: 'Our coaching goes beyond quick fixes. We equip you with the tools and confidence to take ownership of your financial future.',
   },
 ]
@@ -144,69 +144,67 @@ export default async function HomePage({
         </div>
 
         {/* ── DESKTOP: two-column — left text panel, right image ── */}
-        <div className="hidden md:flex" style={{ minHeight: '580px', maxHeight: '700px' }}>
+        <div className="hidden md:flex" style={{ minHeight: '560px', maxHeight: '680px' }}>
 
           {/* Left text panel */}
-          <div className="w-1/2 bg-tfs-teal-light flex flex-col justify-start pt-6 px-10 pb-6 overflow-hidden">
+          <div className="w-1/2 bg-tfs-teal-light flex flex-col justify-start pt-8 px-10 pb-8 overflow-hidden">
 
             {/* Headline */}
-            <div className="mb-3">
-              <p className="font-serif font-bold text-tfs-navy text-3xl lg:text-4xl leading-tight">
+            <div className="mb-2">
+              <p className="font-serif font-bold text-tfs-navy text-4xl lg:text-5xl leading-tight">
                 Your financial future.
               </p>
-              <p className="font-serif italic text-tfs-gold text-2xl lg:text-3xl leading-tight mt-1">
+              <p className="font-serif italic text-tfs-gold text-3xl lg:text-4xl leading-tight mt-1">
                 Our focused guidance.
               </p>
             </div>
 
             {/* Gold divider */}
-            <div className="w-16 h-1 bg-tfs-gold rounded mb-2" />
+            <div className="w-20 h-0.5 bg-tfs-gold rounded my-3" />
 
             {/* Tagline */}
             <p className="text-xs font-semibold tracking-widest uppercase text-tfs-gold mb-5">
               Tenant Focused • Community Impact
             </p>
 
-            {/* WHY IT MATTERS heading */}
-            <div className="mb-3">
-              <h2 className="font-serif font-bold text-tfs-navy text-xl lg:text-2xl uppercase tracking-wide">
-                Why It Matters
-              </h2>
-              <div className="w-10 h-1 bg-tfs-gold rounded mt-1" />
-            </div>
-
-            {/* 3 Benefit items — compact vertical list */}
-            <div className="flex flex-col gap-2 mb-5">
-              {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title, desc }) => (
-                <div key={title} className="flex items-start gap-3">
-                  <div className="shrink-0 w-8 h-8 rounded-full bg-tfs-teal flex items-center justify-center shadow-sm">
-                    <Icon className="text-white" size={16} />
+            {/* 3 Benefit icons — horizontal 3-column row */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              {WHY_IT_MATTERS_BENEFITS.map(({ icon: Icon, title }) => (
+                <div key={title} className="flex flex-col items-center text-center">
+                  <div className="w-14 h-14 rounded-full border-2 border-tfs-gold flex items-center justify-center mb-2">
+                    <Icon className="text-tfs-gold" size={26} />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-tfs-navy text-sm font-serif leading-tight">{title}</h3>
-                    <p className="text-tfs-slate text-xs leading-relaxed">{desc}</p>
-                  </div>
+                  <p className="text-tfs-navy text-xs font-semibold leading-snug whitespace-pre-line">{title}</p>
                 </div>
               ))}
             </div>
 
+            {/* WHY IT MATTERS heading */}
+            <div className="mb-3">
+              <h2 className="font-serif font-bold text-tfs-navy text-2xl lg:text-3xl uppercase tracking-wide">
+                Why It Matters
+              </h2>
+              <div className="w-12 h-1 bg-tfs-gold rounded mt-1" />
+            </div>
+
             {/* People icon + descriptive text */}
-            <div className="flex items-center gap-3 bg-white rounded-xl shadow p-4 mb-5">
-              <div className="shrink-0 w-11 h-11 rounded-full bg-tfs-teal flex items-center justify-center shadow border-2 border-tfs-teal/30">
-                <Users className="text-white" size={22} />
+            <div className="flex items-start gap-3 mb-5">
+              <div className="shrink-0 w-12 h-12 rounded-full border-2 border-tfs-gold flex items-center justify-center">
+                <Users className="text-tfs-gold" size={22} />
               </div>
-              <p className="text-tfs-slate text-xs leading-relaxed">
-                Financial stress shouldn&apos;t stand in the way of your goals. We help tenants build
-                confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
+              <p className="text-tfs-slate text-sm leading-relaxed">
+                Financial stress shouldn&apos;t stand in the way of your goals.<br />
+                We help tenants build confidence, reduce stress, and create practical plans for a more secure, empowered tomorrow.
               </p>
             </div>
 
-            {/* CTA Button */}
+            {/* CTA Button — full width, rectangular */}
             <Link
               href="/register?tier=free"
-              className="self-start bg-tfs-gold text-tfs-navy font-bold text-xs uppercase tracking-widest px-5 py-2.5 rounded-full shadow hover:brightness-110 transition"
+              data-hero-cta="true"
+              className="w-full text-center bg-tfs-gold text-tfs-navy font-bold text-sm uppercase tracking-widest py-3 rounded-md shadow hover:brightness-110 transition"
             >
-              Step into your free Connection Session
+              Step Into Your Free Connection Session
             </Link>
           </div>
 
@@ -239,7 +237,7 @@ export default async function HomePage({
                 <div className="w-14 h-14 rounded-full bg-tfs-teal flex items-center justify-center mb-3 shadow-md">
                   <Icon className="text-white" size={24} />
                 </div>
-                <h3 className="font-bold text-tfs-navy text-lg font-serif mb-1">{title}</h3>
+                <h3 className="font-bold text-tfs-navy text-lg font-serif mb-1">{title.replace('\n', ' ')}</h3>
                 <p className="text-tfs-slate text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
