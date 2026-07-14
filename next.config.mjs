@@ -27,7 +27,7 @@ const nextConfig = {
               "img-src 'self' data: blob: https://*.supabase.co",
               "connect-src 'self' https://*.supabase.co https://api.stripe.com https://api.resend.com",
               "frame-src https://js.stripe.com https://hooks.stripe.com",
-              "frame-ancestors 'self' https://www.weblaunchacademy.com http://localhost:*",
+              "frame-ancestors 'self' https://www.weblaunchacademy.com https://*.weblaunchacademy.com",
             ].join('; '),
           },
         ],
