@@ -18,8 +18,8 @@ export default async function AdminNewsletterPage() {
     .order('subscribed_at', { ascending: false })
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12">
+    <main className="max-w-5xl mx-auto px-4 py-12">
       <NewsletterClient subscribers={subscribers ?? []} />
-    </div>
+    </main>
   )
 }
