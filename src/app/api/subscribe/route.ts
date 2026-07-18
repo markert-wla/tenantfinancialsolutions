@@ -4,14 +4,10 @@ import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
 
 export async function POST(req: NextRequest) {
-  let body: { email?: string; name?: string }
-  try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
-  }
+  const rawBody = await req.json().catch(() => null) as { email?: string; name?: string } | null
+  if (!rawBody) return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
 
-  const { email, name } = body
+  const { email, name } = rawBody
 
   if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 })

@@ -19,14 +19,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  let body: { subject?: string; html?: string }
-  try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
-  }
+  const rawBody = await req.json().catch(() => null) as { subject?: string; html?: string } | null
+  if (!rawBody) return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
 
-  const { subject, html } = body
+  const { subject, html } = rawBody
   if (!subject?.trim() || !html?.trim()) {
     return NextResponse.json({ error: 'Missing subject or content' }, { status: 400 })
   }
