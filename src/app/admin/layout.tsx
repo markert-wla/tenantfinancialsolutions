@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
   LayoutDashboard, Users, UserCheck, Tag,
-  Calendar, Star, Video, Building2, Settings, Inbox, StickyNote,
+  Calendar, Star, Video, Building2, Settings, Inbox, StickyNote, Mail,
 } from 'lucide-react'
 import SignOutButton from '@/components/portal/SignOutButton'
 import AdminNavLink from '@/components/admin/AdminNavLink'
@@ -50,6 +50,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <AdminNavLink href="/admin/testimonials">   <Star size={16} />            Testimonials   </AdminNavLink>
         <AdminNavLink href="/admin/group-sessions"> <Video size={16} />           Group Sessions </AdminNavLink>
         <AdminNavLink href="/admin/partners">       <Building2 size={16} />       Partners       </AdminNavLink>
+        <AdminNavLink href="/admin/newsletter">     <Mail size={16} />            Newsletter     </AdminNavLink>
         <AdminNavLink href="/admin/settings">       <Settings size={16} />        Settings       </AdminNavLink>
       </nav>
       <div className="px-3 py-4 border-t border-white/10">
