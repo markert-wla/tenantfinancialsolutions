@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Mail, Users, Send, CheckCircle, XCircle } from 'lucide-react'
+import { Mail, Users, Send, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
 
 type Subscriber = {
   id: string
@@ -11,13 +11,37 @@ type Subscriber = {
   is_active: boolean
 }
 
-export default function NewsletterClient({ subscribers }: { subscribers: Subscriber[] }) {
+export default function NewsletterClient({ subscribers: initialSubscribers }: { subscribers: Subscriber[] }) {
+  const [subscribers, setSubscribers] = useState(initialSubscribers)
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const [result, setResult] = useState<{ ok: boolean; sent?: number; error?: string } | null>(null)
+  const [syncResult, setSyncResult] = useState<{ ok: boolean; synced?: number; error?: string } | null>(null)
 
   const active = subscribers.filter(s => s.is_active)
+
+  async function handleSync() {
+    if (!confirm('Sync all active clients to the newsletter list? Anyone who previously unsubscribed will NOT be re-added.')) return
+    setSyncing(true)
+    setSyncResult(null)
+    try {
+      const res = await fetch('/api/admin/sync-clients-newsletter', { method: 'POST' })
+      const data = await res.json()
+      if (data.ok) {
+        setSyncResult({ ok: true, synced: data.synced })
+        // Refresh page data after a short delay so subscriber count updates
+        setTimeout(() => window.location.reload(), 1500)
+      } else {
+        setSyncResult({ ok: false, error: data.error ?? 'Unknown error' })
+      }
+    } catch {
+      setSyncResult({ ok: false, error: 'Network error — please try again' })
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   async function handleSend() {
     if (!subject.trim() || !body.trim()) return
@@ -75,6 +99,35 @@ export default function NewsletterClient({ subscribers }: { subscribers: Subscri
           <p className="text-3xl font-bold text-slate-700">{subscribers.length}</p>
           <p className="text-sm text-slate-500 mt-1">Total all-time</p>
         </div>
+      </div>
+
+      {/* Sync Clients */}
+      <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-3">
+        <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+          <RefreshCw size={18} /> Sync Clients to Newsletter
+        </h2>
+        <p className="text-sm text-slate-500">
+          Adds all active coaching clients to the newsletter list. Clients who have previously
+          unsubscribed will <strong>not</strong> be re-added.
+        </p>
+        {syncResult && (
+          <div className={`flex items-center gap-2 text-sm px-4 py-3 rounded-lg ${
+            syncResult.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+          }`}>
+            {syncResult.ok ? <CheckCircle size={16} /> : <XCircle size={16} />}
+            {syncResult.ok
+              ? `Synced ${syncResult.synced} client${syncResult.synced !== 1 ? 's' : ''} — refreshing…`
+              : `Error: ${syncResult.error}`}
+          </div>
+        )}
+        <button
+          onClick={handleSync}
+          disabled={syncing}
+          className="flex items-center gap-2 bg-slate-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+          {syncing ? 'Syncing…' : 'Sync Active Clients Now'}
+        </button>
       </div>
 
       {/* Compose */}
@@ -135,7 +188,7 @@ export default function NewsletterClient({ subscribers }: { subscribers: Subscri
         </div>
         {subscribers.length === 0 ? (
           <p className="px-6 py-10 text-center text-slate-400 text-sm">
-            No subscribers yet. Once you add a signup form to your site, they'll appear here.
+            No subscribers yet. Sync your clients above or add a signup form to your site.
           </p>
         ) : (
           <div className="overflow-x-auto">
