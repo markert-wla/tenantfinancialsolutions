@@ -176,6 +176,25 @@ export async function POST(req: NextRequest) {
   const { error: profileErr } = await supabase.from('profiles').update(profileUpdate).eq('id', userId)
   if (profileErr) console.error('[Register] Profile update failed:', profileErr.message, profileErr.details, profileErr.hint)
 
+  // 3b. Auto-subscribe new clients to newsletter (fire-and-forget — never blocks registration).
+  // ignoreDuplicates: true means existing records (including previously unsubscribed ones) are untouched.
+  if (!isAdmin) {
+    supabase
+      .from('newsletter_subscribers')
+      .upsert(
+        {
+          email: email.toLowerCase().trim(),
+          name: `${firstName} ${lastName}`.trim() || null,
+          is_active: true,
+          unsubscribed_at: null,
+        },
+        { onConflict: 'email', ignoreDuplicates: true }
+      )
+      .then(({ error: nlErr }) => {
+        if (nlErr) console.error('[Register] Newsletter upsert failed:', nlErr.message)
+      })
+  }
+
   // 4. Stripe — only for paid checkouts
   let checkoutUrl: string | undefined
 
