@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  let body: { session_date: string; join_link?: string | null; partner_ids?: string[] | null }
+  let body: { session_date: string; session_time?: string | null; join_link?: string | null; partner_ids?: string[] | null }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
   const service = createServiceClient()
   const { error } = await service.from('group_sessions').insert({
     session_date: body.session_date,
-    join_link:    body.join_link   ?? null,
+    session_time: body.session_time  ?? null,
+    join_link:    body.join_link     ?? null,
     partner_ids:  body.partner_ids?.length ? body.partner_ids : null,
   })
 

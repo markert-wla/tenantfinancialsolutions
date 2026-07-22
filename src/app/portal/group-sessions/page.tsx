@@ -42,7 +42,7 @@ export default async function PortalGroupSessionsPage() {
   // Upcoming sessions (today and forward)
   const { data: upcoming } = await supabase
     .from('group_sessions')
-    .select('id, session_date, join_link, recording_url')
+    .select('id, session_date, session_time, join_link, recording_url')
     .or(partnerFilter)
     .gte('session_date', today)
     .order('session_date', { ascending: true })
@@ -107,6 +107,9 @@ export default async function PortalGroupSessionsPage() {
               <div key={s.id} className="card flex items-center justify-between gap-4">
                 <div>
                   <p className="font-medium text-tfs-navy">{fmtDate(s.session_date)}</p>
+                  {s.session_time && (
+                    <p className="text-sm text-tfs-teal-button font-medium mt-0.5">{s.session_time}</p>
+                  )}
                   <p className="text-xs text-tfs-slate mt-0.5">TFS Community Connect</p>
                 </div>
                 <div className="shrink-0 flex items-center gap-2">

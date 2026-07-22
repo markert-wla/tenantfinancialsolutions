@@ -4,6 +4,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Link as LinkIcon, Video, Users, Trash2 } from 'lucide-react'
 
+const TIME_OPTIONS = [
+  '6:00 AM','6:30 AM','7:00 AM','7:30 AM','8:00 AM','8:30 AM',
+  '9:00 AM','9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM',
+  '12:00 PM','12:30 PM','1:00 PM','1:30 PM','2:00 PM','2:30 PM',
+  '3:00 PM','3:30 PM','4:00 PM','4:30 PM','5:00 PM','5:30 PM',
+  '6:00 PM','6:30 PM','7:00 PM','7:30 PM','8:00 PM','8:30 PM',
+  '9:00 PM',
+]
+
 type Partner = {
   id: string
   partner_name: string
@@ -13,6 +22,7 @@ type Partner = {
 type GroupSession = {
   id: string
   session_date: string
+  session_time: string | null
   join_link: string | null
   recording_url: string | null
   reminder_sent: boolean
@@ -65,6 +75,7 @@ export default function GroupSessionsClient({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         session_date: fd.get('session_date'),
+        session_time: fd.get('session_time') || null,
         join_link:    fd.get('join_link') || null,
         partner_ids:  selectedPartnerIds.length ? selectedPartnerIds : null,
       }),
@@ -121,7 +132,7 @@ export default function GroupSessionsClient({
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-serif font-bold text-tfs-navy">Group Sessions</h1>
+        <h1 className="text-3xl font-serif font-bold text-tfs-navy">TFS Community Connect</h1>
         <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
           <Plus size={16} /> Schedule Session
         </button>
@@ -131,7 +142,7 @@ export default function GroupSessionsClient({
         title="Upcoming"
         sessions={upcoming}
         partnerMap={partnerMap}
-        emptyMessage="No upcoming group sessions scheduled."
+        emptyMessage="No upcoming TFS Community Connect sessions scheduled."
         onEditLink={s => openEdit(s, 'join_link')}
         onEditRecording={s => openEdit(s, 'recording_url')}
         onDelete={s => setDeleteId(s.id)}
@@ -155,17 +166,33 @@ export default function GroupSessionsClient({
 
       {/* Create modal */}
       {showAdd && (
-        <Modal title="Schedule Group Session" onClose={() => { setShowAdd(false); setError(''); setSelectedPartnerIds([]) }}>
+        <Modal title="Schedule TFS Community Connect Session" onClose={() => { setShowAdd(false); setError(''); setSelectedPartnerIds([]) }}>
           <form onSubmit={handleCreate} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-tfs-navy mb-1">Session Date</label>
-              <input
-                type="date"
-                name="session_date"
-                required
-                min={now}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Session Date</label>
+                <input
+                  type="date"
+                  name="session_date"
+                  required
+                  min={now}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">
+                  Session Time <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <select
+                  name="session_time"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal bg-white"
+                >
+                  <option value="">— Select time —</option>
+                  {TIME_OPTIONS.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-tfs-navy mb-1">Join Link <span className="text-gray-400 font-normal">(optional — add now or later)</span></label>
@@ -308,6 +335,9 @@ function SessionList({
               <div key={s.id} className="py-4 flex items-start justify-between gap-4">
                 <div>
                   <p className="font-medium text-tfs-navy">{fmtDate(s.session_date)}</p>
+                  {s.session_time && (
+                    <p className="text-sm text-tfs-teal-button font-medium mt-0.5">{s.session_time}</p>
+                  )}
                   <div className="flex items-center gap-4 mt-1.5 flex-wrap">
                     {s.join_link ? (
                       <a href={s.join_link} target="_blank" rel="noopener noreferrer"

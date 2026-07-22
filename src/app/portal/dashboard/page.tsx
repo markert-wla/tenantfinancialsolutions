@@ -71,7 +71,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
   // Next group session
   const { data: nextGroup } = await supabase
     .from('group_sessions')
-    .select('id, session_date, join_link')
+    .select('id, session_date, session_time, join_link')
     .gte('session_date', new Date().toISOString().split('T')[0])
     .order('session_date', { ascending: true })
     .limit(1)
@@ -269,6 +269,9 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
                   timeZone: 'UTC',
                 })}
               </p>
+              {nextGroup.session_time && (
+                <p className="text-sm text-tfs-teal-button font-medium mt-0.5">{nextGroup.session_time}</p>
+              )}
               <p className="text-sm text-tfs-slate mt-0.5">
                 Complimentary for all members — multiple coaches present.
               </p>
