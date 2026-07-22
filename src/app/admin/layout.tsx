@@ -39,19 +39,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </span>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <AdminNavLink href="/admin/dashboard">      <LayoutDashboard size={16} /> Dashboard      </AdminNavLink>
+        <AdminNavLink href="/admin/dashboard">      <LayoutDashboard size={16} /> Dashboard             </AdminNavLink>
         <AdminNavLink href="/admin/contacts" badge={newContactCount ?? 0}>
-                                                    <Inbox size={16} />           Contacts       </AdminNavLink>
-        <AdminNavLink href="/admin/clients">        <Users size={16} />           Clients        </AdminNavLink>
-        <AdminNavLink href="/admin/coaches">        <UserCheck size={16} />       Coaches        </AdminNavLink>
-        <AdminNavLink href="/admin/codes">          <Tag size={16} />             Promo Codes    </AdminNavLink>
-        <AdminNavLink href="/admin/bookings">       <Calendar size={16} />        Bookings       </AdminNavLink>
-        <AdminNavLink href="/admin/notes">          <StickyNote size={16} />      Notes          </AdminNavLink>
-        <AdminNavLink href="/admin/testimonials">   <Star size={16} />            Testimonials   </AdminNavLink>
-        <AdminNavLink href="/admin/group-sessions"> <Video size={16} />           Group Sessions </AdminNavLink>
-        <AdminNavLink href="/admin/partners">       <Building2 size={16} />       Partners       </AdminNavLink>
-        <AdminNavLink href="/admin/newsletter">     <Mail size={16} />            Newsletter     </AdminNavLink>
-        <AdminNavLink href="/admin/settings">       <Settings size={16} />        Settings       </AdminNavLink>
+                                                    <Inbox size={16} />           Contacts              </AdminNavLink>
+        <AdminNavLink href="/admin/clients">        <Users size={16} />           Clients               </AdminNavLink>
+        <AdminNavLink href="/admin/coaches">        <UserCheck size={16} />       Coaches               </AdminNavLink>
+        <AdminNavLink href="/admin/codes">          <Tag size={16} />             Promo Codes           </AdminNavLink>
+        <AdminNavLink href="/admin/bookings">       <Calendar size={16} />        Bookings              </AdminNavLink>
+        <AdminNavLink href="/admin/notes">          <StickyNote size={16} />      Notes                 </AdminNavLink>
+        <AdminNavLink href="/admin/testimonials">   <Star size={16} />            Testimonials          </AdminNavLink>
+        <AdminNavLink href="/admin/group-sessions"> <Video size={16} />           TFS Community Connect </AdminNavLink>
+        <AdminNavLink href="/admin/partners">       <Building2 size={16} />       Partners              </AdminNavLink>
+        <AdminNavLink href="/admin/newsletter">     <Mail size={16} />            Newsletter            </AdminNavLink>
+        <AdminNavLink href="/admin/settings">       <Settings size={16} />        Settings              </AdminNavLink>
       </nav>
       <div className="px-3 py-4 border-t border-white/10">
         <SignOutButton />
