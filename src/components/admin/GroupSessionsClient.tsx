@@ -132,7 +132,7 @@ export default function GroupSessionsClient({
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-serif font-bold text-tfs-navy">Group Sessions</h1>
+        <h1 className="text-3xl font-serif font-bold text-tfs-navy">TFS Community Connect</h1>
         <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
           <Plus size={16} /> Schedule Session
         </button>
