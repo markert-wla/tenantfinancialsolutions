@@ -93,18 +93,6 @@ const AUDIENCE_CARDS = [
   },
 ]
 
-const COACH_BENEFITS = [
-  'Build financial clarity',
-  'Reduce financial stress',
-  'Improve decision making',
-]
-
-const MGMT_BENEFITS = [
-  'Fewer delinquencies',
-  'Improved tenant relationships',
-  'More time for core responsibilities',
-]
-
 export default async function HomePage({
   searchParams,
 }: {
@@ -132,15 +120,24 @@ export default async function HomePage({
           furniture is unreadable on narrow screens); the gradient approximates the
           image's own background so the two blocks read as one scene. */}
       <section className="relative mt-20 overflow-hidden bg-gradient-to-b from-[#aecbe4] to-[#dceaf5]">
+        {/* ── MOBILE image (hidden on lg+) ── */}
         <div className="relative aspect-[4/3] lg:hidden">
           <Image
-            src="/images/home-page-hero-clean.webp"
+            src="/images/copilot-20260724-164051.png"
             alt="A calm sitting area with a velvet armchair, marble side table, and a Tenant Financial Solutions mug"
             fill
             sizes="100vw"
             className="object-cover object-bottom select-none"
             priority
           />
+          {/* TFS mug overlay — mobile */}
+          <span
+            aria-hidden="true"
+            className="absolute font-bold tracking-widest text-tfs-navy select-none pointer-events-none"
+            style={{ left: '61%', top: '64%', fontSize: '9px', letterSpacing: '0.12em' }}
+          >
+            TFS
+          </span>
           {/* Free Session CTA on the empty wall beside the chair — slides into the
               navbar once scrolled past (Navbar watches [data-hero-cta]) */}
           <div className="absolute left-4 top-1/2 -translate-y-1/2 w-[45%] max-w-[220px] sm:hidden">
@@ -153,16 +150,27 @@ export default async function HomePage({
             </Link>
           </div>
         </div>
+
+        {/* ── DESKTOP background image (hidden below lg) — resized to object-center ── */}
         <div className="absolute inset-0 hidden lg:block" aria-hidden="true">
           <Image
-            src="/images/home-page-hero-clean.webp"
+            src="/images/copilot-20260724-164051.png"
             alt=""
             fill
             sizes="100vw"
-            className="object-cover object-bottom select-none"
+            className="object-cover object-center select-none"
             priority
           />
+          {/* TFS mug overlay — desktop */}
+          <span
+            aria-hidden="true"
+            className="absolute font-bold tracking-widest text-tfs-navy select-none pointer-events-none"
+            style={{ left: '61%', top: '64%', fontSize: '11px', letterSpacing: '0.14em' }}
+          >
+            TFS
+          </span>
         </div>
+
         <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 grid lg:grid-cols-2">
           <div className="py-14 lg:py-16">
             <h1 className="font-serif text-4xl sm:text-5xl leading-tight">
@@ -295,46 +303,6 @@ export default async function HomePage({
             <Link href="/about#coaches" className="btn-navy">
               Learn More About Our Team
             </Link>
-          </div>
-        </div>
-      </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-tfs-gold/50 to-transparent" />
-
-      {/* ── BENEFITS ─────────────────────────────────────────── */}
-      <section className="relative">
-        {/* Lighthouse-style full-width teal-to-navy section */}
-        <div
-          className="py-20 px-4 text-white"
-          style={{ background: 'linear-gradient(180deg, #1A2B4A 0%, #1D9E75 100%)' }}
-        >
-          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">
-                • Coaching empowers tenants to:
-              </h2>
-              <ul className="space-y-3">
-                {COACH_BENEFITS.map(b => (
-                  <li key={b} className="flex items-center gap-3 text-lg text-white/90">
-                    <span className="w-2 h-2 rounded-full bg-tfs-gold shrink-0" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">
-                • Coaching that lightens the load on management by:
-              </h2>
-              <ul className="space-y-3">
-                {MGMT_BENEFITS.map(b => (
-                  <li key={b} className="flex items-center gap-3 text-lg text-white/90">
-                    <span className="w-2 h-2 rounded-full bg-tfs-gold shrink-0" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       </section>
