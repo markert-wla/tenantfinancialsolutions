@@ -18,6 +18,7 @@ const config: Config = {
           'navy-light':  '#2C3E6B',
           slate:         '#50647A',
           gold:          '#F5C842',
+          'gold-dark':   '#A9791D',
           purple:        '#5B2D8E',
           'purple-dark': '#4A2478',
           'purple-light':'#F0E8F9',

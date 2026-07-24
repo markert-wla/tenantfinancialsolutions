@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { ChevronRight, Users, Building2, HeartHandshake } from 'lucide-react'
+import { ChevronRight, Users, Building2, HeartHandshake, UserCheck, TrendingUp, Sunrise } from 'lucide-react'
 import HeroCTAButton from '@/components/layout/HeroCTAButton'
 import CoachCard from '@/components/public/CoachCard'
 
@@ -128,19 +128,73 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative mt-20 h-[66.67vw] sm:h-[calc(100vh+80px)] overflow-hidden">
-        <Image
-          src="/images/homepage-image.webp"
-          alt="Tenant Financial Solutions — Real People, Real Coaching"
-          fill
-          className="object-cover object-center select-none"
-          priority
-        />
-        {/* Narrow gradient at very top only — keeps nav links readable over any image */}
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" aria-hidden="true" />
-        {/* CTA pinned to bottom of the image — hidden on mobile (button lives in navbar instead) */}
-        <div className="absolute bottom-0 inset-x-0 z-10 pb-12 hidden sm:flex justify-center">
-          <HeroCTAButton />
+      {/* Below lg the photo stacks under the text (text over the furniture is unreadable
+          on narrow screens); the gradient approximates the image's own background so the
+          two blocks read as one scene. */}
+      <section className="relative mt-20 overflow-hidden bg-gradient-to-b from-[#aecbe4] to-[#dceaf5]">
+        <div className="absolute inset-0 hidden lg:block" aria-hidden="true">
+          <Image
+            src="/images/home-page-hero-clean.webp"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-bottom select-none"
+            priority
+          />
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 grid lg:grid-cols-2">
+          <div className="py-14 lg:py-16">
+            <h1 className="font-serif text-4xl sm:text-5xl leading-tight">
+              <span className="block text-tfs-navy">Your financial future.</span>
+              <span className="block italic text-tfs-gold-dark">Our focused guidance.</span>
+            </h1>
+            <div className="mt-5 h-px max-w-md bg-gradient-to-r from-tfs-gold-dark/70 to-transparent" aria-hidden="true" />
+            <p className="mt-4 text-base sm:text-lg font-semibold text-tfs-gold-dark">
+              Tenant Focused&ensp;&bull;&ensp;Community Impact
+            </p>
+
+            <ul className="mt-8 flex gap-4 sm:gap-10">
+              {[
+                { icon: UserCheck, label: 'Personalized Coaching' },
+                { icon: TrendingUp, label: 'Stronger Financial Habits' },
+                { icon: Sunrise, label: 'Lasting Financial Freedom' },
+              ].map(({ icon: Icon, label }) => (
+                <li key={label} className="flex flex-col items-center text-center w-24 sm:w-28">
+                  <span className="w-14 h-14 rounded-full border-2 border-tfs-gold-dark flex items-center justify-center mb-2">
+                    <Icon className="w-6 h-6 text-tfs-gold-dark" aria-hidden="true" />
+                  </span>
+                  <span className="text-sm text-tfs-navy leading-snug">{label}</span>
+                </li>
+              ))}
+            </ul>
+
+            <h2 className="mt-10 text-2xl sm:text-3xl font-extrabold tracking-wide text-tfs-navy uppercase">
+              Why It Matters
+            </h2>
+            <div className="mt-3 h-1 w-16 bg-tfs-gold-dark" aria-hidden="true" />
+            <p className="mt-5 text-tfs-navy max-w-md leading-relaxed">
+              Financial stress shouldn&rsquo;t stand in the way of your goals.
+            </p>
+            <p className="mt-3 text-tfs-navy max-w-md leading-relaxed">
+              We help you build confidence, reduce stress, and create practical plans
+              for a more secure, empowered tomorrow.
+            </p>
+
+            {/* Hidden on mobile — the CTA lives in the navbar there */}
+            <div className="mt-10 hidden sm:block">
+              <HeroCTAButton />
+            </div>
+          </div>
+        </div>
+        <div className="relative aspect-[4/3] lg:hidden">
+          <Image
+            src="/images/home-page-hero-clean.webp"
+            alt="A calm sitting area with a velvet armchair, marble side table, and a Tenant Financial Solutions mug"
+            fill
+            sizes="100vw"
+            className="object-cover object-bottom select-none"
+            priority
+          />
         </div>
       </section>
 
