@@ -52,10 +52,17 @@ export default function Navbar() {
     if (!PUBLIC_PAGES.has(pathname)) return
 
     const checkCta = () => {
-      const el = document.querySelector('[data-hero-cta]')
-      if (!el) { setSessionVisible(false); return }
-      // Session appears when the CTA button's bottom edge enters the navbar zone
-      setSessionVisible(el.getBoundingClientRect().bottom < 100)
+      // Pages can carry breakpoint-specific CTAs (e.g. the home hero's mobile
+      // overlay vs desktop button) — track the one actually rendered, skipping
+      // display:none elements, whose rects collapse to zero.
+      for (const el of Array.from(document.querySelectorAll('[data-hero-cta]'))) {
+        const rect = el.getBoundingClientRect()
+        if (rect.width === 0 && rect.height === 0) continue
+        // Session appears when the CTA button's bottom edge enters the navbar zone
+        setSessionVisible(rect.bottom < 100)
+        return
+      }
+      setSessionVisible(false)
     }
 
     window.addEventListener('scroll', checkCta, { passive: true })
@@ -132,9 +139,18 @@ export default function Navbar() {
               />
             </Link>
             {showSessionBtn && !user && (
+              /* Slides in once the page's hero CTA scrolls behind the navbar,
+                 mirroring the desktop Session button behavior. */
               <Link
                 href="/register?tier=free"
-                className="sm:hidden bg-tfs-gold text-tfs-navy text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap hover:brightness-105 transition-all"
+                tabIndex={sessionActive ? 0 : -1}
+                aria-hidden={!sessionActive}
+                className={cn(
+                  'sm:hidden bg-tfs-gold text-tfs-navy text-xs font-bold py-1.5 rounded-lg whitespace-nowrap hover:brightness-105 overflow-hidden transition-all duration-300 ease-in-out',
+                  sessionActive
+                    ? 'max-w-[120px] px-3 opacity-100'
+                    : 'max-w-0 px-0 opacity-0 pointer-events-none'
+                )}
               >
                 Free Session
               </Link>

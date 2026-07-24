@@ -128,10 +128,31 @@ export default async function HomePage({
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      {/* Below lg the photo stacks under the text (text over the furniture is unreadable
-          on narrow screens); the gradient approximates the image's own background so the
-          two blocks read as one scene. */}
+      {/* Below lg the photo sits on top with the text stacked under it (text over the
+          furniture is unreadable on narrow screens); the gradient approximates the
+          image's own background so the two blocks read as one scene. */}
       <section className="relative mt-20 overflow-hidden bg-gradient-to-b from-[#aecbe4] to-[#dceaf5]">
+        <div className="relative aspect-[4/3] lg:hidden">
+          <Image
+            src="/images/home-page-hero-clean.webp"
+            alt="A calm sitting area with a velvet armchair, marble side table, and a Tenant Financial Solutions mug"
+            fill
+            sizes="100vw"
+            className="object-cover object-bottom select-none"
+            priority
+          />
+          {/* Free Session CTA on the empty wall beside the chair — slides into the
+              navbar once scrolled past (Navbar watches [data-hero-cta]) */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 w-[45%] max-w-[220px] sm:hidden">
+            <Link
+              href="/register?tier=free"
+              data-hero-cta="true"
+              className="block bg-tfs-gold text-tfs-navy font-bold text-sm text-center px-4 py-3 rounded-xl shadow-lg hover:brightness-105 transition-all"
+            >
+              Step into your free Connection Session
+            </Link>
+          </div>
+        </div>
         <div className="absolute inset-0 hidden lg:block" aria-hidden="true">
           <Image
             src="/images/home-page-hero-clean.webp"
@@ -185,16 +206,6 @@ export default async function HomePage({
               <HeroCTAButton />
             </div>
           </div>
-        </div>
-        <div className="relative aspect-[4/3] lg:hidden">
-          <Image
-            src="/images/home-page-hero-clean.webp"
-            alt="A calm sitting area with a velvet armchair, marble side table, and a Tenant Financial Solutions mug"
-            fill
-            sizes="100vw"
-            className="object-cover object-bottom select-none"
-            priority
-          />
         </div>
       </section>
 
