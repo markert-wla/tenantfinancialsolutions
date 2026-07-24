@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Link as LinkIcon, Video, Users, Trash2 } from 'lucide-react'
+import { SESSION_TIMEZONES, tzShort } from '@/lib/timezones'
 
 const TIME_OPTIONS = [
   '6:00 AM','6:30 AM','7:00 AM','7:30 AM','8:00 AM','8:30 AM',
@@ -23,6 +24,7 @@ type GroupSession = {
   id: string
   session_date: string
   session_time: string | null
+  session_timezone: string | null
   join_link: string | null
   recording_url: string | null
   reminder_sent: boolean
@@ -74,10 +76,11 @@ export default function GroupSessionsClient({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        session_date: fd.get('session_date'),
-        session_time: fd.get('session_time') || null,
-        join_link:    fd.get('join_link') || null,
-        partner_ids:  selectedPartnerIds.length ? selectedPartnerIds : null,
+        session_date:     fd.get('session_date'),
+        session_time:     fd.get('session_time') || null,
+        session_timezone: fd.get('session_time') ? fd.get('session_timezone') : null,
+        join_link:        fd.get('join_link') || null,
+        partner_ids:      selectedPartnerIds.length ? selectedPartnerIds : null,
       }),
     })
     const data = await res.json()
@@ -190,6 +193,18 @@ export default function GroupSessionsClient({
                   <option value="">— Select time —</option>
                   {TIME_OPTIONS.map(t => (
                     <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Time Zone</label>
+                <select
+                  name="session_timezone"
+                  defaultValue="America/New_York"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal bg-white"
+                >
+                  {SESSION_TIMEZONES.map(tz => (
+                    <option key={tz.value} value={tz.value}>{tz.label}</option>
                   ))}
                 </select>
               </div>
@@ -336,7 +351,9 @@ function SessionList({
                 <div>
                   <p className="font-medium text-tfs-navy">{fmtDate(s.session_date)}</p>
                   {s.session_time && (
-                    <p className="text-sm text-tfs-teal-button font-medium mt-0.5">{s.session_time}</p>
+                    <p className="text-sm text-tfs-teal-button font-medium mt-0.5">
+                      {s.session_time}{s.session_timezone ? ` ${tzShort(s.session_timezone)}` : ''}
+                    </p>
                   )}
                   <div className="flex items-center gap-4 mt-1.5 flex-wrap">
                     {s.join_link ? (

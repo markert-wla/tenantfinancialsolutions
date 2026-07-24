@@ -14,7 +14,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const allowed = ['join_link', 'recording_url', 'partner_ids']
+  const allowed = ['join_link', 'recording_url', 'partner_ids', 'session_time', 'session_timezone']
   const updates: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) updates[key] = body[key]

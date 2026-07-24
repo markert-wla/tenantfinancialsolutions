@@ -15,7 +15,7 @@ export default async function AdminGroupSessionsPage() {
   const [{ data: sessions }, { data: partners }] = await Promise.all([
     supabase
       .from('group_sessions')
-      .select('id, session_date, session_time, join_link, recording_url, reminder_sent, partner_ids, created_at')
+      .select('id, session_date, session_time, session_timezone, join_link, recording_url, reminder_sent, partner_ids, created_at')
       .order('session_date', { ascending: false }),
     supabase
       .from('partners')

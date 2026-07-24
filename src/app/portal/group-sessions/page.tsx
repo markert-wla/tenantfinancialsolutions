@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Video, ExternalLink, CalendarDays, CheckCircle2, XCircle, Clock } from 'lucide-react'
+import { tzShort } from '@/lib/timezones'
 import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'TFS Community Connect — Portal' }
@@ -42,7 +43,7 @@ export default async function PortalGroupSessionsPage() {
   // Upcoming sessions (today and forward)
   const { data: upcoming } = await supabase
     .from('group_sessions')
-    .select('id, session_date, session_time, join_link, recording_url')
+    .select('id, session_date, session_time, session_timezone, join_link, recording_url')
     .or(partnerFilter)
     .gte('session_date', today)
     .order('session_date', { ascending: true })
@@ -108,7 +109,9 @@ export default async function PortalGroupSessionsPage() {
                 <div>
                   <p className="font-medium text-tfs-navy">{fmtDate(s.session_date)}</p>
                   {s.session_time && (
-                    <p className="text-sm text-tfs-teal-button font-medium mt-0.5">{s.session_time}</p>
+                    <p className="text-sm text-tfs-teal-button font-medium mt-0.5">
+                      {s.session_time}{s.session_timezone ? ` ${tzShort(s.session_timezone)}` : ''}
+                    </p>
                   )}
                   <p className="text-xs text-tfs-slate mt-0.5">TFS Community Connect</p>
                 </div>

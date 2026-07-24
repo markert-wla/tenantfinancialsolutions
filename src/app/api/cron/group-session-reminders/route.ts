@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
+import { tzShort } from '@/lib/timezones'
 
 export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
 
   const { data: sessions } = await service
     .from('group_sessions')
-    .select('id, session_date, join_link, partner_ids')
+    .select('id, session_date, session_time, session_timezone, join_link, partner_ids')
     .eq('session_date', targetDate)
     .eq('reminder_sent', false)
 
@@ -86,6 +87,11 @@ export async function GET(req: NextRequest) {
               <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Date</span><br>
               <strong style="color:#1A2B4A;">${formattedDate}</strong>
             </td></tr>
+            ${session.session_time ? `
+            <tr><td style="padding:0 16px 12px;">
+              <span style="font-size:12px;color:#6B7E8F;text-transform:uppercase;letter-spacing:0.5px;">Time</span><br>
+              <strong style="color:#1A2B4A;">${session.session_time}${session.session_timezone ? ` ${tzShort(session.session_timezone)}` : ''}</strong>
+            </td></tr>` : ''}
           </table>
           ${session.join_link
             ? emailButton(session.join_link, 'Join Session')
