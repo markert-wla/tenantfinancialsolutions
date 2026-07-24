@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Send } from 'lucide-react'
+import { Send, MessageSquare } from 'lucide-react'
 
 type Message = {
   id: string
@@ -9,12 +9,21 @@ type Message = {
   created_at: string
 }
 
+type CoachMessage = {
+  id: string
+  body: string
+  created_at: string
+  read_at: string | null
+}
+
 const MAX = 2000
 
 export default function PortalMessagesClient({
   initial,
+  coachMessages,
 }: {
   initial: Message[]
+  coachMessages: CoachMessage[]
 }) {
   const [messages, setMessages] = useState(initial)
   const [text, setText]         = useState('')
@@ -60,6 +69,24 @@ export default function PortalMessagesClient({
         Your coach will see your message when they next review your profile.
       </p>
 
+      {/* Messages from Coach */}
+      {coachMessages.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <MessageSquare size={16} className="text-tfs-teal-button" />
+            <h2 className="font-serif font-bold text-tfs-navy text-lg">Messages from Your Coach</h2>
+          </div>
+          <div className="space-y-3">
+            {coachMessages.map(m => (
+              <div key={m.id} className="card border-l-4 border-tfs-teal">
+                <p className="text-sm text-tfs-navy whitespace-pre-wrap">{m.body}</p>
+                <p className="text-xs text-tfs-slate mt-2">{fmt(m.created_at)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Compose */}
       <div className="card mb-8">
         <label className="block text-sm font-semibold text-tfs-navy mb-2">New Message</label>
@@ -89,9 +116,9 @@ export default function PortalMessagesClient({
         </div>
       </div>
 
-      {/* Previous messages */}
+      {/* Previous messages from client */}
       <div>
-        <h2 className="font-serif font-bold text-tfs-navy text-lg mb-3">Previous Messages</h2>
+        <h2 className="font-serif font-bold text-tfs-navy text-lg mb-3">Messages You&rsquo;ve Sent</h2>
         {messages.length === 0 ? (
           <p className="text-sm text-tfs-slate italic">You haven&rsquo;t sent any messages yet.</p>
         ) : (
