@@ -52,6 +52,34 @@ export async function POST(req: NextRequest) {
 
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
+
+      // Handle subscription upgrades (free → Starter / Advantage).
+      // checkout.session.completed fires reliably on every successful checkout,
+      // so we update plan_tier here as the primary path. The
+      // customer.subscription.created handler above acts as a second layer.
+      if (session.mode === 'subscription' && session.subscription) {
+        try {
+          const stripe = getStripe()
+          const sub  = await stripe.subscriptions.retrieve(session.subscription as string)
+          const meta = sub.metadata
+          const userId = meta?.supabase_user_id
+          const tier   = meta?.tier
+          if (userId && tier && ['bronze', 'silver'].includes(tier)) {
+            await supabase
+              .from('profiles')
+              .update({
+                plan_tier:              tier,
+                stripe_subscription_id: sub.id,
+                stripe_customer_id:     sub.customer as string,
+              })
+              .eq('id', userId)
+          }
+        } catch (err) {
+          console.error('[webhook] Failed to update plan on checkout.session.completed:', err)
+        }
+      }
+
+      // Handle one-off session credit purchases
       if (session.mode === 'payment' && session.metadata?.type === 'session_credit') {
         const userId   = session.metadata.supabase_user_id
         const coachId  = session.metadata.coach_id  ?? null
