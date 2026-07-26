@@ -62,33 +62,35 @@ export default function OurStoryPage() {
           <div className="flex gap-5 items-start">
             <div className="mt-1.5 shrink-0 w-1 self-stretch rounded-full bg-tfs-teal" aria-hidden="true" />
             <p className="text-tfs-slate text-lg leading-relaxed">
-              Welcome to Tenant Financial Solutions, your partner in assisting tenants financially
-              in the most sustainable way possible — <strong className="text-tfs-navy">COACHING!</strong> We
-              are passionate about seeing your community thrive through the relief of money stress.
-              There is no quick fix here. There are only dedicated coaches who desire the success of each
-              and every client through behavioral changes, process changes, perspective changes, and people changes.
+              Welcome to Tenant Financial Solutions — a place built for you. We&apos;re here to support
+              you in the most sustainable way possible: financial coaching designed around your real life.
+              Money stress doesn&apos;t disappear overnight, and there&apos;s no quick fix. But you do have
+              dedicated coaches who care deeply about your success and walk with you as you build new habits,
+              new processes, new perspectives, and stronger financial confidence.
             </p>
           </div>
 
           <div className="flex gap-5 items-start">
             <div className="mt-1.5 shrink-0 w-1 self-stretch rounded-full bg-tfs-gold" aria-hidden="true" />
             <p className="text-tfs-slate text-lg leading-relaxed">
-              Imagine a world where there was a direct resource for your tenant population to go to first
-              when facing financial challenges or seeking financial clarity —{' '}
-              <strong className="text-tfs-navy">IMAGINE NO LONGER!</strong> A market differentiator in the
-              form of an amenity outside of a physical asset. Coaching is an amenity that has the power to
-              provide lasting peace. Tenant Financial Solutions understands this transformative power. We
-              work diligently to understand the needs of the tenant and the management staff.
+              Imagine having a trusted resource you can turn to the moment you feel overwhelmed or unsure.
+              A place where you can get clarity, guidance, and a plan — without judgment. That&apos;s exactly
+              what TFS provides. Coaching is an amenity created for your peace of mind, giving you support
+              that lasts far beyond any physical asset. We take the time to understand your needs and your
+              goals so you feel equipped, encouraged, and never alone in your financial journey.
             </p>
           </div>
 
           <div className="flex gap-5 items-start">
             <div className="mt-1.5 shrink-0 w-1 self-stretch rounded-full bg-tfs-teal" aria-hidden="true" />
             <p className="text-tfs-slate text-lg leading-relaxed">
-              In addition to the individual coaching, members have access to one complimentary TFS Community Connect
-              session per month with multiple coaches present during the call. This is a great time to interact
-              outside of a one-on-one environment and a time to learn about topical discussions and present-day
-              financial trends.
+              You&apos;ll also be invited to join our monthly TFS Community Connect session — a powerful
+              space where tenants come together to celebrate wins, share progress, and encourage one another.
+              It&apos;s a supportive, corporate&#8209;style gathering designed to help you feel part of a
+              community that&apos;s growing financially stronger every month. During these sessions, coaches
+              highlight broader financial topics, offer practical insights, and create an environment where
+              everyone can learn from each other&apos;s experiences. It&apos;s your chance to be inspired,
+              stay motivated, and see firsthand that you&apos;re not walking this journey alone.
             </p>
           </div>
         </div>
