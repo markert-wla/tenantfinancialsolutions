@@ -62,8 +62,8 @@ export default function OurStoryPage() {
           <div className="flex gap-5 items-start">
             <div className="mt-1.5 shrink-0 w-1 self-stretch rounded-full bg-tfs-teal" aria-hidden="true" />
             <p className="text-tfs-slate text-lg leading-relaxed">
-              Welcome to Tenant Financial Solutions — a place built for you. We&apos;re here to support
-              you in the most sustainable way possible: financial coaching designed around your real life.
+              <strong>Welcome to Tenant Financial Solutions — a place built for you.</strong> We&apos;re here to support
+              you in the most sustainable way possible: <strong>financial coaching designed around your real life.</strong>{' '}
               Money stress doesn&apos;t disappear overnight, and there&apos;s no quick fix. But you do have
               dedicated coaches who care deeply about your success and walk with you as you build new habits,
               new processes, new perspectives, and stronger financial confidence.
@@ -73,7 +73,7 @@ export default function OurStoryPage() {
           <div className="flex gap-5 items-start">
             <div className="mt-1.5 shrink-0 w-1 self-stretch rounded-full bg-tfs-gold" aria-hidden="true" />
             <p className="text-tfs-slate text-lg leading-relaxed">
-              Imagine having a trusted resource you can turn to the moment you feel overwhelmed or unsure.
+              <strong>Imagine having a trusted resource you can turn to the moment you feel overwhelmed or unsure.</strong>{' '}
               A place where you can get clarity, guidance, and a plan — without judgment. That&apos;s exactly
               what TFS provides. Coaching is an amenity created for your peace of mind, giving you support
               that lasts far beyond any physical asset. We take the time to understand your needs and your
@@ -84,8 +84,8 @@ export default function OurStoryPage() {
           <div className="flex gap-5 items-start">
             <div className="mt-1.5 shrink-0 w-1 self-stretch rounded-full bg-tfs-teal" aria-hidden="true" />
             <p className="text-tfs-slate text-lg leading-relaxed">
-              You&apos;ll also be invited to join our monthly TFS Community Connect session — a powerful
-              space where tenants come together to celebrate wins, share progress, and encourage one another.
+              <strong>You&apos;ll also be invited to join our monthly TFS Community Connect session — a powerful
+              space where tenants come together to celebrate wins, share progress, and encourage one another.</strong>{' '}
               It&apos;s a supportive, corporate&#8209;style gathering designed to help you feel part of a
               community that&apos;s growing financially stronger every month. During these sessions, coaches
               highlight broader financial topics, offer practical insights, and create an environment where
