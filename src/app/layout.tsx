@@ -35,6 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PopupManager />
         <Analytics />
         <SpeedInsights />
+        {/* Web Launch Academy analytics */}
+        <script defer src="https://weblaunchacademy.com/beacon.js" data-site="cbb96ea5-f384-47cf-b603-109ab43e8ad0"></script>
       </body>
     </html>
   )
