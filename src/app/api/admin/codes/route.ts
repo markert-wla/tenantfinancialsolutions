@@ -35,12 +35,12 @@ export async function POST(req: NextRequest) {
   const resolvedCodeType = validCodeTypes.includes(code_type) ? code_type : 'tier_assignment'
 
   // affiliate_discount allows null assigned_tier ("all tiers"); other types require a specific tier
-  const validTiers = ['free', 'bronze', 'silver']
+  const validTiers = ['free', 'starter', 'advantage']
   if (resolvedCodeType !== 'affiliate_discount' && (!assigned_tier || !validTiers.includes(assigned_tier))) {
     return NextResponse.json({ error: 'Missing or invalid assigned tier.' }, { status: 400 })
   }
   if (resolvedCodeType === 'affiliate_discount' && assigned_tier && !validTiers.includes(assigned_tier)) {
-    return NextResponse.json({ error: 'Gold tier cannot be assigned via promo code' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid assigned tier for promo code' }, { status: 400 })
   }
 
   if (resolvedCodeType === 'affiliate_discount' && (!discount_percent || discount_percent <= 0 || discount_percent > 100)) {
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
   if (partner.contact_email) {
     const siteUrl     = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tenantfinancialsolutions.com'
     const firstName   = (partner.contact_name as string | null)?.split(' ')[0] ?? 'there'
-    const tierLabels: Record<string, string> = { free: 'Free', bronze: 'Starter Plan', silver: 'Advantage Plan' }
+    const tierLabels: Record<string, string> = { free: 'Free', starter: 'Starter Plan', advantage: 'Advantage Plan' }
     const tierLabel   = resolvedTier ? (tierLabels[resolvedTier] ?? resolvedTier) : 'All Plans'
     const expiryLine  = expires_at
       ? `<p style="margin:0 0 16px;color:#6B7E8F;"><strong style="color:#1A2B4A;">Expires:</strong> ${new Date(expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>`

@@ -38,7 +38,7 @@ const INDIVIDUAL_PLANS = [
   {
     name: 'Starter Plan',
     price: 50,
-    tier: 'bronze',
+    tier: 'starter',
     tagline: 'Best for tenants new to coaching',
     color: 'border-amber-400',
     badge: 'amber',
@@ -47,13 +47,13 @@ const INDIVIDUAL_PLANS = [
       '1 complimentary TFS Community Connect session per month',
     ],
     cta: 'Get Started',
-    ctaHref: '/register?tier=bronze',
+    ctaHref: '/register?tier=starter',
     ctaStyle: 'btn-primary text-sm text-center',
   },
   {
     name: 'Advantage Plan',
     price: 100,
-    tier: 'silver',
+    tier: 'advantage',
     tagline: 'For tenants who want real momentum',
     color: 'border-tfs-teal',
     badge: 'teal',
@@ -65,7 +65,7 @@ const INDIVIDUAL_PLANS = [
       'Text check-ins',
     ],
     cta: 'Get Started',
-    ctaHref: '/register?tier=silver',
+    ctaHref: '/register?tier=advantage',
     ctaStyle: 'btn-primary text-sm text-center',
   },
 ]

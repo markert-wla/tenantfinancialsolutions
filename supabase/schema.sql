@@ -8,7 +8,7 @@ create extension if not exists "pgcrypto";
 
 -- ─── ENUMS ──────────────────────────────────────────────────
 create type user_role as enum ('client', 'coach', 'admin');
-create type plan_tier as enum ('free', 'bronze', 'silver', 'gold');
+create type plan_tier as enum ('free', 'starter', 'advantage');
 create type booking_status as enum ('pending', 'confirmed', 'cancelled');
 create type partner_type as enum ('property_management', 'nonprofit', 'trial');
 create type partner_model as enum ('affiliate', 'paying');
@@ -188,7 +188,7 @@ create table promo_codes (
   code          text primary key,
   partner_type  partner_type not null,
   partner_name  text not null,
-  assigned_tier plan_tier not null check (assigned_tier in ('free', 'bronze', 'silver')),
+  assigned_tier plan_tier not null check (assigned_tier in ('free', 'starter', 'advantage')),
   max_uses      int not null default 1,
   uses_count    int not null default 0,
   is_active     boolean not null default true,

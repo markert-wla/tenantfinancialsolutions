@@ -28,7 +28,7 @@ type Props = {
 }
 
 const TIER_LABEL: Record<string, string> = {
-  free: 'Free', bronze: 'Starter', silver: 'Advantage',
+  free: 'Free', starter: 'Starter', advantage: 'Advantage',
 }
 
 export default function AttendanceClient({ groupSessions, clients, attendance: initialAttendance }: Props) {

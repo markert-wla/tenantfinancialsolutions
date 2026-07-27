@@ -13,8 +13,8 @@ export const metadata: Metadata = { title: 'Billing — Portal' }
 
 const TIER_LABEL: Record<string, string> = {
   free:   'Free',
-  bronze: 'Starter Plan ($50/mo)',
-  silver: 'Advantage Plan ($100/mo)',
+  starter: 'Starter Plan ($50/mo)',
+  advantage: 'Advantage Plan ($100/mo)',
 }
 
 export default async function PortalBillingPage() {
@@ -69,7 +69,7 @@ export default async function PortalBillingPage() {
         {isPaid && hasStripe ? (
           <div className="space-y-3">
             <BillingPortalButton />
-            {tier === 'bronze' && <UpgradeButtons currentTier={tier} />}
+            {tier === 'starter' && <UpgradeButtons currentTier={tier} />}
           </div>
         ) : isPromoUser ? (
           <div className="space-y-3">
@@ -77,7 +77,7 @@ export default async function PortalBillingPage() {
               Your <strong className="text-tfs-navy">{TIER_LABEL[tier] ?? tier}</strong> plan is provided
               through your property manager at no charge.
             </p>
-            {tier === 'bronze' && <UpgradeButtons currentTier={tier} />}
+            {tier === 'starter' && <UpgradeButtons currentTier={tier} />}
           </div>
         ) : isPaid && !hasStripe ? (
           <p className="text-sm text-tfs-slate">

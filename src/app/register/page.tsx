@@ -11,8 +11,8 @@ type Path = 'individual' | 'partner' | 'nonprofit'
 
 const TIER_LABELS: Record<string, string> = {
   free:   'Free',
-  bronze: 'Starter Plan ($50/mo)',
-  silver: 'Advantage Plan ($100/mo)',
+  starter: 'Starter Plan ($50/mo)',
+  advantage: 'Advantage Plan ($100/mo)',
 }
 
 const MONTHS = [
@@ -27,7 +27,7 @@ function RegisterInner() {
   const router   = useRouter()
   const supabase = createClient()
 
-  const preselectedTier = (['free','bronze','silver'].includes(params.get('tier') ?? ''))
+  const preselectedTier = (['free','starter','advantage'].includes(params.get('tier') ?? ''))
     ? (params.get('tier') as string)
     : 'free'
 
@@ -290,7 +290,7 @@ function RegisterInner() {
               <div>
                 <label className="block text-sm font-medium text-tfs-navy mb-2">Select a Plan</label>
                 <div className="grid grid-cols-1 gap-2">
-                  {(['free','bronze','silver'] as const).map(t => (
+                  {(['free','starter','advantage'] as const).map(t => (
                     <button
                       key={t}
                       type="button"

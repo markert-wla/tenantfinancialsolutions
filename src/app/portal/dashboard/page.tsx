@@ -13,9 +13,8 @@ export const metadata: Metadata = { title: 'Dashboard' }
 
 const TIER_LABEL: Record<string, string> = {
   free:   'Free',
-  bronze: 'Starter Plan',
-  silver: 'Advantage Plan',
-  gold:   'Gold Plan',
+  starter: 'Starter Plan',
+  advantage: 'Advantage Plan',
 }
 
 export default async function PortalDashboard({ searchParams }: { searchParams: { welcome?: string } }) {
@@ -35,7 +34,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
   const used    = profile?.sessions_used_this_month ?? 0
   const extras  = profile?.extra_sessions ?? 0
   const userTz  = profile?.timezone ?? 'America/New_York'
-  const isTopTier = tier === 'silver'
+  const isTopTier = tier === 'advantage'
 
   const promoActive = !profile?.promo_expires_at || new Date(profile.promo_expires_at) >= new Date()
   const activeCodeType = promoActive ? (profile?.applied_code_type ?? null) : null

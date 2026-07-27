@@ -8,6 +8,16 @@ import Stripe from 'stripe'
 // Raw body required for Stripe signature verification
 export const dynamic = 'force-dynamic'
 
+// Subscriptions created before the tier rename still carry the old slugs in
+// their Stripe metadata, and renewals re-send them on every billing cycle.
+const LEGACY_TIER_SLUGS: Record<string, string> = { bronze: 'starter', silver: 'advantage' }
+const VALID_TIERS = ['free', 'starter', 'advantage']
+
+function normalizeTier(tier: string | null | undefined): string | null {
+  if (!tier) return null
+  return LEGACY_TIER_SLUGS[tier] ?? tier
+}
+
 export async function POST(req: NextRequest) {
   const rawBody = await req.text()
   const sig     = req.headers.get('stripe-signature') ?? ''
@@ -27,8 +37,8 @@ export async function POST(req: NextRequest) {
     case 'customer.subscription.updated': {
       const sub  = event.data.object as Stripe.Subscription
       const meta = sub.metadata
-      const tier = meta?.tier ?? 'free'
-      if (meta?.supabase_user_id) {
+      const tier = normalizeTier(meta?.tier) ?? 'free'
+      if (meta?.supabase_user_id && VALID_TIERS.includes(tier)) {
         await supabase
           .from('profiles')
           .update({
@@ -52,6 +62,34 @@ export async function POST(req: NextRequest) {
 
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
+
+      // Handle subscription upgrades (free → Starter / Advantage).
+      // checkout.session.completed fires reliably on every successful checkout,
+      // so we update plan_tier here as the primary path. The
+      // customer.subscription.created handler above acts as a second layer.
+      if (session.mode === 'subscription' && session.subscription) {
+        try {
+          const stripe = getStripe()
+          const sub  = await stripe.subscriptions.retrieve(session.subscription as string)
+          const meta = sub.metadata
+          const userId = meta?.supabase_user_id
+          const tier   = normalizeTier(meta?.tier)
+          if (userId && tier && ['starter', 'advantage'].includes(tier)) {
+            await supabase
+              .from('profiles')
+              .update({
+                plan_tier:              tier,
+                stripe_subscription_id: sub.id,
+                stripe_customer_id:     sub.customer as string,
+              })
+              .eq('id', userId)
+          }
+        } catch (err) {
+          console.error('[webhook] Failed to update plan on checkout.session.completed:', err)
+        }
+      }
+
+      // Handle one-off session credit purchases
       if (session.mode === 'payment' && session.metadata?.type === 'session_credit') {
         const userId   = session.metadata.supabase_user_id
         const coachId  = session.metadata.coach_id  ?? null

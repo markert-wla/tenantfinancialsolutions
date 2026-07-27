@@ -15,10 +15,11 @@ export function getStripe(): Stripe {
   return _stripe
 }
 
+// STRIPE_PRICE_BRONZE / STRIPE_PRICE_SILVER are the legacy env var names for
+// these plans (pre-rename); fall back to them so existing deployments keep working.
 export const PLAN_PRICE_IDS: Record<string, string | undefined> = {
-  bronze: process.env.STRIPE_PRICE_BRONZE,
-  silver: process.env.STRIPE_PRICE_SILVER,
-  gold:   process.env.STRIPE_PRICE_GOLD,
+  starter:   process.env.STRIPE_PRICE_STARTER   ?? process.env.STRIPE_PRICE_BRONZE,
+  advantage: process.env.STRIPE_PRICE_ADVANTAGE ?? process.env.STRIPE_PRICE_SILVER,
 }
 
 export const SESSION_PRICE_ID = process.env.STRIPE_PRICE_SESSION
@@ -26,8 +27,7 @@ export const SESSION_PRICE_ID = process.env.STRIPE_PRICE_SESSION
 /** Single source of truth for monthly session limits per plan tier — imported by
  *  the dashboard, book page, and booking API so they can't drift out of sync. */
 export const SESSION_LIMITS: Record<string, number> = {
-  free:   1,
-  bronze: 1,
-  silver: 2,
-  gold:   4,
+  free:      1,
+  starter:   1,
+  advantage: 2,
 }
