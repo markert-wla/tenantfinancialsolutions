@@ -408,7 +408,7 @@ export type Database = {
       client_type: "individual" | "couple" | "nonprofit_individual" | "property_tenant"
       partner_model: "affiliate" | "paying"
       partner_type: "property_management" | "nonprofit" | "trial"
-      plan_tier: "free" | "bronze" | "silver" | "gold"
+      plan_tier: "free" | "starter" | "advantage"
       user_role: "client" | "coach" | "admin" | "property_manager"
     }
     CompositeTypes: {
@@ -541,7 +541,7 @@ export const Constants = {
       client_type: ["individual", "couple", "nonprofit_individual", "property_tenant"],
       partner_model: ["affiliate", "paying"],
       partner_type: ["property_management", "nonprofit", "trial"],
-      plan_tier: ["free", "bronze", "silver", "gold"],
+      plan_tier: ["free", "starter", "advantage"],
       user_role: ["client", "coach", "admin", "property_manager"],
     },
   },

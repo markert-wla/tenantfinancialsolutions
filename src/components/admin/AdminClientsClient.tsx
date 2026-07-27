@@ -3,12 +3,12 @@ import { useState, useMemo } from 'react'
 import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2, PlusCircle, Search, DollarSign, X } from 'lucide-react'
 
 const TIER_LABEL: Record<string, string> = {
-  free: 'Free', bronze: 'Starter', silver: 'Advantage',
+  free: 'Free', starter: 'Starter', advantage: 'Advantage',
 }
 const TIER_COLOR: Record<string, string> = {
   free:   'bg-gray-100 text-gray-600',
-  bronze: 'bg-amber-100 text-amber-700',
-  silver: 'bg-slate-200 text-slate-700',
+  starter: 'bg-amber-100 text-amber-700',
+  advantage: 'bg-slate-200 text-slate-700',
 }
 const TYPE_LABEL: Record<string, string> = {
   individual:           'Individual',
@@ -292,7 +292,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
 
           {/* Plan tier */}
           <div className="flex gap-1 flex-wrap">
-            {[['all', 'All Plans'], ['free', 'Free'], ['bronze', 'Starter'], ['silver', 'Advantage']].map(([val, label]) => (
+            {[['all', 'All Plans'], ['free', 'Free'], ['starter', 'Starter'], ['advantage', 'Advantage']].map(([val, label]) => (
               <button
                 key={val}
                 onClick={() => setTierFilter(val)}

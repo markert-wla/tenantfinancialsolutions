@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Tag, CheckCircle } from 'lucide-react'
 
 const TIER_LABEL: Record<string, string> = {
-  bronze: 'Starter Plan',
-  silver: 'Advantage Plan',
+  starter: 'Starter Plan',
+  advantage: 'Advantage Plan',
 }
 
 export default function ApplyPromoCode() {

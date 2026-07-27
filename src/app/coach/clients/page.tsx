@@ -7,11 +7,11 @@ import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'My Clients — Coach' }
 
-const TIER_LABEL: Record<string, string>  = { free: 'Free', bronze: 'Starter', silver: 'Advantage' }
+const TIER_LABEL: Record<string, string>  = { free: 'Free', starter: 'Starter', advantage: 'Advantage' }
 const TIER_COLOR: Record<string, string>  = {
   free:   'bg-gray-100 text-gray-600',
-  bronze: 'bg-amber-100 text-amber-700',
-  silver: 'bg-slate-200 text-slate-700',
+  starter: 'bg-amber-100 text-amber-700',
+  advantage: 'bg-slate-200 text-slate-700',
 }
 const CLIENT_TYPE_LABEL: Record<string, string> = {
   individual:          'Individual',

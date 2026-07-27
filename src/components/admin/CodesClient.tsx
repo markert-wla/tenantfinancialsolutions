@@ -15,7 +15,7 @@ type PromoCode = {
   partner_id: string | null
   partner_type: 'property_management' | 'nonprofit' | 'trial'
   partner_name: string
-  assigned_tier: 'free' | 'bronze' | 'silver' | null
+  assigned_tier: 'free' | 'starter' | 'advantage' | null
   code_type: 'tier_assignment' | 'affiliate_discount' | 'full_comp' | 'group_comp'
   discount_percent: number | null
   max_uses: number
@@ -27,8 +27,8 @@ type PromoCode = {
 
 const TIER_LABELS: Record<string, string> = {
   free:   'Free',
-  bronze: 'Starter',
-  silver: 'Advantage',
+  starter: 'Starter',
+  advantage: 'Advantage',
   all:    'All',
 }
 
@@ -47,16 +47,16 @@ const PARTNER_LABELS: Record<string, string> = {
 
 const TIER_COLORS: Record<string, string> = {
   free:   'bg-gray-100 text-gray-600',
-  bronze: 'bg-orange-100 text-orange-700',
-  silver: 'bg-slate-100 text-slate-600',
+  starter: 'bg-orange-100 text-orange-700',
+  advantage: 'bg-slate-100 text-slate-600',
   all:    'bg-tfs-teal/10 text-tfs-teal-button',
 }
 
 function partnershipLabel(code: PromoCode): { label: string; color: string } | null {
   if (code.code_type === 'affiliate_discount') return { label: 'Affiliate', color: 'bg-tfs-teal/10 text-tfs-teal-button' }
-  if (code.assigned_tier === 'silver') return { label: 'Full Amenity', color: 'bg-tfs-navy/10 text-tfs-navy' }
+  if (code.assigned_tier === 'advantage') return { label: 'Full Amenity', color: 'bg-tfs-navy/10 text-tfs-navy' }
   if (code.code_type === 'full_comp' || code.code_type === 'group_comp') return null
-  if (code.assigned_tier === 'bronze') return { label: 'Affiliate', color: 'bg-tfs-teal/10 text-tfs-teal-button' }
+  if (code.assigned_tier === 'starter') return { label: 'Affiliate', color: 'bg-tfs-teal/10 text-tfs-teal-button' }
   return null
 }
 
@@ -284,8 +284,8 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
                     <option value="">All Tiers</option>
                   )}
                   <option value="free">Free</option>
-                  <option value="bronze">Starter</option>
-                  <option value="silver">Advantage</option>
+                  <option value="starter">Starter</option>
+                  <option value="advantage">Advantage</option>
                 </select>
               </div>
             </div>

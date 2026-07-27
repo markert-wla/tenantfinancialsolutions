@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { tier } = body
-  if (!['bronze', 'silver'].includes(tier)) {
+  if (!['starter', 'advantage'].includes(tier)) {
     return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
   }
 

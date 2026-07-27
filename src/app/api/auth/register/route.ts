@@ -17,8 +17,8 @@ type ClientType = typeof VALID_CLIENT_TYPES[number]
 
 const TIER_DISPLAY: Record<string, string> = {
   free:   'Free',
-  bronze: 'Starter Plan',
-  silver: 'Advantage Plan',
+  starter: 'Starter Plan',
+  advantage: 'Advantage Plan',
 }
 
 export async function POST(req: NextRequest) {
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
   }
 
-  const validTiers = ['free', 'bronze', 'silver']
+  const validTiers = ['free', 'starter', 'advantage']
   if (tier && !validTiers.includes(tier)) {
     return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
   }
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceClient()
 
   // 1. Validate promo code server-side if provided
-  let effectiveTier = (tier && ['free', 'bronze', 'silver'].includes(tier)) ? tier : 'free'
+  let effectiveTier = (tier && ['free', 'starter', 'advantage'].includes(tier)) ? tier : 'free'
   let codeType = 'tier_assignment'
   let discountPercent: number | null = null
   let promoPartnerId: string | null = null

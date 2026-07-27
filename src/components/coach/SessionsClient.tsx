@@ -26,8 +26,8 @@ const STATUS_BADGE: Record<string, string> = {
 
 const TIER_LABEL: Record<string, string> = {
   free:   'Free',
-  bronze: 'Starter',
-  silver: 'Advantage',
+  starter: 'Starter',
+  advantage: 'Advantage',
 }
 
 type Props = { sessions: Session[]; coachTz: string }

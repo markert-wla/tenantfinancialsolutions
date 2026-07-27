@@ -3,8 +3,8 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getStripe, PLAN_PRICE_IDS } from '@/lib/stripe'
 
 const NEXT_TIER: Record<string, string | undefined> = {
-  free:   'bronze',
-  bronze: 'silver',
+  free:   'starter',
+  starter: 'advantage',
 }
 
 export async function POST(req: NextRequest) {
