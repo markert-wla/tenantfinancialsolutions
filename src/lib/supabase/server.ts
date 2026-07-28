@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export function createClient() {
@@ -23,23 +24,17 @@ export function createClient() {
   )
 }
 
-/** Server client using the service role key — bypasses RLS. Use only in trusted server contexts. */
+/**
+ * Server client using the secret key — bypasses RLS. Use only in trusted server contexts.
+ *
+ * Must NOT be cookie-aware: if the caller's session cookies are hydrated into the
+ * client, supabase-js sends the user's JWT as the Authorization bearer and every
+ * query runs as `authenticated` instead of `service_role`.
+ */
 export function createServiceClient() {
-  const cookieStore = cookies()
-  return createServerClient(
+  return createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SECRET_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {}
-        },
-      },
-    }
+    { auth: { persistSession: false, autoRefreshToken: false } }
   )
 }

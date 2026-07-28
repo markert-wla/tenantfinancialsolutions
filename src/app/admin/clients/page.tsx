@@ -26,7 +26,7 @@ export default async function AdminClientsPage() {
     supabase
       .from('promo_codes')
       .select('code, partner_name')
-      .eq('partner_type', 'property_manager')
+      .eq('partner_type', 'property_management')
       .eq('is_active', true)
       .order('partner_name'),
   ])
