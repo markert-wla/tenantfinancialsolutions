@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
 
-  const { data: promoCode, error: codeErr } = await supabase
+  const { data: promoCode, error: codeErr } = await service
     .from('promo_codes')
     .select('code, assigned_tier, code_type, discount_percent, is_active, uses_count, max_uses, expires_at, partner_id')
     .eq('code', code)

@@ -26,6 +26,10 @@ export const contactLimiter = createLimiter(5, '1 h')
 export const authLimiter = createLimiter(10, '1 h')
 export const bookingLimiter = createLimiter(20, '1 h')
 export const codeLimiter = createLimiter(10, '1 h')
+// Public, unauthenticated endpoints that trigger an outbound email or an
+// account mutation — kept tight so they can't be used to send mail in bulk
+// or to probe user ids.
+export const subscribeLimiter = createLimiter(5, '1 h')
 
 /** Check rate limit for an IP. Returns true if request is allowed. */
 export async function checkRateLimit(

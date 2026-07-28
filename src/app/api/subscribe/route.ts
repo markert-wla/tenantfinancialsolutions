@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
+import { subscribeLimiter, checkRateLimit } from '@/lib/ratelimit'
 
 export async function POST(req: NextRequest) {
+  // Unauthenticated and sends an email per call — rate limit before any work.
+  const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const { allowed } = await checkRateLimit(subscribeLimiter, ip)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  }
+
   const rawBody = await req.json().catch(() => null) as { email?: string; name?: string } | null
   if (!rawBody) return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
 

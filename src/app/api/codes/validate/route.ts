@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { codeLimiter, checkRateLimit } from '@/lib/ratelimit'
 
 export async function POST(req: NextRequest) {
@@ -14,7 +14,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ valid: false, error: 'No code provided' }, { status: 400 })
   }
 
-  const supabase = createClient()
+  // Service client: promo_codes is no longer publicly readable. This route is
+  // rate limited and looks up one caller-supplied code, returning only the
+  // fields the signup form needs — never a listing.
+  const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('promo_codes')
     .select('code, partner_type, partner_name, partner_id, assigned_tier, max_uses, uses_count, is_active, expires_at, partner:partners(partner_name, partner_type)')
