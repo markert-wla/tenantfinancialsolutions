@@ -143,8 +143,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Selected slot is outside coach availability' }, { status: 400 })
   }
 
+  // Conflict checks must use the service client: RLS only lets a client read
+  // their own bookings, so other clients' bookings are invisible to `supabase`.
+  const service = createServiceClient()
+
   // --- Coach conflict check ---
-  const { data: coachConflict } = await supabase
+  const { data: coachConflict } = await service
     .from('bookings')
     .select('id')
     .eq('coach_id', coachId)
@@ -158,7 +162,7 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Client conflict check ---
-  const { data: clientConflict } = await supabase
+  const { data: clientConflict } = await service
     .from('bookings')
     .select('id')
     .eq('client_id', user.id)
@@ -172,7 +176,6 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Insert booking ---
-  const service = createServiceClient()
   const { data: booking, error: bookingErr } = await service
     .from('bookings')
     .insert({
@@ -186,6 +189,11 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (bookingErr || !booking) {
+    // 23P01 = exclusion constraint violation: another booking won the slot
+    // between our conflict check and this insert.
+    if (bookingErr?.code === '23P01') {
+      return NextResponse.json({ error: 'That time slot is no longer available. Please choose another.' }, { status: 409 })
+    }
     console.error('[booking] insert error:', bookingErr?.message)
     return NextResponse.json({ error: 'Failed to create booking. Please try again.' }, { status: 500 })
   }

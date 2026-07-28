@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,7 +72,10 @@ export async function GET(req: NextRequest) {
   if (!availability?.length) return NextResponse.json([], { status: 200 })
 
   // --- Fetch existing confirmed bookings in the window ---
-  const { data: existingBookings } = await supabase
+  // Service client required: RLS only exposes the requesting client's own
+  // bookings, which made other clients' booked slots appear available.
+  // Only coach_id + times are read; nothing client-identifying is returned.
+  const { data: existingBookings } = await createServiceClient()
     .from('bookings')
     .select('coach_id, start_time_utc, end_time_utc')
     .in('coach_id', coachIds)
