@@ -155,8 +155,8 @@ export async function GET(req: NextRequest) {
       while (slotStart.getTime() + SLOT_MINUTES * 60_000 <= blockEnd.getTime()) {
         const slotEnd = new Date(slotStart.getTime() + SLOT_MINUTES * 60_000)
 
-        // Require 12-hour advance notice
-        if (slotStart.getTime() > Date.now() + 12 * 60 * 60_000) {
+        // Require 24-hour advance notice
+        if (slotStart.getTime() > Date.now() + 24 * 60 * 60_000) {
           // Check for booking conflict on this coach
           const conflicts = bookedByCoach[block.coach_id] ?? []
           const hasConflict = conflicts.some(
