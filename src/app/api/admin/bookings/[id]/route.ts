@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { data: booking } = await service
       .from('bookings')
       .select(`
-        id, client_id, coach_id, start_time_utc, status,
+        id, client_id, coach_id, start_time_utc, status, used_extra_session,
         client:profiles!bookings_client_id_fkey(first_name, last_name, email, timezone),
         coach:profiles!bookings_coach_id_fkey(first_name, last_name, email, timezone)
       `)
@@ -41,6 +41,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     const { error } = await service.from('bookings').update({ status: 'cancelled', cancelled_by: 'admin' }).eq('id', params.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Admin-initiated cancellation of a future session: return the client's
+    // credit. Past bookings can also be cancelled here — those don't refund.
+    if (new Date(booking.start_time_utc) > new Date()) {
+      const { error: refundErr } = await service.rpc('refund_session_credit', {
+        p_client_id:     booking.client_id,
+        p_restore_extra: booking.used_extra_session === true,
+      })
+      if (refundErr) console.error('[Admin cancel] Credit refund failed:', refundErr.message)
+    }
 
     const client = booking.client as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null
     const coach  = booking.coach as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null

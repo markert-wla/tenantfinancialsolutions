@@ -259,9 +259,16 @@ export default function HistoryClient({
                 Cancel your session on <strong>{fmt(cancelTarget.start_time_utc)}</strong> with{' '}
                 <strong>{cancelTarget.coaches?.display_name ?? 'TFS Coach'}</strong>?
               </p>
-              <p className="text-tfs-slate text-sm mb-4">
-                Your session credit for this month will be restored. This cannot be undone.
-              </p>
+              {new Date(cancelTarget.start_time_utc).getTime() - Date.now() >= 24 * 60 * 60 * 1000 ? (
+                <p className="text-tfs-slate text-sm mb-4">
+                  Your session credit will be returned to your account. This cannot be undone.
+                </p>
+              ) : (
+                <p className="text-tfs-slate text-sm mb-4">
+                  This session starts in less than 24 hours, so the session credit will still
+                  count as used. This cannot be undone.
+                </p>
+              )}
               {error && (
                 <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2 mb-4">{error}</p>
               )}

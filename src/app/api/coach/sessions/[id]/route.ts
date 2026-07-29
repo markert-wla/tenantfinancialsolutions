@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
 
@@ -27,7 +27,7 @@ export async function PATCH(
   const { data: booking } = await supabase
     .from('bookings')
     .select(`
-      id, coach_id, client_id, status, start_time_utc,
+      id, coach_id, client_id, status, start_time_utc, used_extra_session,
       client:profiles!bookings_client_id_fkey(first_name, last_name, email, timezone)
     `)
     .eq('id', params.id)
@@ -79,6 +79,16 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  if (update.status === 'cancelled') {
+    // Coach-initiated cancellation: always return the client's session credit
+    // regardless of notice — the client didn't choose to cancel.
+    const { error: refundErr } = await createServiceClient().rpc('refund_session_credit', {
+      p_client_id:     booking.client_id,
+      p_restore_extra: booking.used_extra_session === true,
+    })
+    if (refundErr) console.error('[Sessions PATCH] Credit refund failed:', refundErr.message)
+  }
+
   // Email client when coach cancels a future session
   if (update.status === 'cancelled') {
     const client = booking.client as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null
@@ -97,7 +107,7 @@ export async function PATCH(
             <strong style="color:#1A2B4A;">Cancelled session:</strong> ${sessionTime}
           </p>
           <p style="margin:0 0 24px;color:#6B7E8F;">
-            Please log in to book a new time that works for you or contact us if you have any questions.
+            Your session credit has been returned to your account. Please log in to book a new time that works for you or contact us if you have any questions.
           </p>
           ${emailButton(`${process.env.NEXT_PUBLIC_SITE_URL}/portal/dashboard`, 'Book a New Session')}
           <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">— The TFS Team</p>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
 
@@ -21,7 +21,7 @@ export async function POST(
   const { data: booking } = await supabase
     .from('bookings')
     .select(`
-      id, client_id, coach_id, status, start_time_utc,
+      id, client_id, coach_id, status, start_time_utc, used_extra_session,
       coach:profiles!bookings_coach_id_fkey(first_name, last_name, email, contact_email, timezone),
       client:profiles!bookings_client_id_fkey(first_name, last_name)
     `)
@@ -37,12 +37,26 @@ export async function POST(
     return NextResponse.json({ error: 'Cannot cancel a session that has already started' }, { status: 400 })
   }
 
+  // Company policy (Terms §5): cancelling with at least 24 hours' notice
+  // returns the session credit; later cancellations count as used.
+  const creditRestored =
+    new Date(booking.start_time_utc).getTime() - Date.now() >= 24 * 60 * 60_000
+
   const { error } = await supabase
     .from('bookings')
     .update({ status: 'cancelled', cancelled_by: 'client' })
     .eq('id', params.id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (creditRestored) {
+    // The RPC is service-role only; clients cannot update their own counters.
+    const { error: refundErr } = await createServiceClient().rpc('refund_session_credit', {
+      p_client_id:     booking.client_id,
+      p_restore_extra: booking.used_extra_session === true,
+    })
+    if (refundErr) console.error('[Cancel] Credit refund failed:', refundErr.message)
+  }
 
   // Email coach
   const coach = booking.coach as unknown as { first_name: string; last_name: string; email: string; contact_email: string | null; timezone: string } | null
@@ -70,5 +84,5 @@ export async function POST(
     }).catch(err => console.error('[Cancel] Coach email failed:', err))
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, creditRestored })
 }

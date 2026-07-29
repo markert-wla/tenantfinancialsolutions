@@ -184,6 +184,9 @@ export async function POST(req: NextRequest) {
       start_time_utc: startUtc,
       end_time_utc:   endUtc,
       status:         'confirmed',
+      // Which pool this booking consumes — a ≥24h-notice cancellation must
+      // restore the same pool (refund_session_credit).
+      used_extra_session: extraSessions > 0,
     })
     .select('id')
     .single()

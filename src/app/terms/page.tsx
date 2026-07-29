@@ -85,6 +85,7 @@ export default function TermsPage() {
           <ul className="list-disc pl-6 mt-3 space-y-1">
             <li>Sessions are 60 minutes and conducted via video or phone as arranged with your coach</li>
             <li>Session credits reset on the 1st of each month and do not roll over</li>
+            <li>Cancellations made with at least 24 hours&apos; notice will have the session credit returned to your account</li>
             <li>Cancellations made with less than 24 hours&apos; notice may be counted as used sessions at coach discretion</li>
             <li>No-shows without notice will be counted as used sessions</li>
             <li>TFS Community Connect sessions are complimentary for all active members and do not count against session limits</li>
