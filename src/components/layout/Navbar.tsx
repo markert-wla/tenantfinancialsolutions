@@ -135,7 +135,7 @@ export default function Navbar() {
                 width={220}
                 height={64}
                 className="h-14 w-auto object-contain"
-                priority
+                loading="eager"
               />
             </Link>
             {showSessionBtn && !user && (
