@@ -18,13 +18,14 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // No profile embeds here: bookings.coach_id references coaches(id), so
+  // PostgREST rejects a profiles join through that FK (the tables are 1:1 by
+  // id, but there is no FK between them). Coach/client details for the email
+  // are fetched below via the service client — the client's RLS can't read
+  // other users' profiles anyway.
   const { data: booking } = await supabase
     .from('bookings')
-    .select(`
-      id, client_id, coach_id, status, start_time_utc, used_extra_session,
-      coach:profiles!bookings_coach_id_fkey(first_name, last_name, email, contact_email, timezone),
-      client:profiles!bookings_client_id_fkey(first_name, last_name)
-    `)
+    .select('id, client_id, coach_id, status, start_time_utc, used_extra_session')
     .eq('id', params.id)
     .single()
 
@@ -49,18 +50,26 @@ export async function POST(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+  const service = createServiceClient()
+
   if (creditRestored) {
     // The RPC is service-role only; clients cannot update their own counters.
-    const { error: refundErr } = await createServiceClient().rpc('refund_session_credit', {
+    const { error: refundErr } = await service.rpc('refund_session_credit', {
       p_client_id:     booking.client_id,
       p_restore_extra: booking.used_extra_session === true,
     })
     if (refundErr) console.error('[Cancel] Credit refund failed:', refundErr.message)
   }
 
-  // Email coach
-  const coach = booking.coach as unknown as { first_name: string; last_name: string; email: string; contact_email: string | null; timezone: string } | null
-  const client = booking.client as unknown as { first_name: string; last_name: string } | null
+  // Email coach — coaches.id doubles as the coach's profiles id
+  const [{ data: coach }, { data: client }] = await Promise.all([
+    service.from('profiles')
+      .select('first_name, last_name, email, contact_email, timezone')
+      .eq('id', booking.coach_id).single(),
+    service.from('profiles')
+      .select('first_name, last_name')
+      .eq('id', booking.client_id).single(),
+  ])
   if (coach?.email) {
     const sessionTime = fmtTime(booking.start_time_utc, coach.timezone ?? 'America/New_York')
     const clientName = `${client?.first_name ?? ''} ${client?.last_name ?? ''}`.trim() || 'A client'

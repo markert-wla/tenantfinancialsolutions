@@ -26,13 +26,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const service = createServiceClient()
 
   if (body.status === 'cancelled') {
+    // No coach embed: bookings.coach_id references coaches(id), not profiles,
+    // so PostgREST rejects a profiles join through that FK. The tables share
+    // ids 1:1, so fetch both profiles directly instead.
     const { data: booking } = await service
       .from('bookings')
-      .select(`
-        id, client_id, coach_id, start_time_utc, status, used_extra_session,
-        client:profiles!bookings_client_id_fkey(first_name, last_name, email, timezone),
-        coach:profiles!bookings_coach_id_fkey(first_name, last_name, email, timezone)
-      `)
+      .select('id, client_id, coach_id, start_time_utc, status, used_extra_session')
       .eq('id', params.id)
       .single()
 
@@ -52,8 +51,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       if (refundErr) console.error('[Admin cancel] Credit refund failed:', refundErr.message)
     }
 
-    const client = booking.client as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null
-    const coach  = booking.coach as unknown as { first_name: string; last_name: string; email: string; timezone: string } | null
+    const [{ data: client }, { data: coach }] = await Promise.all([
+      service.from('profiles')
+        .select('first_name, last_name, email, timezone')
+        .eq('id', booking.client_id).single(),
+      service.from('profiles')
+        .select('first_name, last_name, email, contact_email, timezone')
+        .eq('id', booking.coach_id).single(),
+    ])
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
 
     const emailPromises = []
@@ -84,7 +89,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       const sessionTime = fmtTime(booking.start_time_utc, coach.timezone ?? 'America/New_York')
       const clientName = `${client?.first_name ?? ''} ${client?.last_name ?? ''}`.trim() || 'A client'
       emailPromises.push(sendEmail({
-        to: coach.email,
+        to: coach.contact_email ?? coach.email,
         subject: 'Session Cancelled by Admin',
         html: brandedEmail(`
           <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:22px;color:#1A2B4A;">Session Cancelled</h1>
