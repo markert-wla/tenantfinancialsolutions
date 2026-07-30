@@ -38,6 +38,8 @@ interface Client {
   is_active: boolean
   created_at: string
   stripe_customer_id: string | null
+  deletion_requested_at: string | null
+  deletion_scheduled_for: string | null
 }
 
 interface PMCode {
@@ -69,6 +71,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
   const [bulkPM, setBulkPM]             = useState('')
   const [savingId, setSavingId]         = useState<string | null>(null)
   const [deleting, setDeleting]         = useState<string | null>(null)
+  const [extendingId, setExtendingId]   = useState<string | null>(null)
   const [bulkSaving, setBulkSaving]     = useState(false)
   const [grantingId, setGrantingId]     = useState<string | null>(null)
   const [grantAmount, setGrantAmount]   = useState<Record<string, string>>({})
@@ -147,6 +150,28 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
       showToast('Failed to delete client')
     } finally {
       setDeleting(null)
+    }
+  }
+
+  // ── Extend pending account deletion by 30 days ───────────────
+  async function extendDeletion(id: string) {
+    setExtendingId(id)
+    try {
+      const res = await fetch('/api/admin/clients/deletion', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ clientId: id, action: 'extend' }),
+      })
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setClients(prev => prev.map(c =>
+        c.id === id ? { ...c, deletion_scheduled_for: data.scheduledFor } : c
+      ))
+      showToast('Deletion pushed out 30 days')
+    } catch {
+      showToast('Failed to extend retention')
+    } finally {
+      setExtendingId(null)
     }
   }
 
@@ -415,6 +440,30 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                       <p className="text-xs text-tfs-slate">{c.email}</p>
                       {c.promo_code_used && (
                         <p className="text-xs text-gray-400 font-mono">{c.promo_code_used}</p>
+                      )}
+                      {c.deletion_scheduled_for && (
+                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-semibold bg-red-100 text-red-700">
+                            <Trash2 size={10} />
+                            Deletion {new Date(c.deletion_scheduled_for).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                          <button
+                            onClick={() => extendDeletion(c.id)}
+                            disabled={extendingId === c.id}
+                            className="text-xs px-2 py-0.5 rounded-full font-medium border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors disabled:opacity-50"
+                            title="Keep this client's data 30 more days before permanent deletion"
+                          >
+                            {extendingId === c.id ? 'Extending…' : '+30 days'}
+                          </button>
+                          <button
+                            onClick={() => deleteClient(c.id, `${c.first_name} ${c.last_name}`.trim() || c.email)}
+                            disabled={deleting === c.id}
+                            className="text-xs px-2 py-0.5 rounded-full font-medium border border-red-300 text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50"
+                            title="Permanently delete this client's data now instead of waiting"
+                          >
+                            {deleting === c.id ? 'Deleting…' : 'Delete now'}
+                          </button>
+                        </div>
                       )}
                     </td>
                     <td className="px-4 py-3">

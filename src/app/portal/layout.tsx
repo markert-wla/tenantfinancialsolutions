@@ -14,7 +14,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, last_name, plan_tier, role')
+    .select('first_name, last_name, plan_tier, role, deletion_scheduled_for')
     .eq('id', user.id)
     .single()
 
@@ -53,9 +53,19 @@ export default async function PortalLayout({ children }: { children: React.React
     </>
   )
 
+  const deletionDate = profile?.deletion_scheduled_for
+    ? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        .format(new Date(profile.deletion_scheduled_for))
+    : null
+
   const banner = isAdminPreview ? (
     <div className="bg-amber-400 text-amber-900 text-xs font-semibold text-center py-1.5 tracking-wide">
       Admin Preview — viewing client portal as admin
+    </div>
+  ) : deletionDate ? (
+    <div className="bg-amber-400 text-amber-900 text-xs font-semibold text-center py-1.5 tracking-wide">
+      Your account is scheduled for permanent deletion on {deletionDate} —{' '}
+      <Link href="/portal/profile" className="underline">restore it here</Link>
     </div>
   ) : undefined
 

@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import PortalProfileForm from '@/components/settings/PortalProfileForm'
+import DeleteAccountSection from '@/components/portal/DeleteAccountSection'
 
 export const metadata: Metadata = { title: 'Profile Settings' }
 
@@ -14,7 +15,7 @@ export default async function PortalProfilePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, last_name, timezone, unit_number, birthday_month, contact_email, client_type, plan_tier, photo_url, bio')
+    .select('first_name, last_name, timezone, unit_number, birthday_month, contact_email, client_type, plan_tier, photo_url, bio, role, deletion_scheduled_for')
     .eq('id', user.id)
     .single()
 
@@ -31,6 +32,9 @@ export default async function PortalProfilePage() {
         userId={user.id}
         profile={profile}
       />
+      {profile.role === 'client' && (
+        <DeleteAccountSection deletionScheduledFor={profile.deletion_scheduled_for ?? null} />
+      )}
     </div>
   )
 }
