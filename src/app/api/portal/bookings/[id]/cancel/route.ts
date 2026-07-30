@@ -61,13 +61,13 @@ export async function POST(
     if (refundErr) console.error('[Cancel] Credit refund failed:', refundErr.message)
   }
 
-  // Email coach — coaches.id doubles as the coach's profiles id
+  // Email coach + client — coaches.id doubles as the coach's profiles id
   const [{ data: coach }, { data: client }] = await Promise.all([
     service.from('profiles')
       .select('first_name, last_name, email, contact_email, timezone')
       .eq('id', booking.coach_id).single(),
     service.from('profiles')
-      .select('first_name, last_name')
+      .select('first_name, last_name, email, timezone')
       .eq('id', booking.client_id).single(),
   ])
   if (coach?.email) {
@@ -91,6 +91,31 @@ export async function POST(
         <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">— The TFS Team</p>
       `),
     }).catch(err => console.error('[Cancel] Coach email failed:', err))
+  }
+
+  // Confirmation to the client
+  if (client?.email) {
+    const sessionTime = fmtTime(booking.start_time_utc, client.timezone ?? 'America/New_York')
+    await sendEmail({
+      to: client.email,
+      subject: 'Your Session Has Been Cancelled',
+      html: brandedEmail(`
+        <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:22px;color:#1A2B4A;">Session Cancelled</h1>
+        <p style="margin:0 0 16px;color:#6B7E8F;">
+          Hi ${client.first_name ?? 'there'}, this confirms you cancelled your upcoming session.
+        </p>
+        <p style="margin:0 0 24px;color:#6B7E8F;">
+          <strong style="color:#1A2B4A;">Cancelled session:</strong> ${sessionTime}
+        </p>
+        <p style="margin:0 0 24px;color:#6B7E8F;">
+          ${creditRestored
+            ? 'Your session credit has been returned to your account — book a new time whenever you’re ready.'
+            : 'Because this session was cancelled with less than 24 hours’ notice, the session credit counts as used.'}
+        </p>
+        ${emailButton(`${process.env.NEXT_PUBLIC_SITE_URL}/portal/book`, 'Book a New Session')}
+        <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">— The TFS Team</p>
+      `),
+    }).catch(err => console.error('[Cancel] Client email failed:', err))
   }
 
   return NextResponse.json({ ok: true, creditRestored })

@@ -38,6 +38,7 @@ export default function HistoryClient({
   const [savingNote, setSavingNote] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
   const [error, setError]           = useState('')
+  const [success, setSuccess]       = useState('')
   const [noteError, setNoteError]   = useState('')
 
   function fmt(iso: string) {
@@ -87,7 +88,17 @@ export default function HistoryClient({
     const res = await fetch(`/api/portal/bookings/${id}/cancel`, { method: 'POST' })
     setCancelLoading(false)
     if (res.ok) {
+      const data = await res.json().catch(() => ({ creditRestored: false }))
+      // Flip the card immediately — router.refresh() re-fetches the server
+      // data, but this list renders from local state seeded once from props,
+      // so without this the screen keeps showing the booking as confirmed.
+      const markCancelled = (list: Booking[]) =>
+        list.map(b => b.id === id ? { ...b, status: 'cancelled' } : b)
+      setBookings(prev => ({ upcoming: markCancelled(prev.upcoming), past: markCancelled(prev.past) }))
       setCancelId(null)
+      setSuccess(data.creditRestored
+        ? 'Session cancelled. Your session credit has been returned to your account.'
+        : 'Session cancelled.')
       router.refresh()
     } else {
       const data = await res.json().catch(() => ({}))
@@ -211,6 +222,13 @@ export default function HistoryClient({
           Book a Session
         </Link>
       </div>
+
+      {success && (
+        <div className="mb-6 flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-4">
+          <span className="text-green-600 text-xl leading-none mt-0.5">✓</span>
+          <p className="font-medium text-green-800 text-sm">{success}</p>
+        </div>
+      )}
 
       {/* Upcoming */}
       {bookings.upcoming.length > 0 && (
