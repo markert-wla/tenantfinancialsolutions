@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 /**
  * PATCH /api/admin/clients/trial
@@ -33,11 +33,16 @@ export async function PATCH(req: Request) {
       }
     }
 
+    // Admins hold no column grant on free_trial_expires_at (the 2026-07
+    // lockdown scoped authenticated's profile UPDATE to self-editable
+    // fields), so this write must run as the service role.
+    const service = createServiceClient()
+
     let ids: string[] = []
 
     if (pmCode) {
       // Resolve all free-tier clients who used this promo code
-      const { data: tenants } = await supabase
+      const { data: tenants } = await service
         .from('profiles')
         .select('id')
         .eq('promo_code_used', pmCode)
@@ -51,7 +56,7 @@ export async function PATCH(req: Request) {
 
     if (!ids.length) return NextResponse.json({ updated: 0 })
 
-    const { error, count } = await supabase
+    const { error, count } = await service
       .from('profiles')
       .update({ free_trial_expires_at: expiresAt ?? null })
       .in('id', ids)

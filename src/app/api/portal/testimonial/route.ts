@@ -25,11 +25,13 @@ export async function POST(req: Request) {
       ? client_name.trim()
       : [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'Anonymous'
 
+    // No `approved` here: clients hold INSERT only on client_name/quote/
+    // plan_tier (the 2026-07 lockdown), so naming the column — even as false —
+    // is a permission error. The DB default enforces approved = false.
     const { error } = await supabase.from('testimonials').insert({
       client_name: name,
       quote:       quote.trim(),
       plan_tier:   profile?.plan_tier ?? null,
-      approved:    false,
     })
     if (error) throw error
 
