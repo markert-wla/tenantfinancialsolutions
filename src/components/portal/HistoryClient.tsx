@@ -21,6 +21,154 @@ const STATUS_COLORS: Record<string, string> = {
   completed:  'bg-tfs-teal/10 text-tfs-teal-button',
 }
 
+function fmtInTz(iso: string, tz: string) {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  }).format(new Date(iso))
+}
+
+function statusLabel(b: Booking): { label: string; cls: string } {
+  if (b.status === 'cancelled') return { label: 'Cancelled', cls: STATUS_COLORS.cancelled }
+  if (new Date(b.start_time_utc) < new Date()) return { label: 'Completed', cls: STATUS_COLORS.completed }
+  return { label: 'Confirmed', cls: STATUS_COLORS.confirmed }
+}
+
+// Module-level on purpose: defining this inside HistoryClient would create a
+// new component type on every parent render, remounting the card — and its
+// textarea — on each keystroke (autoFocus then resets the cursor to the
+// start, typing text backwards).
+function BookingCard({
+  b,
+  dimmed = false,
+  userTz,
+  isEditing,
+  noteText,
+  savingNote,
+  noteError,
+  onNoteChange,
+  onOpenNote,
+  onCloseNote,
+  onSaveNote,
+  onRequestCancel,
+}: {
+  b: Booking
+  dimmed?: boolean
+  userTz: string
+  isEditing: boolean
+  noteText: string
+  savingNote: boolean
+  noteError: string
+  onNoteChange: (value: string) => void
+  onOpenNote: (b: Booking) => void
+  onCloseNote: () => void
+  onSaveNote: (id: string) => void
+  onRequestCancel: (id: string) => void
+}) {
+  const badge = statusLabel(b)
+  const isCancelled = b.status === 'cancelled'
+  const isFuture = new Date(b.start_time_utc) > new Date()
+
+  return (
+    <div className={`card ${dimmed ? 'opacity-80' : ''}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-tfs-navy">
+            {b.coaches?.display_name ?? 'TFS Coach'}
+          </p>
+          <p className="text-sm text-tfs-slate mt-0.5">
+            {fmtInTz(b.start_time_utc, userTz)}
+            <span className="text-xs ml-1 opacity-60">({userTz})</span>
+          </p>
+
+          {/* Coach's note — read-only */}
+          {b.client_notes && (
+            <div className="mt-2 border-l-2 border-tfs-teal/50 pl-2">
+              <p className="text-xs font-medium text-tfs-teal-button mb-0.5">Coach</p>
+              <p className="text-sm text-tfs-slate italic">{b.client_notes}</p>
+            </div>
+          )}
+
+          {/* Client's own message — read-only (shown when not editing) */}
+          {b.client_message && !isEditing && (
+            <div className="mt-2 border-l-2 border-gray-300 pl-2">
+              <p className="text-xs font-medium text-tfs-slate mb-0.5">Me</p>
+              <p className="text-sm text-tfs-slate italic">{b.client_message}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {b.coaches?.zoom_link && isFuture && !isCancelled && (
+            <a
+              href={b.coaches.zoom_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs px-3 py-1 rounded-full bg-tfs-teal text-white font-medium hover:bg-tfs-teal/90 transition-colors"
+            >
+              Join
+            </a>
+          )}
+          <span className={`text-xs px-2 py-1 rounded-full font-medium ${badge.cls}`}>
+            {badge.label}
+          </span>
+          {!isCancelled && (
+            <button
+              onClick={() => onOpenNote(b)}
+              className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
+              title={b.client_message ? 'Edit your note' : 'Add your note'}
+            >
+              <Edit3 size={15} />
+            </button>
+          )}
+          {b.status === 'confirmed' && isFuture && (
+            <button
+              onClick={() => onRequestCancel(b.id)}
+              className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
+              title="Cancel this session"
+            >
+              <XCircle size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {isEditing && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <label className="block text-xs font-medium text-tfs-navy mb-1">My Note</label>
+          <textarea
+            value={noteText}
+            onChange={e => onNoteChange(e.target.value)}
+            rows={4}
+            placeholder="Jot down questions, action items, or anything you want to share with your coach…"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none mb-2"
+            autoFocus
+          />
+          {noteError && (
+            <p className="text-xs text-red-600 mb-2">{noteError}</p>
+          )}
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={onCloseNote}
+              className="text-sm text-tfs-slate hover:text-tfs-navy px-3 py-1.5 rounded-lg border border-gray-200"
+            >
+              <X size={13} className="inline mr-1" />Cancel
+            </button>
+            <button
+              onClick={() => onSaveNote(b.id)}
+              disabled={savingNote}
+              className="btn-primary text-sm px-4 py-1.5"
+            >
+              {savingNote ? 'Saving…' : 'Save Note'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function HistoryClient({
   upcoming,
   past,
@@ -40,20 +188,6 @@ export default function HistoryClient({
   const [error, setError]           = useState('')
   const [success, setSuccess]       = useState('')
   const [noteError, setNoteError]   = useState('')
-
-  function fmt(iso: string) {
-    return new Intl.DateTimeFormat('en-US', {
-      timeZone: userTz,
-      weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
-      hour: 'numeric', minute: '2-digit', hour12: true,
-    }).format(new Date(iso))
-  }
-
-  function statusLabel(b: Booking): { label: string; cls: string } {
-    if (b.status === 'cancelled') return { label: 'Cancelled', cls: STATUS_COLORS.cancelled }
-    if (new Date(b.start_time_utc) < new Date()) return { label: 'Completed', cls: STATUS_COLORS.completed }
-    return { label: 'Confirmed', cls: STATUS_COLORS.confirmed }
-  }
 
   function openNote(b: Booking) {
     setEditingNote(b.id)
@@ -108,109 +242,16 @@ export default function HistoryClient({
 
   const cancelTarget = bookings.upcoming.find(b => b.id === cancelId)
 
-  function BookingCard({ b, dimmed = false }: { b: Booking; dimmed?: boolean }) {
-    const badge = statusLabel(b)
-    const isCancelled = b.status === 'cancelled'
-    const isFuture = new Date(b.start_time_utc) > new Date()
-    const isEditing = editingNote === b.id
-
-    return (
-      <div className={`card ${dimmed ? 'opacity-80' : ''}`}>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-tfs-navy">
-              {b.coaches?.display_name ?? 'TFS Coach'}
-            </p>
-            <p className="text-sm text-tfs-slate mt-0.5">
-              {fmt(b.start_time_utc)}
-              <span className="text-xs ml-1 opacity-60">({userTz})</span>
-            </p>
-
-            {/* Coach's note — read-only */}
-            {b.client_notes && (
-              <div className="mt-2 border-l-2 border-tfs-teal/50 pl-2">
-                <p className="text-xs font-medium text-tfs-teal-button mb-0.5">Coach</p>
-                <p className="text-sm text-tfs-slate italic">{b.client_notes}</p>
-              </div>
-            )}
-
-            {/* Client's own message — read-only (shown when not editing) */}
-            {b.client_message && !isEditing && (
-              <div className="mt-2 border-l-2 border-gray-300 pl-2">
-                <p className="text-xs font-medium text-tfs-slate mb-0.5">Me</p>
-                <p className="text-sm text-tfs-slate italic">{b.client_message}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1.5 shrink-0">
-            {b.coaches?.zoom_link && isFuture && !isCancelled && (
-              <a
-                href={b.coaches.zoom_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs px-3 py-1 rounded-full bg-tfs-teal text-white font-medium hover:bg-tfs-teal/90 transition-colors"
-              >
-                Join
-              </a>
-            )}
-            <span className={`text-xs px-2 py-1 rounded-full font-medium ${badge.cls}`}>
-              {badge.label}
-            </span>
-            {!isCancelled && (
-              <button
-                onClick={() => openNote(b)}
-                className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
-                title={b.client_message ? 'Edit your note' : 'Add your note'}
-              >
-                <Edit3 size={15} />
-              </button>
-            )}
-            {b.status === 'confirmed' && isFuture && (
-              <button
-                onClick={() => setCancelId(b.id)}
-                className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
-                title="Cancel this session"
-              >
-                <XCircle size={16} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {isEditing && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <label className="block text-xs font-medium text-tfs-navy mb-1">My Note</label>
-            <textarea
-              value={noteText}
-              onChange={e => setNoteText(e.target.value)}
-              rows={4}
-              placeholder="Jot down questions, action items, or anything you want to share with your coach…"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none mb-2"
-              autoFocus
-            />
-            {noteError && (
-              <p className="text-xs text-red-600 mb-2">{noteError}</p>
-            )}
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setEditingNote(null)}
-                className="text-sm text-tfs-slate hover:text-tfs-navy px-3 py-1.5 rounded-lg border border-gray-200"
-              >
-                <X size={13} className="inline mr-1" />Cancel
-              </button>
-              <button
-                onClick={() => saveNote(b.id)}
-                disabled={savingNote}
-                className="btn-primary text-sm px-4 py-1.5"
-              >
-                {savingNote ? 'Saving…' : 'Save Note'}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    )
+  const cardProps = {
+    userTz,
+    noteText,
+    savingNote,
+    noteError,
+    onNoteChange:    setNoteText,
+    onOpenNote:      openNote,
+    onCloseNote:     () => setEditingNote(null),
+    onSaveNote:      saveNote,
+    onRequestCancel: setCancelId,
   }
 
   return (
@@ -235,7 +276,9 @@ export default function HistoryClient({
         <section className="mb-10">
           <h2 className="text-lg font-semibold text-tfs-navy mb-4">Upcoming</h2>
           <div className="space-y-3">
-            {bookings.upcoming.map(b => <BookingCard key={b.id} b={b} />)}
+            {bookings.upcoming.map(b => (
+              <BookingCard key={b.id} b={b} isEditing={editingNote === b.id} {...cardProps} />
+            ))}
           </div>
         </section>
       )}
@@ -255,7 +298,9 @@ export default function HistoryClient({
           </div>
         ) : (
           <div className="space-y-3">
-            {bookings.past.map(b => <BookingCard key={b.id} b={b} dimmed />)}
+            {bookings.past.map(b => (
+              <BookingCard key={b.id} b={b} dimmed isEditing={editingNote === b.id} {...cardProps} />
+            ))}
           </div>
         )}
       </section>
@@ -274,7 +319,7 @@ export default function HistoryClient({
             </div>
             <div className="px-6 py-5">
               <p className="text-tfs-slate text-sm mb-2">
-                Cancel your session on <strong>{fmt(cancelTarget.start_time_utc)}</strong> with{' '}
+                Cancel your session on <strong>{fmtInTz(cancelTarget.start_time_utc, userTz)}</strong> with{' '}
                 <strong>{cancelTarget.coaches?.display_name ?? 'TFS Coach'}</strong>?
               </p>
               {new Date(cancelTarget.start_time_utc).getTime() - Date.now() >= 24 * 60 * 60 * 1000 ? (
