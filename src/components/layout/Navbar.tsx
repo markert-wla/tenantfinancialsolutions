@@ -110,7 +110,12 @@ export default function Navbar() {
   const dashboardLabel = role === 'client' || role === null ? 'My Portal' : 'Dashboard'
 
   // Show the sliding Session button on public pages for all visitors.
-  // Logged-in users who click it are redirected to their dashboard anyway.
+  // Logged-in users go straight to booking (or their dashboard for staff
+  // roles) instead of the signup wizard — middleware also enforces this
+  // for the other marketing CTAs that link to /register.
+  const sessionHref = user
+    ? (role === 'client' || role === null ? '/portal/book' : dashboardHref)
+    : '/register?tier=free'
   const showSessionBtn = PUBLIC_PAGES.has(pathname)
   const sessionActive  = showSessionBtn && sessionVisible
 
@@ -239,7 +244,7 @@ export default function Navbar() {
                 aria-hidden={!sessionActive}
               >
                 <Link
-                  href="/register?tier=free"
+                  href={sessionHref}
                   tabIndex={sessionActive ? 0 : -1}
                   className="bg-tfs-gold text-tfs-navy font-bold text-sm px-5 py-2 rounded-lg whitespace-nowrap hover:brightness-105 hover:scale-105 block"
                 >

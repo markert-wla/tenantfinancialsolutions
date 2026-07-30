@@ -42,6 +42,29 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Marketing-page session CTAs all point at /register. Already-registered
+  // users who click one should land in the app, not the blank signup wizard.
+  // ?cancelled=1 is exempt: Stripe's cancel_url returns here to show the
+  // payment-cancelled message, and that visitor may still hold a session.
+  if (pathname === '/register' && user && !request.nextUrl.searchParams.has('cancelled')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile) {
+      const url = request.nextUrl.clone()
+      url.pathname =
+        profile.role === 'coach'            ? '/coach/dashboard' :
+        profile.role === 'admin'            ? '/admin/dashboard' :
+        profile.role === 'property_manager' ? '/manager/dashboard' :
+        '/portal/book'
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
+  }
+
   for (const [prefix, allowedRoles] of Object.entries(PROTECTED_ROUTES)) {
     if (pathname.startsWith(prefix)) {
       if (!user) {
