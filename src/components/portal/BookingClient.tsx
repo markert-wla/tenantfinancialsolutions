@@ -182,7 +182,7 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
               ? 'Individual coaching sessions are available on Starter and Advantage plans.'
               : `You've used all your sessions for this month. Upgrade for more, or check back next month.`}
         </p>
-        {!isGroupComp && <a href="/services" className="btn-primary text-sm">View Plans</a>}
+        {!isGroupComp && <a href="/portal/billing" className="btn-primary text-sm">View Plans &amp; Upgrade</a>}
         {isGroupComp && <a href="/portal/group-sessions" className="btn-primary text-sm">View TFS Community Connect</a>}
       </div>
     )

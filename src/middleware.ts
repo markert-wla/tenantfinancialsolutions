@@ -54,11 +54,17 @@ export async function middleware(request: NextRequest) {
       .single()
 
     if (profile) {
+      // A paid ?tier= means they clicked an upgrade CTA (e.g. the public
+      // services page) — send clients to the in-portal upgrade flow, which
+      // has working Stripe checkout, rather than the booking page.
+      const tier = request.nextUrl.searchParams.get('tier')
+      const wantsUpgrade = tier === 'starter' || tier === 'advantage'
       const url = request.nextUrl.clone()
       url.pathname =
         profile.role === 'coach'            ? '/coach/dashboard' :
         profile.role === 'admin'            ? '/admin/dashboard' :
         profile.role === 'property_manager' ? '/manager/dashboard' :
+        wantsUpgrade                        ? '/portal/billing' :
         '/portal/book'
       url.search = ''
       return NextResponse.redirect(url)
