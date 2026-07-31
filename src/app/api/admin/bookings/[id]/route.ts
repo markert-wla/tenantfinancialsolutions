@@ -109,6 +109,41 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ ok: true })
   }
 
+  // ── Mark as No-Show (Option A: auto-resets free-plan session counter) ──
+  if (body.status === 'no_show') {
+    const { data: booking } = await service
+      .from('bookings')
+      .select('id, client_id, status')
+      .eq('id', params.id)
+      .single()
+
+    if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+    if (booking.status === 'no_show') return NextResponse.json({ ok: true })
+
+    const { error } = await service
+      .from('bookings')
+      .update({ status: 'no_show' })
+      .eq('id', params.id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Automatically reset the session counter for free-plan clients so they
+    // can rebook their one free Connection Session.
+    const { data: clientProfile } = await service
+      .from('profiles')
+      .select('plan_tier, sessions_used_this_month')
+      .eq('id', booking.client_id)
+      .single()
+
+    if (clientProfile?.plan_tier === 'free' && (clientProfile.sessions_used_this_month ?? 0) > 0) {
+      await service
+        .from('profiles')
+        .update({ sessions_used_this_month: 0 })
+        .eq('id', booking.client_id)
+    }
+
+    return NextResponse.json({ ok: true })
+  }
+
   if ('notes' in body || 'client_notes' in body) {
     const update: Record<string, string | null> = {}
     if ('notes' in body)        update.notes        = body.notes        ?? null

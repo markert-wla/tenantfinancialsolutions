@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { XCircle, StickyNote, Flag, FlagOff, Lock, Share2 } from 'lucide-react'
+import { XCircle, StickyNote, Flag, FlagOff, Lock, Share2, UserX } from 'lucide-react'
 
 type Booking = {
   id: string
   start_time_utc: string
   end_time_utc: string
-  status: 'pending' | 'confirmed' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'cancelled' | 'no_show'
   notes: string | null
   client_notes: string | null
   flagged: boolean
@@ -21,6 +21,14 @@ const STATUS_COLORS: Record<string, string> = {
   confirmed: 'bg-green-100 text-green-700',
   cancelled: 'bg-red-100  text-red-700',
   pending:   'bg-yellow-100 text-yellow-700',
+  no_show:   'bg-orange-100 text-orange-700',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  confirmed: 'Confirmed',
+  cancelled: 'Cancelled',
+  pending:   'Pending',
+  no_show:   'No-Show',
 }
 
 const ET = 'America/New_York'
@@ -33,19 +41,21 @@ function fmt(iso: string) {
   }).format(new Date(iso))
 }
 
-type Filter = 'all' | 'confirmed' | 'cancelled' | 'pending' | 'flagged'
+type Filter = 'all' | 'confirmed' | 'cancelled' | 'pending' | 'no_show' | 'flagged'
 
 export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
   const router = useRouter()
-  const [cancelId, setCancelId]       = useState<string | null>(null)
+  const [cancelId, setCancelId]         = useState<string | null>(null)
+  const [noShowId, setNoShowId]         = useState<string | null>(null)
   const [notesId,         setNotesId]         = useState<string | null>(null)
   const [coachNoteText,   setCoachNoteText]   = useState('')
   const [clientNoteText,  setClientNoteText]  = useState('')
-  const [expandFlag, setExpandFlag]   = useState<string | null>(null)
-  const [loading, setLoading]         = useState(false)
-  const [filter, setFilter]           = useState<Filter>('all')
+  const [expandFlag, setExpandFlag]     = useState<string | null>(null)
+  const [loading, setLoading]           = useState(false)
+  const [filter, setFilter]             = useState<Filter>('all')
 
   const flaggedCount = bookings.filter(b => b.flagged).length
+  const noShowCount  = bookings.filter(b => b.status === 'no_show').length
 
   const visible = filter === 'all'     ? bookings
     : filter === 'flagged'             ? bookings.filter(b => b.flagged)
@@ -67,6 +77,11 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
     setCancelId(null)
   }
 
+  async function handleNoShow(id: string) {
+    await patch(id, { status: 'no_show' })
+    setNoShowId(null)
+  }
+
   function openNotes(b: Booking) {
     setNotesId(b.id)
     setCoachNoteText(b.notes ?? '')
@@ -85,13 +100,15 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
   }
 
   const cancelTarget = bookings.find(b => b.id === cancelId)
+  const noShowTarget = bookings.find(b => b.id === noShowId)
 
   const FILTERS: { key: Filter; label: string; count?: number }[] = [
     { key: 'all',       label: 'All' },
     { key: 'confirmed', label: 'Confirmed' },
     { key: 'cancelled', label: 'Cancelled' },
     { key: 'pending',   label: 'Pending' },
-    { key: 'flagged',   label: 'Flagged', count: flaggedCount || undefined },
+    { key: 'no_show',   label: 'No-Show', count: noShowCount || undefined },
+    { key: 'flagged',   label: 'Flagged',  count: flaggedCount || undefined },
   ]
 
   return (
@@ -108,14 +125,18 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                   ? 'bg-tfs-navy text-white'
                   : f.key === 'flagged' && f.count
                     ? 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100'
-                    : 'bg-white text-tfs-slate border border-gray-200 hover:border-tfs-teal'
+                    : f.key === 'no_show' && f.count
+                      ? 'bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100'
+                      : 'bg-white text-tfs-slate border border-gray-200 hover:border-tfs-teal'
               }`}
             >
-              {f.key === 'flagged' && <Flag size={11} />}
+              {f.key === 'flagged'  && <Flag size={11} />}
+              {f.key === 'no_show' && <UserX size={11} />}
               {f.label}
               {f.count ? (
                 <span className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${
-                  filter === f.key ? 'bg-white/20' : 'bg-red-500 text-white'
+                  filter === f.key ? 'bg-white/20' :
+                  f.key === 'flagged' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'
                 }`}>{f.count}</span>
               ) : null}
             </button>
@@ -140,100 +161,112 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {visible.map(b => (
-                  <>
-                    <tr key={b.id} className={b.flagged ? 'bg-red-50/50' : ''}>
-                      <td className="py-3 pr-4 text-tfs-navy text-xs whitespace-nowrap">
-                        {fmt(b.start_time_utc)}
-                      </td>
-                      <td className="py-3 pr-4">
-                        <p className="font-medium text-tfs-navy">
-                          {b.client?.first_name} {b.client?.last_name}
-                        </p>
-                        <p className="text-xs text-tfs-slate">{b.client?.email}</p>
-                      </td>
-                      <td className="py-3 pr-4 text-tfs-slate">{b.coach?.display_name ?? '—'}</td>
-                      <td className="py-3 pr-4">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[b.status]}`}>
-                          {b.status}
-                        </span>
-                      </td>
-                      <td className="py-3 pr-4 max-w-[220px]">
-                        {b.flagged && (
-                          <button
-                            onClick={() => setExpandFlag(expandFlag === b.id ? null : b.id)}
-                            className="flex items-center gap-1 text-xs text-red-600 font-semibold mb-1 hover:underline"
-                          >
-                            <Flag size={11} /> Flagged by coach
-                          </button>
-                        )}
-                        {b.notes && (
-                          <p className="text-xs text-tfs-slate truncate flex items-center gap-1">
-                            <Lock size={10} className="shrink-0 text-gray-400" />{b.notes}
+                {visible.map(b => {
+                  const isPast = new Date(b.start_time_utc) < new Date()
+                  return (
+                    <>
+                      <tr key={b.id} className={b.flagged ? 'bg-red-50/50' : ''}>
+                        <td className="py-3 pr-4 text-tfs-navy text-xs whitespace-nowrap">
+                          {fmt(b.start_time_utc)}
+                        </td>
+                        <td className="py-3 pr-4">
+                          <p className="font-medium text-tfs-navy">
+                            {b.client?.first_name} {b.client?.last_name}
                           </p>
-                        )}
-                        {b.client_notes && (
-                          <p className="text-xs text-tfs-teal-button truncate flex items-center gap-1 mt-0.5">
-                            <Share2 size={10} className="shrink-0" />{b.client_notes}
-                          </p>
-                        )}
-                        {!b.notes && !b.client_notes && !b.flagged && (
-                          <span className="text-xs text-gray-300">—</span>
-                        )}
-                      </td>
-                      <td className="py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => openNotes(b)}
-                            className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
-                            title="Edit notes"
-                          >
-                            <StickyNote size={15} />
-                          </button>
+                          <p className="text-xs text-tfs-slate">{b.client?.email}</p>
+                        </td>
+                        <td className="py-3 pr-4 text-tfs-slate">{b.coach?.display_name ?? '—'}</td>
+                        <td className="py-3 pr-4">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[b.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                            {STATUS_LABEL[b.status] ?? b.status}
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4 max-w-[220px]">
                           {b.flagged && (
                             <button
-                              onClick={() => clearFlag(b.id)}
-                              disabled={loading}
-                              className="p-1.5 rounded-lg text-red-500 hover:text-gray-500 hover:bg-gray-50 transition-colors"
-                              title="Clear flag"
+                              onClick={() => setExpandFlag(expandFlag === b.id ? null : b.id)}
+                              className="flex items-center gap-1 text-xs text-red-600 font-semibold mb-1 hover:underline"
                             >
-                              <FlagOff size={15} />
+                              <Flag size={11} /> Flagged by coach
                             </button>
                           )}
-                          {b.status === 'confirmed' && (
-                            <button
-                              onClick={() => setCancelId(b.id)}
-                              className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
-                              title="Cancel booking"
-                            >
-                              <XCircle size={15} />
-                            </button>
+                          {b.notes && (
+                            <p className="text-xs text-tfs-slate truncate flex items-center gap-1">
+                              <Lock size={10} className="shrink-0 text-gray-400" />{b.notes}
+                            </p>
                           )}
-                        </div>
-                      </td>
-                    </tr>
-                    {/* Flag reason expand row */}
-                    {b.flagged && expandFlag === b.id && (
-                      <tr key={`${b.id}-flag`} className="bg-red-50">
-                        <td colSpan={6} className="px-4 py-3">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <p className="text-xs font-semibold text-red-700 mb-1">Coach flag reason:</p>
-                              <p className="text-sm text-red-800">{b.flag_reason ?? 'No reason provided.'}</p>
-                            </div>
+                          {b.client_notes && (
+                            <p className="text-xs text-tfs-teal-button truncate flex items-center gap-1 mt-0.5">
+                              <Share2 size={10} className="shrink-0" />{b.client_notes}
+                            </p>
+                          )}
+                          {!b.notes && !b.client_notes && !b.flagged && (
+                            <span className="text-xs text-gray-300">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
                             <button
-                              onClick={() => clearFlag(b.id)}
-                              disabled={loading}
-                              className="shrink-0 flex items-center gap-1.5 text-xs bg-white border border-red-200 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg transition-colors"
+                              onClick={() => openNotes(b)}
+                              className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
+                              title="Edit notes"
                             >
-                              <FlagOff size={12} /> Clear Flag
+                              <StickyNote size={15} />
                             </button>
+                            {b.flagged && (
+                              <button
+                                onClick={() => clearFlag(b.id)}
+                                disabled={loading}
+                                className="p-1.5 rounded-lg text-red-500 hover:text-gray-500 hover:bg-gray-50 transition-colors"
+                                title="Clear flag"
+                              >
+                                <FlagOff size={15} />
+                              </button>
+                            )}
+                            {b.status === 'confirmed' && isPast && (
+                              <button
+                                onClick={() => setNoShowId(b.id)}
+                                className="p-1.5 rounded-lg text-tfs-slate hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                                title="Mark as no-show (free-plan clients can rebook automatically)"
+                              >
+                                <UserX size={15} />
+                              </button>
+                            )}
+                            {b.status === 'confirmed' && (
+                              <button
+                                onClick={() => setCancelId(b.id)}
+                                className="p-1.5 rounded-lg text-tfs-slate hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Cancel booking"
+                              >
+                                <XCircle size={15} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
-                    )}
-                  </>
-                ))}
+                      {/* Flag reason expand row */}
+                      {b.flagged && expandFlag === b.id && (
+                        <tr key={`${b.id}-flag`} className="bg-red-50">
+                          <td colSpan={6} className="px-4 py-3">
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <p className="text-xs font-semibold text-red-700 mb-1">Coach flag reason:</p>
+                                <p className="text-sm text-red-800">{b.flag_reason ?? 'No reason provided.'}</p>
+                              </div>
+                              <button
+                                onClick={() => clearFlag(b.id)}
+                                disabled={loading}
+                                className="shrink-0 flex items-center gap-1.5 text-xs bg-white border border-red-200 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                <FlagOff size={12} /> Clear Flag
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -259,6 +292,31 @@ export default function BookingsClient({ bookings }: { bookings: Booking[] }) {
               className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Cancelling…' : 'Cancel Booking'}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* No-Show modal */}
+      {noShowId && noShowTarget && (
+        <Modal title="Mark as No-Show" onClose={() => setNoShowId(null)}>
+          <p className="text-tfs-slate text-sm mb-2">
+            Mark{' '}
+            <strong>{noShowTarget.client?.first_name} {noShowTarget.client?.last_name}</strong>&apos;s
+            session on <strong>{fmt(noShowTarget.start_time_utc)}</strong> as a no-show?
+          </p>
+          <p className="text-tfs-slate text-sm mb-6">
+            If this client is on the <strong>Free plan</strong>, their session counter will be reset
+            automatically so they can rebook their free Connection Session.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <button onClick={() => setNoShowId(null)} className="btn-outline">Go Back</button>
+            <button
+              onClick={() => handleNoShow(noShowId)}
+              disabled={loading}
+              className="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Saving…' : 'Mark No-Show'}
             </button>
           </div>
         </Modal>
