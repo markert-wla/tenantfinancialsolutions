@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2, PlusCircle, Search, DollarSign, X } from 'lucide-react'
+import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2, PlusCircle, Search, DollarSign, X, RotateCcw } from 'lucide-react'
 
 const TIER_LABEL: Record<string, string> = {
   free: 'Free', starter: 'Starter', advantage: 'Advantage',
@@ -79,6 +79,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
   const [creditAmount, setCreditAmount] = useState('')
   const [creditNote, setCreditNote]     = useState('')
   const [crediting, setCrediting]       = useState(false)
+  const [resetingId, setResetingId]     = useState<string | null>(null)
   const [toast, setToast]               = useState('')
 
   function showToast(msg: string) {
@@ -237,6 +238,28 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
       showToast('Failed to grant session')
     } finally {
       setGrantingId(null)
+    }
+  }
+
+  // ── Reset free-plan session counter (Option B — manual override) ──
+  async function resetSession(clientId: string, name: string) {
+    if (!confirm(`Reset ${name}'s session counter to 0? This lets them book their free Connection Session again.`)) return
+    setResetingId(clientId)
+    try {
+      const res = await fetch('/api/admin/clients/reset-session', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId }),
+      })
+      if (!res.ok) throw new Error()
+      setClients(prev => prev.map(c =>
+        c.id === clientId ? { ...c, sessions_used_this_month: 0 } : c
+      ))
+      showToast(`Session reset — ${name} can rebook`)
+    } catch {
+      showToast('Failed to reset session')
+    } finally {
+      setResetingId(null)
     }
   }
 
@@ -424,6 +447,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                 const flag   = days >= 120 ? 'critical' : days >= 90 ? 'warning' : null
                 const isSelected = selected.has(c.id)
                 const trialExpired = c.free_trial_expires_at ? new Date(c.free_trial_expires_at) < new Date() : false
+                const canResetSession = c.plan_tier === 'free' && (c.sessions_used_this_month ?? 0) > 0
 
                 return (
                   <tr
@@ -545,6 +569,19 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {canResetSession && (
+                          <button
+                            onClick={() => resetSession(c.id, `${c.first_name} ${c.last_name}`.trim() || c.email)}
+                            disabled={resetingId === c.id}
+                            className="p-1.5 rounded-lg text-tfs-slate hover:text-orange-600 hover:bg-orange-50 transition-colors disabled:opacity-40"
+                            title="Reset free session counter so client can rebook"
+                          >
+                            {resetingId === c.id
+                              ? <Loader2 size={15} className="animate-spin" />
+                              : <RotateCcw size={15} />
+                            }
+                          </button>
+                        )}
                         {c.stripe_customer_id && (
                           <button
                             onClick={() => { setCreditClient(c); setCreditAmount(''); setCreditNote('') }}
