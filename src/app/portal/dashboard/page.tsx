@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { CalendarPlus, Users, CalendarCheck } from 'lucide-react'
+import { CalendarPlus, Users, CalendarCheck, MessageSquare } from 'lucide-react'
 import ExtraSessionCard from '@/components/portal/ExtraSessionCard'
 import { SESSION_LIMITS } from '@/lib/stripe'
 import { tzShort } from '@/lib/timezones'
@@ -68,6 +68,14 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
     .gte('start_time_utc', firstOfMonth)
     .lt('start_time_utc', now.toISOString())
 
+  // Unread messages from coach
+  const { data: unreadCoachMessages } = await supabase
+    .from('coach_messages')
+    .select('id, body, created_at')
+    .eq('client_id', user.id)
+    .is('read_at', null)
+    .order('created_at', { ascending: false })
+
   // Next group session
   const { data: nextGroup } = await supabase
     .from('group_sessions')
@@ -103,6 +111,33 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
           </div>
         </div>
       )}
+
+      {/* Unread coach message alerts */}
+      {unreadCoachMessages && unreadCoachMessages.length > 0 && (
+        <div className="mb-6 space-y-3">
+          {unreadCoachMessages.map((msg: { id: string; body: string; created_at: string }) => (
+            <div key={msg.id} className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
+              <MessageSquare size={20} className="text-blue-600 shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-blue-900 text-sm mb-1">New message from your coach</p>
+                <p className="text-blue-800 text-sm whitespace-pre-wrap">{msg.body}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-blue-600">
+                    {new Intl.DateTimeFormat('en-US', {
+                      month: 'short', day: 'numeric', year: 'numeric',
+                      hour: 'numeric', minute: '2-digit', hour12: true,
+                    }).format(new Date(msg.created_at))}
+                  </p>
+                  <Link href="/portal/messages" className="text-xs font-semibold text-blue-700 hover:underline">
+                    View in Messages →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-1">
           Welcome back, {profile?.first_name ?? 'there'}!
