@@ -53,10 +53,17 @@ export async function POST(req: NextRequest) {
 
     case 'customer.subscription.deleted': {
       const sub = event.data.object as Stripe.Subscription
+      // Only downgrade when the cancelled subscription is the one on record. A
+      // customer can briefly hold more than one subscription (the upgrade flow
+      // opens a fresh checkout rather than modifying the existing one), and
+      // matching on customer alone would drop a still-paying client to free.
+      // Rows with no recorded subscription id are legacy/manual upgrades — keep
+      // the old customer-only behaviour for those so they still downgrade.
       await supabase
         .from('profiles')
         .update({ plan_tier: 'free', stripe_subscription_id: null })
         .eq('stripe_customer_id', (sub.customer as string))
+        .or(`stripe_subscription_id.eq.${sub.id},stripe_subscription_id.is.null`)
       break
     }
 
