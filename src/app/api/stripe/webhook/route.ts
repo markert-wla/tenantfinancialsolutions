@@ -17,8 +17,34 @@ export async function POST(req: NextRequest) {
     const stripe = getStripe()
     event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err: unknown) {
+    // Stripe only shows the response body in its own dashboard, so without this
+    // a rejected delivery is invisible in the Vercel logs. The usual cause is
+    // the endpoint's signing secret not matching STRIPE_WEBHOOK_SECRET — which
+    // happens whenever a destination is recreated rather than edited.
+    //
+    // The id/type below come from an *unverified* payload and are logged purely
+    // so a log line can be matched against a delivery in the Stripe dashboard.
+    // Nothing downstream reads them.
+    let claimed = 'unparseable'
+    try {
+      const parsed = JSON.parse(rawBody) as { id?: string; type?: string }
+      claimed = `${parsed.type ?? 'unknown'} ${parsed.id ?? ''}`.trim()
+    } catch { /* body wasn't JSON — leave as unparseable */ }
+
+    // Stripe's message is multi-line; flatten it so each failure is one
+    // greppable log line with the diagnostic fields up front.
+    const reason = (err as Error).message.replace(/\s+/g, ' ').trim()
+    console.error(
+      `[webhook] Signature verification FAILED` +
+      ` | claimed event: ${claimed}` +
+      ` | signature header: ${sig ? 'present' : 'MISSING'}` +
+      ` | STRIPE_WEBHOOK_SECRET: ${process.env.STRIPE_WEBHOOK_SECRET ? 'set' : 'NOT SET'}` +
+      ` | reason: ${reason}`
+    )
     return NextResponse.json({ error: `Webhook Error: ${(err as Error).message}` }, { status: 400 })
   }
+
+  console.log(`[webhook] Received ${event.type} (${event.id})`)
 
   const supabase = createServiceClient()
 
