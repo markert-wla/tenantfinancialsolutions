@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { CalendarCheck, Users, AlertTriangle, Clock, Bell } from 'lucide-react'
 import Link from 'next/link'
+import { tzShort } from '@/lib/timezones'
 
 export const metadata: Metadata = { title: 'Coach Dashboard' }
 
@@ -31,6 +32,7 @@ export default async function CoachDashboardPage() {
     { data: allBookings },
     { data: newBookings },
     { data: assignedInquiries },
+    { data: nextGroup },
   ] = await Promise.all([
     supabase
       .from('bookings')
@@ -70,6 +72,15 @@ export default async function CoachDashboardPage() {
       .eq('assigned_coach_id', user.id)
       .eq('status', 'assigned')
       .order('submitted_at', { ascending: false }),
+
+    // Next TFS Community Connect session
+    supabase
+      .from('group_sessions')
+      .select('id, session_date, session_time, session_timezone, join_link')
+      .gte('session_date', new Date().toISOString().split('T')[0])
+      .order('session_date', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   type AllBookingRow   = { client_id: string }
@@ -214,7 +225,7 @@ export default async function CoachDashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Upcoming sessions */}
         <div className="lg:col-span-2 card">
           <div className="flex items-center justify-between mb-4">
@@ -293,6 +304,53 @@ export default async function CoachDashboardPage() {
             View all clients →
           </Link>
         </div>
+      </div>
+
+      {/* TFS Community Connect */}
+      <div className="card">
+        <div className="flex items-center gap-2 mb-3">
+          <Users size={20} className="text-tfs-teal-button" />
+          <h2 className="font-serif font-bold text-tfs-navy text-xl">TFS Community Connect</h2>
+        </div>
+        {nextGroup ? (
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-tfs-navy font-medium">
+                {new Date(nextGroup.session_date + 'T00:00:00').toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month:   'long',
+                  day:     'numeric',
+                  year:    'numeric',
+                  timeZone: 'UTC',
+                })}
+              </p>
+              {nextGroup.session_time && (
+                <p className="text-sm text-tfs-teal-button font-medium mt-0.5">
+                  {nextGroup.session_time}{nextGroup.session_timezone ? ` ${tzShort(nextGroup.session_timezone)}` : ''}
+                </p>
+              )}
+              <p className="text-sm text-tfs-slate mt-0.5">
+                Complimentary for all members — multiple coaches present.
+              </p>
+            </div>
+            {nextGroup.join_link ? (
+              <a
+                href={nextGroup.join_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary text-sm shrink-0"
+              >
+                Join Session
+              </a>
+            ) : (
+              <span className="text-xs text-tfs-slate italic">Link coming soon</span>
+            )}
+          </div>
+        ) : (
+          <p className="text-tfs-slate text-sm">
+            No TFS Community Connect sessions scheduled yet. Check back soon!
+          </p>
+        )}
       </div>
     </div>
   )
