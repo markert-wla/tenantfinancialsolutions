@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock, Share2, Edit3, X, CheckCircle, Trash2, Plus, FileText, ClipboardList, MessageCircle, Check } from 'lucide-react'
+import { Lock, Share2, Edit3, X, CheckCircle, Trash2, Plus, FileText, ClipboardList, MessageCircle, Check, FolderOpen, Download, Loader2 } from 'lucide-react'
 
 type Client = {
   id: string
@@ -48,6 +48,15 @@ type IntakeResponse = {
   created_at: string
 }
 
+type ClientDocument = {
+  id: string
+  file_name: string
+  file_size: number | null
+  mime_type: string | null
+  uploaded_at: string
+  signed_url: string | null
+}
+
 const TIER_LABEL: Record<string, string> = { free: 'Free', starter: 'Starter', advantage: 'Advantage' }
 
 const QUESTION_LABELS: [string, string][] = [
@@ -66,6 +75,13 @@ const STATUS_BADGE: Record<string, string> = {
   confirmed: 'bg-green-100 text-green-700',
   pending:   'bg-yellow-100 text-yellow-700',
   cancelled: 'bg-red-100 text-red-600',
+}
+
+function formatBytes(bytes: number | null): string {
+  if (!bytes) return ''
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 export default function ClientDetailClient({
@@ -103,6 +119,17 @@ export default function ClientDetailClient({
   // Portal messages state
   const [messages,     setMessages]     = useState<PortalMessage[]>(initialMessages)
   const [markingId,    setMarkingId]    = useState<string | null>(null)
+
+  // Client documents state
+  const [documents,    setDocuments]    = useState<ClientDocument[]>([])
+  const [docsLoading,  setDocsLoading]  = useState(true)
+
+  useEffect(() => {
+    fetch(`/api/coach/clients/${client.id}/documents`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => { setDocuments(data); setDocsLoading(false) })
+      .catch(() => setDocsLoading(false))
+  }, [client.id])
 
   function fmt(iso: string) {
     return new Intl.DateTimeFormat('en-US', {
@@ -298,6 +325,56 @@ export default function ClientDetailClient({
                     </span>
                   )}
                 </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Client documents */}
+      <section>
+        <div className="flex items-center gap-2 mb-3">
+          <FolderOpen size={16} className="text-tfs-teal-button" />
+          <h2 className="font-serif font-bold text-tfs-navy text-lg">Client Documents</h2>
+          {!docsLoading && documents.length > 0 && (
+            <span className="text-xs text-tfs-slate">{documents.length} file{documents.length !== 1 ? 's' : ''}</span>
+          )}
+        </div>
+
+        {docsLoading ? (
+          <div className="card flex items-center gap-2 text-tfs-slate text-sm">
+            <Loader2 size={15} className="animate-spin" /> Loading documents…
+          </div>
+        ) : documents.length === 0 ? (
+          <div className="card flex items-center gap-3 text-tfs-slate text-sm">
+            <FolderOpen size={16} className="text-gray-300 shrink-0" />
+            This client has not uploaded any documents yet.
+          </div>
+        ) : (
+          <div className="card divide-y divide-gray-100">
+            {documents.map(doc => (
+              <div key={doc.id} className="py-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <FileText size={16} className="text-tfs-teal-button shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-tfs-navy truncate">{doc.file_name}</p>
+                    <p className="text-xs text-tfs-slate mt-0.5">
+                      {formatBytes(doc.file_size)}{doc.file_size ? ' · ' : ''}
+                      {fmtDate(doc.uploaded_at)}
+                    </p>
+                  </div>
+                </div>
+                {doc.signed_url && (
+                  <a
+                    href={doc.signed_url}
+                    download={doc.file_name}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 flex items-center gap-1.5 text-xs text-tfs-teal-button hover:underline border border-tfs-teal/40 rounded px-2.5 py-1 transition-colors"
+                  >
+                    <Download size={12} /> Download
+                  </a>
+                )}
               </div>
             ))}
           </div>
