@@ -24,7 +24,11 @@ export default function UpgradeButtons({ currentTier }: { currentTier: string })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed')
-      window.location.href = data.checkoutUrl
+      // Clients who already have a subscription have their existing one switched
+      // in place, so there's no Checkout to send them to.
+      window.location.href = data.switched
+        ? '/portal/dashboard?upgraded=1'
+        : data.checkoutUrl
     } catch (err: unknown) {
       setError((err instanceof Error ? err.message : null) ?? 'Could not start upgrade. Please try again.')
       setLoading(null)

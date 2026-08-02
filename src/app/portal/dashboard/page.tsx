@@ -17,7 +17,7 @@ const TIER_LABEL: Record<string, string> = {
   advantage: 'Advantage Plan',
 }
 
-export default async function PortalDashboard({ searchParams }: { searchParams: { welcome?: string } }) {
+export default async function PortalDashboard({ searchParams }: { searchParams: { welcome?: string; upgraded?: string } }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -108,6 +108,15 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
           <div>
             <p className="font-semibold text-green-800">Payment successful — welcome aboard!</p>
             <p className="text-sm text-green-700 mt-0.5">Your plan is now active. Book your first coaching session whenever you&rsquo;re ready.</p>
+          </div>
+        </div>
+      )}
+      {searchParams.upgraded === '1' && (
+        <div className="mb-6 flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-4">
+          <span className="text-green-600 text-xl leading-none mt-0.5">✓</span>
+          <div>
+            <p className="font-semibold text-green-800">Your plan has been updated.</p>
+            <p className="text-sm text-green-700 mt-0.5">Your new session allowance is available right away. The difference in price will appear on your next invoice — you haven&rsquo;t been charged twice.</p>
           </div>
         </div>
       )}

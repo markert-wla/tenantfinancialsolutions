@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStripe } from '@/lib/stripe'
+import { getStripe, normalizeTier, VALID_TIERS } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
@@ -7,16 +7,6 @@ import Stripe from 'stripe'
 
 // Raw body required for Stripe signature verification
 export const dynamic = 'force-dynamic'
-
-// Subscriptions created before the tier rename still carry the old slugs in
-// their Stripe metadata, and renewals re-send them on every billing cycle.
-const LEGACY_TIER_SLUGS: Record<string, string> = { bronze: 'starter', silver: 'advantage' }
-const VALID_TIERS = ['free', 'starter', 'advantage']
-
-function normalizeTier(tier: string | null | undefined): string | null {
-  if (!tier) return null
-  return LEGACY_TIER_SLUGS[tier] ?? tier
-}
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text()
