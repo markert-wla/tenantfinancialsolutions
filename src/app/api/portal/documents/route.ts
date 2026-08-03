@@ -3,6 +3,18 @@ import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+  'image/jpeg',
+  'image/png',
+])
+
+const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png'])
+const MAX_IMAGE_COUNT = 5
+const MAX_SIZE = 10 * 1024 * 1024 // 10 MB
+
 export async function GET() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -41,9 +53,33 @@ export async function POST(request: NextRequest) {
   const file = formData.get('file') as File | null
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
-  const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
+  // Type validation
+  if (!ALLOWED_MIME_TYPES.has(file.type)) {
+    return NextResponse.json(
+      { error: 'Unsupported file type. Please upload a PDF, DOCX, TXT, JPG, or PNG.' },
+      { status: 400 }
+    )
+  }
+
+  // Size validation
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'File exceeds the 5 MB limit.' }, { status: 400 })
+    return NextResponse.json({ error: 'File exceeds the 10 MB limit.' }, { status: 400 })
+  }
+
+  // Image count validation
+  if (IMAGE_MIME_TYPES.has(file.type)) {
+    const { count, error: countError } = await supabase
+      .from('client_documents')
+      .select('id', { count: 'exact', head: true })
+      .eq('client_id', user.id)
+      .in('mime_type', Array.from(IMAGE_MIME_TYPES))
+
+    if (!countError && (count ?? 0) >= MAX_IMAGE_COUNT) {
+      return NextResponse.json(
+        { error: `You have reached the maximum of ${MAX_IMAGE_COUNT} images. Remove one before uploading another.` },
+        { status: 400 }
+      )
+    }
   }
 
   const timestamp = Date.now()
