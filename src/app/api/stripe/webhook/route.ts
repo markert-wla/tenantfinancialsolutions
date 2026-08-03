@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStripe, normalizeTier, VALID_TIERS } from '@/lib/stripe'
+import { getStripe, listLiveSubscriptions, tierForSubscription, VALID_TIERS } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
@@ -53,8 +53,14 @@ export async function POST(req: NextRequest) {
     case 'customer.subscription.updated': {
       const sub  = event.data.object as Stripe.Subscription
       const meta = sub.metadata
-      const tier = normalizeTier(meta?.tier) ?? 'free'
-      if (meta?.supabase_user_id && VALID_TIERS.includes(tier)) {
+      // Metadata first, price id as the fallback. A plan switched inside
+      // Stripe's billing portal keeps its original metadata, so trusting
+      // metadata alone wrote the *old* tier back over the new one. An
+      // unresolvable tier is left alone rather than defaulted to 'free' —
+      // downgrading a paying client on an event we don't understand is worse
+      // than leaving plan_tier where it is.
+      const tier = tierForSubscription(sub)
+      if (meta?.supabase_user_id && tier && VALID_TIERS.includes(tier)) {
         await supabase
           .from('profiles')
           .update({
@@ -63,22 +69,71 @@ export async function POST(req: NextRequest) {
             stripe_customer_id:     sub.customer as string,
           })
           .eq('id', meta.supabase_user_id)
+      } else if (meta?.supabase_user_id) {
+        console.error(
+          `[webhook] ${event.type}: could not resolve a tier for ${sub.id} ` +
+          `(user ${meta.supabase_user_id}) — plan_tier left unchanged`
+        )
       }
       break
     }
 
     case 'customer.subscription.deleted': {
-      const sub = event.data.object as Stripe.Subscription
-      // Only downgrade when the cancelled subscription is the one on record. A
-      // customer can briefly hold more than one subscription (the upgrade flow
-      // opens a fresh checkout rather than modifying the existing one), and
-      // matching on customer alone would drop a still-paying client to free.
-      // Rows with no recorded subscription id are legacy/manual upgrades — keep
-      // the old customer-only behaviour for those so they still downgrade.
+      const sub        = event.data.object as Stripe.Subscription
+      const customerId = sub.customer as string
+
+      // Ask Stripe what's left before downgrading anyone. Cancelling one of two
+      // duplicate subscriptions is a *cleanup*, not a cancellation, and the
+      // legacy customer-only match below would read it as the latter and drop a
+      // still-paying client to free. Every paid profile whose
+      // stripe_subscription_id was never recorded is exposed to that.
+      let remaining: Stripe.Subscription[]
+      try {
+        remaining = await listLiveSubscriptions(getStripe(), customerId)
+      } catch (err) {
+        // Can't confirm what's left, so take the cautious branch: only touch the
+        // profile if it names this exact subscription.
+        console.error(`[webhook] could not list subscriptions for ${customerId}:`, err)
+        await supabase
+          .from('profiles')
+          .update({ plan_tier: 'free', stripe_subscription_id: null })
+          .eq('stripe_customer_id', customerId)
+          .eq('stripe_subscription_id', sub.id)
+        break
+      }
+
+      if (remaining.length > 0) {
+        if (remaining.length > 1) {
+          console.error(
+            `[webhook] ${customerId} still has ${remaining.length} live subscriptions after ${sub.id} ` +
+            `was cancelled: ${remaining.map(s => `${s.id}:${s.status}`).join(', ')}`
+          )
+        }
+        // Point the profile at what is actually still billing, which also
+        // backfills stripe_subscription_id for rows that never had one.
+        const survivor = remaining[0]
+        const tier     = tierForSubscription(survivor)
+        if (tier && VALID_TIERS.includes(tier)) {
+          await supabase
+            .from('profiles')
+            .update({ plan_tier: tier, stripe_subscription_id: survivor.id })
+            .eq('stripe_customer_id', customerId)
+        } else {
+          console.error(
+            `[webhook] ${sub.id} cancelled but surviving ${survivor.id} has no resolvable tier ` +
+            `— plan_tier left unchanged for ${customerId}`
+          )
+        }
+        break
+      }
+
+      // Nothing left running — a real cancellation. Rows with no recorded
+      // subscription id are legacy/manual upgrades, matched on customer alone so
+      // they still downgrade.
       await supabase
         .from('profiles')
         .update({ plan_tier: 'free', stripe_subscription_id: null })
-        .eq('stripe_customer_id', (sub.customer as string))
+        .eq('stripe_customer_id', customerId)
         .or(`stripe_subscription_id.eq.${sub.id},stripe_subscription_id.is.null`)
       break
     }
@@ -96,7 +151,7 @@ export async function POST(req: NextRequest) {
           const sub  = await stripe.subscriptions.retrieve(session.subscription as string)
           const meta = sub.metadata
           const userId = meta?.supabase_user_id
-          const tier   = normalizeTier(meta?.tier)
+          const tier   = tierForSubscription(sub)
           if (userId && tier && ['starter', 'advantage'].includes(tier)) {
             await supabase
               .from('profiles')

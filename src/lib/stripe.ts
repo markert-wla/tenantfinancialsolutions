@@ -67,6 +67,44 @@ export async function listLiveSubscriptions(
   return subs.data.filter(s => LIVE_SUB_STATUSES.has(s.status))
 }
 
+/** What a customer is currently paying for, as far as any flow that changes a
+ *  plan is concerned.
+ *
+ *  Every route that could create a subscription must go through this first.
+ *  /portal/upgrade grew this guard on its own and /portal/apply-promo didn't,
+ *  which let a paying client redeem an affiliate code and end up billed for two
+ *  plans at once. Sharing one implementation is what stops that recurring. */
+export type PlanChangeTarget =
+  /** Nothing live — a Checkout is the correct way to start a subscription. */
+  | { kind: 'none' }
+  /** Already double-billed. A human has to decide what gets refunded. */
+  | { kind: 'duplicate'; detail: string }
+  /** Live, but we can't tell which plan it is, so we can't safely swap the price. */
+  | { kind: 'unresolvable'; sub: Stripe.Subscription; reason: string }
+  /** Live and understood — change the plan in place, never open a Checkout. */
+  | { kind: 'current'; sub: Stripe.Subscription; tier: string; item: Stripe.SubscriptionItem }
+
+export async function resolvePlanChangeTarget(
+  stripe: Stripe,
+  customerId: string
+): Promise<PlanChangeTarget> {
+  const live = await listLiveSubscriptions(stripe, customerId)
+
+  if (live.length === 0) return { kind: 'none' }
+  if (live.length > 1) {
+    return { kind: 'duplicate', detail: live.map(s => `${s.id}:${s.status}`).join(', ') }
+  }
+
+  const sub  = live[0]
+  const tier = tierForSubscription(sub)
+  if (!tier) return { kind: 'unresolvable', sub, reason: `unrecognised plan on ${sub.id}` }
+
+  const item = sub.items.data[0]
+  if (!item) return { kind: 'unresolvable', sub, reason: `no line items on ${sub.id}` }
+
+  return { kind: 'current', sub, tier, item }
+}
+
 /** Single source of truth for monthly session limits per plan tier — imported by
  *  the dashboard, book page, and booking API so they can't drift out of sync. */
 export const SESSION_LIMITS: Record<string, number> = {
