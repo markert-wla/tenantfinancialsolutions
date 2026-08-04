@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, XCircle, Trash2 } from 'lucide-react'
+import { Plus, XCircle, Trash2, Pencil } from 'lucide-react'
 
 type Partner = {
   id: string
@@ -26,10 +26,10 @@ type PromoCode = {
 }
 
 const TIER_LABELS: Record<string, string> = {
-  free:   'Free',
-  starter: 'Starter',
+  free:      'Free',
+  starter:   'Starter',
   advantage: 'Advantage',
-  all:    'All',
+  all:       'All',
 }
 
 const CODE_TYPE_LABELS: Record<string, string> = {
@@ -46,10 +46,10 @@ const PARTNER_LABELS: Record<string, string> = {
 }
 
 const TIER_COLORS: Record<string, string> = {
-  free:   'bg-gray-100 text-gray-600',
-  starter: 'bg-orange-100 text-orange-700',
+  free:      'bg-gray-100 text-gray-600',
+  starter:   'bg-orange-100 text-orange-700',
   advantage: 'bg-slate-100 text-slate-600',
-  all:    'bg-tfs-teal/10 text-tfs-teal-button',
+  all:       'bg-tfs-teal/10 text-tfs-teal-button',
 }
 
 function partnershipLabel(code: PromoCode): { label: string; color: string } | null {
@@ -71,6 +71,7 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
   const router = useRouter()
   const [showAdd, setShowAdd]   = useState(false)
   const [revoking, setRevoking] = useState<string | null>(null)
+  const [editing, setEditing]   = useState<PromoCode | null>(null)
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
   const [codeType, setCodeType] = useState('tier_assignment')
@@ -104,7 +105,6 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
         setLoading(false)
         return
       }
-      // Create the partner first, then use the returned ID
       const pRes = await fetch('/api/admin/partners', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -146,6 +146,36 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
     router.refresh()
   }
 
+  async function handleEdit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!editing) return
+    setError('')
+    setLoading(true)
+
+    const fd = new FormData(e.currentTarget)
+    const newCodeType = fd.get('code_type') as string
+
+    const res = await fetch(`/api/admin/codes/${encodeURIComponent(editing.code)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code_type:        newCodeType,
+        assigned_tier:    fd.get('assigned_tier') || null,
+        expires_at:       fd.get('expires_at') || null,
+        discount_percent: newCodeType === 'affiliate_discount' && fd.get('discount_percent')
+                            ? Number(fd.get('discount_percent'))
+                            : null,
+        partner_type:     fd.get('partner_type'),
+      }),
+    })
+    const data = await res.json()
+    setLoading(false)
+    if (!res.ok) { setError(data.error ?? 'Failed to update code'); return }
+    setEditing(null)
+    setError('')
+    router.refresh()
+  }
+
   async function handleRevoke(code: string) {
     setLoading(true)
     await fetch(`/api/admin/codes/${encodeURIComponent(code)}/revoke`, { method: 'PATCH' })
@@ -164,6 +194,11 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
   const activeCodes   = codes.filter(c => c.is_active)
   const inactiveCodes = codes.filter(c => !c.is_active)
 
+  // Derive the partner_type of the code being edited
+  const editingPartner = editing?.partner_id
+    ? partners.find(p => p.id === editing.partner_id)
+    : null
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -179,6 +214,7 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
         title="Active Codes"
         emptyMessage="No active promo codes."
         onRevoke={setRevoking}
+        onEdit={setEditing}
         onDelete={null}
       />
 
@@ -190,6 +226,7 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
             title="Revoked / Expired"
             emptyMessage=""
             onRevoke={null}
+            onEdit={null}
             onDelete={handleDelete}
           />
         </div>
@@ -209,7 +246,6 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
               />
             </div>
 
-            {/* Partner selection */}
             <div>
               <label className="block text-sm font-medium text-tfs-navy mb-1">Partner</label>
               <select
@@ -228,7 +264,6 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
               </select>
             </div>
 
-            {/* Inline new-partner fields */}
             {isNewPartner && (
               <div className="border border-tfs-teal/30 bg-tfs-teal/5 rounded-lg p-4 space-y-3">
                 <p className="text-xs font-semibold text-tfs-teal-button uppercase tracking-wide">New Partner Details</p>
@@ -253,7 +288,7 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
                     <option value="trial">Trial</option>
                   </select>
                 </div>
-                <p className="text-xs text-tfs-slate">The partner will be created automatically when you save this code. You can add contact details later in the Partners section.</p>
+                <p className="text-xs text-tfs-slate">The partner will be created automatically when you save this code.</p>
               </div>
             )}
 
@@ -351,6 +386,89 @@ export default function CodesClient({ codes, partners }: { codes: PromoCode[]; p
         </Modal>
       )}
 
+      {/* Edit modal */}
+      {editing && (
+        <Modal title={`Edit Code — ${editing.code}`} onClose={() => { setEditing(null); setError('') }}>
+          <form onSubmit={handleEdit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Type</label>
+                <select
+                  name="code_type"
+                  defaultValue={editing.code_type}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                >
+                  <option value="tier_assignment">Tier Assignment</option>
+                  <option value="affiliate_discount">Affiliate Discount</option>
+                  <option value="full_comp">Full Comp</option>
+                  <option value="group_comp">Group Comp</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Tier</label>
+                <select
+                  name="assigned_tier"
+                  defaultValue={editing.assigned_tier ?? ''}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                >
+                  <option value="">All Tiers</option>
+                  <option value="free">Free</option>
+                  <option value="starter">Starter</option>
+                  <option value="advantage">Advantage</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-tfs-navy mb-1">Partnership Level</label>
+              <select
+                name="partner_type"
+                defaultValue={editingPartner?.partner_type ?? editing.partner_type}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+              >
+                <option value="property_management">Property Management</option>
+                <option value="nonprofit">Non-Profit</option>
+                <option value="trial">Trial</option>
+              </select>
+            </div>
+
+            {editing.code_type === 'affiliate_discount' && (
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">Discount % (first month)</label>
+                <input
+                  type="number"
+                  name="discount_percent"
+                  min={1}
+                  max={100}
+                  defaultValue={editing.discount_percent ?? 10}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-tfs-navy mb-1">Expiry Date <span className="text-gray-400 font-normal">(optional)</span></label>
+              <input
+                type="date"
+                name="expires_at"
+                defaultValue={editing.expires_at ? editing.expires_at.slice(0, 10) : ''}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+              />
+            </div>
+
+            {error && (
+              <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+            )}
+
+            <div className="flex justify-end pt-2">
+              <button type="submit" disabled={loading} className="btn-primary">
+                {loading ? 'Saving…' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
       {/* Revoke confirmation */}
       {revoking && (
         <Modal title="Revoke Code" onClose={() => setRevoking(null)}>
@@ -380,6 +498,7 @@ function CodeTable({
   title,
   emptyMessage,
   onRevoke,
+  onEdit,
   onDelete,
 }: {
   codes: PromoCode[]
@@ -387,6 +506,7 @@ function CodeTable({
   title: string
   emptyMessage: string
   onRevoke: ((code: string) => void) | null
+  onEdit: ((code: PromoCode) => void) | null
   onDelete: ((code: string) => void) | null
 }) {
   const partnerMap = Object.fromEntries(partners.map(p => [p.id, p]))
@@ -408,7 +528,7 @@ function CodeTable({
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Tier</th>
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Uses</th>
                 <th className="text-left py-2 pr-4 font-medium text-tfs-slate">Expires</th>
-                {(onRevoke || onDelete) && <th className="text-right py-2 font-medium text-tfs-slate">Actions</th>}
+                {(onRevoke || onEdit || onDelete) && <th className="text-right py-2 font-medium text-tfs-slate">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -449,8 +569,17 @@ function CodeTable({
                         ? new Date(c.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                         : '—'}
                     </td>
-                    {(onRevoke || onDelete) && (
+                    {(onRevoke || onEdit || onDelete) && (
                       <td className="py-2.5 text-right flex items-center justify-end gap-1">
+                        {onEdit && (
+                          <button
+                            onClick={() => onEdit(c)}
+                            className="p-1.5 rounded-lg text-tfs-slate hover:text-tfs-teal-button hover:bg-tfs-teal/10 transition-colors"
+                            title="Edit"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                        )}
                         {onRevoke && (
                           <button
                             onClick={() => onRevoke(c.code)}
