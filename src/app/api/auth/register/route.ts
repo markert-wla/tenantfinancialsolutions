@@ -95,20 +95,24 @@ export async function POST(req: NextRequest) {
     codeType        = code.code_type ?? 'tier_assignment'
     discountPercent = code.discount_percent ?? null
     promoPartnerId  = code.partner_id ?? null
-  }
 
-  // Strategic Partner Level (paying model) PM tenants are pre-paid by their property manager
-  // and are always entitled to the Advantage plan: 2 coaching sessions/month + TFS Community Connect.
-  // Override effectiveTier to 'advantage' regardless of what the promo code's assigned_tier says.
-  if (promoPartnerId && clientType === 'property_tenant') {
-    const { data: partner } = await supabase
-      .from('partners')
-      .select('partner_model')
-      .eq('id', promoPartnerId)
-      .single()
-    if (partner?.partner_model === 'paying') {
-      effectiveTier = 'advantage'
+    // Strategic Partner Level PM (model='paying') tenants always receive the Advantage plan.
+    // Override effectiveTier regardless of what the promo code's assigned_tier says.
+    if (promoPartnerId) {
+      const { data: partnerRow } = await supabase
+        .from('partners')
+        .select('model')
+        .eq('id', promoPartnerId)
+        .single()
+      if (partnerRow?.model === 'paying') {
+        effectiveTier = 'advantage'
+      }
     }
+
+    await supabase
+      .from('promo_codes')
+      .update({ uses_count: code.uses_count + 1 })
+      .eq('code', promoCode)
   }
 
   // Determine whether this signup requires Stripe checkout.
