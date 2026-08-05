@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Send, MessageSquare } from 'lucide-react'
+import { Send, MessageSquare, Download, FileText, Image } from 'lucide-react'
 
 type Message = {
   id: string
@@ -9,14 +9,35 @@ type Message = {
   created_at: string
 }
 
+type Attachment = {
+  name: string
+  path: string
+  size: number
+  mime_type: string
+  signed_url: string | null
+}
+
 type CoachMessage = {
   id: string
   body: string
   created_at: string
   read_at: string | null
+  attachments?: Attachment[]
 }
 
 const MAX = 2000
+
+function fileIcon(mimeType: string) {
+  if (mimeType === 'image/jpeg' || mimeType === 'image/png')
+    return <Image size={14} className="text-tfs-teal-button flex-shrink-0" />
+  return <FileText size={14} className="text-tfs-teal-button flex-shrink-0" />
+}
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 export default function PortalMessagesClient({
   initial,
@@ -80,6 +101,37 @@ export default function PortalMessagesClient({
             {coachMessages.map(m => (
               <div key={m.id} className="card border-l-4 border-tfs-teal">
                 <p className="text-sm text-tfs-navy whitespace-pre-wrap">{m.body}</p>
+
+                {/* Attachments from coach */}
+                {m.attachments && m.attachments.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs font-semibold text-tfs-navy">
+                      Attached {m.attachments.length === 1 ? 'file' : 'files'} from your coach:
+                    </p>
+                    {m.attachments.map((att, i) => (
+                      <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                        {fileIcon(att.mime_type)}
+                        <span className="text-xs text-tfs-navy flex-1 truncate">{att.name}</span>
+                        <span className="text-xs text-tfs-slate">{formatBytes(att.size)}</span>
+                        {att.signed_url ? (
+                          <a
+                            href={att.signed_url}
+                            download={att.name}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-xs text-tfs-teal-button font-medium hover:underline"
+                          >
+                            <Download size={12} />
+                            Download
+                          </a>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">Unavailable</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <p className="text-xs text-tfs-slate mt-2">{fmt(m.created_at)}</p>
               </div>
             ))}

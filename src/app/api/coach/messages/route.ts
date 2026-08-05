@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await supabase
     .from('coach_messages')
-    .select('id, body, created_at, read_at')
+    .select('id, body, created_at, read_at, attachments')
     .eq('coach_id', user.id)
     .eq('client_id', clientId)
     .order('created_at', { ascending: false })
@@ -35,14 +35,21 @@ export async function POST(req: NextRequest) {
   if (!profile || (profile.role !== 'coach' && profile.role !== 'admin'))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { clientId, body } = await req.json().catch(() => ({}))
+  const { clientId, body, attachments } = await req.json().catch(() => ({}))
   if (!clientId || !body?.trim())
     return NextResponse.json({ error: 'clientId and body are required' }, { status: 400 })
 
+  const safeAttachments = Array.isArray(attachments) ? attachments : []
+
   const { data, error } = await supabase
     .from('coach_messages')
-    .insert({ coach_id: user.id, client_id: clientId, body: body.trim() })
-    .select('id, body, created_at, read_at')
+    .insert({
+      coach_id:    user.id,
+      client_id:   clientId,
+      body:        body.trim(),
+      attachments: safeAttachments,
+    })
+    .select('id, body, created_at, read_at, attachments')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
