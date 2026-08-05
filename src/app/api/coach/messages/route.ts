@@ -22,7 +22,41 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+
+  // Fetch attachments for all returned messages and embed them
+  const messageIds = (data ?? []).map(m => m.id)
+  const attachmentsByMessage: Record<string, { id: string; file_name: string; file_path: string; file_size: number | null; mime_type: string | null; url: string | null }[]> = {}
+
+  if (messageIds.length > 0) {
+    const { data: atts } = await supabase
+      .from('coach_message_attachments')
+      .select('id, message_id, file_name, file_path, file_size, mime_type')
+      .in('message_id', messageIds)
+      .eq('coach_id', user.id)
+      .order('created_at', { ascending: true })
+
+    if (atts && atts.length > 0) {
+      const attsWithUrls = await Promise.all(
+        atts.map(async (a) => {
+          const { data: signed } = await supabase.storage
+            .from('coach-documents')
+            .createSignedUrl(a.file_path, 3600)
+          return { ...a, url: signed?.signedUrl ?? null }
+        })
+      )
+      for (const a of attsWithUrls) {
+        if (!attachmentsByMessage[a.message_id]) attachmentsByMessage[a.message_id] = []
+        attachmentsByMessage[a.message_id].push(a)
+      }
+    }
+  }
+
+  const result = (data ?? []).map(m => ({
+    ...m,
+    attachments: attachmentsByMessage[m.id] ?? [],
+  }))
+
+  return NextResponse.json(result)
 }
 
 export async function POST(req: NextRequest) {

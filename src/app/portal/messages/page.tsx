@@ -19,10 +19,10 @@ export default async function PortalMessagesPage() {
     .eq('client_id', user.id)
     .order('created_at', { ascending: false })
 
-  // Messages the coach sent to this client
+  // Messages the coach sent to this client (including attachments)
   const { data: coachMessages } = await supabase
     .from('coach_messages')
-    .select('id, body, created_at, read_at')
+    .select('id, body, created_at, read_at, attachments')
     .eq('client_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -39,10 +39,35 @@ export default async function PortalMessagesPage() {
       .eq('client_id', user.id)
   }
 
+  // Generate signed URLs for any file attachments so the client can download them
+  type RawAttachment = { name: string; path: string; size: number; mime_type: string }
+  const coachMessagesWithUrls = await Promise.all(
+    (coachMessages ?? []).map(async (msg: {
+      id: string
+      body: string
+      created_at: string
+      read_at: string | null
+      attachments?: RawAttachment[]
+    }) => {
+      const attachments: RawAttachment[] = Array.isArray(msg.attachments) ? msg.attachments : []
+      if (attachments.length === 0) return { ...msg, attachments: [] }
+
+      const withUrls = await Promise.all(
+        attachments.map(async (att) => {
+          const { data: signedData } = await supabase.storage
+            .from('coach-documents')
+            .createSignedUrl(att.path, 3600)
+          return { ...att, signed_url: signedData?.signedUrl ?? null }
+        })
+      )
+      return { ...msg, attachments: withUrls }
+    })
+  )
+
   return (
     <PortalMessagesClient
       initial={messages ?? []}
-      coachMessages={coachMessages ?? []}
+      coachMessages={coachMessagesWithUrls}
     />
   )
 }

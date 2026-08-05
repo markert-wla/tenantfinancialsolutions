@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Upload, FileText, Image, Download, Trash2, Loader2, AlertCircle, Info } from 'lucide-react'
+import { Upload, FileText, Image as ImageIcon, Download, Trash2, Loader2, AlertCircle, Info } from 'lucide-react'
 
 type Doc = {
   id: string
@@ -171,7 +171,7 @@ export default function DocumentsSection() {
         {/* Image count indicator */}
         {imageCount > 0 && (
           <p className="mt-2 text-xs text-tfs-slate">
-            <Image size={11} className="inline mr-1" />
+            <ImageIcon size={11} className="inline mr-1" />
             {imageCount} of {MAX_IMAGES} images used
             {atImageLimit && <span className="text-amber-600 font-medium"> — limit reached. Remove an image to upload another.</span>}
           </p>
@@ -199,7 +199,7 @@ export default function DocumentsSection() {
               <div key={doc.id} className="py-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   {isImage(doc.mime_type)
-                    ? <Image size={18} className="text-tfs-teal-button shrink-0" />
+                    ? <ImageIcon size={18} className="text-tfs-teal-button shrink-0" />
                     : <FileText size={18} className="text-tfs-teal-button shrink-0" />}
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-tfs-navy truncate">{doc.file_name}</p>
