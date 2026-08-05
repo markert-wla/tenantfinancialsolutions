@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
   // Fetch attachments for all returned messages and embed them
   const messageIds = (data ?? []).map(m => m.id)
-  let attachmentsByMessage: Record<string, { id: string; file_name: string; file_path: string; file_size: number | null; mime_type: string | null; url: string | null }[]> = {}
+  const attachmentsByMessage: Record<string, { id: string; file_name: string; file_path: string; file_size: number | null; mime_type: string | null; url: string | null }[]> = {}
 
   if (messageIds.length > 0) {
     const { data: atts } = await supabase
