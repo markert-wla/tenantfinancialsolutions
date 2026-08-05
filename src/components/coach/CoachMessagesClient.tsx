@@ -1,7 +1,19 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Paperclip, X, FileText, Image, ChevronDown, ChevronUp } from 'lucide-react'
+import { Send, Paperclip, X, FileText, Image, ChevronDown, ChevronUp, Download } from 'lucide-react'
+
+const ALLOWED_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+]
+const IMAGE_TYPES = ['image/jpeg', 'image/png']
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
+const MAX_IMAGES    = 5
+const MAX_MSG       = 2000
 
 type Client = {
   id: string
@@ -11,10 +23,11 @@ type Client = {
 }
 
 type Attachment = {
-  name: string
-  path: string
-  size: number
-  mime_type: string
+  id: string
+  file_name: string
+  file_size: number | null
+  mime_type: string | null
+  url: string | null
 }
 
 type Message = {
@@ -25,40 +38,18 @@ type Message = {
   attachments?: Attachment[]
 }
 
-const MAX_BODY         = 2000
-const MAX_FILE_SIZE    = 10 * 1024 * 1024 // 10 MB
-const MAX_IMAGES       = 5
-const ALLOWED_TYPES    = new Set([
-  'application/pdf',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain',
-  'image/jpeg',
-  'image/png',
-])
-const IMAGE_TYPES      = new Set(['image/jpeg', 'image/png'])
-
-function fileIcon(mimeType: string) {
-  if (IMAGE_TYPES.has(mimeType)) return <Image size={14} className="text-tfs-teal-button" />
-  return <FileText size={14} className="text-tfs-teal-button" />
-}
-
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
 export default function CoachMessagesClient({ clients }: { clients: Client[] }) {
-  const [selectedId, setSelectedId]   = useState('')
-  const [messages, setMessages]       = useState<Message[]>([])
-  const [loading, setLoading]         = useState(false)
-  const [text, setText]               = useState('')
-  const [sending, setSending]         = useState(false)
-  const [error, setError]             = useState('')
-  const [success, setSuccess]         = useState(false)
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [showTips, setShowTips]       = useState(false)
-  const fileInputRef                  = useRef<HTMLInputElement>(null)
+  const [selectedId, setSelectedId] = useState('')
+  const [messages, setMessages]     = useState<Message[]>([])
+  const [loading, setLoading]       = useState(false)
+  const [text, setText]             = useState('')
+  const [sending, setSending]       = useState(false)
+  const [error, setError]           = useState('')
+  const [success, setSuccess]       = useState(false)
+  const [stagedFiles, setStagedFiles] = useState<File[]>([])
+  const [fileError, setFileError]   = useState('')
+  const [showTips, setShowTips]     = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!selectedId) { setMessages([]); return }
@@ -69,41 +60,34 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
       .catch(() => setLoading(false))
   }, [selectedId])
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? [])
-    if (!files.length) return
+  function addFiles(newFiles: File[]) {
+    setFileError('')
+    const updated = [...stagedFiles]
 
-    const existing      = selectedFiles
-    const currentImages = existing.filter(f => IMAGE_TYPES.has(f.type)).length
-    const newErrors: string[] = []
-    const valid: File[] = []
-
-    for (const f of files) {
-      if (!ALLOWED_TYPES.has(f.type)) {
-        newErrors.push(`"${f.name}" is not a supported type (PDF, DOCX, TXT, JPG, PNG only).`)
-        continue
+    for (const file of newFiles) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        setFileError(`"${file.name}" is not an allowed type. Use PDF, DOCX, TXT, JPG, or PNG.`)
+        return
       }
-      if (f.size > MAX_FILE_SIZE) {
-        newErrors.push(`"${f.name}" exceeds the 10 MB limit.`)
-        continue
+      if (file.size > MAX_FILE_SIZE) {
+        setFileError(`"${file.name}" exceeds the 10 MB limit.`)
+        return
       }
-      if (IMAGE_TYPES.has(f.type) && currentImages + valid.filter(v => IMAGE_TYPES.has(v.type)).length >= MAX_IMAGES) {
-        newErrors.push(`Maximum of ${MAX_IMAGES} images per message.`)
-        continue
+      if (IMAGE_TYPES.includes(file.type)) {
+        const imgCount = updated.filter(f => IMAGE_TYPES.includes(f.type)).length
+        if (imgCount >= MAX_IMAGES) {
+          setFileError(`Maximum ${MAX_IMAGES} images per message.`)
+          return
+        }
       }
-      valid.push(f)
+      updated.push(file)
     }
-
-    if (newErrors.length) setError(newErrors[0])
-    setSelectedFiles(prev => [...prev, ...valid])
-
-    // Reset the input so the same file can be re-selected after removal
-    if (fileInputRef.current) fileInputRef.current.value = ''
+    setStagedFiles(updated)
   }
 
-  function removeFile(index: number) {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
-    setError('')
+  function removeFile(idx: number) {
+    setStagedFiles(prev => prev.filter((_, i) => i !== idx))
+    setFileError('')
   }
 
   async function send() {
@@ -112,52 +96,40 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
     setError('')
     setSuccess(false)
 
-    // Upload attachments first
-    const uploadedAttachments: Attachment[] = []
-
-    for (const file of selectedFiles) {
-      const fd = new FormData()
-      fd.append('file', file)
-      fd.append('clientId', selectedId)
-      if (IMAGE_TYPES.has(file.type)) {
-        fd.append('currentImageCount', String(
-          uploadedAttachments.filter(a => IMAGE_TYPES.has(a.mime_type)).length
-        ))
-      }
-
-      const res = await fetch('/api/coach/message-attachments', { method: 'POST', body: fd })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        setError(data.error ?? `Failed to upload "${file.name}".`)
-        setSending(false)
-        return
-      }
-      uploadedAttachments.push(await res.json())
-    }
-
-    // Send the message with attachments
+    // Step 1 — insert the message
     const res = await fetch('/api/coach/messages', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({
-        clientId:    selectedId,
-        body:        text.trim(),
-        attachments: uploadedAttachments,
-      }),
+      body:    JSON.stringify({ clientId: selectedId, body: text.trim() }),
     })
-    setSending(false)
-
-    if (res.ok) {
-      const created: Message = await res.json()
-      setMessages(prev => [created, ...prev])
-      setText('')
-      setSelectedFiles([])
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
-    } else {
-      const data = await res.json().catch(() => ({}))
-      setError(data.error ?? 'Failed to send message.')
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}))
+      setError(d.error ?? 'Failed to send message.')
+      setSending(false)
+      return
     }
+    const created: Message = await res.json()
+    created.attachments = []
+
+    // Step 2 — upload each staged file
+    for (const file of stagedFiles) {
+      const fd = new FormData()
+      fd.append('messageId', created.id)
+      fd.append('clientId', selectedId)
+      fd.append('file', file)
+      const ures = await fetch('/api/coach/messages/attachments', { method: 'POST', body: fd })
+      if (ures.ok) {
+        const att: Attachment = await ures.json()
+        created.attachments!.push(att)
+      }
+    }
+
+    setMessages(prev => [created, ...prev])
+    setText('')
+    setStagedFiles([])
+    setSuccess(true)
+    setTimeout(() => setSuccess(false), 3000)
+    setSending(false)
   }
 
   function fmt(iso: string) {
@@ -167,9 +139,21 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
     }).format(new Date(iso))
   }
 
+  function fileIcon(mime: string | null) {
+    if (mime && IMAGE_TYPES.includes(mime)) return <Image size={13} />
+    return <FileText size={13} />
+  }
+
+  function formatSize(bytes: number | null) {
+    if (!bytes) return ''
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  const hasImages       = stagedFiles.some(f => IMAGE_TYPES.includes(f.type))
   const selectedClient  = clients.find(c => c.id === selectedId)
-  const imageCount      = selectedFiles.filter(f => IMAGE_TYPES.has(f.type)).length
-  const hasImages       = imageCount > 0
+  const imageCount      = stagedFiles.filter(f => IMAGE_TYPES.includes(f.type)).length
 
   return (
     <div>
@@ -186,8 +170,9 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
             onChange={e => {
               setSelectedId(e.target.value)
               setText('')
-              setSelectedFiles([])
+              setStagedFiles([])
               setError('')
+              setFileError('')
               setSuccess(false)
             }}
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal"
@@ -209,85 +194,97 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
             <label className="block text-sm font-semibold text-tfs-navy mb-2">
               New Message to {selectedClient?.first_name} {selectedClient?.last_name}
             </label>
+
             <textarea
               value={text}
-              onChange={e => setText(e.target.value.slice(0, MAX_BODY))}
+              onChange={e => setText(e.target.value.slice(0, MAX_MSG))}
               rows={5}
               placeholder="Write your message here…"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-none"
             />
 
-            {/* Attach files row */}
-            <div className="mt-3 flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={sending}
-                className="flex items-center gap-1.5 text-xs font-medium text-tfs-teal-button border border-tfs-teal rounded-lg px-3 py-1.5 hover:bg-tfs-teal/5 transition-colors disabled:opacity-50"
-              >
-                <Paperclip size={13} />
-                Attach Files
-              </button>
-              <span className="text-xs text-tfs-slate">
-                PDF, DOCX, TXT, JPG, PNG · max 10 MB · max {MAX_IMAGES} images
-              </span>
+            {/* File attach area */}
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-3 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1.5 text-xs text-tfs-slate border border-gray-200 rounded-lg px-3 py-1.5 hover:border-tfs-teal hover:text-tfs-teal transition-colors"
+                >
+                  <Paperclip size={13} />
+                  Attach file
+                </button>
+                <span className="text-xs text-tfs-slate">
+                  PDF, DOCX, TXT, JPG, PNG · 10 MB max
+                  {imageCount > 0 && (
+                    <span className={imageCount >= MAX_IMAGES ? ' text-amber-600 font-medium' : ''}>
+                      {' '}· {imageCount}/{MAX_IMAGES} images used
+                    </span>
+                  )}
+                </span>
+              </div>
+
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/jpeg,image/png"
+                accept=".pdf,.docx,.txt,.jpg,.jpeg,.png"
                 multiple
                 className="hidden"
-                onChange={handleFileChange}
+                onChange={e => {
+                  if (e.target.files) addFiles(Array.from(e.target.files))
+                  e.target.value = ''
+                }}
               />
+
+              {/* Staged files list */}
+              {stagedFiles.length > 0 && (
+                <div className="space-y-1.5">
+                  {stagedFiles.map((f, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5">
+                      {fileIcon(f.type)}
+                      <span className="text-xs text-tfs-navy flex-1 truncate">{f.name}</span>
+                      <span className="text-xs text-tfs-slate">{formatSize(f.size)}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(i)}
+                        className="text-tfs-slate hover:text-red-500 transition-colors"
+                        aria-label="Remove file"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Photo tips toggle (only shown when images are staged) */}
+              {hasImages && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowTips(t => !t)}
+                    className="flex items-center gap-1 text-xs text-tfs-teal-button font-medium"
+                  >
+                    {showTips ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    Photo upload tips
+                  </button>
+                  {showTips && (
+                    <ul className="mt-1.5 text-xs text-tfs-slate space-y-1 pl-4 list-disc">
+                      <li>Clear, well-lit photo — no shadows or glare</li>
+                      <li>Entire document visible — no cropped corners</li>
+                      <li>No handwritten forms unless extremely neat</li>
+                      <li>Don&apos;t send multiple photos of the same document — stitch into one PDF instead</li>
+                    </ul>
+                  )}
+                </div>
+              )}
+
+              {fileError && <p className="text-xs text-red-600">{fileError}</p>}
             </div>
 
-            {/* Selected files list */}
-            {selectedFiles.length > 0 && (
-              <div className="mt-3 space-y-2">
-                {selectedFiles.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                    {fileIcon(f.type)}
-                    <span className="text-xs text-tfs-navy flex-1 truncate">{f.name}</span>
-                    <span className="text-xs text-tfs-slate">{formatBytes(f.size)}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(i)}
-                      className="text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <X size={13} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Photo tips (shown when images are selected) */}
-            {hasImages && (
-              <div className="mt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowTips(v => !v)}
-                  className="flex items-center gap-1 text-xs text-tfs-teal-button font-medium"
-                >
-                  {showTips ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                  Photo upload tips
-                </button>
-                {showTips && (
-                  <ul className="mt-2 space-y-1 text-xs text-tfs-slate pl-4 list-disc">
-                    <li>Photo should be clear and well-lit</li>
-                    <li>Entire document must be visible — no cropped corners</li>
-                    <li>Avoid shadows or glare across the page</li>
-                    <li>Handwritten documents should be extremely neat</li>
-                    <li>Do not upload multiple photos of the same document — stitch into a single PDF instead</li>
-                  </ul>
-                )}
-              </div>
-            )}
-
-            {/* Send row */}
             <div className="flex items-center justify-between mt-3">
-              <span className={`text-xs ${text.length >= MAX_BODY ? 'text-red-500' : 'text-tfs-slate'}`}>
-                {text.length} / {MAX_BODY}
+              <span className={`text-xs ${text.length >= MAX_MSG ? 'text-red-500' : 'text-tfs-slate'}`}>
+                {text.length} / {MAX_MSG}
               </span>
               <div className="flex items-center gap-3">
                 {success && <span className="text-xs text-green-600 font-medium">Message sent!</span>}
@@ -298,7 +295,7 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
                   className="btn-primary text-sm px-4 py-1.5 flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <Send size={13} />
-                  {sending ? (selectedFiles.length > 0 ? 'Uploading…' : 'Sending…') : 'Send'}
+                  {sending ? 'Sending…' : 'Send'}
                 </button>
               </div>
             </div>
@@ -316,17 +313,32 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
                 {messages.map(m => (
                   <div key={m.id} className="card">
                     <p className="text-sm text-tfs-navy whitespace-pre-wrap">{m.body}</p>
+
+                    {/* Attachments on this message */}
                     {m.attachments && m.attachments.length > 0 && (
-                      <div className="mt-2 space-y-1">
-                        {m.attachments.map((a, i) => (
-                          <div key={i} className="flex items-center gap-2 text-xs text-tfs-slate">
+                      <div className="mt-2 space-y-1.5">
+                        {m.attachments.map(a => (
+                          <div key={a.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5">
                             {fileIcon(a.mime_type)}
-                            <span className="truncate">{a.name}</span>
-                            <span className="text-gray-400">({formatBytes(a.size)})</span>
+                            <span className="text-xs text-tfs-navy flex-1 truncate">{a.file_name}</span>
+                            <span className="text-xs text-tfs-slate">{formatSize(a.file_size)}</span>
+                            {a.url && (
+                              <a
+                                href={a.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download={a.file_name}
+                                className="text-tfs-teal-button hover:opacity-70 transition-opacity"
+                                aria-label={`Download ${a.file_name}`}
+                              >
+                                <Download size={13} />
+                              </a>
+                            )}
                           </div>
                         ))}
                       </div>
                     )}
+
                     <div className="flex items-center justify-between mt-2">
                       <p className="text-xs text-tfs-slate">{fmt(m.created_at)}</p>
                       {m.read_at ? (

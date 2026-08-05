@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Send, MessageSquare, Download, FileText, Image } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Send, MessageSquare, FileText, Image, Download } from 'lucide-react'
 
 type Message = {
   id: string
@@ -9,35 +9,23 @@ type Message = {
   created_at: string
 }
 
-type Attachment = {
-  name: string
-  path: string
-  size: number
-  mime_type: string
-  signed_url: string | null
-}
-
 type CoachMessage = {
   id: string
   body: string
   created_at: string
   read_at: string | null
-  attachments?: Attachment[]
 }
 
+type Attachment = {
+  id: string
+  file_name: string
+  file_size: number | null
+  mime_type: string | null
+  url: string | null
+}
+
+const IMAGE_TYPES = ['image/jpeg', 'image/png']
 const MAX = 2000
-
-function fileIcon(mimeType: string) {
-  if (mimeType === 'image/jpeg' || mimeType === 'image/png')
-    return <Image size={14} className="text-tfs-teal-button flex-shrink-0" />
-  return <FileText size={14} className="text-tfs-teal-button flex-shrink-0" />
-}
-
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
 
 export default function PortalMessagesClient({
   initial,
@@ -46,11 +34,26 @@ export default function PortalMessagesClient({
   initial: Message[]
   coachMessages: CoachMessage[]
 }) {
-  const [messages, setMessages] = useState(initial)
-  const [text, setText]         = useState('')
-  const [sending, setSending]   = useState(false)
-  const [error, setError]       = useState('')
-  const [success, setSuccess]   = useState(false)
+  const [messages, setMessages]   = useState(initial)
+  const [text, setText]           = useState('')
+  const [sending, setSending]     = useState(false)
+  const [error, setError]         = useState('')
+  const [success, setSuccess]     = useState(false)
+  const [attachmentsByMsg, setAttachmentsByMsg] = useState<Record<string, Attachment[]>>({})
+
+  // Load attachments for all coach messages
+  useEffect(() => {
+    if (coachMessages.length === 0) return
+    const ids = coachMessages.map(m => m.id).join(',')
+    fetch(`/api/portal/coach-attachments?messageIds=${ids}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data && typeof data === 'object' && !data.error) {
+          setAttachmentsByMsg(data as Record<string, Attachment[]>)
+        }
+      })
+      .catch(() => {/* silently fail — attachments are supplementary */})
+  }, [coachMessages])
 
   async function send() {
     if (!text.trim()) return
@@ -82,6 +85,18 @@ export default function PortalMessagesClient({
     }).format(new Date(iso))
   }
 
+  function fileIcon(mime: string | null) {
+    if (mime && IMAGE_TYPES.includes(mime)) return <Image size={13} />
+    return <FileText size={13} />
+  }
+
+  function formatSize(bytes: number | null) {
+    if (!bytes) return ''
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-2">Message Your Coach</h1>
@@ -98,43 +113,41 @@ export default function PortalMessagesClient({
             <h2 className="font-serif font-bold text-tfs-navy text-lg">Messages from Your Coach</h2>
           </div>
           <div className="space-y-3">
-            {coachMessages.map(m => (
-              <div key={m.id} className="card border-l-4 border-tfs-teal">
-                <p className="text-sm text-tfs-navy whitespace-pre-wrap">{m.body}</p>
+            {coachMessages.map(m => {
+              const atts = attachmentsByMsg[m.id] ?? []
+              return (
+                <div key={m.id} className="card border-l-4 border-tfs-teal">
+                  <p className="text-sm text-tfs-navy whitespace-pre-wrap">{m.body}</p>
 
-                {/* Attachments from coach */}
-                {m.attachments && m.attachments.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    <p className="text-xs font-semibold text-tfs-navy">
-                      Attached {m.attachments.length === 1 ? 'file' : 'files'} from your coach:
-                    </p>
-                    {m.attachments.map((att, i) => (
-                      <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                        {fileIcon(att.mime_type)}
-                        <span className="text-xs text-tfs-navy flex-1 truncate">{att.name}</span>
-                        <span className="text-xs text-tfs-slate">{formatBytes(att.size)}</span>
-                        {att.signed_url ? (
-                          <a
-                            href={att.signed_url}
-                            download={att.name}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-xs text-tfs-teal-button font-medium hover:underline"
-                          >
-                            <Download size={12} />
-                            Download
-                          </a>
-                        ) : (
-                          <span className="text-xs text-gray-400 italic">Unavailable</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                  {/* Attachments sent by coach */}
+                  {atts.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {atts.map(a => (
+                        <div key={a.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5">
+                          {fileIcon(a.mime_type)}
+                          <span className="text-xs text-tfs-navy flex-1 truncate">{a.file_name}</span>
+                          <span className="text-xs text-tfs-slate">{formatSize(a.file_size)}</span>
+                          {a.url && (
+                            <a
+                              href={a.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download={a.file_name}
+                              className="text-tfs-teal-button hover:opacity-70 transition-opacity"
+                              aria-label={`Download ${a.file_name}`}
+                            >
+                              <Download size={13} />
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                <p className="text-xs text-tfs-slate mt-2">{fmt(m.created_at)}</p>
-              </div>
-            ))}
+                  <p className="text-xs text-tfs-slate mt-2">{fmt(m.created_at)}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
