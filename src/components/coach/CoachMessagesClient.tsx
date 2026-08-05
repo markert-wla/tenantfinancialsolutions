@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Paperclip, X, FileText, Image, ChevronDown, ChevronUp, Download } from 'lucide-react'
+import { Send, Paperclip, X, FileText, Image as ImageIcon, ChevronDown, ChevronUp, Download } from 'lucide-react'
 
 const ALLOWED_TYPES = [
   'image/jpeg',
@@ -140,7 +140,7 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
   }
 
   function fileIcon(mime: string | null) {
-    if (mime && IMAGE_TYPES.includes(mime)) return <Image size={13} />
+    if (mime && IMAGE_TYPES.includes(mime)) return <ImageIcon size={13} />
     return <FileText size={13} />
   }
 
