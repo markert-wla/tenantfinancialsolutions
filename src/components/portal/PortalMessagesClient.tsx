@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Send, MessageSquare, FileText, Image, Download } from 'lucide-react'
+import { Send, MessageSquare, FileText, Image as ImageIcon, Download } from 'lucide-react'
 
 type Message = {
   id: string
@@ -86,7 +86,7 @@ export default function PortalMessagesClient({
   }
 
   function fileIcon(mime: string | null) {
-    if (mime && IMAGE_TYPES.includes(mime)) return <Image size={13} />
+    if (mime && IMAGE_TYPES.includes(mime)) return <ImageIcon size={13} />
     return <FileText size={13} />
   }
 
