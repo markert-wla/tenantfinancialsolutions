@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
+import { brandedEmail, emailButton } from '@/lib/email-template'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tenantfinancialsolutions.com'
 
 export async function GET() {
   const supabase = createClient()
@@ -31,6 +34,13 @@ export async function POST(req: NextRequest) {
   if (!text)              return NextResponse.json({ error: 'Message cannot be empty' }, { status: 400 })
   if (text.length > 2000) return NextResponse.json({ error: 'Message too long (2000 characters max)' }, { status: 400 })
 
+  // Look up the client's profile for the notification email
+  const { data: clientProfile } = await supabase
+    .from('profiles')
+    .select('email, first_name, last_name')
+    .eq('id', user.id)
+    .single()
+
   const { data, error } = await supabase
     .from('portal_messages')
     .insert({ client_id: user.id, body: text })
@@ -39,14 +49,8 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Send email notification to the assigned coach
+  // Send email notification to the client's coach (fire-and-forget — never block the response)
   try {
-    const { data: clientProfile } = await supabase
-      .from('profiles')
-      .select('first_name, last_name, email')
-      .eq('id', user.id)
-      .single()
-
     // Find the coach assigned to this client via their most recent non-cancelled booking
     const { data: booking } = await supabase
       .from('bookings')
@@ -66,24 +70,24 @@ export async function POST(req: NextRequest) {
 
       if (coachProfile?.email) {
         const clientName = [clientProfile?.first_name, clientProfile?.last_name].filter(Boolean).join(' ') || 'A client'
+        const coachFirstName = coachProfile.first_name ?? 'there'
         await sendEmail({
           to: coachProfile.email,
           subject: `New message from ${clientName}`,
-          html: `
-            <div style="font-family:sans-serif;max-width:520px;margin:0 auto;">
-              <h2 style="color:#1a365d;">New message from ${clientName}</h2>
-              <p>Hi ${coachProfile.first_name ?? 'there'},</p>
-              <p>${clientName} has sent you a new message on the Tenant Financial Solutions portal. Log in to read it and reply.</p>
-              <a href="https://app.tenantfinancialsolutions.com/coach/messages"
-                 style="display:inline-block;margin-top:12px;padding:10px 20px;background:#2b6cb0;color:#fff;border-radius:6px;text-decoration:none;">View Message</a>
-              <p style="margin-top:24px;font-size:12px;color:#718096;">Tenant Financial Solutions &bull; <a href="https://tenantfinancialsolutions.com" style="color:#718096;">tenantfinancialsolutions.com</a></p>
-            </div>
-          `,
+          html: brandedEmail(`
+            <p style="margin:0 0 16px;">Hi ${coachFirstName},</p>
+            <p style="margin:0 0 16px;"><strong>${clientName}</strong> has sent you a new message through their TFS portal.</p>
+            <p style="margin:0 0 24px;">Log in to your coach dashboard to read it and reply.</p>
+            ${emailButton(`${SITE_URL}/coach/messages`, 'View Message')}
+            <p style="margin:24px 0 0;font-size:13px;color:#6B7E8F;">
+              Questions? Reach us at
+              <a href="mailto:hello@tenantfinancialsolutions.com" style="color:#1D9E75;">hello@tenantfinancialsolutions.com</a>.
+            </p>
+          `),
         })
       }
     }
   } catch (emailErr) {
-    // Non-fatal — log but don't fail the request
     console.error('[portal/messages] Failed to send coach notification email:', emailErr)
   }
 
