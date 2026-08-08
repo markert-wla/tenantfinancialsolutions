@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { sendEmail, FROM } from '@/lib/resend'
 
 export async function GET(req: NextRequest) {
   const supabase = createClient()
@@ -64,9 +65,9 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || (profile.role !== 'coach' && profile.role !== 'admin'))
+  const { data: coachProfile } = await supabase
+    .from('profiles').select('role, first_name, last_name').eq('id', user.id).single()
+  if (!coachProfile || (coachProfile.role !== 'coach' && coachProfile.role !== 'admin'))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { clientId, body } = await req.json().catch(() => ({}))
@@ -80,5 +81,36 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Send email notification to the client
+  try {
+    const { data: clientProfile } = await supabase
+      .from('profiles')
+      .select('email, first_name')
+      .eq('id', clientId)
+      .single()
+
+    if (clientProfile?.email) {
+      const coachName = [coachProfile.first_name, coachProfile.last_name].filter(Boolean).join(' ') || 'Your coach'
+      await sendEmail({
+        to: clientProfile.email,
+        subject: 'You have a new message from your TFS Coach',
+        html: `
+          <div style="font-family:sans-serif;max-width:520px;margin:0 auto;">
+            <h2 style="color:#1a365d;">New message from ${coachName}</h2>
+            <p>Hi ${clientProfile.first_name ?? 'there'},</p>
+            <p>Your coach has sent you a new message on the Tenant Financial Solutions portal. Log in to read it and reply.</p>
+            <a href="https://app.tenantfinancialsolutions.com/portal/messages"
+               style="display:inline-block;margin-top:12px;padding:10px 20px;background:#2b6cb0;color:#fff;border-radius:6px;text-decoration:none;">View Message</a>
+            <p style="margin-top:24px;font-size:12px;color:#718096;">Tenant Financial Solutions &bull; <a href="https://tenantfinancialsolutions.com" style="color:#718096;">tenantfinancialsolutions.com</a></p>
+          </div>
+        `,
+      })
+    }
+  } catch (emailErr) {
+    // Non-fatal — log but don't fail the request
+    console.error('[coach/messages] Failed to send client notification email:', emailErr)
+  }
+
   return NextResponse.json(data)
 }
