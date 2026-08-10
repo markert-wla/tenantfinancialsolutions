@@ -30,6 +30,7 @@ interface Client {
   email: string
   plan_tier: string
   client_type: string | null
+  partner_id: string | null
   promo_code_used: string | null
   free_trial_expires_at: string | null
   sessions_used_this_month: number
@@ -50,6 +51,7 @@ interface PMCode {
 interface Props {
   clients: Client[]
   pmCodes: PMCode[]
+  partnerModels: Record<string, string>
 }
 
 function toInputDate(iso: string | null) {
@@ -60,7 +62,15 @@ function daysSince(iso: string) {
   return Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24))
 }
 
-export default function AdminClientsClient({ clients: initial, pmCodes }: Props) {
+function pmTenantLabel(partnerId: string | null, partnerModels: Record<string, string>): string {
+  if (!partnerId) return 'PM Tenant'
+  const model = partnerModels[partnerId]
+  if (model === 'paying')    return 'PM Tenant (Strategic Partner)'
+  if (model === 'affiliate') return 'PM Tenant (Affiliate Partner)'
+  return 'PM Tenant'
+}
+
+export default function AdminClientsClient({ clients: initial, pmCodes, partnerModels }: Props) {
   const [clients, setClients]           = useState<Client[]>(initial)
   const [searchQuery, setSearchQuery]   = useState('')
   const [typeFilter, setTypeFilter]     = useState<string>('all')
@@ -493,7 +503,10 @@ export default function AdminClientsClient({ clients: initial, pmCodes }: Props)
                     <td className="px-4 py-3">
                       {c.client_type && (
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLOR[c.client_type] ?? 'bg-gray-100 text-gray-600'}`}>
-                          {TYPE_LABEL[c.client_type] ?? c.client_type}
+                          {c.client_type === 'property_tenant'
+                            ? pmTenantLabel(c.partner_id, partnerModels)
+                            : (TYPE_LABEL[c.client_type] ?? c.client_type)
+                          }
                         </span>
                       )}
                     </td>

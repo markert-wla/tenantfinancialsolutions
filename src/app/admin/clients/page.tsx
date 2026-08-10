@@ -16,10 +16,10 @@ export default async function AdminClientsPage() {
     .from('profiles').select('role').eq('id', user.id).single()
   if (actor?.role !== 'admin') redirect('/login')
 
-  const [{ data: clients }, { data: pmCodes }] = await Promise.all([
+  const [{ data: clients }, { data: pmCodes }, { data: partnerRows }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, plan_tier, client_type, promo_code_used, free_trial_expires_at, sessions_used_this_month, extra_sessions, last_active_at, is_active, created_at, stripe_customer_id, deletion_requested_at, deletion_scheduled_for')
+      .select('id, first_name, last_name, email, plan_tier, client_type, promo_code_used, free_trial_expires_at, sessions_used_this_month, extra_sessions, last_active_at, is_active, created_at, stripe_customer_id, deletion_requested_at, deletion_scheduled_for, partner_id')
       .eq('role', 'client')
       .order('last_active_at', { ascending: true }),
 
@@ -29,7 +29,16 @@ export default async function AdminClientsPage() {
       .eq('partner_type', 'property_management')
       .eq('is_active', true)
       .order('partner_name'),
+
+    supabase
+      .from('partners')
+      .select('id, model'),
   ])
+
+  const partnerModels: Record<string, string> = {}
+  for (const p of partnerRows ?? []) {
+    if (p.id && p.model) partnerModels[p.id] = p.model
+  }
 
   const activeCount   = clients?.filter(c => c.is_active).length ?? 0
   const inactiveCount = clients?.filter(c => !c.is_active).length ?? 0
@@ -49,6 +58,7 @@ export default async function AdminClientsPage() {
       <AdminClientsClient
         clients={clients ?? []}
         pmCodes={pmCodes ?? []}
+        partnerModels={partnerModels}
       />
     </div>
   )
