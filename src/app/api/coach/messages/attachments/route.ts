@@ -32,6 +32,18 @@ export async function POST(req: NextRequest) {
   if (!messageId || !clientId || !file)
     return NextResponse.json({ error: 'messageId, clientId, and file are required' }, { status: 400 })
 
+  // The message must be one this coach sent to this client — otherwise a coach
+  // could attach files into another coach's conversation.
+  const { data: message } = await supabase
+    .from('coach_messages')
+    .select('id')
+    .eq('id', messageId)
+    .eq('coach_id', user.id)
+    .eq('client_id', clientId)
+    .single()
+  if (!message)
+    return NextResponse.json({ error: 'Message not found' }, { status: 404 })
+
   if (!ALLOWED_TYPES.includes(file.type))
     return NextResponse.json({ error: 'File type not allowed. Use PDF, DOCX, TXT, JPG, or PNG.' }, { status: 400 })
 
