@@ -340,6 +340,10 @@ export default function ClientDetailClient({
             <span className="text-xs text-tfs-slate">{documents.length} file{documents.length !== 1 ? 's' : ''}</span>
           )}
         </div>
+        <p className="text-xs text-tfs-slate mb-3">
+          Documents are automatically deleted 14 days after upload — this area is not certified for
+          storing sensitive personal information. Save anything you need for your records before it expires.
+        </p>
 
         {docsLoading ? (
           <div className="card flex items-center gap-2 text-tfs-slate text-sm">

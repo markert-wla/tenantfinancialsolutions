@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Send, MessageSquare, FileText, Image as ImageIcon, Download } from 'lucide-react'
+import { Send, MessageSquare, FileText, Image as ImageIcon, Download, AlertTriangle } from 'lucide-react'
 
 type Message = {
   id: string
@@ -112,6 +112,9 @@ export default function PortalMessagesClient({
             <MessageSquare size={16} className="text-tfs-teal-button" />
             <h2 className="font-serif font-bold text-tfs-navy text-lg">Messages from Your Coach</h2>
           </div>
+          <p className="text-xs text-tfs-slate mb-3">
+            Attachments are automatically deleted after 14 days — download anything you need to keep.
+          </p>
           <div className="space-y-3">
             {coachMessages.map(m => {
               const atts = attachmentsByMsg[m.id] ?? []
@@ -155,6 +158,14 @@ export default function PortalMessagesClient({
       {/* Compose */}
       <div className="card mb-8">
         <label className="block text-sm font-semibold text-tfs-navy mb-2">New Message</label>
+        <div className="mb-2 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-800">
+          <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+          <p>
+            <span className="font-semibold">Privacy notice:</span> messaging is not certified for
+            sensitive personal information — please do not share tax details, Social Security
+            numbers, bank or account numbers, or similar sensitive information with your coach here.
+          </p>
+        </div>
         <textarea
           value={text}
           onChange={e => setText(e.target.value.slice(0, MAX))}
