@@ -96,6 +96,21 @@ export async function POST(req: NextRequest) {
     discountPercent = code.discount_percent ?? null
     promoPartnerId  = code.partner_id ?? null
 
+    // Strategic Partner Level PMs (model='paying') pre-pay coaching for their tenants:
+    // property tenants registering with such a partner's code always land on the
+    // Advantage plan, regardless of the code's assigned_tier. Affiliate-discount codes
+    // are excluded — forcing Advantage there would change what the registrant is billed.
+    if (promoPartnerId && clientType === 'property_tenant' && codeType !== 'affiliate_discount') {
+      const { data: partnerRow } = await supabase
+        .from('partners')
+        .select('model')
+        .eq('id', promoPartnerId)
+        .single()
+      if (partnerRow?.model === 'paying') {
+        effectiveTier = 'advantage'
+      }
+    }
+
     await supabase
       .from('promo_codes')
       .update({ uses_count: code.uses_count + 1 })
