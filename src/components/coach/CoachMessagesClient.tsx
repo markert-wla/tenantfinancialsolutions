@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Paperclip, X, FileText, Image as ImageIcon, ChevronDown, ChevronUp, Download } from 'lucide-react'
+import { Send, Paperclip, X, FileText, Image as ImageIcon, ChevronDown, ChevronUp, Download, AlertTriangle } from 'lucide-react'
 
 const ALLOWED_TYPES = [
   'image/jpeg',
@@ -280,6 +280,17 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
               )}
 
               {fileError && <p className="text-xs text-red-600">{fileError}</p>}
+
+              {/* PII / retention notice */}
+              <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-800">
+                <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+                <p>
+                  <span className="font-semibold">Privacy notice:</span> message attachments are not
+                  certified for sensitive personal information — do not send tax documents, Social
+                  Security numbers, or account details, and remind clients not to share them either.
+                  Attachments are <span className="font-semibold">automatically deleted after 14 days</span>.
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center justify-between mt-3">

@@ -145,6 +145,17 @@ export default function DocumentsSection() {
           </div>
         </div>
 
+        {/* PII / retention notice */}
+        <div className="mt-3 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 text-xs text-amber-800">
+          <AlertCircle size={14} className="shrink-0 mt-0.5" />
+          <p>
+            <span className="font-semibold">Privacy notice:</span> This upload area is not certified
+            for storing sensitive personal information. Please do not upload tax returns, Social
+            Security numbers, bank statements, or other sensitive personal or financial documents.
+            All uploaded files are <span className="font-semibold">automatically deleted after 14 days</span>.
+          </p>
+        </div>
+
         {/* Image guardrails toggle */}
         <div className="mt-3">
           <button
