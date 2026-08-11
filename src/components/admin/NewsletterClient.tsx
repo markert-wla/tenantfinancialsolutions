@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Mail, Users, Send, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
+import { Mail, Users, Send, CheckCircle, XCircle, RefreshCw, FlaskConical } from 'lucide-react'
 
 type Subscriber = {
   id: string
@@ -17,6 +17,9 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const [testEmail, setTestEmail] = useState('')
+  const [testSending, setTestSending] = useState(false)
+  const [testResult, setTestResult] = useState<{ ok: boolean; error?: string } | null>(null)
   const [result, setResult] = useState<{ ok: boolean; sent?: number; error?: string } | null>(null)
   const [syncResult, setSyncResult] = useState<{ ok: boolean; synced?: number; error?: string } | null>(null)
 
@@ -31,7 +34,6 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
       const data = await res.json()
       if (data.ok) {
         setSyncResult({ ok: true, synced: data.synced })
-        // Refresh page data after a short delay so subscriber count updates
         setTimeout(() => window.location.reload(), 1500)
       } else {
         setSyncResult({ ok: false, error: data.error ?? 'Unknown error' })
@@ -43,6 +45,35 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
     }
   }
 
+  function buildHtml() {
+    return body
+      .split(/\n{2,}/)
+      .map(p => p.trim())
+      .filter(Boolean)
+      .map(p => `<p style="margin:0 0 16px;">${p.replace(/\n/g, '<br>')}</p>`)
+      .join('')
+  }
+
+  async function handleTestSend() {
+    if (!subject.trim() || !body.trim()) return
+    if (!testEmail.trim()) return
+    setTestSending(true)
+    setTestResult(null)
+    try {
+      const res = await fetch('/api/newsletter/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject: subject.trim(), html: buildHtml(), testEmail: testEmail.trim() }),
+      })
+      const data = await res.json()
+      setTestResult({ ok: data.ok, error: data.error })
+    } catch {
+      setTestResult({ ok: false, error: 'Network error — please try again' })
+    } finally {
+      setTestSending(false)
+    }
+  }
+
   async function handleSend() {
     if (!subject.trim() || !body.trim()) return
     if (!confirm(`Send this newsletter to ${active.length} subscriber${active.length !== 1 ? 's' : ''}?`)) return
@@ -51,17 +82,10 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
     setResult(null)
 
     try {
-      const paragraphs = body
-        .split(/\n{2,}/)
-        .map(p => p.trim())
-        .filter(Boolean)
-        .map(p => `<p style="margin:0 0 16px;">${p.replace(/\n/g, '<br>')}</p>`)
-        .join('')
-
       const res = await fetch('/api/newsletter/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject: subject.trim(), html: paragraphs }),
+        body: JSON.stringify({ subject: subject.trim(), html: buildHtml() }),
       })
       const data = await res.json()
       if (data.ok) {
@@ -156,7 +180,40 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
             placeholder="Write your newsletter here. Separate paragraphs with a blank line."
             className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal resize-y"
           />
-          <p className="text-xs text-slate-400 mt-1">Plain text — blank lines become new paragraphs. Your email will arrive in the TFS branded template.</p>
+          <p className="text-xs text-slate-400 mt-1">Plain text — blank lines become new paragraphs. Your email will arrive with the &ldquo;Wednesday Wisdom from TFS&rdquo; heading and TFS branded template.</p>
+        </div>
+
+        {/* Test send */}
+        <div className="border border-slate-200 rounded-lg p-4 space-y-3 bg-slate-50">
+          <p className="text-sm font-medium text-slate-700 flex items-center gap-2">
+            <FlaskConical size={15} /> Send a test email
+          </p>
+          <p className="text-xs text-slate-500">Send this newsletter to one address before blasting to all subscribers. Subject will be prefixed with [TEST].</p>
+          <div className="flex gap-2">
+            <input
+              type="email"
+              value={testEmail}
+              onChange={e => setTestEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tfs-teal bg-white"
+            />
+            <button
+              onClick={handleTestSend}
+              disabled={testSending || !subject.trim() || !body.trim() || !testEmail.trim()}
+              className="flex items-center gap-2 bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+            >
+              <FlaskConical size={14} />
+              {testSending ? 'Sending…' : 'Send Test'}
+            </button>
+          </div>
+          {testResult && (
+            <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${
+              testResult.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {testResult.ok ? <CheckCircle size={14} /> : <XCircle size={14} />}
+              {testResult.ok ? 'Test email sent!' : `Error: ${testResult.error}`}
+            </div>
+          )}
         </div>
 
         {result && (
