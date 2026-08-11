@@ -27,24 +27,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing subject or content' }, { status: 400 })
   }
 
-  // Prepend the Wednesday Wisdom title banner
-  const titledHtml = `
-    <h1 style="font-family:Georgia,serif;font-size:26px;font-weight:bold;color:#1a3a4a;text-align:center;margin:0 0 24px;padding-bottom:16px;border-bottom:2px solid #e2e8f0;">
-      Wednesday Wisdom from TFS
-    </h1>
-    ${html}
-  `
+  // Prepend the Wednesday Wisdom heading to every newsletter
+  const titledHtml = `<h2 style="margin:0 0 24px;font-size:22px;font-weight:700;color:#1A2B4A;text-align:center;letter-spacing:0.2px;">Wednesday Wisdom from TFS</h2>${html}`
   const wrappedHtml = brandedEmail(titledHtml)
 
-  // Test send — one address only, skip subscriber list
+  // Test send — one address only
   if (testEmail?.trim()) {
-    try {
-      await sendEmail({ to: [testEmail.trim()], subject: `[TEST] ${subject.trim()}`, html: wrappedHtml })
-      return NextResponse.json({ ok: true, sent: 1, test: true })
-    } catch (err) {
-      console.error('[Newsletter test send] Error:', err)
-      return NextResponse.json({ error: 'Failed to send test email' }, { status: 500 })
-    }
+    await sendEmail({ to: [testEmail.trim()], subject: `[TEST] ${subject.trim()}`, html: wrappedHtml })
+    return NextResponse.json({ ok: true, sent: 1, test: true })
   }
 
   // Get all active subscribers
