@@ -4,24 +4,21 @@ import { sendEmail } from '@/lib/resend'
 import { brandedEmail } from '@/lib/email-template'
 
 export async function POST(req: NextRequest) {
-  // Auth check — admin or Amanda Butler (coach)
+  // Auth check — admin by role, or a coach granted the newsletter permission
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, first_name, last_name')
+    .select('role, can_manage_newsletter')
     .eq('id', user.id)
     .single()
 
   const isAdmin = profile?.role === 'admin'
-  const isAmanda =
-    profile?.role === 'coach' &&
-    profile?.first_name === 'Amanda' &&
-    profile?.last_name === 'Butler'
+  const isNewsletterCoach = profile?.role === 'coach' && profile?.can_manage_newsletter === true
 
-  if (!isAdmin && !isAmanda) {
+  if (!isAdmin && !isNewsletterCoach) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

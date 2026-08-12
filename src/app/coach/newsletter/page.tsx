@@ -15,15 +15,16 @@ export default async function CoachNewsletterPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, last_name, role')
+    .select('role, can_manage_newsletter')
     .eq('id', user.id)
     .single()
 
-  // Only Amanda Butler (coach) may access this page
-  const isAmanda =
-    profile?.first_name === 'Amanda' && profile?.last_name === 'Butler'
+  // Coaches granted the newsletter permission (and admins) may access this page
+  const allowed =
+    profile?.role === 'admin' ||
+    (profile?.role === 'coach' && profile?.can_manage_newsletter === true)
 
-  if (!isAmanda) redirect('/coach/dashboard')
+  if (!allowed) redirect('/coach/dashboard')
 
   const service = createServiceClient()
   const { data: subscribers } = await service
