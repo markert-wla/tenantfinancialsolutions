@@ -4,6 +4,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 // GET /api/portal/coach-attachments?messageIds=id1,id2,...
 // Returns attachments with signed download URLs for messages sent by a coach to this client.
 export async function GET(req: NextRequest) {
+  // Authenticate the requesting user with their session
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -12,8 +13,16 @@ export async function GET(req: NextRequest) {
   const messageIds = raw.split(',').map(s => s.trim()).filter(Boolean)
   if (messageIds.length === 0) return NextResponse.json({})
 
-  // Use the authenticated client for the data query — RLS enforces client_id === user.id
-  const { data, error } = await supabase
+  // Use the service client for both the data query and signed URL generation:
+  // - Data query: RLS on coach_message_attachments only allows coaches/admins to read,
+  //   not clients. Using service role lets us bypass that while still filtering by client_id.
+  // - Signed URLs: files are stored under the coach's user ID so the client session
+  //   cannot sign them.
+  // Security is maintained: we explicitly filter .eq('client_id', user.id) so a client
+  // can never see another client's attachments.
+  const serviceClient = createServiceClient()
+
+  const { data, error } = await serviceClient
     .from('coach_message_attachments')
     .select('id, message_id, file_name, file_path, file_size, mime_type, created_at')
     .in('message_id', messageIds)
@@ -22,9 +31,6 @@ export async function GET(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Use the service client to generate signed URLs — files are stored under the coach's
-  // user ID in the path, so the client's session alone cannot sign them.
-  const serviceClient = createServiceClient()
   const result: Record<string, unknown[]> = {}
 
   await Promise.all(
