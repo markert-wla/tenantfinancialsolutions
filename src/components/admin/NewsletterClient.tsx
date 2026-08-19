@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Mail, Users, Send, CheckCircle, XCircle, RefreshCw, FlaskConical } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Mail, Users, Send, CheckCircle, XCircle, RefreshCw, FlaskConical, BookmarkCheck, Clock, Trash2 } from 'lucide-react'
 
 type Subscriber = {
   id: string
@@ -22,8 +22,29 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
   const [testResult, setTestResult] = useState<{ ok: boolean; error?: string } | null>(null)
   const [result, setResult] = useState<{ ok: boolean; sent?: number; error?: string } | null>(null)
   const [syncResult, setSyncResult] = useState<{ ok: boolean; synced?: number; error?: string } | null>(null)
+  const [draftSaving, setDraftSaving] = useState(false)
+  const [draftResult, setDraftResult] = useState<{ ok: boolean; error?: string } | null>(null)
+  const [draftLoaded, setDraftLoaded] = useState<{ subject: string; updatedAt: string } | null>(null)
+  const [clearingDraft, setClearingDraft] = useState(false)
 
   const active = subscribers.filter(s => s.is_active)
+
+  // Load the saved draft on mount
+  const loadDraft = useCallback(async () => {
+    try {
+      const res = await fetch('/api/newsletter/draft')
+      const data = await res.json()
+      if (data.ok && data.draft) {
+        setDraftLoaded({ subject: data.draft.subject, updatedAt: data.draft.updated_at })
+      } else {
+        setDraftLoaded(null)
+      }
+    } catch {
+      // Non-fatal — draft status just won't show
+    }
+  }, [])
+
+  useEffect(() => { loadDraft() }, [loadDraft])
 
   async function handleSync() {
     if (!confirm('Sync all active clients to the newsletter list? Anyone who previously unsubscribed will NOT be re-added.')) return
@@ -74,6 +95,47 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
     }
   }
 
+  async function handleSaveDraft() {
+    if (!subject.trim() || !body.trim()) return
+    setDraftSaving(true)
+    setDraftResult(null)
+    try {
+      const res = await fetch('/api/newsletter/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject: subject.trim(), body: body.trim() }),
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setDraftResult({ ok: true })
+        await loadDraft()
+      } else {
+        setDraftResult({ ok: false, error: data.error ?? 'Unknown error' })
+      }
+    } catch {
+      setDraftResult({ ok: false, error: 'Network error — please try again' })
+    } finally {
+      setDraftSaving(false)
+    }
+  }
+
+  async function handleClearDraft() {
+    if (!confirm('Remove the saved draft? The newsletter will NOT go out this Wednesday unless you save a new one.')) return
+    setClearingDraft(true)
+    try {
+      await fetch('/api/newsletter/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clear: true }),
+      })
+      setDraftLoaded(null)
+    } catch {
+      // Non-fatal
+    } finally {
+      setClearingDraft(false)
+    }
+  }
+
   async function handleSend() {
     if (!subject.trim() || !body.trim()) return
     if (!confirm(`Send this newsletter to ${active.length} subscriber${active.length !== 1 ? 's' : ''}?`)) return
@@ -107,6 +169,44 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
       <div className="flex items-center gap-3">
         <Mail className="text-tfs-teal" size={28} />
         <h1 className="text-2xl font-bold text-slate-800">Newsletter</h1>
+      </div>
+
+      {/* Scheduled send status banner */}
+      <div className={`rounded-xl p-5 border flex items-start gap-4 ${
+        draftLoaded
+          ? 'bg-teal-50 border-teal-200'
+          : 'bg-slate-50 border-slate-200'
+      }`}>
+        <Clock size={20} className={draftLoaded ? 'text-tfs-teal mt-0.5 shrink-0' : 'text-slate-400 mt-0.5 shrink-0'} />
+        <div className="flex-1 min-w-0">
+          {draftLoaded ? (
+            <>
+              <p className="text-sm font-semibold text-teal-800">Wednesday send is scheduled ✓</p>
+              <p className="text-sm text-teal-700 mt-0.5">
+                &ldquo;{draftLoaded.subject}&rdquo; will go out automatically this Wednesday at 10am EST.
+                Saved {new Date(draftLoaded.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-slate-700">No Wednesday send scheduled</p>
+              <p className="text-sm text-slate-500 mt-0.5">
+                Compose your newsletter below and click <strong>Save as Wednesday Draft</strong> to schedule it.
+                If no draft is saved, nothing goes out this week.
+              </p>
+            </>
+          )}
+        </div>
+        {draftLoaded && (
+          <button
+            onClick={handleClearDraft}
+            disabled={clearingDraft}
+            title="Remove scheduled draft"
+            className="shrink-0 text-teal-500 hover:text-red-500 transition-colors disabled:opacity-50"
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -216,6 +316,38 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
           )}
         </div>
 
+        {/* Save as draft + send now row */}
+        <div className="flex flex-wrap gap-3 pt-1">
+          <button
+            onClick={handleSaveDraft}
+            disabled={draftSaving || !subject.trim() || !body.trim()}
+            className="flex items-center gap-2 bg-tfs-teal/10 text-tfs-teal border border-tfs-teal/30 px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-tfs-teal/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <BookmarkCheck size={16} />
+            {draftSaving ? 'Saving…' : 'Save as Wednesday Draft'}
+          </button>
+
+          <button
+            onClick={handleSend}
+            disabled={sending || !subject.trim() || !body.trim() || active.length === 0}
+            className="flex items-center gap-2 bg-tfs-teal text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-tfs-teal/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Send size={16} />
+            {sending ? 'Sending…' : `Send Now to ${active.length} subscriber${active.length !== 1 ? 's' : ''}`}
+          </button>
+        </div>
+
+        {draftResult && (
+          <div className={`flex items-center gap-2 text-sm px-4 py-3 rounded-lg ${
+            draftResult.ok ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'bg-red-50 text-red-700 border border-red-200'
+          }`}>
+            {draftResult.ok ? <CheckCircle size={16} /> : <XCircle size={16} />}
+            {draftResult.ok
+              ? 'Draft saved — this will go out automatically Wednesday at 10am EST.'
+              : `Error: ${draftResult.error}`}
+          </div>
+        )}
+
         {result && (
           <div className={`flex items-center gap-2 text-sm px-4 py-3 rounded-lg ${
             result.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
@@ -226,15 +358,6 @@ export default function NewsletterClient({ subscribers: initialSubscribers }: { 
               : `Error: ${result.error}`}
           </div>
         )}
-
-        <button
-          onClick={handleSend}
-          disabled={sending || !subject.trim() || !body.trim() || active.length === 0}
-          className="flex items-center gap-2 bg-tfs-teal text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-tfs-teal/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          <Send size={16} />
-          {sending ? 'Sending…' : `Send to ${active.length} subscriber${active.length !== 1 ? 's' : ''}`}
-        </button>
       </div>
 
       {/* Subscriber list */}
