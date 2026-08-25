@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import BirthdayTestButton from '@/components/admin/BirthdayTestButton'
 
 export const metadata: Metadata = { title: 'Client Demographics — Admin' }
 
@@ -69,6 +70,8 @@ export default async function AdminDemographicsPage() {
           {total} clients · {couples} couples · {withBirthday} birthday months on file · {withAnniversary} anniversary months on file
         </p>
       </div>
+
+      <BirthdayTestButton />
 
       <div className="card overflow-hidden p-0">
         <div className="overflow-x-auto">
