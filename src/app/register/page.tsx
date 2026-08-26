@@ -111,7 +111,7 @@ function RegisterInner() {
           timezone:           form.timezone,
           tier:               path === 'individual' ? tier : (codeInfo?.assigned_tier ?? 'free'),
           clientType:         clientType(),
-          promoCode:          (path === 'partner' || path === 'nonprofit') ? form.promoCode.trim().toUpperCase() : null,
+          promoCode:          form.promoCode.trim() ? form.promoCode.trim().toUpperCase() : null,
           unitNumber:         path === 'partner' ? form.unitNumber.trim() : null,
           birthdayMonth:      !isCouple && form.birthdayMonth ? parseInt(form.birthdayMonth) : null,
           anniversaryMonth:   isCouple && form.anniversaryMonth ? parseInt(form.anniversaryMonth) : null,
@@ -284,7 +284,7 @@ function RegisterInner() {
             </div>
           )}
 
-          {/* Individual: plan picker */}
+          {/* Individual: plan picker + optional promo code */}
           {path === 'individual' && (
             <>
               <div>
@@ -311,6 +311,42 @@ function RegisterInner() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Optional promo code for individuals */}
+              <div>
+                <label className="block text-sm font-medium text-tfs-navy mb-1">
+                  Promo Code <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={form.promoCode}
+                    onChange={e => { update('promoCode', e.target.value.toUpperCase()); setCodeStatus('idle'); setCodeInfo(null) }}
+                    placeholder="Enter code if you have one"
+                    className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-tfs-teal"
+                  />
+                  <button
+                    type="button"
+                    onClick={validateCode}
+                    disabled={codeStatus === 'checking' || !form.promoCode.trim()}
+                    className="px-4 py-2.5 bg-tfs-teal text-white text-sm rounded-lg font-medium hover:bg-tfs-teal-dark transition-colors disabled:opacity-50"
+                  >
+                    {codeStatus === 'checking' ? '…' : 'Validate'}
+                  </button>
+                </div>
+                {codeStatus === 'valid' && (
+                  <div className="mt-2 flex items-center gap-2 text-green-600 text-sm">
+                    <Check size={16} />
+                    Code valid — {codeInfo ? (TIER_LABELS[codeInfo.assigned_tier] ?? codeInfo.assigned_tier) : ''} assigned
+                  </div>
+                )}
+                {codeStatus === 'invalid' && (
+                  <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+                    <AlertCircle size={16} />
+                    Invalid or expired code.
+                  </div>
+                )}
               </div>
             </>
           )}
