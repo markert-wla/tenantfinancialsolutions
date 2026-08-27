@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TFS Emotional Money Map Coaching Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy:'#0A1628', gold:'#C9A84C', 'gold-light':'#E0C97A', 'gold-dark':'#A8872E',
+            emerald:'#1A7A4A', 'emerald-light':'#2A9A60', 'emerald-dark':'#146038',
+            mint:'#F0F7F4', softgray:'#F5F6FA', bodytext:'#1C2B3A',
+            'release-red':'#C0392B', 'release-bg':'#FDF2F0', 'cultivate-bg':'#F0FAF5',
+          },
+          fontFamily: { display:['Playfair Display','serif'], body:['Inter','sans-serif'] }
+        }
+      }
+    };
+    </script>
+    <style>
+    :root { --navy:#0A1628; --gold:#C9A84C; --emerald:#1A7A4A; --mint:#F0F7F4; --white:#FFFFFF; --softgray:#F5F6FA; --bodytext:#1C2B3A; --release-red:#C0392B; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',sans-serif; color:var(--bodytext); background:var(--mint); }
+    h1,h2,h3,h4 { font-family:'Playfair Display',serif; }
+    .hero-bg { background:linear-gradient(135deg,#0A1628 0%,#0d2240 30%,#0f2e1e 60%,#0A1628 100%); background-size:400% 400%; animation:heroGlow 8s ease infinite; }
+    @keyframes heroGlow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    .hero-radial { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:600px; height:600px; background:radial-gradient(ellipse,rgba(201,168,76,0.12) 0%,rgba(26,122,74,0.06) 40%,transparent 70%); pointer-events:none; }
+    .step-panel { display:none; opacity:0; transform:translateY(16px); }
+    .step-panel.active { display:block; animation:fadeInUp 0.4s ease forwards; }
+    @keyframes fadeInUp { to{opacity:1;transform:translateY(0)} }
+    .emotion-card { transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease; cursor:pointer; user-select:none; position:relative; }
+    .emotion-card:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,0.1); }
+    .emotion-card.selected-decrease { border-color:var(--release-red)!important; box-shadow:0 0 0 3px rgba(192,57,43,0.2); animation:pulseRed 2s ease infinite; }
+    .emotion-card.selected-increase { border-color:var(--emerald)!important; box-shadow:0 0 0 3px rgba(26,122,74,0.2); animation:pulseGreen 2s ease infinite; }
+    @keyframes pulseRed { 0%,100%{box-shadow:0 0 0 3px rgba(192,57,43,0.15)} 50%{box-shadow:0 0 0 6px rgba(192,57,43,0.08)} }
+    @keyframes pulseGreen { 0%,100%{box-shadow:0 0 0 3px rgba(26,122,74,0.15)} 50%{box-shadow:0 0 0 6px rgba(26,122,74,0.08)} }
+    .checkmark-badge { position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; display:none; align-items:center; justify-content:center; font-size:14px; color:white; font-weight:700; }
+    .emotion-card.selected-decrease .checkmark-badge, .emotion-card.selected-increase .checkmark-badge { display:flex; }
+    .emotion-card.selected-decrease .checkmark-badge { background:var(--release-red); }
+    .emotion-card.selected-increase .checkmark-badge { background:var(--emerald); }
+    .progress-fill { transition:width 0.5s ease; }
+    .btn-gold { background:var(--gold); color:var(--navy); font-weight:600; border-radius:9999px; padding:12px 32px; font-size:16px; transition:transform 0.15s ease,background 0.2s ease,box-shadow 0.2s ease; cursor:pointer; border:none; font-family:'Inter',sans-serif; }
+    .btn-gold:hover:not(:disabled) { transform:scale(1.02); background:#d4b35a; box-shadow:0 4px 16px rgba(201,168,76,0.3); }
+    .btn-gold:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+    .btn-outline { background:transparent; color:var(--navy); border:2px solid #d1d5db; font-weight:500; border-radius:9999px; padding:10px 24px; font-size:14px; transition:transform 0.15s ease,border-color 0.2s ease; cursor:pointer; font-family:'Inter',sans-serif; }
+    .btn-outline:hover { transform:scale(1.02); border-color:var(--gold); }
+    .toast { position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-80px); background:var(--navy); color:white; padding:12px 28px; border-radius:12px; font-size:14px; font-weight:500; z-index:1000; opacity:0; transition:transform 0.3s ease,opacity 0.3s ease; pointer-events:none; font-family:'Inter',sans-serif; box-shadow:0 8px 32px rgba(0,0,0,0.25); }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .commitment-card { position:relative; overflow:hidden; border:2px solid var(--gold); border-radius:16px; background:white; }
+    .commitment-card::before { content:'TFS'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-30deg); font-family:'Playfair Display',serif; font-size:140px; font-weight:800; color:rgba(201,168,76,0.04); pointer-events:none; letter-spacing:12px; }
+    .habit-card { background:white; border-radius:12px; padding:20px; border-left:4px solid transparent; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+    .habit-card.release { border-left-color:var(--release-red); }
+    .habit-card.cultivate { border-left-color:var(--emerald); }
+    .lang-toggle { display:inline-flex; border-radius:9999px; overflow:hidden; border:1px solid rgba(255,255,255,0.2); }
+    .lang-btn { padding:6px 14px; font-size:13px; font-weight:500; cursor:pointer; transition:background 0.2s,color 0.2s; border:none; font-family:'Inter',sans-serif; }
+    .lang-btn.active-lang { background:var(--gold); color:var(--navy); }
+    .lang-btn:not(.active-lang) { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); }
+    @media print { @page{size:8.5in 11in;margin:0.75in} *{-webkit-print-color-adjust:exact!important;color-adjust:exact!important;animation:none!important} .step-panel{display:none!important;opacity:0!important} .step-panel.active{display:block!important;opacity:1!important;transform:none!important} #step-0-welcome{display:none!important} #app-header{display:flex!important;position:relative!important} .no-print{display:none!important} html,body{margin:0;padding:0;background:white!important;min-height:auto} .commitment-card{border:2px solid #C9A84C!important;box-shadow:none!important;page-break-inside:avoid} }
+    </style>
+</head>
+<body class="min-h-screen">
+<div id="toast-msg" class="toast"></div>
+
+<header id="app-header" class="no-print sticky top-0 z-50 bg-navy shadow-lg" style="display:none;">
+  <div class="max-w-6xl mx-auto flex items-center justify-between px-4 md:px-6 py-3">
+    <div class="flex items-center gap-3"><div class="bg-gold text-navy font-display font-bold text-lg px-3 py-1 rounded" style="letter-spacing:2px;">TFS</div><span class="text-white/70 text-sm font-body hidden sm:inline">Tenant Financial Solutions</span></div>
+    <div class="flex items-center gap-4">
+      <div id="progress-wrap" class="hidden md:flex items-center gap-2"><span id="step-label" class="text-white/60 text-xs font-body whitespace-nowrap"></span><div class="w-32 lg:w-48 h-2 bg-white/10 rounded-full overflow-hidden"><div id="progress-bar" class="progress-fill h-full bg-gold rounded-full" style="width:0%"></div></div></div>
+      <div class="lang-toggle"><button id="lang-en-btn" class="lang-btn active-lang">🇺🇸 EN</button><button id="lang-es-btn" class="lang-btn">🇪🇸 ES</button></div>
+    </div>
+  </div>
+</header>
+
+<!-- STEP 0: WELCOME -->
+<section id="step-0-welcome" class="step-panel active">
+  <div class="hero-bg min-h-screen flex flex-col relative overflow-hidden">
+    <div class="hero-radial"></div>
+    <div class="relative z-10 flex items-center justify-between px-5 md:px-10 py-5">
+      <div class="flex items-center gap-3"><div class="bg-gold text-navy font-display font-bold text-xl px-4 py-1.5 rounded" style="letter-spacing:3px;">TFS</div></div>
+      <div class="lang-toggle"><button id="lang-en-hero" class="lang-btn active-lang">🇺🇸 EN</button><button id="lang-es-hero" class="lang-btn">🇪🇸 ES</button></div>
+    </div>
+    <div class="relative z-10 flex-1 flex flex-col items-center justify-center px-5 text-center">
+      <div class="mb-6"><div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 mb-8"><span class="w-2 h-2 bg-gold rounded-full"></span><span class="text-white/60 text-sm font-body" data-i18n="hero_badge">Financial Coaching Experience</span></div></div>
+      <h1 class="font-display text-4xl md:text-6xl lg:text-7xl text-white font-bold leading-tight mb-4" data-i18n="hero_title">The Emotional<br/>Money Map</h1>
+      <p class="font-body text-white/60 text-base md:text-lg max-w-xl mb-3 leading-relaxed" data-i18n="hero_subtitle">Understand the emotions driving your financial decisions — and rewrite the story.</p>
+      <p class="font-display text-gold/80 italic text-sm md:text-base mb-10" data-i18n="hero_tagline">Your Financial Future, Elevated.</p>
+      <button id="begin-btn" class="btn-gold text-base md:text-lg px-10 py-4 flex items-center gap-2"><span data-i18n="hero_cta">Begin Your Journey</span><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+    </div>
+    <div class="relative z-10 text-center pb-6"><p class="text-white/20 text-xs font-body">© Tenant Financial Solutions</p></div>
+  </div>
+</section>
+
+<!-- STEP 1: HOW IT WORKS -->
+<section id="step-1-how" class="step-panel">
+  <div class="max-w-4xl mx-auto px-4 md:px-6 py-10 md:py-16">
+    <div class="text-center mb-10"><h2 class="font-display text-3xl md:text-4xl text-navy font-bold mb-3" data-i18n="s1_title">How This Works</h2><div class="w-16 h-1 bg-gold mx-auto rounded-full"></div></div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div class="bg-white rounded-2xl p-6 md:p-8 text-center shadow-sm border border-gray-100"><div class="w-14 h-14 bg-release-bg rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🎯</div><h3 class="font-display text-xl text-navy font-semibold mb-2" data-i18n="s1_c1_title">Identify</h3><p class="font-body text-sm text-bodytext/70 leading-relaxed" data-i18n="s1_c1_desc">Select 3 emotions that are holding your finances back.</p></div>
+      <div class="bg-white rounded-2xl p-6 md:p-8 text-center shadow-sm border border-gray-100"><div class="w-14 h-14 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">✨</div><h3 class="font-display text-xl text-navy font-semibold mb-2" data-i18n="s1_c2_title">Elevate</h3><p class="font-body text-sm text-bodytext/70 leading-relaxed" data-i18n="s1_c2_desc">Choose 3 emotions you want to build into your financial life.</p></div>
+      <div class="bg-white rounded-2xl p-6 md:p-8 text-center shadow-sm border border-gray-100"><div class="w-14 h-14 bg-cultivate-bg rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🌱</div><h3 class="font-display text-xl text-navy font-semibold mb-2" data-i18n="s1_c3_title">Act</h3><p class="font-body text-sm text-bodytext/70 leading-relaxed" data-i18n="s1_c3_desc">Receive personalized micro-habits to bridge the gap.</p></div>
+    </div>
+    <div class="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm mb-8">
+      <p class="font-body text-bodytext/80 leading-relaxed text-sm md:text-base" data-i18n="s1_body">Money is emotional. Every financial decision you make is shaped by how you feel. At TFS, we help you move from emotional scarcity to intentional abundance — one habit at a time.</p>
+      <p class="font-body text-bodytext/50 text-sm mt-4 italic" data-i18n="s1_lang_note">This tool is available in English and Spanish. Use the toggle at the top right to switch languages.</p>
+    </div>
+    <div class="flex justify-center"><button id="s1-next-btn" class="btn-gold flex items-center gap-2"><span data-i18n="s1_cta">Let's Begin</span><i data-lucide="arrow-right" class="w-5 h-5"></i></button></div>
+  </div>
+</section>
+
+<!-- STEP 2: DECREASE EMOTIONS -->
+<section id="step-2-decrease" class="step-panel">
+  <div class="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+      <div><div class="flex items-center gap-2 mb-2"><span class="text-xl">🔴</span><h2 class="font-display text-2xl md:text-3xl text-navy font-bold" data-i18n="s2_title">Emotions to Release</h2></div><p class="font-body text-bodytext/60 text-sm md:text-base max-w-xl" data-i18n="s2_subtitle">Select exactly 3 emotions that currently hold you back financially.</p></div>
+      <div id="decrease-counter" class="flex items-center gap-2 bg-white rounded-full px-5 py-2 shadow-sm border border-gray-100 shrink-0"><span class="font-body text-sm font-medium text-bodytext/70" data-i18n="counter_label">Selected:</span><span id="decrease-count" class="font-body text-lg font-bold text-bodytext">0</span><span class="font-body text-lg text-bodytext/40">/ 3</span></div>
+    </div>
+    <div id="decrease-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+    <div class="flex items-center justify-between">
+      <button id="s2-back-btn" class="btn-outline flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i><span data-i18n="btn_back">Back</span></button>
+      <button id="s2-next-btn" class="btn-gold flex items-center gap-2" disabled><span data-i18n="btn_next">Next Step</span><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 3: INCREASE EMOTIONS -->
+<section id="step-3-increase" class="step-panel">
+  <div class="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+      <div><div class="flex items-center gap-2 mb-2"><span class="text-xl">🟢</span><h2 class="font-display text-2xl md:text-3xl text-navy font-bold" data-i18n="s3_title">Emotions to Cultivate</h2></div><p class="font-body text-bodytext/60 text-sm md:text-base max-w-xl" data-i18n="s3_subtitle">Now choose 3 emotions you want to feel more of in your financial life.</p></div>
+      <div id="increase-counter" class="flex items-center gap-2 bg-white rounded-full px-5 py-2 shadow-sm border border-gray-100 shrink-0"><span class="font-body text-sm font-medium text-bodytext/70" data-i18n="counter_label2">Selected:</span><span id="increase-count" class="font-body text-lg font-bold text-bodytext">0</span><span class="font-body text-lg text-bodytext/40">/ 3</span></div>
+    </div>
+    <div id="increase-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+    <div class="flex items-center justify-between">
+      <button id="s3-back-btn" class="btn-outline flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i><span data-i18n="btn_back">Back</span></button>
+      <button id="s3-next-btn" class="btn-gold flex items-center gap-2" disabled><span data-i18n="btn_next">Next Step</span><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 4: MICRO-HABITS -->
+<section id="step-4-habits" class="step-panel">
+  <div class="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
+    <div class="text-center mb-8"><div class="flex items-center justify-center gap-2 mb-2"><span class="text-xl">🌱</span><h2 class="font-display text-2xl md:text-3xl text-navy font-bold" data-i18n="s4_title">Your Micro-Habit Action Plan</h2></div><p class="font-body text-bodytext/60 text-sm md:text-base max-w-2xl mx-auto" data-i18n="s4_subtitle">Small, consistent actions create massive financial shifts.</p></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div><div class="flex items-center gap-2 mb-4 pb-3 border-b-2 border-release-red/20"><span class="text-lg">🔴</span><h3 class="font-display text-xl text-release-red font-semibold" data-i18n="s4_release_header">Releasing</h3></div><div id="release-habits" class="space-y-4"></div></div>
+      <div><div class="flex items-center gap-2 mb-4 pb-3 border-b-2 border-emerald/20"><span class="text-lg">🟢</span><h3 class="font-display text-xl text-emerald font-semibold" data-i18n="s4_cultivate_header">Cultivating</h3></div><div id="cultivate-habits" class="space-y-4"></div></div>
+    </div>
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-8">
+      <label class="font-display text-lg text-navy font-semibold mb-3 block" data-i18n="s4_notes_label">Notes &amp; Reflections</label>
+      <textarea id="notes-textarea" class="w-full h-32 border border-gray-200 rounded-xl p-4 font-body text-sm text-bodytext resize-none focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold" placeholder="Write your reflections, commitments, or anything that came up during this exercise..."></textarea>
+    </div>
+    <div class="flex items-center justify-between">
+      <button id="s4-back-btn" class="btn-outline flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i><span data-i18n="btn_back">Back</span></button>
+      <button id="s4-next-btn" class="btn-gold flex items-center gap-2"><span data-i18n="btn_next">Next Step</span><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 5: COMMITMENT -->
+<section id="step-5-commit" class="step-panel">
+  <div class="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
+    <div class="text-center mb-8"><div class="flex items-center justify-center gap-2 mb-2"><span class="text-xl">💎</span><h2 class="font-display text-2xl md:text-3xl text-navy font-bold" data-i18n="s5_title">Your TFS Financial Commitment</h2></div></div>
+    <div class="commitment-card p-6 md:p-10 mb-8">
+      <div class="text-center mb-6 pb-4 border-b border-gold/20"><div class="inline-block bg-gold text-navy font-display font-bold text-2xl px-5 py-2 rounded mb-3" style="letter-spacing:3px;">TFS</div><p class="font-display text-navy text-xl font-semibold" data-i18n="s5_card_title">Emotional Money Map — Personal Commitment</p><p class="font-body text-bodytext/50 text-sm mt-1" data-i18n="s5_card_tagline">Your Financial Future, Elevated.</p></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div><label class="font-body text-xs text-bodytext/50 uppercase tracking-wider block mb-1" data-i18n="s5_name_label">Your Name</label><input id="commit-name-input" type="text" class="w-full border-b-2 border-gray-200 pb-2 font-display text-lg text-navy bg-transparent focus:outline-none focus:border-gold transition-colors" placeholder="Enter your name" /></div>
+        <div><label class="font-body text-xs text-bodytext/50 uppercase tracking-wider block mb-1" data-i18n="s5_date_label">Date</label><p id="commit-date" class="font-display text-lg text-navy pb-2 border-b-2 border-gray-200"></p></div>
+      </div>
+      <div class="mb-6"><h4 class="font-display text-base text-release-red font-semibold mb-3 flex items-center gap-2"><span>🔴</span><span data-i18n="s5_releasing">I am releasing:</span></h4><div id="commit-release-list" class="space-y-2"></div></div>
+      <div class="mb-6"><h4 class="font-display text-base text-emerald font-semibold mb-3 flex items-center gap-2"><span>🟢</span><span data-i18n="s5_cultivating">I am cultivating:</span></h4><div id="commit-cultivate-list" class="space-y-2"></div></div>
+      <div class="mb-6"><label class="font-display text-base text-navy font-semibold mb-2 block" data-i18n="s5_top_habit_label">My #1 Micro-Habit this week:</label><select id="top-habit-select" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 font-body text-sm text-bodytext bg-white focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold cursor-pointer"></select></div>
+      <div class="border-t border-gold/20 pt-6 mt-6"><p class="font-display italic text-bodytext/60 text-sm mb-3" data-i18n="s5_signed">Signed with intention,</p><input id="commit-sig-input" type="text" class="w-full md:w-1/2 border-b-2 border-navy/20 pb-2 font-display text-lg text-navy bg-transparent focus:outline-none focus:border-gold transition-colors" placeholder="Your signature" /></div>
+      <div class="text-center mt-8 pt-4 border-t border-gold/10"><div class="inline-block bg-gold text-navy font-display font-bold text-sm px-3 py-1 rounded mb-2" style="letter-spacing:2px;">TFS</div><p class="font-body text-bodytext/40 text-xs">Tenant Financial Solutions</p><p class="font-display italic text-gold/70 text-xs mt-1" data-i18n="s5_footer_tagline">Your Financial Future, Elevated.</p></div>
+    </div>
+    <div class="bg-navy rounded-2xl p-6 md:p-8 text-center mb-8"><p class="font-display text-white/90 text-base md:text-lg italic leading-relaxed" data-i18n="s5_closing_quote">Wealth is built one intentional habit at a time. You've taken the first step. TFS is here for every step that follows.</p><div class="w-10 h-0.5 bg-gold mx-auto mt-4"></div></div>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 no-print">
+      <button id="print-btn" class="btn-gold flex items-center gap-2 w-full sm:w-auto justify-center"><i data-lucide="printer" class="w-5 h-5"></i><span data-i18n="btn_print">Print / Save as PDF</span></button>
+      <button id="restart-btn" class="btn-outline flex items-center gap-2 w-full sm:w-auto justify-center"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span data-i18n="btn_restart">Start Over</span></button>
+    </div>
+  </div>
+</section>
+
+<footer id="app-footer" class="no-print bg-navy py-6 text-center" style="display:none;"><div class="flex items-center justify-center gap-2 mb-2"><div class="bg-gold text-navy font-display font-bold text-xs px-2 py-0.5 rounded" style="letter-spacing:1px;">TFS</div><span class="text-white/40 text-xs font-body">Tenant Financial Solutions</span></div></footer>
+
+<script>
+const DECREASE_EMOTIONS = [
+  {id:'fear',emoji:'😰',en:'Fear',es:'Miedo',desc_en:'Avoids investing or making financial moves',desc_es:'Evita invertir o tomar decisiones financieras'},
+  {id:'shame',emoji:'😔',en:'Shame',es:'Vergüenza',desc_en:'Hides debt, avoids financial conversations',desc_es:'Oculta deudas, evita conversaciones financieras'},
+  {id:'resentment1',emoji:'😤',en:'Resentment',es:'Resentimiento',desc_en:'Overspends out of spite or entitlement',desc_es:'Gasta de más por despecho o derecho propio'},
+  {id:'anxiety',emoji:'😟',en:'Anxiety',es:'Ansiedad',desc_en:'Hoards cash but never builds wealth',desc_es:'Acumula efectivo pero nunca construye riqueza'},
+  {id:'hopelessness',emoji:'😞',en:'Hopelessness',es:'Desesperanza',desc_en:'Stops tracking finances entirely',desc_es:'Deja de rastrear las finanzas por completo'},
+  {id:'overwhelm',emoji:'😣',en:'Overwhelm',es:'Agobio',desc_en:'Freezes on financial decisions',desc_es:'Se paraliza ante decisiones financieras'},
+  {id:'anger',emoji:'😡',en:'Anger',es:'Enojo',desc_en:'Makes impulsive purchases to cope',desc_es:'Realiza compras impulsivas para sobrellevar'},
+  {id:'comparison',emoji:'😒',en:'Comparison',es:'Comparación',desc_en:'Compares to others, overspends to keep up',desc_es:'Se compara con otros, gasta de más'},
+  {id:'guilt',emoji:'😓',en:'Guilt',es:'Culpa',desc_en:'Sabotages financial progress subconsciously',desc_es:'Sabotea el progreso financiero inconscientemente'},
+  {id:'scarcity',emoji:'😰',en:'Scarcity',es:'Escasez',desc_en:'Believes there will never be enough',desc_es:'Cree que nunca habrá suficiente'},
+  {id:'denial',emoji:'🤐',en:'Denial',es:'Negación',desc_en:'Avoids checking accounts or bills',desc_es:'Evita revisar cuentas o facturas'},
+  {id:'confusion',emoji:'😕',en:'Confusion',es:'Confusión',desc_en:"Doesn't know where to start, stays stuck",desc_es:'No sabe por dónde empezar, permanece estancado'},
+  {id:'apathy',emoji:'😪',en:'Apathy',es:'Apatía',desc_en:"Doesn't engage with financial planning",desc_es:'No se involucra con la planificación financiera'},
+  {id:'greed',emoji:'🤑',en:'Greed',es:'Codicia',desc_en:'Takes financial risks without research',desc_es:'Toma riesgos financieros sin investigar'},
+  {id:'exhaustion',emoji:'😩',en:'Exhaustion',es:'Agotamiento',desc_en:'Too tired to manage money consistently',desc_es:'Demasiado cansado para manejar el dinero'},
+  {id:'avoidance',emoji:'🫣',en:'Avoidance',es:'Evasión',desc_en:'Delays all financial conversations and tasks',desc_es:'Posterga conversaciones y tareas financieras'}
+];
+const INCREASE_EMOTIONS = [
+  {id:'confidence',emoji:'💪',en:'Confidence',es:'Confianza',desc_en:'Makes decisions from a place of strength',desc_es:'Toma decisiones desde un lugar de fortaleza'},
+  {id:'gratitude',emoji:'🙏',en:'Gratitude',es:'Gratitud',desc_en:'Acknowledges current abundance while building more',desc_es:'Reconoce la abundancia actual mientras construye más'},
+  {id:'clarity',emoji:'✨',en:'Clarity',es:'Claridad',desc_en:'Sees financial path forward with precision',desc_es:'Ve el camino financiero con precisión'},
+  {id:'peace',emoji:'🧘',en:'Peace',es:'Paz',desc_en:'Manages money without stress or drama',desc_es:'Maneja el dinero sin estrés ni drama'},
+  {id:'focus',emoji:'🎯',en:'Focus',es:'Enfoque',desc_en:'Stays on budget and long-term goals',desc_es:'Se mantiene en presupuesto y metas'},
+  {id:'hope',emoji:'🌟',en:'Hope',es:'Esperanza',desc_en:'Believes a better financial future is possible',desc_es:'Cree que un mejor futuro financiero es posible'},
+  {id:'curiosity',emoji:'💡',en:'Curiosity',es:'Curiosidad',desc_en:'Loves learning about money and investing',desc_es:'Le encanta aprender sobre dinero e inversiones'},
+  {id:'pride',emoji:'🏆',en:'Pride',es:'Orgullo',desc_en:'Feels accomplished with financial milestones',desc_es:'Se siente realizado con logros financieros'},
+  {id:'trust',emoji:'🤝',en:'Trust',es:'Confianza',desc_en:'Builds healthy financial relationships',desc_es:'Construye relaciones financieras saludables'},
+  {id:'growth',emoji:'🌱',en:'Growth',es:'Crecimiento',desc_en:'Views setbacks as learning opportunities',desc_es:'Ve los obstáculos como oportunidades de aprendizaje'},
+  {id:'abundance',emoji:'❤️',en:'Abundance',es:'Abundancia',desc_en:'Operates from a mindset of enough and more',desc_es:'Opera desde una mentalidad de suficiencia y más'},
+  {id:'freedom',emoji:'🦋',en:'Freedom',es:'Libertad',desc_en:'Makes choices not driven by financial fear',desc_es:'Toma decisiones sin miedo financiero'},
+  {id:'motivation',emoji:'🔥',en:'Motivation',es:'Motivación',desc_en:'Takes consistent action toward financial goals',desc_es:'Toma acciones consistentes hacia sus metas financieras'},
+  {id:'joy',emoji:'🌈',en:'Joy',es:'Alegría',desc_en:'Celebrates financial wins, big and small',desc_es:'Celebra los logros financieros'},
+  {id:'security',emoji:'🛡️',en:'Security',es:'Seguridad',desc_en:'Feels protected by savings and planning',desc_es:'Se siente protegido por ahorros y planificación'},
+  {id:'worthiness',emoji:'💎',en:'Worthiness',es:'Dignidad',desc_en:'Believes you deserve financial success',desc_es:'Cree que mereces el éxito financiero'}
+];
+const DECREASE_HABITS = {
+  fear:{reframe_en:"Fear is just excitement waiting for direction.",reframe_es:"El miedo es solo entusiasmo esperando dirección.",daily_en:"Write one financial fear and one action that would shrink it.",daily_es:"Escribe un miedo financiero y una acción que lo reduciría.",weekly_en:"Review your net worth statement — familiarity reduces fear.",weekly_es:"Revisa tu estado de patrimonio neto — la familiaridad reduce el miedo."},
+  shame:{reframe_en:"Your past does not define your financial future.",reframe_es:"Tu pasado no define tu futuro financiero.",daily_en:"Say aloud: 'I am worthy of financial health.'",daily_es:"Di en voz alta: 'Soy digno de salud financiera.'",weekly_en:"Share one financial win with a trusted person.",weekly_es:"Comparte una victoria financiera con alguien de confianza."},
+  resentment1:{reframe_en:"Your financial journey is yours alone — run your race.",reframe_es:"Tu camino financiero es solo tuyo — corre tu propia carrera.",daily_en:"Unfollow one account that triggers financial comparison.",daily_es:"Deja de seguir una cuenta que provoque comparación financiera.",weekly_en:"Journal: What would YOUR ideal financial life look like?",weekly_es:"Escribe en tu diario: ¿Cómo sería TU vida financiera ideal?"},
+  anxiety:{reframe_en:"Preparation is the antidote to anxiety.",reframe_es:"La preparación es el antídoto contra la ansiedad.",daily_en:"Spend 5 minutes reviewing your budget.",daily_es:"Dedica 5 minutos a revisar tu presupuesto.",weekly_en:"Automate one savings transfer — let systems do the worrying.",weekly_es:"Automatiza una transferencia de ahorro."},
+  hopelessness:{reframe_en:"Every dollar saved is a vote for your future self.",reframe_es:"Cada dólar ahorrado es un voto por tu futuro yo.",daily_en:"Write down one small financial win from today.",daily_es:"Escribe una pequeña victoria financiera de hoy.",weekly_en:"Create a 'Financial Vision Board' entry — one dream, one step.",weekly_es:"Crea una entrada en tu 'Tablero de Visión Financiera'."},
+  overwhelm:{reframe_en:"You only need to do the next right thing.",reframe_es:"Solo necesitas hacer lo siguiente correcto.",daily_en:"Pick ONE financial task and do only that.",daily_es:"Elige UNA tarea financiera y haz solo eso.",weekly_en:"Break your biggest money goal into 3 micro-steps.",weekly_es:"Divide tu mayor meta financiera en 3 micro-pasos."},
+  anger:{reframe_en:"Your anger shows you care — redirect it into strategy.",reframe_es:"Tu enojo muestra que te importa — redirigelo hacia una estrategia.",daily_en:"Before spending, pause 60 seconds and breathe.",daily_es:"Antes de gastar, pausa 60 segundos y respira.",weekly_en:"Identify one financial trigger and write a new response.",weekly_es:"Identifica un detonante financiero y escribe una nueva respuesta."},
+  comparison:{reframe_en:"Your financial journey is yours alone — run your race.",reframe_es:"Tu camino financiero es solo tuyo — corre tu propia carrera.",daily_en:"Unfollow one account that triggers financial comparison.",daily_es:"Deja de seguir una cuenta que provoque comparación.",weekly_en:"Journal: What would YOUR ideal financial life look like?",weekly_es:"Escribe en tu diario: ¿Cómo sería TU vida financiera ideal?"},
+  guilt:{reframe_en:"You did the best you could. Now you know better.",reframe_es:"Hiciste lo mejor que pudiste. Ahora sabes más.",daily_en:"Write one forgiveness note to your past financial self.",daily_es:"Escribe una nota de perdón a tu yo financiero del pasado.",weekly_en:"Track spending without judgment — observe, don't criticize.",weekly_es:"Rastrea gastos sin juzgar — observa, no critiques."},
+  scarcity:{reframe_en:"Abundance is a practice, not just a destination.",reframe_es:"La abundancia es una práctica, no solo un destino.",daily_en:"List 3 financial resources you already have.",daily_es:"Enumera 3 recursos financieros que ya tienes.",weekly_en:"Find one free financial education resource to explore.",weekly_es:"Encuentra un recurso gratuito de educación financiera."},
+  denial:{reframe_en:"What you face, you can change.",reframe_es:"Lo que enfrentas, lo puedes cambiar.",daily_en:"Open your bank app — just look, no action needed.",daily_es:"Abre tu app bancaria — solo mira.",weekly_en:"Schedule a 15-minute 'Money Date' with yourself.",weekly_es:"Programa una 'Cita con el Dinero' de 15 minutos."},
+  confusion:{reframe_en:"Clarity comes from starting, not from waiting.",reframe_es:"La claridad viene de empezar, no de esperar.",daily_en:"Learn one financial term or concept.",daily_es:"Aprende un término o concepto financiero.",weekly_en:"Write down your top 3 financial priorities.",weekly_es:"Escribe tus 3 principales prioridades financieras."},
+  apathy:{reframe_en:"Your financial future is worth showing up for.",reframe_es:"Tu futuro financiero vale la pena que te presentes.",daily_en:"Set one micro financial goal for the week.",daily_es:"Establece una micro meta financiera para la semana.",weekly_en:"Calculate your current net worth — connection creates motivation.",weekly_es:"Calcula tu patrimonio neto actual."},
+  greed:{reframe_en:"Patience is the highest-yield investment.",reframe_es:"La paciencia es la inversión de mayor rendimiento.",daily_en:"Before any purchase, ask: 'Is this aligned with my goals?'",daily_es:"Antes de cada compra, pregunta: '¿Esto está alineado con mis metas?'",weekly_en:"Review one financial risk you're currently taking.",weekly_es:"Revisa un riesgo financiero que estés tomando."},
+  exhaustion:{reframe_en:"Rest is part of the strategy.",reframe_es:"El descanso es parte de la estrategia.",daily_en:"Automate one financial task to save mental energy.",daily_es:"Automatiza una tarea financiera para ahorrar energía mental.",weekly_en:"Delegate or simplify one financial process.",weekly_es:"Delega o simplifica un proceso financiero."},
+  avoidance:{reframe_en:"Every minute you face your finances, you win.",reframe_es:"Cada minuto que enfrentas tus finanzas, ganas.",daily_en:"Open one financial account and check the balance.",daily_es:"Abre una cuenta financiera y revisa el saldo.",weekly_en:"Schedule your next financial action on your calendar.",weekly_es:"Programa tu próxima acción financiera en tu calendario."}
+};
+const INCREASE_HABITS = {
+  confidence:{affirmation_en:"I make powerful financial decisions every day.",affirmation_es:"Tomo decisiones financieras poderosas cada día.",daily_en:"Make one intentional financial choice and name it out loud.",daily_es:"Toma una decisión financiera intencional y nómbrala en voz alta.",weekly_en:"Review 3 financial goals and your progress toward them.",weekly_es:"Revisa 3 metas financieras y tu progreso."},
+  gratitude:{affirmation_en:"I am grateful for what I have and excited for what's coming.",affirmation_es:"Agradezco lo que tengo y estoy emocionado por lo que viene.",daily_en:"Write down one financial thing you're grateful for.",daily_es:"Escribe una cosa financiera por la que estés agradecido.",weekly_en:"Thank one person who has supported your financial journey.",weekly_es:"Agradece a una persona que haya apoyado tu camino financiero."},
+  clarity:{affirmation_en:"My financial path is clear, and I walk it with purpose.",affirmation_es:"Mi camino financiero es claro y lo camino con propósito.",daily_en:"Review your financial dashboard for 5 minutes.",daily_es:"Revisa tu panel financiero durante 5 minutos.",weekly_en:"Update your budget and realign with your top goal.",weekly_es:"Actualiza tu presupuesto y alinéalo con tu meta principal."},
+  peace:{affirmation_en:"I manage my money with calm and intention.",affirmation_es:"Manejo mi dinero con calma e intención.",daily_en:"Take 3 deep breaths before opening financial apps.",daily_es:"Toma 3 respiraciones profundas antes de abrir apps financieras.",weekly_en:"Hold a 20-minute 'Money Meditation' — review, reflect, release.",weekly_es:"Haz una 'Meditación del Dinero' de 20 minutos."},
+  focus:{affirmation_en:"I stay the course — distraction does not derail me.",affirmation_es:"Me mantengo en el camino — las distracciones no me desvían.",daily_en:"Review your #1 financial goal before noon.",daily_es:"Revisa tu meta financiera #1 antes del mediodía.",weekly_en:"Block 30 minutes as protected 'financial focus time.'",weekly_es:"Bloquea 30 minutos como 'tiempo de enfoque financiero'."},
+  hope:{affirmation_en:"My financial breakthrough is already in motion.",affirmation_es:"Mi avance financiero ya está en movimiento.",daily_en:"Visualize your ideal financial life for 2 minutes.",daily_es:"Visualiza tu vida financiera ideal durante 2 minutos.",weekly_en:"Read one success story of someone who achieved your goal.",weekly_es:"Lee una historia de éxito de alguien que logró tu meta."},
+  curiosity:{affirmation_en:"I love learning and growing financially.",affirmation_es:"Me encanta aprender y crecer financieramente.",daily_en:"Learn one new financial concept or term.",daily_es:"Aprende un nuevo concepto o término financiero.",weekly_en:"Listen to 15 minutes of a financial podcast or book.",weekly_es:"Escucha 15 minutos de un podcast o libro financiero."},
+  pride:{affirmation_en:"I am proud of every financial step I take.",affirmation_es:"Estoy orgulloso de cada paso financiero que doy.",daily_en:"Acknowledge one financial win, no matter how small.",daily_es:"Reconoce una victoria financiera, por pequeña que sea.",weekly_en:"Share a financial milestone with your coach or a trusted friend.",weekly_es:"Comparte un logro financiero con tu coach o amigo."},
+  trust:{affirmation_en:"I build trustworthy financial relationships.",affirmation_es:"Construyo relaciones financieras confiables.",daily_en:"Keep one financial commitment to yourself today.",daily_es:"Cumple un compromiso financiero contigo mismo hoy.",weekly_en:"Check in with your TFS coach or accountability partner.",weekly_es:"Comunícate con tu coach de TFS."},
+  growth:{affirmation_en:"Every challenge makes me a stronger financial steward.",affirmation_es:"Cada desafío me hace un administrador financiero más fuerte.",daily_en:"Reflect: What did I learn about money today?",daily_es:"Reflexiona: ¿Qué aprendí sobre el dinero hoy?",weekly_en:"Identify one area of financial growth to focus on this month.",weekly_es:"Identifica un área de crecimiento financiero."},
+  abundance:{affirmation_en:"There is more than enough — for me and for others.",affirmation_es:"Hay más que suficiente — para mí y para los demás.",daily_en:"Spot 3 signs of abundance in your current life.",daily_es:"Identifica 3 señales de abundancia en tu vida actual.",weekly_en:"Give or invest in something beyond yourself.",weekly_es:"Da o invierte en algo más allá de ti mismo."},
+  freedom:{affirmation_en:"Financial freedom is my birthright and my pursuit.",affirmation_es:"La libertad financiera es mi derecho y mi búsqueda.",daily_en:"Take one action that moves you closer to financial independence.",daily_es:"Toma una acción que te acerque a la independencia financiera.",weekly_en:"Calculate how much closer to your freedom number you are.",weekly_es:"Calcula cuánto más cerca estás de tu número de libertad."},
+  motivation:{affirmation_en:"I am driven, disciplined, and financially unstoppable.",affirmation_es:"Soy determinado, disciplinado e imparable financieramente.",daily_en:"Do one financial task you've been putting off.",daily_es:"Haz una tarea financiera que hayas estado posponiendo.",weekly_en:"Revisit your 'why' — journal about the life your finances will build.",weekly_es:"Revisita tu 'por qué' — escribe en tu diario."},
+  joy:{affirmation_en:"I celebrate every step of my financial journey.",affirmation_es:"Celebro cada paso de mi camino financiero.",daily_en:"Identify one money moment that made you feel good.",daily_es:"Identifica un momento financiero que te hizo sentir bien.",weekly_en:"Plan one small, budget-friendly reward for a financial win.",weekly_es:"Planifica una pequeña recompensa económica por un logro financiero."},
+  security:{affirmation_en:"I am building a fortress of financial security.",affirmation_es:"Estoy construyendo una fortaleza de seguridad financiera.",daily_en:"Check your emergency fund balance and set a target.",daily_es:"Revisa el saldo de tu fondo de emergencia.",weekly_en:"Review your insurance and safety net — update as needed.",weekly_es:"Revisa tu seguro y red de seguridad."},
+  worthiness:{affirmation_en:"I am worthy of wealth, success, and financial peace.",affirmation_es:"Soy digno de riqueza, éxito y paz financiera.",daily_en:"Say: 'I deserve financial abundance' — and mean it.",daily_es:"Di: 'Merezco abundancia financiera' — y siéntelo.",weekly_en:"Invest in yourself: a course, a book, or a coaching session.",weekly_es:"Invierte en ti mismo: un curso, un libro o una sesión de coaching."}
+};
+
+const I18N = {
+  hero_badge:{en:"Financial Coaching Experience",es:"Experiencia de Coaching Financiero"},
+  hero_title:{en:"The Emotional<br/>Money Map",es:"El Mapa Emocional<br/>del Dinero"},
+  hero_subtitle:{en:"Understand the emotions driving your financial decisions — and rewrite the story.",es:"Comprende las emociones que impulsan tus decisiones financieras — y reescribe la historia."},
+  hero_tagline:{en:"Your Financial Future, Elevated.",es:"Tu Futuro Financiero, Elevado."},
+  hero_cta:{en:"Begin Your Journey",es:"Comienza Tu Camino"},
+  s1_title:{en:"How This Works",es:"Cómo Funciona"},
+  s1_c1_title:{en:"Identify",es:"Identificar"}, s1_c1_desc:{en:"Select 3 emotions that are holding your finances back.",es:"Selecciona 3 emociones que frenan tus finanzas."},
+  s1_c2_title:{en:"Elevate",es:"Elevar"}, s1_c2_desc:{en:"Choose 3 emotions you want to build into your financial life.",es:"Elige 3 emociones que quieras integrar en tu vida financiera."},
+  s1_c3_title:{en:"Act",es:"Actuar"}, s1_c3_desc:{en:"Receive personalized micro-habits to bridge the gap.",es:"Recibe micro-hábitos personalizados para cerrar la brecha."},
+  s1_body:{en:"Money is emotional. Every financial decision you make is shaped by how you feel. At TFS, we help you move from emotional scarcity to intentional abundance — one habit at a time.",es:"El dinero es emocional. Cada decisión financiera que tomas está influenciada por cómo te sientes. En TFS, te ayudamos a pasar de la escasez emocional a la abundancia intencional."},
+  s1_lang_note:{en:"This tool is available in English and Spanish. Use the toggle at the top right to switch languages.",es:"Esta herramienta está disponible en inglés y español. Usa el botón en la esquina superior derecha para cambiar de idioma."},
+  s1_cta:{en:"Let's Begin",es:"Vamos a Comenzar"},
+  s2_title:{en:"Emotions to Release",es:"Emociones a Liberar"}, s2_subtitle:{en:"Select exactly 3 emotions that currently hold you back financially.",es:"Selecciona exactamente 3 emociones que actualmente te frenan financieramente."},
+  s3_title:{en:"Emotions to Cultivate",es:"Emociones a Cultivar"}, s3_subtitle:{en:"Now choose 3 emotions you want to feel more of in your financial life.",es:"Ahora elige 3 emociones que quieras sentir más en tu vida financiera."},
+  counter_label:{en:"Selected:",es:"Seleccionado:"}, counter_label2:{en:"Selected:",es:"Seleccionado:"},
+  btn_back:{en:"Back",es:"Atrás"}, btn_next:{en:"Next Step",es:"Siguiente Paso"},
+  s4_title:{en:"Your Micro-Habit Action Plan",es:"Tu Plan de Micro-Hábitos"}, s4_subtitle:{en:"Small, consistent actions create massive financial shifts.",es:"Pequeñas acciones consistentes crean grandes cambios financieros."},
+  s4_release_header:{en:"Releasing",es:"Liberando"}, s4_cultivate_header:{en:"Cultivating",es:"Cultivando"},
+  s4_notes_label:{en:"Notes & Reflections",es:"Notas y Reflexiones"},
+  s5_title:{en:"Your TFS Financial Commitment",es:"Tu Compromiso Financiero TFS"},
+  s5_card_title:{en:"Emotional Money Map — Personal Commitment",es:"Mapa Emocional del Dinero — Compromiso Personal"},
+  s5_card_tagline:{en:"Your Financial Future, Elevated.",es:"Tu Futuro Financiero, Elevado."},
+  s5_name_label:{en:"Your Name",es:"Tu Nombre"}, s5_date_label:{en:"Date",es:"Fecha"},
+  s5_releasing:{en:"I am releasing:",es:"Estoy liberando:"}, s5_cultivating:{en:"I am cultivating:",es:"Estoy cultivando:"},
+  s5_top_habit_label:{en:"My #1 Micro-Habit this week:",es:"Mi micro-hábito #1 esta semana:"},
+  s5_signed:{en:"Signed with intention,",es:"Firmado con intención,"},
+  s5_footer_tagline:{en:"Your Financial Future, Elevated.",es:"Tu Futuro Financiero, Elevado."},
+  s5_closing_quote:{en:"Wealth is built one intentional habit at a time. You've taken the first step. TFS is here for every step that follows.",es:"La riqueza se construye un hábito intencional a la vez. Has dado el primer paso. TFS está aquí para cada paso que siga."},
+  btn_print:{en:"Print / Save as PDF",es:"Imprimir / Guardar como PDF"}, btn_restart:{en:"Start Over",es:"Empezar de Nuevo"},
+  step_of:{en:"Step",es:"Paso"}, toast_max3:{en:"Please select only 3 emotions to release.",es:"Por favor selecciona solo 3 emociones a liberar."}, toast_max3_inc:{en:"Please select only 3 emotions to cultivate.",es:"Por favor selecciona solo 3 emociones a cultivar."},
+  habit_daily:{en:"Daily (2 min):",es:"Diario (2 min):"}, habit_weekly:{en:"Weekly Ritual:",es:"Ritual Semanal:"},
+};
+
+let currentLang='en', currentStep=0, selectedDecrease=[], selectedIncrease=[];
+
+function t(key){return(I18N[key]&&I18N[key][currentLang])||key;}
+function showToast(msg){const el=document.getElementById('toast-msg');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+
+function applyLanguage(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.getAttribute('data-i18n');if(I18N[key])el.innerHTML=I18N[key][currentLang];});
+  if(currentStep>=1)document.getElementById('step-label').textContent=`${t('step_of')} ${currentStep}/5`;
+  const isEn=currentLang==='en';
+  document.querySelectorAll('#lang-en-btn,#lang-en-hero').forEach(b=>b.classList.toggle('active-lang',isEn));
+  document.querySelectorAll('#lang-es-btn,#lang-es-hero').forEach(b=>b.classList.toggle('active-lang',!isEn));
+  updateEmotionCardDescriptions();
+  if(currentStep===4)renderHabits();
+  if(currentStep===5)renderCommitment();
+}
+
+function updateEmotionCardDescriptions(){
+  document.querySelectorAll('.emotion-card[data-type="decrease"]').forEach(card=>{const em=DECREASE_EMOTIONS[parseInt(card.dataset.index)];const descEl=card.querySelector('.emotion-desc');if(descEl)descEl.textContent=currentLang==='en'?em.desc_en:em.desc_es;});
+  document.querySelectorAll('.emotion-card[data-type="increase"]').forEach(card=>{const em=INCREASE_EMOTIONS[parseInt(card.dataset.index)];const descEl=card.querySelector('.emotion-desc');if(descEl)descEl.textContent=currentLang==='en'?em.desc_en:em.desc_es;});
+}
+
+function goToStep(step){
+  document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
+  currentStep=step;
+  const header=document.getElementById('app-header'); const footer=document.getElementById('app-footer');
+  if(step===0){header.style.display='none';footer.style.display='none';document.getElementById('step-0-welcome').classList.add('active');}
+  else{
+    header.style.display='';footer.style.display='';
+    const progressWrap=document.getElementById('progress-wrap'); progressWrap.classList.remove('hidden'); progressWrap.classList.add('flex');
+    document.getElementById('progress-bar').style.width=`${(step/5)*100}%`;
+    document.getElementById('step-label').textContent=`${t('step_of')} ${step}/5`;
+    const panelIds=['','step-1-how','step-2-decrease','step-3-increase','step-4-habits','step-5-commit'];
+    const panel=document.getElementById(panelIds[step]); if(panel)panel.classList.add('active');
+    if(step===4)renderHabits(); if(step===5)renderCommitment();
+  }
+  window.scrollTo({top:0,behavior:'smooth'}); applyLanguage();
+}
+
+function buildEmotionCard(emotion,index,type){
+  const card=document.createElement('div');
+  card.className='emotion-card bg-white rounded-xl p-4 border-2 border-gray-100';
+  card.dataset.type=type; card.dataset.index=index; card.dataset.id=emotion.id;
+  card.innerHTML=`<div class="checkmark-badge">✓</div><div class="text-2xl mb-2">${emotion.emoji}</div><h4 class="font-display text-base font-semibold text-navy">${emotion.en}</h4><p class="font-body text-xs italic text-bodytext/50 mb-2">${emotion.es}</p><p class="emotion-desc font-body text-xs text-bodytext/60 leading-relaxed">${currentLang==='en'?emotion.desc_en:emotion.desc_es}</p>`;
+  return card;
+}
+
+function buildDecreaseGrid(){const grid=document.getElementById('decrease-grid');grid.innerHTML='';DECREASE_EMOTIONS.forEach((em,i)=>{const card=buildEmotionCard(em,i,'decrease');grid.appendChild(card);card.addEventListener('click',()=>toggleDecrease(i,card));});}
+function buildIncreaseGrid(){const grid=document.getElementById('increase-grid');grid.innerHTML='';INCREASE_EMOTIONS.forEach((em,i)=>{const card=buildEmotionCard(em,i,'increase');grid.appendChild(card);card.addEventListener('click',()=>toggleIncrease(i,card));});}
+
+function toggleDecrease(index,card){const id=DECREASE_EMOTIONS[index].id;if(selectedDecrease.includes(id)){selectedDecrease=selectedDecrease.filter(x=>x!==id);card.classList.remove('selected-decrease');}else{if(selectedDecrease.length>=3){showToast(t('toast_max3'));return;}selectedDecrease.push(id);card.classList.add('selected-decrease');}updateDecreaseCounter();}
+function toggleIncrease(index,card){const id=INCREASE_EMOTIONS[index].id;if(selectedIncrease.includes(id)){selectedIncrease=selectedIncrease.filter(x=>x!==id);card.classList.remove('selected-increase');}else{if(selectedIncrease.length>=3){showToast(t('toast_max3_inc'));return;}selectedIncrease.push(id);card.classList.add('selected-increase');}updateIncreaseCounter();}
+
+function updateDecreaseCounter(){
+  const countEl=document.getElementById('decrease-count'); countEl.textContent=selectedDecrease.length;
+  const counterWrap=document.getElementById('decrease-counter'); counterWrap.style.borderColor=selectedDecrease.length===3?'var(--gold)':''; countEl.style.color=selectedDecrease.length===3?'var(--gold)':'';
+  document.getElementById('s2-next-btn').disabled=selectedDecrease.length!==3;
+}
+function updateIncreaseCounter(){
+  const countEl=document.getElementById('increase-count'); countEl.textContent=selectedIncrease.length;
+  const counterWrap=document.getElementById('increase-counter'); counterWrap.style.borderColor=selectedIncrease.length===3?'var(--gold)':''; countEl.style.color=selectedIncrease.length===3?'var(--gold)':'';
+  document.getElementById('s3-next-btn').disabled=selectedIncrease.length!==3;
+}
+
+function renderHabits(){
+  const releaseContainer=document.getElementById('release-habits'); const cultivateContainer=document.getElementById('cultivate-habits');
+  releaseContainer.innerHTML=''; cultivateContainer.innerHTML='';
+  const dailyLabel=t('habit_daily'); const weeklyLabel=t('habit_weekly'); const lang=currentLang;
+  selectedDecrease.forEach(id=>{const emotion=DECREASE_EMOTIONS.find(e=>e.id===id);const habits=DECREASE_HABITS[id];if(!emotion||!habits)return;const card=document.createElement('div');card.className='habit-card release';card.innerHTML=`<div class="flex items-center gap-2 mb-2"><span class="text-xl">${emotion.emoji}</span><h4 class="font-display text-base font-semibold text-navy">${emotion.en}</h4></div><p class="font-body italic text-sm text-release-red/80 mb-3">"${lang==='en'?habits.reframe_en:habits.reframe_es}"</p><div class="space-y-2"><div class="flex items-start gap-2"><span class="shrink-0 mt-0.5 w-5 h-5 bg-release-bg rounded-full flex items-center justify-center">☀️</span><p class="font-body text-sm text-bodytext/80"><span class="font-semibold">${dailyLabel}</span> ${lang==='en'?habits.daily_en:habits.daily_es}</p></div><div class="flex items-start gap-2"><span class="shrink-0 mt-0.5 w-5 h-5 bg-release-bg rounded-full flex items-center justify-center">📅</span><p class="font-body text-sm text-bodytext/80"><span class="font-semibold">${weeklyLabel}</span> ${lang==='en'?habits.weekly_en:habits.weekly_es}</p></div></div>`;releaseContainer.appendChild(card);});
+  selectedIncrease.forEach(id=>{const emotion=INCREASE_EMOTIONS.find(e=>e.id===id);const habits=INCREASE_HABITS[id];if(!emotion||!habits)return;const card=document.createElement('div');card.className='habit-card cultivate';card.innerHTML=`<div class="flex items-center gap-2 mb-2"><span class="text-xl">${emotion.emoji}</span><h4 class="font-display text-base font-semibold text-navy">${emotion.en}</h4></div><p class="font-body italic text-sm text-emerald/80 mb-3">"${lang==='en'?habits.affirmation_en:habits.affirmation_es}"</p><div class="space-y-2"><div class="flex items-start gap-2"><span class="shrink-0 mt-0.5 w-5 h-5 bg-cultivate-bg rounded-full flex items-center justify-center">☀️</span><p class="font-body text-sm text-bodytext/80"><span class="font-semibold">${dailyLabel}</span> ${lang==='en'?habits.daily_en:habits.daily_es}</p></div><div class="flex items-start gap-2"><span class="shrink-0 mt-0.5 w-5 h-5 bg-cultivate-bg rounded-full flex items-center justify-center">📅</span><p class="font-body text-sm text-bodytext/80"><span class="font-semibold">${weeklyLabel}</span> ${lang==='en'?habits.weekly_en:habits.weekly_es}</p></div></div>`;cultivateContainer.appendChild(card);});
+  if(typeof lucide!=="undefined"&&typeof lucide.createIcons==="function")lucide.createIcons();
+}
+
+function renderCommitment(){
+  const lang=currentLang;
+  document.getElementById('commit-date').textContent=new Date().toLocaleDateString(lang==='en'?'en-US':'es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const releaseList=document.getElementById('commit-release-list');releaseList.innerHTML='';
+  selectedDecrease.forEach(id=>{const emotion=DECREASE_EMOTIONS.find(e=>e.id===id);const habits=DECREASE_HABITS[id];if(!emotion||!habits)return;const div=document.createElement('div');div.className='bg-release-bg/50 rounded-lg px-4 py-3';div.innerHTML=`<p class="font-body text-sm"><span class="font-semibold">${emotion.emoji} ${emotion.en}</span></p><p class="font-body italic text-xs text-bodytext/50 mt-1">"${lang==='en'?habits.reframe_en:habits.reframe_es}"</p>`;releaseList.appendChild(div);});
+  const cultivateList=document.getElementById('commit-cultivate-list');cultivateList.innerHTML='';
+  selectedIncrease.forEach(id=>{const emotion=INCREASE_EMOTIONS.find(e=>e.id===id);const habits=INCREASE_HABITS[id];if(!emotion||!habits)return;const div=document.createElement('div');div.className='bg-cultivate-bg/50 rounded-lg px-4 py-3';div.innerHTML=`<p class="font-body text-sm"><span class="font-semibold">${emotion.emoji} ${emotion.en}</span></p><p class="font-body italic text-xs text-bodytext/50 mt-1">"${lang==='en'?habits.affirmation_en:habits.affirmation_es}"</p>`;cultivateList.appendChild(div);});
+  const select=document.getElementById('top-habit-select');select.innerHTML='';const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent=lang==='en'?'— Choose your #1 habit —':'— Elige tu hábito #1 —';select.appendChild(placeholder);
+  selectedDecrease.forEach(id=>{const emotion=DECREASE_EMOTIONS.find(e=>e.id===id);const habits=DECREASE_HABITS[id];if(!emotion||!habits)return;const o1=document.createElement('option');o1.textContent=`${emotion.emoji} ${emotion.en}: ${lang==='en'?habits.daily_en:habits.daily_es}`;select.appendChild(o1);const o2=document.createElement('option');o2.textContent=`${emotion.emoji} ${emotion.en}: ${lang==='en'?habits.weekly_en:habits.weekly_es}`;select.appendChild(o2);});
+  selectedIncrease.forEach(id=>{const emotion=INCREASE_EMOTIONS.find(e=>e.id===id);const habits=INCREASE_HABITS[id];if(!emotion||!habits)return;const o1=document.createElement('option');o1.textContent=`${emotion.emoji} ${emotion.en}: ${lang==='en'?habits.daily_en:habits.daily_es}`;select.appendChild(o1);const o2=document.createElement('option');o2.textContent=`${emotion.emoji} ${emotion.en}: ${lang==='en'?habits.weekly_en:habits.weekly_es}`;select.appendChild(o2);});
+}
+
+document.getElementById('lang-en-btn').addEventListener('click',()=>{currentLang='en';applyLanguage();});
+document.getElementById('lang-es-btn').addEventListener('click',()=>{currentLang='es';applyLanguage();});
+document.getElementById('lang-en-hero').addEventListener('click',()=>{currentLang='en';applyLanguage();});
+document.getElementById('lang-es-hero').addEventListener('click',()=>{currentLang='es';applyLanguage();});
+document.getElementById('begin-btn').addEventListener('click',()=>goToStep(1));
+document.getElementById('s1-next-btn').addEventListener('click',()=>goToStep(2));
+document.getElementById('s2-back-btn').addEventListener('click',()=>goToStep(1));
+document.getElementById('s2-next-btn').addEventListener('click',()=>goToStep(3));
+document.getElementById('s3-back-btn').addEventListener('click',()=>goToStep(2));
+document.getElementById('s3-next-btn').addEventListener('click',()=>goToStep(4));
+document.getElementById('s4-back-btn').addEventListener('click',()=>goToStep(3));
+document.getElementById('s4-next-btn').addEventListener('click',()=>goToStep(5));
+document.getElementById('print-btn').addEventListener('click',()=>window.print());
+document.getElementById('restart-btn').addEventListener('click',()=>{selectedDecrease=[];selectedIncrease=[];document.querySelectorAll('.emotion-card').forEach(c=>c.classList.remove('selected-decrease','selected-increase'));document.getElementById('decrease-count').textContent='0';document.getElementById('increase-count').textContent='0';document.getElementById('s2-next-btn').disabled=true;document.getElementById('s3-next-btn').disabled=true;document.getElementById('notes-textarea').value='';document.getElementById('commit-name-input').value='';document.getElementById('commit-sig-input').value='';goToStep(0);});
+
+buildDecreaseGrid(); buildIncreaseGrid(); goToStep(0);
+if(typeof lucide!=="undefined"&&typeof lucide.createIcons==="function")lucide.createIcons();
+</script>
+</body>
+</html>
