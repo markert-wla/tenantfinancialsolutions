@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { LayoutDashboard, Clock, UserCircle, Users, CalendarDays, ClipboardList, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, Clock, UserCircle, Users, CalendarDays, ClipboardList, MessageSquare, Wrench } from 'lucide-react'
 import SignOutButton from '@/components/portal/SignOutButton'
 import AdminNavLink from '@/components/admin/AdminNavLink'
 import DashboardShell from '@/components/layout/DashboardShell'
@@ -37,6 +37,7 @@ export default async function CoachLayout({ children }: { children: React.ReactN
         <AdminNavLink href="/coach/attendance">   <ClipboardList size={16} />   Attendance        </AdminNavLink>
         <AdminNavLink href="/coach/availability"> <Clock size={16} />           Availability      </AdminNavLink>
         <AdminNavLink href="/coach/messages">     <MessageSquare size={16} />   Messages to Client</AdminNavLink>
+        <AdminNavLink href="/coach/tools">        <Wrench size={16} />          Coaching Tools    </AdminNavLink>
         <AdminNavLink href="/coach/profile">      <UserCircle size={16} />      Profile           </AdminNavLink>
       </nav>
       <div className="px-3 py-4 border-t border-white/10">
