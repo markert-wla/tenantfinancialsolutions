@@ -21,6 +21,16 @@ const tools = [
     badgeColor: 'bg-emerald-900/50 text-emerald-300',
     href: '/tools/emotional-money-map.html',
   },
+  {
+    id: 'spending-audit',
+    title: '3 Bucket Spending Audit',
+    subtitle: '30-Day Spending Audit Tool',
+    description: 'A bilingual (EN/ES) drag-and-drop audit tool where clients categorise 30 days of transactions into Spend Fixed, Spend Freely, and Unexpected buckets — with a subscription tracker, donut & bar charts, and a printable summary.',
+    emoji: '🪣',
+    color: 'from-blue-900/40 to-blue-950/40 border-blue-700/30',
+    badgeColor: 'bg-blue-900/50 text-blue-300',
+    href: '/tools/spending-audit.html',
+  },
 ]
 
 export default function CoachToolsPage() {
