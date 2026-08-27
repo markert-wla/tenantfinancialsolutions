@@ -1,6 +1,6 @@
 'use client'
-import { useState, useMemo } from 'react'
-import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2, PlusCircle, Search, DollarSign, X, RotateCcw } from 'lucide-react'
+import { useState, useMemo, useEffect } from 'react'
+import { Filter, CalendarClock, CheckSquare, Square, Loader2, Trash2, PlusCircle, Search, DollarSign, X, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
 
 const TIER_LABEL: Record<string, string> = {
   free: 'Free', starter: 'Starter', advantage: 'Advantage',
@@ -21,6 +21,19 @@ const TYPE_COLOR: Record<string, string> = {
   couple:               'bg-purple-100 text-purple-700',
   property_tenant:      'bg-orange-100 text-orange-700',
   nonprofit_individual: 'bg-green-100 text-green-700',
+}
+
+const QUESTION_LABELS: Record<string, string> = {
+  q1:  'How would you rate your current level of comfort managing your personal finances?',
+  q2:  'Which of the following best describes your current employment status?',
+  q3:  'How confident are you in your ability to pay rent on time each month?',
+  q4:  'Do you currently follow a monthly budget?',
+  q5:  'Which of the following financial challenges have you experienced in the last 12 months?',
+  q6:  'How would you describe your current savings situation?',
+  q7:  'What is one thing that has motivated you to manage your personal finances differently?',
+  q8:  'What was it like for you growing up around money?',
+  q9:  'When making money decisions, what is your current process?',
+  q10: 'What is your primary financial goal for the next 12 months?',
 }
 
 interface Client {
@@ -54,6 +67,16 @@ interface Props {
   partnerModels: Record<string, string>
 }
 
+interface QuestionnaireEntry {
+  id: string
+  client_id: string
+  language: string
+  responses: Record<string, string | string[]>
+  created_at: string
+  client_name: string
+  client_email: string
+}
+
 function toInputDate(iso: string | null) {
   if (!iso) return ''
   return iso.split('T')[0]
@@ -68,6 +91,111 @@ function pmTenantLabel(partnerId: string | null, partnerModels: Record<string, s
   if (model === 'paying')    return 'PM Tenant (Strategic Partner)'
   if (model === 'affiliate') return 'PM Tenant (Affiliate Partner)'
   return 'PM Tenant'
+}
+
+function QuestionnairesSection() {
+  const [data, setData]       = useState<QuestionnaireEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState('')
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    fetch('/api/admin/questionnaires')
+      .then(r => r.json())
+      .then(d => {
+        if (d.responses) setData(d.responses as QuestionnaireEntry[])
+        else setError('Failed to load questionnaires')
+      })
+      .catch(() => setError('Failed to load questionnaires'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  function toggleExpanded(id: string) {
+    setExpanded(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  return (
+    <div className="mt-12">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-2xl font-serif font-bold text-tfs-navy">Client Questionnaire Responses</h2>
+        {!loading && !error && (
+          <span className="text-sm text-tfs-slate">{data.length} response{data.length !== 1 ? 's' : ''}</span>
+        )}
+      </div>
+
+      {loading && (
+        <div className="flex items-center gap-2 text-sm text-tfs-slate py-6">
+          <Loader2 size={16} className="animate-spin" /> Loading responses…
+        </div>
+      )}
+
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+      )}
+
+      {!loading && !error && data.length === 0 && (
+        <p className="text-sm text-tfs-slate py-6">No questionnaire responses yet.</p>
+      )}
+
+      {!loading && !error && data.length > 0 && (
+        <div className="space-y-3">
+          {data.map(entry => {
+            const isOpen = expanded.has(entry.id)
+            const date = new Date(entry.created_at).toLocaleDateString('en-US', {
+              year: 'numeric', month: 'short', day: 'numeric',
+            })
+            return (
+              <div key={entry.id} className="card p-0 overflow-hidden">
+                <button
+                  onClick={() => toggleExpanded(entry.id)}
+                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <p className="font-medium text-tfs-navy">{entry.client_name || 'Unknown Client'}</p>
+                      <p className="text-xs text-tfs-slate">{entry.client_email} &middot; {date}</p>
+                    </div>
+                    {entry.language === 'es' && (
+                      <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-orange-100 text-orange-700">
+                        Spanish
+                      </span>
+                    )}
+                  </div>
+                  {isOpen
+                    ? <ChevronUp size={16} className="text-tfs-slate shrink-0" />
+                    : <ChevronDown size={16} className="text-tfs-slate shrink-0" />
+                  }
+                </button>
+
+                {isOpen && (
+                  <div className="px-5 pb-5 border-t border-gray-100 space-y-4 pt-4">
+                    {['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'].map((qid, idx) => {
+                      const answer = entry.responses[qid]
+                      if (answer === undefined || answer === null) return null
+                      const answerText = Array.isArray(answer) ? answer.join(', ') : String(answer)
+                      return (
+                        <div key={qid}>
+                          <p className="text-xs font-semibold text-tfs-navy mb-1">
+                            {idx + 1}. {QUESTION_LABELS[qid]}
+                          </p>
+                          <p className="text-sm text-tfs-slate">{answerText}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function AdminClientsClient({ clients: initial, pmCodes, partnerModels }: Props) {
@@ -97,7 +225,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
     setTimeout(() => setToast(''), 3000)
   }
 
-  // ── Filtering ────────────────────────────────────────────────
+  // ── Filtering ────────────────────────────────────────────
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
     return clients.filter(c => {
@@ -113,7 +241,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
     })
   }, [clients, searchQuery, typeFilter, tierFilter, pmFilter])
 
-  // ── Selection ────────────────────────────────────────────────
+  // ── Selection ────────────────────────────────────────────
   function toggleAll() {
     if (selected.size === filtered.length) {
       setSelected(new Set())
@@ -164,7 +292,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
     }
   }
 
-  // ── Extend pending account deletion by 30 days ───────────────
+  // ── Extend pending account deletion by 30 days ───────────────────
   async function extendDeletion(id: string) {
     setExtendingId(id)
     try {
@@ -186,7 +314,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
     }
   }
 
-  // ── Bulk extend ──────────────────────────────────────────────
+  // ── Bulk extend ────────────────────────────────────────────
   async function applyBulk() {
     if (!bulkDate && !bulkPM) return
     setBulkSaving(true)
@@ -226,7 +354,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
     }
   }
 
-  // ── Grant extra session ──────────────────────────────────────
+  // ── Grant extra session ──────────────────────────────────────────
   async function grantSession(clientId: string) {
     const amount = parseInt(grantAmount[clientId] ?? '1', 10)
     if (isNaN(amount) || amount <= 0) return
@@ -273,7 +401,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
     }
   }
 
-  // ── Apply Stripe credit ──────────────────────────────────────
+  // ── Apply Stripe credit ──────────────────────────────────────────
   async function applyCredit() {
     if (!creditClient || !creditAmount) return
     const dollars = parseFloat(creditAmount)
@@ -302,7 +430,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
 
   return (
     <div>
-      {/* ── Search + Filter toolbar ─────────────────────────────── */}
+      {/* ── Search + Filter toolbar ─────────────────────────────────────── */}
       <div className="space-y-3 mb-5">
         {/* Search */}
         <div className="relative">
@@ -383,7 +511,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
         </div>
       </div>
 
-      {/* ── Bulk action bar ─────────────────────────────────── */}
+      {/* ── Bulk action bar ────────────────────────────────────────── */}
       <div className="mb-4 p-4 rounded-xl bg-tfs-teal-light border border-tfs-teal/20">
         <p className="text-sm font-semibold text-tfs-navy mb-3 flex items-center gap-2">
           <CalendarClock size={16} className="text-tfs-teal-button" /> Bulk Extend Trial
@@ -422,7 +550,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
         </div>
       </div>
 
-      {/* ── Table ───────────────────────────────────────────── */}
+      {/* ── Table ───────────────────────────────────────────────────── */}
       <div className="card overflow-hidden p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -622,7 +750,10 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
         </div>
       </div>
 
-      {/* ── Credit modal ────────────────────────────────────── */}
+      {/* ── Questionnaire Responses ───────────────────────────────── */}
+      <QuestionnairesSection />
+
+      {/* ── Credit modal ───────────────────────────────────────────────────── */}
       {creditClient && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
@@ -676,7 +807,7 @@ export default function AdminClientsClient({ clients: initial, pmCodes, partnerM
         </div>
       )}
 
-      {/* ── Toast ──────────────────────────────────────────── */}
+      {/* ── Toast ────────────────────────────────────────────────────────── */}
       {toast && (
         <div className="fixed bottom-6 right-6 bg-tfs-navy text-white text-sm px-5 py-3 rounded-xl shadow-lg z-50 animate-in fade-in slide-in-from-bottom-2">
           {toast}
