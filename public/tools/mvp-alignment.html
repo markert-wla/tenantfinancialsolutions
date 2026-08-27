@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TFS MVP Coaching App — Money · Values · Purpose</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: { 900:'#0A1628', 800:'#0F1E36', 700:'#142844', 600:'#1A3354', 500:'#213F66', 400:'#2A4D7A', 300:'#3A6090', 200:'#4A7AAF' },
+              gold: { 50:'#FFF9E6', 100:'#FFF0C2', 200:'#FFE49E', 300:'#F5D77A', 400:'#D4B44E', 500:'#C9A84C', 600:'#B8953D', 700:'#9A7B2E', 800:'#7C6124', 900:'#5E471A' },
+              surface: { 50:'#FFFFFF', 100:'#F5F6FA', 200:'#EAECF2', 300:'#D8DBE5', 400:'#B0B5C4', 500:'#8A90A3', 600:'#6B7185', 700:'#4A4F60' },
+              success: { light:'#D1FAE5', DEFAULT:'#10B981', dark:'#065F46' },
+              danger: { light:'#FEE2E2', DEFAULT:'#EF4444', dark:'#991B1B' },
+            },
+            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          },
+        },
+      };
+    </script>
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: 'Inter', system-ui, sans-serif; background: #0A1628; color: #FFFFFF; margin: 0; min-height: 100vh; }
+      .step-container { transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1); }
+      .step-slide-left { transform: translateX(-100%); opacity: 0; pointer-events: none; position: absolute; }
+      .step-slide-right { transform: translateX(100%); opacity: 0; pointer-events: none; position: absolute; }
+      .step-active { transform: translateX(0); opacity: 1; pointer-events: auto; position: relative; }
+      .value-card { transition: all 0.25s ease; }
+      .value-card:hover { transform: translateY(-2px); }
+      .value-card.selected { border-color: #C9A84C !important; background: rgba(201,168,76,0.1) !important; box-shadow: 0 0 0 2px rgba(201,168,76,0.3); }
+      .goal-card { transition: all 0.2s ease; }
+      .goal-card:hover { transform: translateY(-1px); }
+      .shake { animation: shake 0.5s ease-in-out; }
+      @keyframes shake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-6px)} 30%{transform:translateX(6px)} 45%{transform:translateX(-4px)} 60%{transform:translateX(4px)} 75%{transform:translateX(-2px)} 90%{transform:translateX(2px)} }
+      .toast-enter { animation: toastIn 0.35s ease-out forwards; }
+      .toast-exit { animation: toastOut 0.3s ease-in forwards; }
+      @keyframes toastIn { from{transform:translateY(-20px) translateX(-50%);opacity:0} to{transform:translateY(0) translateX(-50%);opacity:1} }
+      @keyframes toastOut { from{transform:translateY(0) translateX(-50%);opacity:1} to{transform:translateY(-20px) translateX(-50%);opacity:0} }
+      .progress-fill { transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+      .hero-banner { background: linear-gradient(135deg, rgba(201,168,76,0.12) 0%, rgba(10,22,40,0) 60%); border-bottom: 1px solid rgba(201,168,76,0.15); }
+      .input-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s ease; }
+      .input-card:hover, .input-card:focus-within { background: rgba(255,255,255,0.07); border-color: rgba(201,168,76,0.3); }
+      .currency-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; }
+      .currency-input:focus { background: rgba(255,255,255,0.1); border-color: #C9A84C; outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+      .action-card { border-left: 4px solid #C9A84C; }
+      .cape-hero { background: radial-gradient(ellipse at center, rgba(201,168,76,0.18) 0%, rgba(201,168,76,0.06) 40%, transparent 70%); border: 1px solid rgba(201,168,76,0.3); position: relative; overflow: hidden; }
+      .cape-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center,rgba(201,168,76,0.25) 0%,transparent 60%); animation:capeGlow 4s ease-in-out infinite; pointer-events:none; }
+      @keyframes capeGlow { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.05)} }
+      .action-edit-input { background:rgba(255,255,255,0.08); border:1px solid rgba(201,168,76,0.4); border-radius:0.5rem; color:#FFFFFF; padding:0.4rem 0.6rem; font-size:0.875rem; width:100%; outline:none; transition:border-color 0.2s; font-family:inherit; }
+      .action-edit-input:focus { border-color:#C9A84C; box-shadow:0 0 0 2px rgba(201,168,76,0.18); }
+      @media print { body{background:#fff!important;color:#000!important} #app-nav,#progress-bar-section,#step-navigation,#toast-container{display:none!important} .step-container{display:none!important} #step-4{display:block!important;position:relative!important;transform:none!important;opacity:1!important} }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100]"></div>
+
+    <nav id="app-nav" class="sticky top-0 z-50 bg-navy-900/95 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gold-500 flex items-center justify-center flex-shrink-0">
+                    <span class="text-navy-900 font-extrabold text-sm tracking-tight">TFS</span>
+                </div>
+                <div class="hidden sm:block">
+                    <div class="text-white font-semibold text-sm leading-tight">Tenant Financial Solutions</div>
+                    <div class="text-gold-400 text-xs font-medium tracking-wide">Money · Values · Purpose</div>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-2" id="step-pills-desktop">
+                <button class="step-pill active px-3 py-1.5 rounded-full text-xs font-medium transition-all" data-step-pill="1"><span class="pill-num">1</span> Money</button>
+                <div class="w-4 h-px bg-white/20"></div>
+                <button class="step-pill px-3 py-1.5 rounded-full text-xs font-medium transition-all" data-step-pill="2"><span class="pill-num">2</span> Values</button>
+                <div class="w-4 h-px bg-white/20"></div>
+                <button class="step-pill px-3 py-1.5 rounded-full text-xs font-medium transition-all" data-step-pill="3"><span class="pill-num">3</span> Purpose</button>
+                <div class="w-4 h-px bg-white/20"></div>
+                <button class="step-pill px-3 py-1.5 rounded-full text-xs font-medium transition-all" data-step-pill="4"><span class="pill-num">4</span> Your Path</button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="progress-bar-section" class="bg-navy-800 border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-4 md:px-6">
+            <div class="h-1.5 bg-white/5 rounded-full overflow-hidden my-2">
+                <div id="progress-fill" class="progress-fill h-full bg-gradient-to-r from-gold-600 via-gold-500 to-gold-400 rounded-full" style="width:25%"></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-1 relative max-w-6xl mx-auto w-full px-4 md:px-6 py-6 md:py-8">
+
+        <!-- STEP 1: MONEY -->
+        <section id="step-1" class="step-container step-active">
+            <div class="hero-banner rounded-2xl p-6 md:p-8 mb-8">
+                <div class="flex items-start gap-4"><span class="text-4xl md:text-5xl">💰</span><div><h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Let's Start With Your Money Picture</h1><p class="text-surface-400 text-sm md:text-base">Complete honesty here creates the clearest path forward.</p></div></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8" id="money-inputs-grid">
+                <div class="input-card rounded-2xl p-5"><div class="flex items-center gap-2 mb-3"><span class="text-xl">💵</span><div><label class="text-white font-semibold text-sm block">Total Savings</label><span class="text-surface-500 text-xs">All savings accounts combined</span></div></div><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gold-500 font-semibold text-sm">$</span><input type="text" class="currency-input w-full pl-7 pr-3 py-2.5 rounded-xl text-white text-sm" placeholder="0" data-money="totalSavings" inputmode="decimal" /></div></div>
+                <div class="input-card rounded-2xl p-5"><div class="flex items-center gap-2 mb-3"><span class="text-xl">📈</span><div><label class="text-white font-semibold text-sm block">Brokerage / Investment Balances</label><span class="text-surface-500 text-xs">Stocks, ETFs, mutual funds</span></div></div><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gold-500 font-semibold text-sm">$</span><input type="text" class="currency-input w-full pl-7 pr-3 py-2.5 rounded-xl text-white text-sm" placeholder="0" data-money="brokerage" inputmode="decimal" /></div></div>
+                <div class="input-card rounded-2xl p-5"><div class="flex items-center gap-2 mb-3"><span class="text-xl">🏦</span><div><label class="text-white font-semibold text-sm block">Checking Account Balance</label><span class="text-surface-500 text-xs">All checking accounts combined</span></div></div><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gold-500 font-semibold text-sm">$</span><input type="text" class="currency-input w-full pl-7 pr-3 py-2.5 rounded-xl text-white text-sm" placeholder="0" data-money="checking" inputmode="decimal" /></div></div>
+                <div class="input-card rounded-2xl p-5"><div class="flex items-center gap-2 mb-3"><span class="text-xl">💼</span><div><label class="text-white font-semibold text-sm block">Monthly Income</label><span class="text-surface-500 text-xs">Gross monthly income (before taxes)</span></div></div><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gold-500 font-semibold text-sm">$</span><input type="text" class="currency-input w-full pl-7 pr-3 py-2.5 rounded-xl text-white text-sm" placeholder="0" data-money="monthlyIncome" inputmode="decimal" /></div></div>
+                <div class="input-card rounded-2xl p-5"><div class="flex items-center gap-2 mb-3"><span class="text-xl">🏛️</span><div><label class="text-white font-semibold text-sm block">Retirement Savings</label><span class="text-surface-500 text-xs">401(k), IRA, pension combined</span></div></div><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gold-500 font-semibold text-sm">$</span><input type="text" class="currency-input w-full pl-7 pr-3 py-2.5 rounded-xl text-white text-sm" placeholder="0" data-money="retirement" inputmode="decimal" /></div></div>
+                <div class="input-card rounded-2xl p-5"><div class="flex items-center gap-2 mb-3"><span class="text-xl">💳</span><div><label class="text-white font-semibold text-sm block">Total Debts</label><span class="text-surface-500 text-xs">Credit cards, loans, mortgage, etc.</span></div></div><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gold-500 font-semibold text-sm">$</span><input type="text" class="currency-input w-full pl-7 pr-3 py-2.5 rounded-xl text-white text-sm" placeholder="0" data-money="totalDebts" inputmode="decimal" /></div></div>
+                <div class="input-card rounded-2xl p-5 md:col-span-2"><div class="flex items-center gap-2 mb-3"><span class="text-xl">📊</span><div><label class="text-white font-semibold text-sm block">Monthly Expenses</label><span class="text-surface-500 text-xs">All monthly outgoing expenses</span></div></div><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gold-500 font-semibold text-sm">$</span><input type="text" class="currency-input w-full pl-7 pr-3 py-2.5 rounded-xl text-white text-sm" placeholder="0" data-money="monthlyExpenses" inputmode="decimal" /></div></div>
+            </div>
+            <div class="bg-navy-800 border border-white/10 rounded-2xl p-6 mb-8">
+                <h3 class="text-gold-400 font-semibold text-sm uppercase tracking-wider mb-5 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Financial Snapshot</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center"><div class="text-surface-500 text-xs font-medium uppercase tracking-wide mb-1">Net Worth</div><div id="snap-networth" class="font-bold text-xl md:text-2xl text-white">$0</div></div>
+                    <div class="text-center"><div class="text-surface-500 text-xs font-medium uppercase tracking-wide mb-1">Monthly Cash Flow</div><div id="snap-cashflow" class="font-bold text-xl md:text-2xl text-white">$0</div></div>
+                    <div class="text-center"><div class="text-surface-500 text-xs font-medium uppercase tracking-wide mb-1">Debt-to-Income</div><div id="snap-dti" class="font-bold text-xl md:text-2xl text-white">0%</div></div>
+                    <div class="text-center"><div class="text-surface-500 text-xs font-medium uppercase tracking-wide mb-1">Savings Rate</div><div id="snap-savings" class="font-bold text-xl md:text-2xl text-white">0%</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2: VALUES -->
+        <section id="step-2" class="step-container step-slide-right">
+            <div class="hero-banner rounded-2xl p-6 md:p-8 mb-8"><div class="flex items-start gap-4"><span class="text-4xl md:text-5xl">🌟</span><div><h1 class="text-2xl md:text-3xl font-bold text-white mb-2">What Do You Stand For?</h1><p class="text-surface-400 text-sm md:text-base">Your values are the compass that guides every financial decision.</p></div></div></div>
+            <div class="bg-navy-800/50 rounded-xl px-5 py-3 mb-6 border border-white/5"><p class="text-surface-300 text-sm"><span class="text-gold-400 font-semibold">Instructions:</span> Select your TOP 3 values. Then write a short personal description for each one you choose.</p></div>
+            <div class="flex items-center justify-between mb-4"><span class="text-surface-400 text-sm">Selected: <span id="values-count" class="text-gold-400 font-bold">0</span> / 3</span></div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8" id="values-grid"></div>
+        </section>
+
+        <!-- STEP 3: PURPOSE -->
+        <section id="step-3" class="step-container step-slide-right">
+            <div class="hero-banner rounded-2xl p-6 md:p-8 mb-8"><div class="flex items-start gap-4"><span class="text-4xl md:text-5xl">🎯</span><div><h1 class="text-2xl md:text-3xl font-bold text-white mb-2">What Are You Building Toward?</h1><p class="text-surface-400 text-sm md:text-base">Purpose turns your values into action and your money into meaning.</p></div></div></div>
+            <div class="bg-navy-800/50 rounded-xl px-5 py-3 mb-6 border border-white/5"><p class="text-surface-300 text-sm"><span class="text-gold-400 font-semibold">Instructions:</span> Choose ALL goals that resonate with you.</p></div>
+            <div id="goals-container" class="space-y-8 mb-8"></div>
+            <div class="sticky bottom-20 z-10 flex justify-center"><div class="bg-navy-800 border border-white/10 rounded-full px-5 py-2 shadow-lg"><span class="text-surface-400 text-sm">Selected Goals: <span id="goals-count" class="text-gold-400 font-bold">0</span></span></div></div>
+        </section>
+
+        <!-- STEP 4: YOUR PATH -->
+        <section id="step-4" class="step-container step-slide-right">
+            <div id="client-info-card" class="bg-navy-800 border border-gold-500/30 rounded-2xl p-5 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><label class="text-gold-400 text-xs font-semibold uppercase tracking-wider block mb-2">Client Name</label><input id="client-name-input" type="text" maxlength="80" class="currency-input w-full px-4 py-2.5 rounded-xl text-white text-sm placeholder-surface-600" placeholder="Enter your full name" /></div>
+              <div><label class="text-gold-400 text-xs font-semibold uppercase tracking-wider block mb-2">Session Date</label><input id="client-date-input" type="date" class="currency-input w-full px-4 py-2.5 rounded-xl text-white text-sm" /></div>
+            </div>
+            <div class="hero-banner rounded-2xl p-6 md:p-8 mb-8"><div class="flex items-start gap-4"><span class="text-4xl md:text-5xl">🚀</span><div><h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Your MVP Blueprint</h1><p class="text-surface-400 text-sm md:text-base">Money + Values + Purpose — your personalized coaching framework.</p></div></div></div>
+
+            <!-- Cape Hero -->
+            <div class="cape-hero rounded-3xl py-12 px-6 mb-8 text-center relative">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-6 relative z-10">YOU ARE YOUR<br/><span class="text-gold-500">MOST VALUABLE PLAYER</span></h2>
+                <div class="flex justify-center mb-6 relative z-10">
+                    <svg width="160" height="160" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs><linearGradient id="capeGrad" x1="100" y1="10" x2="100" y2="200" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#C9A84C"/><stop offset="100%" stop-color="#9A7B2E"/></linearGradient><linearGradient id="innerCape" x1="100" y1="30" x2="100" y2="190" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0F1E36"/><stop offset="100%" stop-color="#0A1628"/></linearGradient></defs>
+                        <path d="M100 8 C95 8, 70 12, 55 25 C35 42, 20 70, 15 100 C10 130, 8 155, 18 175 C22 183, 30 190, 40 195 L42 195 C38 185, 32 170, 30 150 C28 125, 35 95, 50 70 C60 52, 75 38, 100 30 Z" fill="url(#capeGrad)" opacity="0.95"/>
+                        <path d="M100 8 C105 8, 130 12, 145 25 C165 42, 180 70, 185 100 C190 130, 192 155, 182 175 C178 183, 170 190, 160 195 L158 195 C162 185, 168 170, 170 150 C172 125, 165 95, 150 70 C140 52, 125 38, 100 30 Z" fill="url(#capeGrad)" opacity="0.95"/>
+                        <path d="M100 30 C75 38, 60 52, 50 70 C35 95, 28 125, 30 150 C32 170, 38 185, 42 195 L158 195 C162 185, 168 170, 170 150 C172 125, 165 95, 150 70 C140 52, 125 38, 100 30 Z" fill="url(#innerCape)"/>
+                        <path d="M78 12 C85 6, 92 4, 100 4 C108 4, 115 6, 122 12 L125 18 C118 10, 110 8, 100 8 C90 8, 82 10, 75 18 Z" fill="#C9A84C"/>
+                        <text x="100" y="120" text-anchor="middle" font-family="Inter,sans-serif" font-size="36" font-weight="800" fill="#FFFFFF" stroke="#C9A84C" stroke-width="1.5" letter-spacing="4">TFS</text>
+                        <path d="M72 85 L100 75 L128 85 L128 130 L100 145 L72 130 Z" stroke="#C9A84C" stroke-width="1.5" fill="none" opacity="0.5"/>
+                    </svg>
+                </div>
+                <p class="text-gold-400 italic text-lg md:text-xl font-medium mb-4 relative z-10">Money · Values · Purpose — Your Superpower</p>
+                <p class="text-surface-300 text-sm md:text-base max-w-2xl mx-auto leading-relaxed relative z-10">You've done the work. You've faced your numbers, named your values, and declared your purpose. That takes courage. Now it's time to put on your cape and become the hero of your own financial story.</p>
+            </div>
+
+            <div class="h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent mb-8"></div>
+
+            <!-- Financial Foundation -->
+            <div class="mb-8">
+                <h2 class="text-gold-400 font-semibold text-sm uppercase tracking-wider mb-4 flex items-center gap-2"><i data-lucide="landmark" class="w-4 h-4"></i> Your Financial Foundation</h2>
+                <div class="bg-navy-800 border border-white/10 rounded-2xl p-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+                        <div><div class="text-surface-500 text-xs font-medium uppercase tracking-wide mb-1">Net Worth</div><div id="summary-networth" class="font-bold text-2xl md:text-3xl text-white">$0</div></div>
+                        <div><div class="text-surface-500 text-xs font-medium uppercase tracking-wide mb-1">Monthly Cash Flow</div><div id="summary-cashflow" class="font-bold text-2xl md:text-3xl text-white">$0</div></div>
+                        <div><div class="text-surface-500 text-xs font-medium uppercase tracking-wide mb-1">Savings Rate</div><div id="summary-savingsrate" class="font-bold text-2xl md:text-3xl text-white">0%</div><div class="w-full h-2 bg-white/10 rounded-full mt-2 overflow-hidden"><div id="summary-savingsbar" class="h-full bg-gold-500 rounded-full transition-all duration-500" style="width:0%"></div></div></div>
+                        <div><div class="text-surface-500 text-xs font-medium uppercase tracking-wide mb-1">Debt-to-Income</div><div id="summary-dti" class="font-bold text-2xl md:text-3xl text-white">0%</div><div class="w-full h-2 bg-white/10 rounded-full mt-2 overflow-hidden"><div id="summary-dtibar" class="h-full bg-gold-500 rounded-full transition-all duration-500" style="width:0%"></div></div></div>
+                    </div>
+                    <div class="bg-gold-500/10 border border-gold-500/20 rounded-xl p-4"><p class="text-gold-200 text-sm flex items-start gap-2"><i data-lucide="lightbulb" class="w-4 h-4 mt-0.5 flex-shrink-0 text-gold-400"></i><span id="insight-text">Complete your financial information to see your personalized insight.</span></p></div>
+                </div>
+            </div>
+
+            <!-- Core Values -->
+            <div class="mb-8">
+                <h2 class="text-gold-400 font-semibold text-sm uppercase tracking-wider mb-4 flex items-center gap-2"><i data-lucide="heart" class="w-4 h-4"></i> Your Core Values</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="summary-values"></div>
+            </div>
+
+            <!-- Purpose Portfolio -->
+            <div class="mb-8">
+                <h2 class="text-gold-400 font-semibold text-sm uppercase tracking-wider mb-4 flex items-center gap-2"><i data-lucide="target" class="w-4 h-4"></i> Your Purpose Portfolio</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="summary-goals"></div>
+            </div>
+
+            <!-- Action Plan -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-gold-400 font-semibold text-sm uppercase tracking-wider flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> Your Coaching Action Plan</h2>
+                    <span class="text-surface-500 text-xs italic">Click ✏️ to edit any step</span>
+                </div>
+                <div class="space-y-4" id="summary-actions"></div>
+                <button id="btn-add-action-step" class="mt-4 w-full flex items-center justify-center gap-2 border-2 border-dashed border-gold-500/40 hover:border-gold-500/70 text-gold-400 hover:text-gold-300 font-semibold px-5 py-3 rounded-2xl transition-all min-h-[52px]">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Add New Action Step
+                </button>
+            </div>
+
+            <!-- Print/Download -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center flex-wrap pt-4 pb-8">
+                <button id="btn-download-summary" class="flex items-center justify-center gap-2 bg-gold-500 hover:bg-gold-600 text-navy-900 font-semibold px-6 py-3 rounded-xl transition-colors min-h-[44px]"><i data-lucide="download" class="w-5 h-5"></i> Download Summary</button>
+                <button id="btn-print" class="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white font-semibold px-6 py-3 rounded-xl transition-colors min-h-[44px]"><i data-lucide="printer" class="w-5 h-5"></i> Print This Blueprint</button>
+                <button id="btn-restart" class="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-surface-400 font-semibold px-6 py-3 rounded-xl transition-colors min-h-[44px]"><i data-lucide="rotate-ccw" class="w-5 h-5"></i> Start Over</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="step-navigation" class="sticky bottom-0 bg-navy-900/95 backdrop-blur-md border-t border-white/5 py-3 z-40">
+        <div class="max-w-6xl mx-auto px-4 md:px-6 flex items-center justify-between">
+            <button id="btn-back" class="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white font-medium px-5 py-2.5 rounded-xl transition-colors min-h-[44px] invisible"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>
+            <span id="step-label" class="text-surface-500 text-sm font-medium">Step 1 of 4</span>
+            <button id="btn-next" class="flex items-center gap-2 bg-gold-500 hover:bg-gold-600 text-navy-900 font-semibold px-5 py-2.5 rounded-xl transition-colors min-h-[44px]">Next <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+        </div>
+    </div>
+
+    <footer class="py-6 text-center border-t border-white/5"><p class="text-xs text-surface-600">Tenant Financial Solutions · Money · Values · Purpose</p></footer>
+
+    <script>
+    if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") { lucide.createIcons(); }
+
+    const state = { currentStep: 1, actionPlanItems: [], money: { totalSavings:0, brokerage:0, checking:0, monthlyIncome:0, retirement:0, totalDebts:0, monthlyExpenses:0 }, values: [], goals: [], customGoals: {} };
+
+    const valuesData = [
+        {emoji:'🔒',name:'Security'},{emoji:'🗽',name:'Freedom'},{emoji:'👨‍👩‍👧',name:'Family'},{emoji:'🤲',name:'Generosity'},
+        {emoji:'🌱',name:'Growth'},{emoji:'🏅',name:'Achievement'},{emoji:'🤝',name:'Integrity'},{emoji:'💡',name:'Creativity'},
+        {emoji:'⚖️',name:'Balance'},{emoji:'🙏',name:'Faith'},{emoji:'🌍',name:'Community'},{emoji:'🎯',name:'Purpose'},
+        {emoji:'💪',name:'Health'},{emoji:'📚',name:'Wisdom'},{emoji:'❤️',name:'Love'},{emoji:'🌟',name:'Excellence'},
+        {emoji:'🕊️',name:'Peace'},{emoji:'🏆',name:'Legacy'},{emoji:'🌈',name:'Adventure'},{emoji:'🤗',name:'Connection'},
+    ];
+
+    const goalsData = [
+        { category:'Financial Goals', emoji:'💰', color:'#C9A84C', goals:['Build a 6-month emergency fund','Become completely debt-free','Achieve financial independence (FIRE)','Save for a home purchase',"Fund my children's education",'Grow a generational wealth portfolio','Start or scale a business','Retire by a specific age'] },
+        { category:'Spiritual Goals', emoji:'🙏', color:'#8B5CF6', goals:['Tithe or give 10%+ of income','Fund a mission trip or pilgrimage','Support faith-based organizations financially','Create a legacy of charitable giving','Live with radical contentment and gratitude'] },
+        { category:'Physical Goals', emoji:'💪', color:'#10B981', goals:['Invest in premium healthcare and wellness','Fund a health transformation program','Create time and financial freedom to prioritize fitness','Build a home gym or wellness space','Afford quality, nourishing food consistently'] },
+        { category:'Intellectual Goals', emoji:'📚', color:'#3B82F6', goals:['Fund advanced education or a degree','Build a personal development fund','Invest in coaching, mentorship, or masterminds','Create time to read, study, and grow',"Support my children's intellectual development"] },
+        { category:'Familial Goals', emoji:'👨‍👩‍👧', color:'#F97316', goals:['Buy or upgrade the family home','Provide financial security for my spouse/partner','Create memorable family experiences and travel','Care for aging parents financially','Leave an inheritance for my children'] },
+        { category:'Social Goals', emoji:'🌍', color:'#14B8A6', goals:['Fund community programs or nonprofits','Mentor others financially','Host gatherings, events, and experiences','Build a network through giving and connection','Create jobs or opportunities for others'] },
+    ];
+
+    function parseCurrency(str) { if (!str) return 0; return parseFloat(str.replace(/[^0-9.-]/g,'')) || 0; }
+    function formatCurrency(num) { if (isNaN(num) || num===0) return '$0'; const abs=Math.abs(num); const formatted=abs>=1000?'$'+abs.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}):'$'+abs.toFixed(0); return num<0?'-'+formatted:formatted; }
+    function formatInputCurrency(str) { const num=parseCurrency(str); if(num===0&&str.replace(/[^0-9]/g,'')==='') return ''; return num.toLocaleString('en-US'); }
+
+    function showToast(message, type) {
+      const container=document.getElementById('toast-container'); const toast=document.createElement('div');
+      const bgColor=type==='error'?'bg-red-500':type==='success'?'bg-emerald-500':'bg-gold-500 text-navy-900';
+      toast.className=`toast-enter fixed top-6 left-1/2 ${bgColor} text-sm font-medium px-5 py-3 rounded-xl shadow-lg z-[100] whitespace-nowrap`;
+      toast.textContent=message; container.innerHTML=''; container.appendChild(toast);
+      setTimeout(()=>{toast.classList.remove('toast-enter');toast.classList.add('toast-exit');setTimeout(()=>toast.remove(),300);},3000);
+    }
+
+    function updateGoalsCount() {
+      let total=state.goals.length;
+      Object.values(state.customGoals).forEach(arr=>arr.forEach(cg=>{if(cg.selected)total++;}));
+      document.getElementById('goals-count').textContent=total;
+    }
+
+    function updateSnapshot() {
+      const m=state.money;
+      const netWorth=(m.totalSavings+m.brokerage+m.checking+m.retirement)-m.totalDebts;
+      const cashFlow=m.monthlyIncome-m.monthlyExpenses;
+      const annualIncome=m.monthlyIncome*12;
+      const dti=annualIncome>0?(m.totalDebts/annualIncome)*100:0;
+      const savingsRate=m.monthlyIncome>0?((m.monthlyIncome-m.monthlyExpenses)/m.monthlyIncome)*100:0;
+      const nwEl=document.getElementById('snap-networth'); nwEl.textContent=formatCurrency(netWorth); nwEl.className='font-bold text-xl md:text-2xl '+(netWorth>=0?'text-emerald-400':'text-red-400');
+      const cfEl=document.getElementById('snap-cashflow'); cfEl.textContent=formatCurrency(cashFlow); cfEl.className='font-bold text-xl md:text-2xl '+(cashFlow>=0?'text-emerald-400':'text-red-400');
+      const dtiEl=document.getElementById('snap-dti'); dtiEl.textContent=dti.toFixed(1)+'%'; dtiEl.className='font-bold text-xl md:text-2xl '+(dti>36?'text-red-400':'text-emerald-400');
+      const srEl=document.getElementById('snap-savings'); srEl.textContent=savingsRate.toFixed(1)+'%'; srEl.className='font-bold text-xl md:text-2xl '+(savingsRate>=0?'text-emerald-400':'text-red-400');
+    }
+
+    function renderValues() {
+      const grid=document.getElementById('values-grid'); grid.innerHTML='';
+      valuesData.forEach((val,idx)=>{
+        const card=document.createElement('div');
+        card.className='value-card bg-white/5 border border-white/10 rounded-2xl p-4 cursor-pointer select-none';
+        card.dataset.valueIdx=idx;
+        card.innerHTML=`<div class="text-center"><span class="text-3xl block mb-2">${val.emoji}</span><span class="text-white font-semibold text-sm">${val.name}</span></div><div class="value-desc-area hidden mt-3"><input type="text" maxlength="100" class="value-desc-input w-full bg-white/10 border border-gold-500/30 rounded-lg px-3 py-2 text-white text-xs placeholder-surface-500 focus:outline-none focus:border-gold-500" placeholder="Why does this matter to you?" /><div class="text-right mt-1"><span class="value-char-count text-surface-600 text-xs">0/100</span></div></div>`;
+        grid.appendChild(card);
+        card.addEventListener('click',function(e){
+          if(e.target.classList.contains('value-desc-input')) return;
+          const isSelected=this.classList.contains('selected');
+          if(isSelected){this.classList.remove('selected');this.querySelector('.value-desc-area').classList.add('hidden');state.values=state.values.filter(v=>v.name!==valuesData[idx].name);}
+          else{
+            if(state.values.length>=3){this.classList.add('shake');setTimeout(()=>this.classList.remove('shake'),500);showToast("You've already selected 3 values.",'warn');return;}
+            this.classList.add('selected');this.querySelector('.value-desc-area').classList.remove('hidden');state.values.push({name:valuesData[idx].name,emoji:valuesData[idx].emoji,description:''});
+          }
+          document.getElementById('values-count').textContent=state.values.length;
+        });
+        const input=card.querySelector('.value-desc-input');
+        if(input){input.addEventListener('input',function(){const valObj=state.values.find(v=>v.name===valuesData[idx].name);if(valObj)valObj.description=this.value;card.querySelector('.value-char-count').textContent=this.value.length+'/100';});}
+      });
+    }
+
+    function renderGoals() {
+      const container=document.getElementById('goals-container'); container.innerHTML='';
+      goalsData.forEach(cat=>{
+        const section=document.createElement('div'); section.dataset.goalCategory=cat.category;
+        section.innerHTML=`<div class="flex items-center gap-2 mb-3"><span class="text-xl">${cat.emoji}</span><h3 class="font-semibold text-sm uppercase tracking-wider" style="color:${cat.color}">${cat.category}</h3></div><div class="flex flex-wrap gap-2 goals-cat-grid"></div>`;
+        const grid=section.querySelector('.goals-cat-grid');
+        cat.goals.forEach(goal=>{
+          const chip=document.createElement('button');
+          chip.className='goal-card flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium border transition-all min-h-[44px]';
+          chip.style.borderColor=cat.color+'40'; chip.style.color=cat.color; chip.style.background='transparent';
+          chip.dataset.goal=goal; chip.dataset.category=cat.category;
+          chip.innerHTML=`<span class="goal-check hidden"><i data-lucide="check" class="w-4 h-4"></i></span><span>${goal}</span>`;
+          chip.addEventListener('click',function(){
+            const isSelected=this.classList.contains('selected');
+            if(isSelected){this.classList.remove('selected');this.style.background='transparent';this.style.color=cat.color;this.querySelector('.goal-check').classList.add('hidden');state.goals=state.goals.filter(g=>g.goal!==goal);}
+            else{this.classList.add('selected');this.style.background=cat.color;this.style.color='#FFFFFF';this.style.borderColor=cat.color;this.querySelector('.goal-check').classList.remove('hidden');state.goals.push({category:cat.category,goal});}
+            updateGoalsCount();
+          });
+          grid.appendChild(chip);
+        });
+        container.appendChild(section);
+      });
+      if(typeof lucide!=="undefined"&&typeof lucide.createIcons==="function") lucide.createIcons();
+    }
+
+    function goToStep(step) {
+      if(step<1||step>4) return;
+      const currentEl=document.getElementById('step-'+state.currentStep); const nextEl=document.getElementById('step-'+step);
+      if(step>state.currentStep){currentEl.className='step-container step-slide-left';nextEl.className='step-container step-active';}
+      else{currentEl.className='step-container step-slide-right';nextEl.className='step-container step-active';}
+      state.currentStep=step; updateUI();
+      if(step===4) renderSummary();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function updateUI() {
+      const step=state.currentStep;
+      document.getElementById('progress-fill').style.width=(step*25)+'%';
+      document.getElementById('step-label').textContent='Step '+step+' of 4';
+      document.getElementById('btn-back').style.visibility=step===1?'hidden':'visible';
+      document.getElementById('btn-next').style.display=step===4?'none':'flex';
+      document.querySelectorAll('[data-step-pill]').forEach(pill=>{
+        const ps=parseInt(pill.dataset.stepPill);
+        if(ps===step) pill.className='step-pill active px-3 py-1.5 rounded-full text-xs font-medium bg-gold-500 text-navy-900 transition-all';
+        else if(ps<step) pill.className='step-pill px-3 py-1.5 rounded-full text-xs font-medium bg-gold-500/20 text-gold-400 transition-all';
+        else pill.className='step-pill px-3 py-1.5 rounded-full text-xs font-medium bg-white/5 text-surface-500 transition-all';
+      });
+    }
+
+    function validateStep(step) {
+      if(step===1){if(state.money.monthlyIncome<=0){showToast('Please enter your monthly income to continue.','error');return false;}return true;}
+      if(step===2){if(state.values.length!==3){showToast('Please select exactly 3 values to continue.','error');return false;}for(const val of state.values){if(!val.description||val.description.trim().length===0){showToast('Please write a description for each selected value.','error');return false;}}return true;}
+      if(step===3){let total=state.goals.length;Object.values(state.customGoals).forEach(arr=>arr.forEach(cg=>{if(cg.selected)total++;}));if(total===0){showToast('Please select at least 1 goal to continue.','error');return false;}return true;}
+      return true;
+    }
+
+    function renderSummary() {
+      const dateInput=document.getElementById('client-date-input');
+      if(dateInput&&!dateInput.value){const today=new Date();dateInput.value=today.toISOString().split('T')[0];}
+      const m=state.money;
+      const netWorth=(m.totalSavings+m.brokerage+m.checking+m.retirement)-m.totalDebts;
+      const cashFlow=m.monthlyIncome-m.monthlyExpenses;
+      const annualIncome=m.monthlyIncome*12;
+      const dti=annualIncome>0?(m.totalDebts/annualIncome)*100:0;
+      const savingsRate=m.monthlyIncome>0?((m.monthlyIncome-m.monthlyExpenses)/m.monthlyIncome)*100:0;
+      const snw=document.getElementById('summary-networth');snw.textContent=formatCurrency(netWorth);snw.className='font-bold text-2xl md:text-3xl '+(netWorth>=0?'text-emerald-400':'text-red-400');
+      const scf=document.getElementById('summary-cashflow');scf.textContent=formatCurrency(cashFlow);scf.className='font-bold text-2xl md:text-3xl '+(cashFlow>=0?'text-emerald-400':'text-red-400');
+      const ssr=document.getElementById('summary-savingsrate');ssr.textContent=savingsRate.toFixed(1)+'%';ssr.className='font-bold text-2xl md:text-3xl '+(savingsRate>=0?'text-emerald-400':'text-red-400');
+      document.getElementById('summary-savingsbar').style.width=Math.min(Math.max(savingsRate,0),100)+'%';
+      const sdti=document.getElementById('summary-dti');sdti.textContent=dti.toFixed(1)+'%';sdti.className='font-bold text-2xl md:text-3xl '+(dti>36?'text-red-400':'text-emerald-400');
+      const dtiBar=document.getElementById('summary-dtibar');dtiBar.style.width=Math.min(dti,100)+'%';dtiBar.style.background=dti>36?'#EF4444':'#C9A84C';
+      let insight='';
+      if(netWorth<0) insight="Your first priority is eliminating negative net worth — every dollar of debt reduction builds your foundation.";
+      else if(dti>50) insight="High debt-to-income ratio is your most urgent financial challenge — a focused debt elimination plan is step one.";
+      else if(savingsRate<10) insight="Increasing your savings rate to at least 20% is the single most impactful move you can make right now.";
+      else if(cashFlow>0&&savingsRate>20) insight="You have strong cash flow. The focus now is purposeful deployment toward your goals.";
+      else if(cashFlow>0) insight="Positive cash flow is a great foundation. Let's build a plan to direct it intentionally toward what matters most.";
+      else insight="Let's build a step-by-step plan to strengthen your financial position and align your money with your purpose.";
+      document.getElementById('insight-text').textContent=insight;
+      const valuesContainer=document.getElementById('summary-values');valuesContainer.innerHTML='';
+      state.values.forEach(val=>{const card=document.createElement('div');card.className='bg-navy-800 border border-gold-500/20 rounded-2xl p-5';card.innerHTML=`<div class="flex items-center gap-3 mb-3"><span class="text-3xl">${val.emoji}</span><span class="text-white font-bold text-lg">${val.name}</span></div><p class="text-surface-400 text-sm italic">"${val.description}"</p>`;valuesContainer.appendChild(card);});
+      const goalsContainer=document.getElementById('summary-goals');goalsContainer.innerHTML='';
+      const grouped={};state.goals.forEach(g=>{if(!grouped[g.category])grouped[g.category]=[];grouped[g.category].push(g.goal);});
+      Object.keys(grouped).forEach(cat=>{const catData=goalsData.find(c=>c.category===cat);const block=document.createElement('div');block.className='bg-navy-800 border border-white/10 rounded-2xl p-5';let goalsHtml=grouped[cat].map(g=>`<div class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 mt-0.5 flex-shrink-0" style="color:${catData.color}"></i><span class="text-surface-300 text-sm">${g}</span></div>`).join('');block.innerHTML=`<div class="flex items-center gap-2 mb-3"><span class="text-lg">${catData.emoji}</span><h4 class="font-semibold text-sm" style="color:${catData.color}">${cat}</h4></div><div class="space-y-2">${goalsHtml}</div>`;goalsContainer.appendChild(block);});
+      state.actionPlanItems=generateActionPlan().map(a=>({...a,custom:false}));renderActionPlan();
+      if(typeof lucide!=="undefined"&&typeof lucide.createIcons==="function") lucide.createIcons();
+    }
+
+    function generateActionPlan() {
+      const m=state.money; const valueNames=state.values.map(v=>v.name); const goalTexts=state.goals.map(g=>g.goal);
+      const goalCategories=[...new Set(state.goals.map(g=>g.category))];
+      const netWorth=(m.totalSavings+m.brokerage+m.checking+m.retirement)-m.totalDebts;
+      const savingsRate=m.monthlyIncome>0?((m.monthlyIncome-m.monthlyExpenses)/m.monthlyIncome)*100:0;
+      const cashFlow=m.monthlyIncome-m.monthlyExpenses; const actions=[];
+      if(m.totalDebts>0&&(valueNames.includes('Security')||valueNames.includes('Legacy'))) actions.push({title:'Create a Debt Freedom Timeline',description:'Map every debt with interest rates and build a payoff sequence. Prioritize high-interest debt first while maintaining minimum payments on everything else.'});
+      if(savingsRate<15&&goalTexts.some(g=>g.includes('FIRE')||g.includes('Retire'))) actions.push({title:'Automate Savings to 20%',description:'Set up automatic transfers on payday. Start by increasing your current rate by 2-3% each month until you reach 20%.'});
+      if(cashFlow>0&&goalTexts.some(g=>g.includes('business')||g.includes('Start or scale'))) actions.push({title:'Launch Your Business Fund',description:'Open a dedicated business savings account and direct a portion of your monthly surplus toward startup capital.'});
+      if(goalCategories.includes('Spiritual Goals')||valueNames.includes('Generosity')||valueNames.includes('Faith')) actions.push({title:'Build a Giving Plan',description:"Define your giving percentage now, before your income grows, so generosity becomes a habit and not an afterthought."});
+      if(goalTexts.some(g=>g.includes('education')||g.includes("children's"))) actions.push({title:'Start a 529 or Education Fund',description:"Even $50/month invested now creates significant opportunity for your children's future."});
+      if(netWorth<0&&!actions.some(a=>a.title.includes('Debt'))) actions.push({title:'Reverse Your Net Worth',description:`Your net worth is currently ${formatCurrency(netWorth)}. Focus on the debt avalanche or snowball method — pick the one that keeps you motivated.`});
+      actions.push({title:'Schedule Your Next Coaching Session',description:"Momentum is built in regular reviews. Let's meet again in 30 days to measure progress against these action items."});
+      return actions.slice(0,6);
+    }
+
+    function escHtml(str){if(!str)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+    function renderActionPlan() {
+      const container=document.getElementById('summary-actions'); if(!container)return; container.innerHTML='';
+      if(!state.actionPlanItems)return;
+      state.actionPlanItems.forEach((action,idx)=>{
+        const card=document.createElement('div'); card.className='action-card bg-navy-800 border border-white/10 rounded-2xl p-5 pl-6'; card.dataset.actionIdx=idx;
+        if(action.editing){
+          card.innerHTML=`<div class="flex items-start gap-3"><span class="text-gold-500 font-bold text-lg mt-1 flex-shrink-0">${idx+1}</span><div class="flex-1 space-y-2"><input type="text" class="action-edit-input action-title-input" value="${escHtml(action.title)}" placeholder="Step title..." maxlength="120" /><textarea class="action-edit-input action-desc-input resize-none" rows="3" placeholder="Describe this step..." maxlength="400">${escHtml(action.description)}</textarea><div class="flex gap-2 justify-end mt-1"><button class="btn-action-save flex items-center gap-1 bg-gold-500 hover:bg-gold-600 text-navy-900 font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors min-h-[32px]" data-idx="${idx}"><i data-lucide="check" class="w-3.5 h-3.5"></i> Save</button><button class="btn-action-cancel flex items-center gap-1 bg-white/10 hover:bg-white/15 text-white text-xs px-3 py-1.5 rounded-lg transition-colors min-h-[32px]" data-idx="${idx}">Cancel</button></div></div></div>`;
+        } else {
+          card.innerHTML=`<div class="flex items-start gap-3"><span class="text-gold-500 font-bold text-lg mt-0.5 flex-shrink-0">${idx+1}</span><div class="flex-1"><h4 class="text-white font-semibold text-sm mb-1">${escHtml(action.title)}</h4><p class="text-surface-400 text-sm">${escHtml(action.description)}</p></div><div class="flex gap-1 flex-shrink-0"><button class="btn-action-edit p-1.5 text-surface-500 hover:text-gold-400 transition-colors rounded-lg hover:bg-white/5" data-idx="${idx}"><i data-lucide="pencil" class="w-4 h-4"></i></button><button class="btn-action-delete p-1.5 text-surface-500 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5" data-idx="${idx}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>`;
+        }
+        container.appendChild(card);
+      });
+      if(typeof lucide!=="undefined"&&typeof lucide.createIcons==="function") lucide.createIcons();
+      document.querySelectorAll('.btn-action-edit').forEach(btn=>btn.addEventListener('click',function(){state.actionPlanItems[parseInt(this.dataset.idx)].editing=true;renderActionPlan();}));
+      document.querySelectorAll('.btn-action-delete').forEach(btn=>btn.addEventListener('click',function(){state.actionPlanItems.splice(parseInt(this.dataset.idx),1);renderActionPlan();showToast('Step removed.','info');}));
+      document.querySelectorAll('.btn-action-save').forEach(btn=>btn.addEventListener('click',function(){const idx=parseInt(this.dataset.idx);const card=document.querySelector('[data-action-idx="'+idx+'"]');const titleVal=card.querySelector('.action-title-input').value.trim();const descVal=card.querySelector('.action-desc-input').value.trim();if(!titleVal){showToast('Please enter a step title.','error');return;}state.actionPlanItems[idx].title=titleVal;state.actionPlanItems[idx].description=descVal;state.actionPlanItems[idx].editing=false;renderActionPlan();showToast('Step updated!','success');}));
+      document.querySelectorAll('.btn-action-cancel').forEach(btn=>btn.addEventListener('click',function(){const idx=parseInt(this.dataset.idx);if(state.actionPlanItems[idx].custom&&state.actionPlanItems[idx].title==='New Action Step'){state.actionPlanItems.splice(idx,1);}else{state.actionPlanItems[idx].editing=false;}renderActionPlan();}));
+    }
+
+    function downloadSummary() {
+      const clientName=(document.getElementById('client-name-input')?document.getElementById('client-name-input').value.trim():'')||'Client';
+      const sessionDate=(document.getElementById('client-date-input')?document.getElementById('client-date-input').value:'')||new Date().toLocaleDateString();
+      const m=state.money;
+      const netWorth=(m.totalSavings+m.brokerage+m.checking+m.retirement)-m.totalDebts;
+      const cashFlow=m.monthlyIncome-m.monthlyExpenses;
+      const annualIncome=m.monthlyIncome*12; const dti=annualIncome>0?(m.totalDebts/annualIncome)*100:0;
+      const savingsRate=m.monthlyIncome>0?((m.monthlyIncome-m.monthlyExpenses)/m.monthlyIncome)*100:0;
+      const valuesHtml=state.values.map(v=>`<div style="margin-bottom:12px;padding:12px;background:#f5f0e0;border-radius:8px;border-left:4px solid #C9A84C;"><strong>${v.emoji} ${v.name}</strong><br/><em>"${v.description}"</em></div>`).join('');
+      const grouped={};state.goals.forEach(g=>{if(!grouped[g.category])grouped[g.category]=[];grouped[g.category].push(g.goal);});
+      const goalsHtml=Object.keys(grouped).map(cat=>{const catData=goalsData.find(c=>c.category===cat);const items=grouped[cat].map(g=>`<li style="margin:4px 0;">${g}</li>`).join('');return `<div style="margin-bottom:14px;"><strong style="color:${catData?catData.color:'#333'};">${catData?catData.emoji+' ':' '}${cat}</strong><ul style="margin:6px 0 0 16px;">${items}</ul></div>`;}).join('');
+      const actionsHtml=(state.actionPlanItems||[]).map((a,i)=>`<div style="margin-bottom:14px;padding:14px 16px;background:#f9f9f9;border-radius:8px;border-left:4px solid #C9A84C;"><strong>${i+1}. ${a.title}</strong><p style="margin:6px 0 0;color:#555;font-size:0.92em;">${a.description}</p></div>`).join('');
+      const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>TFS MVP Blueprint – ${clientName}</title><style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:20px;color:#1f2937;}h1,h2{font-family:serif;}table{width:100%;border-collapse:collapse;}th{background:#0f2759;color:white;padding:10px 12px;text-align:left;font-size:13px;}.stat{display:inline-block;background:#f5f5f5;border-radius:8px;padding:12px 20px;margin:8px;text-align:center;}.stat-val{font-size:24px;font-weight:700;color:#0f2759;}.stat-lbl{font-size:11px;color:#6b7280;margin-top:2px;}</style></head><body><h1 style="color:#0f2759;">TFS MVP Blueprint</h1><p style="color:#6b7280;">Report for <strong>${clientName}</strong> | ${sessionDate}</p><hr style="margin:20px 0;border-color:#e5e7eb;"><h2>💰 Financial Foundation</h2><div><span class="stat"><div class="stat-val">${formatCurrency(netWorth)}</div><div class="stat-lbl">Net Worth</div></span><span class="stat"><div class="stat-val">${formatCurrency(cashFlow)}</div><div class="stat-lbl">Monthly Cash Flow</div></span><span class="stat"><div class="stat-val">${savingsRate.toFixed(1)}%</div><div class="stat-lbl">Savings Rate</div></span><span class="stat"><div class="stat-val">${dti.toFixed(1)}%</div><div class="stat-lbl">Debt-to-Income</div></span></div><h2>🌟 Core Values</h2>${valuesHtml||'<p>No values selected.</p>'}<h2>🎯 Purpose Portfolio</h2>${goalsHtml||'<p>No goals selected.</p>'}<h2>⚡ Coaching Action Plan</h2>${actionsHtml||'<p>No action steps defined.</p>'}<p style="margin-top:30px;color:#6b7280;font-size:12px;">Generated by Tenant Financial Solutions • Money · Values · Purpose</p></body></html>`;
+      const blob=new Blob([html],{type:'text/html'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`TFS-MVP-Blueprint-${clientName.replace(/\s+/g,'-')}.html`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Summary downloaded!','success');
+    }
+
+    function init() {
+      renderValues(); renderGoals(); updateUI();
+      document.querySelectorAll('[data-money]').forEach(input=>{
+        input.addEventListener('input',function(){state.money[this.dataset.money]=parseCurrency(this.value);updateSnapshot();});
+        input.addEventListener('blur',function(){this.value=formatInputCurrency(this.value);});
+        input.addEventListener('focus',function(){const num=parseCurrency(this.value);this.value=num>0?num.toString():'';});
+      });
+      document.getElementById('btn-next').addEventListener('click',function(){if(validateStep(state.currentStep)){goToStep(state.currentStep+1);}});
+      document.getElementById('btn-back').addEventListener('click',function(){goToStep(state.currentStep-1);});
+      document.querySelectorAll('[data-step-pill]').forEach(pill=>{pill.addEventListener('click',function(){const target=parseInt(this.dataset.stepPill);if(target<state.currentStep){goToStep(target);}else if(target>state.currentStep){let canGo=true;for(let i=state.currentStep;i<target;i++){if(!validateStep(i)){canGo=false;break;}}if(canGo)goToStep(target);}});});
+      const addActionBtn=document.getElementById('btn-add-action-step');
+      if(addActionBtn){addActionBtn.addEventListener('click',function(){if(!state.actionPlanItems)state.actionPlanItems=[];state.actionPlanItems.push({title:'New Action Step',description:'Describe what you will do for this step.',custom:true,editing:true});renderActionPlan();const container=document.getElementById('summary-actions');if(container&&container.lastElementChild)container.lastElementChild.scrollIntoView({behavior:'smooth',block:'center'});});}
+      document.getElementById('btn-download-summary').addEventListener('click',downloadSummary);
+      document.getElementById('btn-print').addEventListener('click',function(){window.print();});
+      document.getElementById('btn-restart').addEventListener('click',function(){
+        state.money={totalSavings:0,brokerage:0,checking:0,monthlyIncome:0,retirement:0,totalDebts:0,monthlyExpenses:0};state.values=[];state.goals=[];state.customGoals={};state.actionPlanItems=[];
+        document.querySelectorAll('[data-money]').forEach(input=>{input.value='';});updateSnapshot();renderValues();document.getElementById('values-count').textContent='0';renderGoals();document.getElementById('goals-count').textContent='0';
+        const cin=document.getElementById('client-name-input');if(cin)cin.value='';const cdi=document.getElementById('client-date-input');if(cdi)cdi.value='';
+        for(let i=2;i<=4;i++){document.getElementById('step-'+i).className='step-container step-slide-right';}
+        document.getElementById('step-1').className='step-container step-active';state.currentStep=1;updateUI();window.scrollTo({top:0,behavior:'smooth'});
+      });
+    }
+
+    if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+    </script>
+</body>
+</html>

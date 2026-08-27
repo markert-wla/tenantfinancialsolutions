@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What's My Press Pause Number — TFS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#0B1F3A', 'navy-light': '#122B4F', 'navy-dark': '#081529',
+            teal: '#0E7C7B', 'teal-dark': '#0A5F5E', 'teal-light': '#10A3A2',
+            gold: '#D4AF37', 'gold-dark': '#B8962E', 'gold-light': '#E5C95C',
+          },
+          fontFamily: { inter: ['Inter', 'system-ui', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root { --navy:#0B1F3A; --teal:#0E7C7B; --teal-dark:#0A5F5E; --gold:#D4AF37; --gold-light:#E5C95C; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--navy); color: #fff; margin: 0; min-height: 100vh; overflow-x: hidden; }
+    .screen { display: none; opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .screen.active { display: block; }
+    .screen.visible { opacity: 1; transform: translateY(0); }
+    .progress-track { height: 6px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--gold)); border-radius: 999px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .dollar-input { font-family: 'Inter', system-ui, sans-serif; font-size: 1.5rem; font-weight: 700; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.15); border-radius: 12px; color: #fff; padding: 16px 20px; width: 100%; outline: none; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+    .dollar-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(14,124,123,0.25); }
+    .dollar-input::placeholder { color: rgba(255,255,255,0.3); }
+    .motivation-card { background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all 0.25s ease; user-select: none; display: flex; align-items: center; gap: 12px; }
+    .motivation-card:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+    .motivation-card.selected { background: rgba(14,124,123,0.2); border-color: var(--teal); box-shadow: 0 0 0 2px rgba(14,124,123,0.15); }
+    .motivation-card .check-box { width: 22px; height: 22px; border: 2px solid rgba(255,255,255,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.25s ease; }
+    .motivation-card.selected .check-box { background: var(--teal); border-color: var(--teal); }
+    .btn-primary { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: #fff; font-weight: 600; font-size: 1.05rem; padding: 16px 32px; border-radius: 12px; border: none; cursor: pointer; width: 100%; transition: all 0.3s ease; font-family: 'Inter', system-ui, sans-serif; min-height: 52px; }
+    .btn-primary:hover { box-shadow: 0 8px 24px rgba(14,124,123,0.35); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary { background: transparent; color: var(--teal); font-weight: 600; font-size: 1rem; padding: 14px 32px; border-radius: 12px; border: 2px solid var(--teal); cursor: pointer; width: 100%; transition: all 0.3s ease; font-family: 'Inter', system-ui, sans-serif; min-height: 52px; }
+    .btn-secondary:hover { background: rgba(14,124,123,0.1); }
+    .pill-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(14,124,123,0.15); border: 1px solid rgba(14,124,123,0.3); border-radius: 999px; padding: 6px 14px; font-size: 0.82rem; font-weight: 500; color: rgba(255,255,255,0.9); }
+    .commitment-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.3); border-radius: 16px; padding: 28px 24px; font-size: 1rem; line-height: 1.75; color: rgba(255,255,255,0.9); }
+    .name-input { font-family: 'Inter', system-ui, sans-serif; font-size: 1rem; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; padding: 14px 18px; width: 100%; outline: none; transition: border-color 0.3s ease; }
+    .name-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(14,124,123,0.25); }
+    .name-input::placeholder { color: rgba(255,255,255,0.3); }
+    .summary-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr 1fr; } }
+    .summary-cell { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; text-align: center; }
+    .step-label { display: inline-block; background: rgba(14,124,123,0.2); border: 1px solid rgba(14,124,123,0.35); border-radius: 999px; padding: 4px 16px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; color: rgba(255,255,255,0.8); text-transform: uppercase; }
+    .error-msg { color: #f87171; font-size: 0.85rem; margin-top: 8px; display: none; }
+    .error-msg.show { display: block; }
+    .live-calc-card { background: rgba(14,124,123,0.1); border: 1px solid rgba(14,124,123,0.25); border-radius: 12px; padding: 16px 20px; }
+    .range-bar-track { position: relative; height: 14px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: visible; margin: 24px 0; }
+    .range-bar-zone { position: absolute; top: 0; height: 100%; background: linear-gradient(90deg, rgba(14,124,123,0.5), rgba(14,124,123,0.8)); border-radius: 999px; }
+    .range-bar-marker { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%; background: var(--gold); border: 3px solid #fff; box-shadow: 0 2px 8px rgba(212,175,55,0.5); z-index: 2; }
+    .advisory-note { background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.25); border-left: 4px solid var(--gold); border-radius: 12px; padding: 20px 24px; margin-top: 32px; font-size: 0.9rem; line-height: 1.65; color: rgba(255,255,255,0.88); }
+    @media print { body { background: #fff !important; color: #0B1F3A !important; } .no-print { display: none !important; } }
+  </style>
+</head>
+<body class="font-inter">
+
+  <div id="progress-bar-wrap" class="no-print fixed top-0 left-0 right-0 z-50 px-4 pt-3 pb-2" style="display:none; background: linear-gradient(180deg, rgba(11,31,58,0.97) 60%, transparent);">
+    <div class="max-w-xl mx-auto">
+      <div class="flex items-center justify-between mb-1.5">
+        <span id="progress-label" class="text-xs font-semibold text-white/60 tracking-wide uppercase"></span>
+        <span id="progress-pct" class="text-xs font-bold" style="color:var(--teal)"></span>
+      </div>
+      <div class="progress-track"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <main class="min-h-screen flex flex-col items-center justify-start px-4 py-8 md:py-12">
+    <div class="w-full max-w-[640px]">
+
+      <!-- SCREEN 0: Welcome -->
+      <div class="screen active" id="screen-0">
+        <div class="text-center pt-12 md:pt-20">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6" style="background:linear-gradient(135deg,var(--teal),var(--teal-dark))">
+            <i data-lucide="pause-circle" class="w-8 h-8 text-white"></i>
+          </div>
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 tracking-tight">What's My<br/>Press Pause Number?</h1>
+          <p class="text-base md:text-lg text-white/60 font-medium mb-8">A guided discovery tool by Tenant Financial Solutions</p>
+          <div class="bg-white/[0.04] rounded-2xl p-6 md:p-8 text-left mb-10 border border-white/[0.06]">
+            <p class="text-white/80 leading-relaxed text-[0.95rem] md:text-base">Your Press Pause Number is the financial yardstick that tells you — with confidence — when it's time to stop, breathe, and wait 24hrs before clicking checkout.</p>
+            <p class="text-white/80 leading-relaxed text-[0.95rem] md:text-base mt-4">This guided experience will help you uncover your number in just a few minutes.</p>
+          </div>
+          <button id="btn-start" class="btn-primary flex items-center justify-center gap-2">
+            Let's Find My Number <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- SCREEN 1: Initial Guess -->
+      <div class="screen" id="screen-1">
+        <div class="pt-16 md:pt-20">
+          <span class="step-label mb-5 block w-fit">Step 1 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">What's Your Gut Telling You?</h2>
+          <p class="text-white/50 font-medium mb-6 text-sm md:text-base">Before we run any numbers, make your best guess.</p>
+          <div class="bg-white/[0.04] rounded-2xl p-6 md:p-8 border border-white/[0.06] mb-8">
+            <p class="text-white/75 leading-relaxed text-[0.93rem] mb-6">What number have you set as the floor on when you will wait 24hrs before buying?</p>
+            <label class="block text-sm font-semibold text-white/70 mb-2">My initial guess is...</label>
+            <input id="input-guess" type="text" inputmode="numeric" class="dollar-input" placeholder="$0" />
+            <p class="text-white/40 text-xs mt-2.5">There's no wrong answer here. This is just your starting point.</p>
+            <p id="error-guess" class="error-msg">Please enter an amount greater than $0 to continue.</p>
+          </div>
+          <button id="btn-guess" class="btn-primary flex items-center justify-center gap-2">That's My Guess <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: Motivations -->
+      <div class="screen" id="screen-2">
+        <div class="pt-16 md:pt-20">
+          <span class="step-label mb-5 block w-fit">Step 2 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">What's Driving This Decision?</h2>
+          <p class="text-white/50 font-medium mb-6 text-sm md:text-base">Select everything that resonates with you right now.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4" id="motivations-grid">
+            <div class="motivation-card" data-value="Starting or growing a business"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🏢 Starting or growing a business</span></div>
+            <div class="motivation-card" data-value="Leaving a job or career transition"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">💼 Leaving a job or career transition</span></div>
+            <div class="motivation-card" data-value="A major life change"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🏠 A major life change (move, family, health)</span></div>
+            <div class="motivation-card" data-value="Going back to school or training"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">📚 Going back to school or training</span></div>
+            <div class="motivation-card" data-value="Burnout or need for rest"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🧘 Burnout or need for rest</span></div>
+            <div class="motivation-card" data-value="Pursuing a passion or calling"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">💡 Pursuing a passion or calling</span></div>
+            <div class="motivation-card" data-value="Relocating or traveling"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🌍 Relocating or traveling</span></div>
+            <div class="motivation-card" data-value="Pivoting to something new entirely"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🔄 Pivoting to something new entirely</span></div>
+          </div>
+          <p class="text-white/40 text-xs mb-6">Your motivations help us understand the weight of your decision — not just the math.</p>
+          <p id="error-motiv" class="error-msg mb-4">Please select at least one motivation to continue.</p>
+          <button id="btn-motiv" class="btn-primary flex items-center justify-center gap-2">These Are My Motivations <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+        </div>
+      </div>
+
+      <!-- SCREEN 3: Real Numbers -->
+      <div class="screen" id="screen-3">
+        <div class="pt-16 md:pt-20">
+          <span class="step-label mb-5 block w-fit">Step 3 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">Let's Look at the Real Numbers</h2>
+          <p class="text-white/50 font-medium mb-6 text-sm md:text-base">Enter your best estimates — ballpark figures are perfectly fine.</p>
+          <div class="space-y-6 mb-6">
+            <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06]">
+              <label class="block text-sm font-semibold text-white/80 mb-1">Liquid Savings</label>
+              <p class="text-xs text-white/40 mb-3">Total cash you could access right now</p>
+              <input id="input-savings" type="text" inputmode="numeric" class="dollar-input" placeholder="$0" />
+            </div>
+            <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06]">
+              <label class="block text-sm font-semibold text-white/80 mb-1">Total Debt</label>
+              <p class="text-xs text-white/40 mb-3">The total outstanding debt you currently owe</p>
+              <input id="input-debt" type="text" inputmode="numeric" class="dollar-input" placeholder="$0" />
+              <p class="text-white/40 text-xs mt-2.5">Enter $0 if you're debt-free — that's great!</p>
+            </div>
+            <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06]">
+              <label class="block text-sm font-semibold text-white/80 mb-1">Monthly Margin</label>
+              <p class="text-xs text-white/40 mb-3">Your average monthly surplus after all bills and expenses</p>
+              <input id="input-margin" type="text" inputmode="numeric" class="dollar-input" placeholder="$0" />
+            </div>
+          </div>
+          <div id="live-calc" class="live-calc-card mb-8" style="display:none;">
+            <p class="text-sm font-semibold mb-1" style="color:var(--teal)">Weighted Value: <span id="calc-wv" class="text-white font-bold">$0</span></p>
+            <p id="calc-formula-note" class="text-xs text-white/50 mb-2">(Liquid Savings + Monthly Margin) ÷ 2</p>
+            <p class="text-sm font-semibold" style="color:var(--teal)">Healthy Range: <span id="calc-range" class="text-white font-bold">$0 – $0</span></p>
+            <p id="calc-debt-warning" class="text-xs mt-3 font-medium hidden" style="color:var(--gold)">⚠️ Since your total debt meets or exceeds your liquid savings, your Weighted Value is based on 50% of your Monthly Margin.</p>
+          </div>
+          <p id="error-numbers" class="error-msg mb-4">Please fill in all three fields to continue.</p>
+          <button id="btn-numbers" class="btn-primary flex items-center justify-center gap-2">Run My Numbers <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+        </div>
+      </div>
+
+      <!-- SCREEN 4: Comparison -->
+      <div class="screen" id="screen-4">
+        <div class="pt-16 md:pt-20">
+          <span class="step-label mb-5 block w-fit">Step 4 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">Your Guess vs. Your Numbers</h2>
+          <p class="text-white/50 font-medium mb-8 text-sm md:text-base">Here's what your gut said — and what the numbers are saying.</p>
+          <div class="summary-grid mb-6">
+            <div class="summary-cell"><p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-1">Your Initial Guess</p><p id="comp-guess" class="text-xl font-bold" style="color:var(--gold)">$0</p></div>
+            <div class="summary-cell"><p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-1">Healthy Pause Range</p><p id="comp-range" class="text-xl font-bold" style="color:var(--teal)">$0 – $0</p></div>
+            <div class="summary-cell"><p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-1">Weighted Value</p><p id="comp-wv" class="text-xl font-bold text-white">$0</p></div>
+          </div>
+          <div class="bg-white/[0.04] rounded-2xl p-5 border border-white/[0.06] mb-6">
+            <p id="comp-message" class="text-white/80 text-sm leading-relaxed"></p>
+          </div>
+          <div class="mb-8 px-2">
+            <div class="flex justify-between text-[0.7rem] text-white/40 font-semibold mb-1"><span>$0</span><span id="range-bar-max">$0</span></div>
+            <div class="range-bar-track" id="range-bar-track">
+              <div class="range-bar-zone" id="range-bar-zone"></div>
+              <div class="range-bar-marker" id="range-bar-marker"></div>
+            </div>
+            <div class="flex justify-between text-[0.7rem] font-medium mt-1">
+              <span style="color:var(--teal)" id="range-label-low">$0</span>
+              <span style="color:var(--gold)">● Your Guess</span>
+              <span style="color:var(--teal)" id="range-label-high">$0</span>
+            </div>
+          </div>
+          <button id="btn-compare" class="btn-primary flex items-center justify-center gap-2">Show Me My Number <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+        </div>
+      </div>
+
+      <!-- SCREEN 5: Result -->
+      <div class="screen" id="screen-5">
+        <div class="pt-16 md:pt-20 text-center">
+          <span class="step-label mb-5 inline-block">Step 5 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">Your Press Pause Number</h2>
+          <p class="text-white/50 font-medium mb-8 text-sm md:text-base">This is the number that balances your instincts with your financial reality.</p>
+          <div class="mb-8"><p id="big-number" class="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight" style="color:var(--gold);text-shadow:0 4px 24px rgba(212,175,55,0.25)">$0</p></div>
+          <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06] text-left mb-6">
+            <p class="text-white/70 text-sm leading-relaxed">Your Press Pause Number was calculated by blending your intuition with your actual financial picture. It reflects the midpoint of your healthy pause range, weighted against where you started.</p>
+          </div>
+          <div class="bg-white/[0.04] rounded-2xl p-5 border border-white/[0.06] text-left mb-6 space-y-2.5">
+            <div class="flex justify-between text-sm"><span class="text-white/50">Your Initial Guess</span><span id="sum-guess" class="font-semibold">$0</span></div>
+            <div class="flex justify-between text-sm"><span class="text-white/50">Weighted Value</span><span id="sum-wv" class="font-semibold">$0</span></div>
+            <div class="flex justify-between text-sm"><span class="text-white/50">Total Debt</span><span id="sum-debt" class="font-semibold">$0</span></div>
+            <div class="flex justify-between text-sm"><span class="text-white/50">Healthy Range</span><span id="sum-range" class="font-semibold">$0 – $0</span></div>
+            <hr class="border-white/10 my-1" />
+            <div class="flex justify-between text-sm"><span class="font-semibold" style="color:var(--gold)">Your Press Pause Number</span><span id="sum-rec" class="font-bold" style="color:var(--gold)">$0</span></div>
+          </div>
+          <div class="text-left mb-8">
+            <p class="text-xs text-white/40 font-semibold uppercase tracking-wide mb-2">You're doing this because:</p>
+            <div id="motiv-pills" class="flex flex-wrap gap-2"></div>
+          </div>
+          <button id="btn-commit" class="btn-primary flex items-center justify-center gap-2">I'm Ready to Commit <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+        </div>
+      </div>
+
+      <!-- SCREEN 6: Commitment -->
+      <div class="screen" id="screen-6">
+        <div class="pt-12 md:pt-16 text-center">
+          <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5" style="background:linear-gradient(135deg,var(--gold),var(--gold-dark))">
+            <i data-lucide="award" class="w-7 h-7" style="color:var(--navy)"></i>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">I'm Pressing Pause with Confidence.</h2>
+          <p class="text-white/50 font-medium mb-6 text-sm md:text-base">You've done the work. Now own your number.</p>
+          <p id="commit-big-num" class="text-4xl md:text-5xl font-black mb-8" style="color:var(--gold);text-shadow:0 4px 24px rgba(212,175,55,0.25)">$0</p>
+          <div class="text-left mb-6">
+            <label class="block text-sm font-semibold text-white/70 mb-2">Your Name</label>
+            <input id="input-name" type="text" class="name-input" placeholder="Enter your full name" />
+          </div>
+          <div class="commitment-card text-left mb-8">
+            <p class="leading-relaxed">I, <strong id="commit-name" style="color:var(--gold)">___________</strong>, commit to my Press Pause Number of <strong id="commit-amount" style="color:var(--gold)">$0</strong>.</p>
+            <p class="leading-relaxed mt-4">I understand this number represents the financial foundation I need to make my move with clarity, not fear. I will use this number as my guide — not as a ceiling, but as a launchpad.</p>
+            <p class="leading-relaxed mt-4 text-white/60 italic">— Signed with intention on <span id="commit-date"></span></p>
+          </div>
+          <div id="commit-motiv-pills" class="mb-8 text-left">
+            <p class="text-xs text-white/40 font-semibold uppercase tracking-wide mb-2">Your motivations:</p>
+            <div id="motiv-pills-commit" class="flex flex-wrap gap-2"></div>
+          </div>
+          <div class="space-y-3 no-print">
+            <button id="btn-print" class="btn-primary flex items-center justify-center gap-2"><i data-lucide="printer" class="w-5 h-5"></i> Print My Commitment</button>
+            <button id="btn-restart" class="btn-secondary flex items-center justify-center gap-2"><i data-lucide="rotate-ccw" class="w-5 h-5"></i> Start Over</button>
+          </div>
+          <div class="advisory-note text-left mt-8">
+            <p>💡 If you have no monthly margin or liquid savings, press pause for <strong>every purchase</strong> outside of your monthly necessities.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="no-print text-center py-8 px-4">
+    <p class="text-white/30 text-xs">© Tenant Financial Solutions | Helping you move with clarity.</p>
+  </footer>
+
+  <script>
+    if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") { lucide.createIcons(); }
+
+    const state = { currentScreen: 0, initialGuess: 0, motivations: [], liquidSavings: 0, totalDebt: 0, monthlyMargin: 0, weightedValue: 0, rangeLow: 0, rangeHigh: 0, rangeMidpoint: 0, recommended: 0, clientName: '' };
+
+    function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+    function fmtRound50(n) { return '$' + (Math.round(n / 50) * 50).toLocaleString('en-US'); }
+    function fmtRound100(n) { return '$' + (Math.round(n / 100) * 100).toLocaleString('en-US'); }
+    function parseDollar(str) { return parseFloat(str.replace(/[^0-9.]/g, '')) || 0; }
+    function formatDollarInput(el) { let raw = el.value.replace(/[^0-9]/g, ''); if (!raw) { el.value = ''; return; } el.value = '$' + parseInt(raw, 10).toLocaleString('en-US'); }
+
+    const screens = document.querySelectorAll('.screen');
+    const progressWrap = document.getElementById('progress-bar-wrap');
+
+    function showScreen(idx) {
+      const prev = state.currentScreen; state.currentScreen = idx;
+      screens.forEach((s, i) => { if (i === prev && i !== idx) { s.classList.remove('visible'); setTimeout(() => { s.classList.remove('active'); }, 400); } });
+      setTimeout(() => {
+        screens[idx].classList.add('active');
+        requestAnimationFrame(() => { requestAnimationFrame(() => { screens[idx].classList.add('visible'); }); });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, prev === idx ? 0 : 300);
+      if (idx >= 1 && idx <= 5) {
+        progressWrap.style.display = 'block';
+        const pct = (idx / 5) * 100;
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('progress-label').textContent = 'Step ' + idx + ' of 5';
+        document.getElementById('progress-pct').textContent = Math.round(pct) + '%';
+      } else { progressWrap.style.display = 'none'; }
+      screens.forEach(s => s.classList.remove('print-target'));
+      if (idx === 6) screens[6].classList.add('print-target');
+      if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") { lucide.createIcons(); }
+    }
+
+    const dollarInputs = [document.getElementById('input-guess'), document.getElementById('input-savings'), document.getElementById('input-debt'), document.getElementById('input-margin')];
+    dollarInputs.forEach(inp => { if (!inp) return; inp.addEventListener('input', function () { formatDollarInput(this); }); inp.addEventListener('focus', function () { if (this.value === '$0') this.value = '$'; }); });
+
+    const savingsInput = document.getElementById('input-savings');
+    const debtInput = document.getElementById('input-debt');
+    const marginInput = document.getElementById('input-margin');
+    const liveCalc = document.getElementById('live-calc');
+
+    function computeWeightedValue(s, d, m) { return d >= s ? m * 0.5 : (s + m) / 2; }
+
+    function updateLiveCalc() {
+      const s = parseDollar(savingsInput.value); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
+      if (s > 0 && m > 0) {
+        const debtExceedsSavings = d >= s; const wv = computeWeightedValue(s, d, m);
+        const lo = wv * 0.20; const hi = wv * 0.40;
+        document.getElementById('calc-wv').textContent = fmt(wv);
+        document.getElementById('calc-range').textContent = fmtRound50(lo) + ' – ' + fmtRound50(hi);
+        liveCalc.style.display = 'block';
+        const formulaNote = document.getElementById('calc-formula-note');
+        const debtWarn = document.getElementById('calc-debt-warning');
+        if (debtExceedsSavings) { formulaNote.textContent = 'Weighted Value = Monthly Margin × 50%'; debtWarn.classList.remove('hidden'); }
+        else { formulaNote.textContent = '(Liquid Savings + Monthly Margin) ÷ 2'; debtWarn.classList.add('hidden'); }
+      } else { liveCalc.style.display = 'none'; }
+    }
+    savingsInput.addEventListener('input', updateLiveCalc);
+    debtInput.addEventListener('input', updateLiveCalc);
+    marginInput.addEventListener('input', updateLiveCalc);
+
+    const motivGrid = document.getElementById('motivations-grid');
+    motivGrid.addEventListener('click', function (e) {
+      const card = e.target.closest('.motivation-card'); if (!card) return;
+      card.classList.toggle('selected');
+      const icon = card.querySelector('i[data-lucide="check"]'); if (icon) icon.classList.toggle('hidden');
+    });
+
+    document.getElementById('input-name').addEventListener('input', function () {
+      state.clientName = this.value;
+      document.getElementById('commit-name').textContent = this.value || '___________';
+    });
+
+    function calculate() {
+      state.weightedValue = computeWeightedValue(state.liquidSavings, state.totalDebt, state.monthlyMargin);
+      state.rangeLow = state.weightedValue * 0.20; state.rangeHigh = state.weightedValue * 0.40; state.rangeMidpoint = state.weightedValue * 0.30;
+      let raw = (state.initialGuess * 0.4) + (state.rangeMidpoint * 0.6);
+      if (raw < state.rangeLow * 0.85) raw = state.rangeLow;
+      if (raw > state.rangeHigh * 1.15) raw = state.rangeHigh;
+      state.recommended = raw;
+    }
+
+    document.getElementById('btn-start').addEventListener('click', () => showScreen(1));
+
+    document.getElementById('btn-guess').addEventListener('click', function () {
+      const val = parseDollar(document.getElementById('input-guess').value);
+      const err = document.getElementById('error-guess');
+      if (val <= 0) { err.classList.add('show'); return; } err.classList.remove('show');
+      state.initialGuess = val; showScreen(2);
+    });
+
+    document.getElementById('btn-motiv').addEventListener('click', function () {
+      const selected = motivGrid.querySelectorAll('.motivation-card.selected');
+      const err = document.getElementById('error-motiv');
+      if (selected.length === 0) { err.classList.add('show'); return; } err.classList.remove('show');
+      state.motivations = Array.from(selected).map(c => c.dataset.value); showScreen(3);
+    });
+
+    document.getElementById('btn-numbers').addEventListener('click', function () {
+      const s = parseDollar(savingsInput.value); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
+      const err = document.getElementById('error-numbers');
+      const savingsRaw = savingsInput.value.replace(/[^0-9]/g, ''); const marginRaw = marginInput.value.replace(/[^0-9]/g, '');
+      if (!savingsRaw || !marginRaw) { err.textContent = 'Please fill in all three fields to continue.'; err.classList.add('show'); return; }
+      if (s <= 0 && m <= 0) { err.textContent = 'Please enter at least one value greater than $0.'; err.classList.add('show'); return; }
+      err.classList.remove('show');
+      state.liquidSavings = s; state.totalDebt = d; state.monthlyMargin = m; calculate(); populateComparison(); showScreen(4);
+    });
+
+    document.getElementById('btn-compare').addEventListener('click', function () { populateResult(); showScreen(5); });
+    document.getElementById('btn-commit').addEventListener('click', function () { populateCommitment(); showScreen(6); });
+    document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
+
+    document.getElementById('btn-restart').addEventListener('click', function () {
+      state.initialGuess = 0; state.motivations = []; state.liquidSavings = 0; state.totalDebt = 0; state.monthlyMargin = 0; state.weightedValue = 0; state.rangeLow = 0; state.rangeHigh = 0; state.rangeMidpoint = 0; state.recommended = 0; state.clientName = '';
+      document.getElementById('input-guess').value = ''; savingsInput.value = ''; debtInput.value = ''; marginInput.value = ''; document.getElementById('input-name').value = ''; liveCalc.style.display = 'none';
+      motivGrid.querySelectorAll('.motivation-card.selected').forEach(c => { c.classList.remove('selected'); const icon = c.querySelector('i[data-lucide="check"]'); if (icon) icon.classList.add('hidden'); });
+      document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
+      document.getElementById('commit-name').textContent = '___________';
+      showScreen(0);
+    });
+
+    function populateComparison() {
+      document.getElementById('comp-guess').textContent = fmt(state.initialGuess);
+      document.getElementById('comp-range').textContent = fmtRound50(state.rangeLow) + ' – ' + fmtRound50(state.rangeHigh);
+      document.getElementById('comp-wv').textContent = fmt(state.weightedValue);
+      const msgEl = document.getElementById('comp-message'); const guess = state.initialGuess; const rLow = state.rangeLow; const rHigh = state.rangeHigh;
+      if (guess < rLow) msgEl.textContent = "Your gut was a bit conservative. Your numbers suggest you may be able to pause with more confidence than you thought.";
+      else if (guess >= rLow && guess <= rHigh) msgEl.textContent = "Great instincts! Your gut guess landed right in the healthy range your numbers support.";
+      else msgEl.textContent = "Your gut was reaching higher than the numbers suggest right now. Let's find a number that's both ambitious and grounded.";
+      const barMax = Math.max(guess, rHigh) * 1.3;
+      document.getElementById('range-bar-max').textContent = fmt(barMax);
+      const zonePctLeft = (rLow / barMax) * 100; const zonePctWidth = ((rHigh - rLow) / barMax) * 100; const markerPct = (guess / barMax) * 100;
+      document.getElementById('range-bar-zone').style.left = zonePctLeft + '%'; document.getElementById('range-bar-zone').style.width = zonePctWidth + '%';
+      document.getElementById('range-bar-marker').style.left = Math.min(Math.max(markerPct, 2), 98) + '%';
+      document.getElementById('range-label-low').textContent = fmtRound50(rLow); document.getElementById('range-label-high').textContent = fmtRound50(rHigh);
+    }
+
+    function populateResult() {
+      document.getElementById('big-number').textContent = fmtRound100(state.recommended);
+      document.getElementById('sum-guess').textContent = fmt(state.initialGuess); document.getElementById('sum-wv').textContent = fmt(state.weightedValue); document.getElementById('sum-debt').textContent = fmt(state.totalDebt);
+      document.getElementById('sum-range').textContent = fmtRound50(state.rangeLow) + ' – ' + fmtRound50(state.rangeHigh); document.getElementById('sum-rec').textContent = fmtRound100(state.recommended);
+      const pillsContainer = document.getElementById('motiv-pills'); pillsContainer.innerHTML = '';
+      state.motivations.forEach(m => { const pill = document.createElement('span'); pill.className = 'pill-tag'; pill.textContent = m; pillsContainer.appendChild(pill); });
+    }
+
+    function populateCommitment() {
+      document.getElementById('commit-big-num').textContent = fmtRound100(state.recommended);
+      document.getElementById('commit-amount').textContent = fmtRound100(state.recommended);
+      document.getElementById('commit-name').textContent = state.clientName || '___________';
+      document.getElementById('input-name').value = state.clientName || '';
+      document.getElementById('commit-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const pillsContainer = document.getElementById('motiv-pills-commit'); pillsContainer.innerHTML = '';
+      state.motivations.forEach(m => { const pill = document.createElement('span'); pill.className = 'pill-tag'; pill.textContent = m; pillsContainer.appendChild(pill); });
+    }
+
+    showScreen(0);
+  </script>
+</body>
+</html>
