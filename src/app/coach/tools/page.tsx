@@ -2,16 +2,6 @@ export const dynamic = 'force-dynamic'
 
 const tools = [
   {
-    id: 'money-diagnostic',
-    title: 'Money Diagnostic',
-    subtitle: 'What Are My Money Problems Stemming From?',
-    description: 'A three-pillar diagnostic — People, Process, Perspective — that identifies the root causes of your client\'s financial challenges. Takes 5–8 minutes and produces a personalised breakdown.',
-    emoji: '💰',
-    color: 'from-yellow-900/40 to-yellow-950/40 border-yellow-700/30',
-    badgeColor: 'bg-yellow-900/50 text-yellow-300',
-    href: '/tools/money-diagnostic.html',
-  },
-  {
     id: 'press-pause-number',
     title: 'Press Pause Number',
     subtitle: 'My Personal Press Pause Number',
@@ -20,16 +10,6 @@ const tools = [
     color: 'from-teal-900/40 to-teal-950/40 border-teal-700/30',
     badgeColor: 'bg-teal-900/50 text-teal-300',
     href: '/tools/press-pause-number.html',
-  },
-  {
-    id: 'mvp-alignment',
-    title: 'MVP Alignment',
-    subtitle: 'Money · Values · Purpose',
-    description: 'A full coaching framework that maps a client\'s financial snapshot, core values, and life goals into a personalised MVP Blueprint — complete with an editable action plan and downloadable summary.',
-    emoji: '🚀',
-    color: 'from-blue-900/40 to-blue-950/40 border-blue-700/30',
-    badgeColor: 'bg-blue-900/50 text-blue-300',
-    href: '/tools/mvp-alignment.html',
   },
   {
     id: 'emotional-money-map',
