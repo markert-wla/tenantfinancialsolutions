@@ -37,8 +37,8 @@ export default function CoachToolsPage() {
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Coaching Tools</h1>
-        <p className="text-white/60 text-sm">
+        <h1 className="text-2xl font-bold text-yellow-400 mb-2">Coaching Tools</h1>
+        <p className="text-yellow-400/80 text-sm">
           Interactive tools to use with your clients during sessions. Each tool opens in a new tab so you can run it alongside your coaching call.
         </p>
       </div>
