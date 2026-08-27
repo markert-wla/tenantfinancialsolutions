@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, ChevronRight, Clock, User, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, User, CheckCircle, AlertCircle, Loader2, X } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,6 +47,7 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
   const [booked,          setBooked]          = useState(false)
   const [bookedSlot,      setBookedSlot]      = useState<Slot | null>(null)
   const [error,           setError]           = useState<string | null>(null)
+  const [showPopup,       setShowPopup]       = useState(false)
 
   // Format a UTC ISO string in the user's local timezone
   function fmtTime(iso: string) {
@@ -120,6 +121,10 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
         } else {
           setBookedSlot(selectedSlot)
           setBooked(true)
+          // Show the Connection Session confirmation pop-up for free-tier clients
+          if (tier === 'free') {
+            setShowPopup(true)
+          }
         }
       }
     } catch {
@@ -127,6 +132,38 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
     } finally {
       setConfirming(false)
     }
+  }
+
+  // ── Connection Session confirmation pop-up ────────────────────────────────
+  if (showPopup) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 flex flex-col items-center text-center">
+          <button
+            onClick={() => setShowPopup(false)}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close"
+          >
+            <X size={20} />
+          </button>
+          <div className="w-16 h-16 rounded-full bg-tfs-teal/10 flex items-center justify-center mb-5">
+            <CheckCircle className="text-tfs-teal-button" size={36} />
+          </div>
+          <h2 className="text-2xl font-serif font-bold text-tfs-navy mb-3">
+            You&apos;re All Set!
+          </h2>
+          <p className="text-tfs-slate text-base leading-relaxed mb-7">
+            Your Connection Session is almost here—check your email for your coach&apos;s Zoom link and get ready to connect.
+          </p>
+          <button
+            onClick={() => setShowPopup(false)}
+            className="btn-primary w-full text-sm"
+          >
+            Got It
+          </button>
+        </div>
+      </div>
+    )
   }
 
   // ── Success state ─────────────────────────────────────────────────────────
