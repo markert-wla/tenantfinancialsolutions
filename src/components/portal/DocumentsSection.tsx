@@ -152,7 +152,8 @@ export default function DocumentsSection() {
             <span className="font-semibold">Privacy notice:</span> This upload area is not certified
             for storing sensitive personal information. Please do not upload tax returns, Social
             Security numbers, bank statements, or other sensitive personal or financial documents.
-            All uploaded files are <span className="font-semibold">automatically deleted after 14 days</span>.
+            All uploaded files are <span className="font-semibold">automatically deleted after 30 days</span>.
+            If you want to keep a document, <span className="font-semibold">download or print it within those 30 days</span>.
           </p>
         </div>
 
