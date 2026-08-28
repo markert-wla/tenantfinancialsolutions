@@ -22,6 +22,16 @@ const tools = [
     href: '/tools/press-pause-number.html',
   },
   {
+    id: 'mvp-alignment',
+    title: 'MVP Alignment',
+    subtitle: 'Money · Values · Purpose',
+    description: 'A full coaching framework that maps a client\'s financial snapshot, core values, and life goals into a personalised MVP Blueprint — complete with an editable action plan and downloadable summary.',
+    emoji: '🚀',
+    color: 'from-blue-900/40 to-blue-950/40 border-blue-700/30',
+    badgeColor: 'bg-blue-900/50 text-blue-300',
+    href: '/tools/mvp-alignment.html',
+  },
+  {
     id: 'emotional-money-map',
     title: 'Emotional Money Map',
     subtitle: 'Understand the emotions driving financial decisions',
