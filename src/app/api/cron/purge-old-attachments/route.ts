@@ -3,13 +3,13 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-const RETENTION_DAYS = 14
+const RETENTION_DAYS = 30
 const STORAGE_BATCH  = 100
 
 /**
  * GET /api/cron/purge-old-attachments
  *
- * PII safeguard: uploaded files are kept for at most 14 days. This platform is
+ * PII safeguard: uploaded files are kept for at most 30 days. This platform is
  * not certified for storing sensitive personal information (tax returns, SSNs,
  * bank statements), so anything clients or coaches upload is purged on a
  * rolling window rather than retained indefinitely.

@@ -341,8 +341,9 @@ export default function ClientDetailClient({
           )}
         </div>
         <p className="text-xs text-tfs-slate mb-3">
-          Documents are automatically deleted 14 days after upload — this area is not certified for
-          storing sensitive personal information. Save anything you need for your records before it expires.
+          Documents are automatically deleted 30 days after upload — this area is not certified for
+          storing sensitive personal information. If you need to keep a document, download or print it
+          within those 30 days.
         </p>
 
         {docsLoading ? (

@@ -288,7 +288,9 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
                   <span className="font-semibold">Privacy notice:</span> message attachments are not
                   certified for sensitive personal information — do not send tax documents, Social
                   Security numbers, or account details, and remind clients not to share them either.
-                  Attachments are <span className="font-semibold">automatically deleted after 14 days</span>.
+                  Attachments are <span className="font-semibold">automatically deleted after 30 days</span>.
+                  If you or your client want to keep anything sent either way,{' '}
+                  <span className="font-semibold">download or print it within those 30 days</span>.
                 </p>
               </div>
             </div>
