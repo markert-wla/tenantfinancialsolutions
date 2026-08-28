@@ -20,6 +20,8 @@
     };
   </script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="/tools/vendor/html2canvas.min.js"></script>
+  <script src="/tools/vendor/jspdf.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -56,6 +58,9 @@
     .error-msg { color: #f87171; font-size: 0.85rem; margin-top: 8px; display: none; }
     .error-msg.show { display: block; }
     .live-calc-card { background: rgba(14,124,123,0.1); border: 1px solid rgba(14,124,123,0.25); border-radius: 12px; padding: 16px 20px; }
+    .range-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.18); outline: none; cursor: pointer; margin: 0; }
+    .range-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); border: 3px solid #fff; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+    .range-slider::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: var(--gold); border: 3px solid #fff; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
     .range-bar-track { position: relative; height: 14px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: visible; margin: 24px 0; }
     .range-bar-zone { position: absolute; top: 0; height: 100%; background: linear-gradient(90deg, rgba(14,124,123,0.5), rgba(14,124,123,0.8)); border-radius: 999px; }
     .range-bar-marker { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%; background: var(--gold); border: 3px solid #fff; box-shadow: 0 2px 8px rgba(212,175,55,0.5); z-index: 2; }
@@ -121,11 +126,9 @@
           <p class="text-white/50 font-medium mb-6 text-sm md:text-base">Select everything that resonates with you right now.</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4" id="motivations-grid">
             <div class="motivation-card" data-value="Starting or growing a business"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🏢 Starting or growing a business</span></div>
-            <div class="motivation-card" data-value="Leaving a job or career transition"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">💼 Leaving a job or career transition</span></div>
             <div class="motivation-card" data-value="A major life change"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🏠 A major life change (move, family, health)</span></div>
             <div class="motivation-card" data-value="Going back to school or training"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">📚 Going back to school or training</span></div>
             <div class="motivation-card" data-value="Burnout or need for rest"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🧘 Burnout or need for rest</span></div>
-            <div class="motivation-card" data-value="Pursuing a passion or calling"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">💡 Pursuing a passion or calling</span></div>
             <div class="motivation-card" data-value="Relocating or traveling"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🌍 Relocating or traveling</span></div>
             <div class="motivation-card" data-value="Pivoting to something new entirely"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🔄 Pivoting to something new entirely</span></div>
           </div>
@@ -144,8 +147,9 @@
           <div class="space-y-6 mb-6">
             <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06]">
               <label class="block text-sm font-semibold text-white/80 mb-1">Liquid Savings</label>
-              <p class="text-xs text-white/40 mb-3">Total cash you could access right now</p>
+              <p class="text-xs text-white/40 mb-3">Cash you could access right now — counted up to $10,000. Do not include your emergency fund or money you have invested.</p>
               <input id="input-savings" type="text" inputmode="numeric" class="dollar-input" placeholder="$0" />
+              <p id="savings-cap-note" class="text-xs mt-2.5 font-medium hidden" style="color:var(--gold)">This calculator counts liquid savings up to $10,000, so $10,000 is being used.</p>
             </div>
             <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06]">
               <label class="block text-sm font-semibold text-white/80 mb-1">Total Debt</label>
@@ -194,6 +198,17 @@
               <span style="color:var(--teal)" id="range-label-low">$0</span>
               <span style="color:var(--gold)">● Your Guess</span>
               <span style="color:var(--teal)" id="range-label-high">$0</span>
+            </div>
+          </div>
+          <div class="live-calc-card mb-8">
+            <p class="text-sm font-semibold mb-1" style="color:var(--teal)">Agree on Your Number</p>
+            <p class="text-xs text-white/50 mb-4">Slide to the number you and your coach agree on — anywhere inside your healthy pause range.</p>
+            <p id="agreed-value" class="text-3xl font-black mb-4" style="color:var(--gold)">$0</p>
+            <input id="input-agreed" type="range" class="range-slider" min="0" max="100" step="50" value="0" />
+            <div class="flex justify-between text-[0.7rem] font-semibold mt-2 text-white/45">
+              <span id="agree-min">$0</span>
+              <span id="agree-suggested" class="text-center">Suggested: $0</span>
+              <span id="agree-max">$0</span>
             </div>
           </div>
           <button id="btn-compare" class="btn-primary flex items-center justify-center gap-2">Show Me My Number <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
@@ -249,6 +264,7 @@
             <div id="motiv-pills-commit" class="flex flex-wrap gap-2"></div>
           </div>
           <div class="space-y-3 no-print">
+            <button id="btn-download" class="btn-primary flex items-center justify-center gap-2"><i data-lucide="download" class="w-5 h-5"></i> <span id="download-btn-text">Download My Commitment</span></button>
             <button id="btn-print" class="btn-primary flex items-center justify-center gap-2"><i data-lucide="printer" class="w-5 h-5"></i> Print My Commitment</button>
             <button id="btn-restart" class="btn-secondary flex items-center justify-center gap-2"><i data-lucide="rotate-ccw" class="w-5 h-5"></i> Start Over</button>
           </div>
@@ -268,7 +284,11 @@
   <script>
     if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") { lucide.createIcons(); }
 
-    const state = { currentScreen: 0, initialGuess: 0, motivations: [], liquidSavings: 0, totalDebt: 0, monthlyMargin: 0, weightedValue: 0, rangeLow: 0, rangeHigh: 0, rangeMidpoint: 0, recommended: 0, clientName: '' };
+    const state = { currentScreen: 0, initialGuess: 0, motivations: [], liquidSavings: 0, totalDebt: 0, monthlyMargin: 0, weightedValue: 0, rangeLow: 0, rangeHigh: 0, rangeMidpoint: 0, suggested: 0, recommended: 0, clientName: '' };
+
+    // This tool deliberately counts liquid savings only up to this amount.
+    const SAVINGS_CAP = 10000;
+    function capSavings(n) { return Math.min(n, SAVINGS_CAP); }
 
     function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
     function fmtRound50(n) { return '$' + (Math.round(n / 50) * 50).toLocaleString('en-US'); }
@@ -310,7 +330,8 @@
     function computeWeightedValue(s, d, m) { return d >= s ? m * 0.5 : (s + m) / 2; }
 
     function updateLiveCalc() {
-      const s = parseDollar(savingsInput.value); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
+      const entered = parseDollar(savingsInput.value); const s = capSavings(entered); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
+      document.getElementById('savings-cap-note').classList.toggle('hidden', entered <= SAVINGS_CAP);
       if (s > 0 && m > 0) {
         const debtExceedsSavings = d >= s; const wv = computeWeightedValue(s, d, m);
         const lo = wv * 0.20; const hi = wv * 0.40;
@@ -345,6 +366,7 @@
       let raw = (state.initialGuess * 0.4) + (state.rangeMidpoint * 0.6);
       if (raw < state.rangeLow * 0.85) raw = state.rangeLow;
       if (raw > state.rangeHigh * 1.15) raw = state.rangeHigh;
+      state.suggested = raw;
       state.recommended = raw;
     }
 
@@ -365,7 +387,7 @@
     });
 
     document.getElementById('btn-numbers').addEventListener('click', function () {
-      const s = parseDollar(savingsInput.value); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
+      const s = capSavings(parseDollar(savingsInput.value)); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
       const err = document.getElementById('error-numbers');
       const savingsRaw = savingsInput.value.replace(/[^0-9]/g, ''); const marginRaw = marginInput.value.replace(/[^0-9]/g, '');
       if (!savingsRaw || !marginRaw) { err.textContent = 'Please fill in all three fields to continue.'; err.classList.add('show'); return; }
@@ -378,9 +400,56 @@
     document.getElementById('btn-commit').addEventListener('click', function () { populateCommitment(); showScreen(6); });
     document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
 
+    // --- Download the signed commitment as a PDF ---
+    document.getElementById('btn-download').addEventListener('click', async function () {
+      const btnText = document.getElementById('download-btn-text');
+      const original = btnText.textContent;
+      btnText.textContent = 'Preparing your PDF…';
+      const target = document.getElementById('screen-6');
+      const hidden = target.querySelectorAll('.no-print');
+      try {
+        if (typeof html2canvas !== 'function' || !window.jspdf || !window.jspdf.jsPDF) throw new Error('PDF libraries unavailable');
+        hidden.forEach(el => { el.style.display = 'none'; });
+        const canvas = await html2canvas(target, { scale: 2, useCORS: true, backgroundColor: '#0B1F3A', logging: false, windowWidth: target.scrollWidth });
+        hidden.forEach(el => { el.style.display = ''; });
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const margin = 8;
+        const imgWidth = pdf.internal.pageSize.getWidth() - margin * 2;
+        const usablePageHeight = pdf.internal.pageSize.getHeight() - margin * 2;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        if (imgHeight <= usablePageHeight) {
+          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
+        } else {
+          const totalPages = Math.ceil(imgHeight / usablePageHeight);
+          for (let page = 0; page < totalPages; page++) {
+            if (page > 0) pdf.addPage();
+            const sourceY = page * (canvas.height / totalPages);
+            const slice = document.createElement('canvas');
+            slice.width = canvas.width;
+            slice.height = Math.min(canvas.height / totalPages, canvas.height - sourceY);
+            slice.getContext('2d').drawImage(canvas, 0, sourceY, canvas.width, slice.height, 0, 0, slice.width, slice.height);
+            pdf.addImage(slice.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, (slice.height * imgWidth) / slice.width);
+          }
+        }
+
+        const namePart = (state.clientName || '').trim().replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+        pdf.save('TFS-Press-Pause-Commitment' + (namePart ? '-' + namePart : '') + '.pdf');
+      } catch (err) {
+        hidden.forEach(el => { el.style.display = ''; });
+        console.error('Commitment PDF failed:', err);
+        alert('The download could not be created. Please use Print My Commitment instead.');
+      } finally {
+        btnText.textContent = original;
+      }
+    });
+
     document.getElementById('btn-restart').addEventListener('click', function () {
-      state.initialGuess = 0; state.motivations = []; state.liquidSavings = 0; state.totalDebt = 0; state.monthlyMargin = 0; state.weightedValue = 0; state.rangeLow = 0; state.rangeHigh = 0; state.rangeMidpoint = 0; state.recommended = 0; state.clientName = '';
+      state.initialGuess = 0; state.motivations = []; state.liquidSavings = 0; state.totalDebt = 0; state.monthlyMargin = 0; state.weightedValue = 0; state.rangeLow = 0; state.rangeHigh = 0; state.rangeMidpoint = 0; state.suggested = 0; state.recommended = 0; state.clientName = '';
       document.getElementById('input-guess').value = ''; savingsInput.value = ''; debtInput.value = ''; marginInput.value = ''; document.getElementById('input-name').value = ''; liveCalc.style.display = 'none';
+      document.getElementById('savings-cap-note').classList.add('hidden');
       motivGrid.querySelectorAll('.motivation-card.selected').forEach(c => { c.classList.remove('selected'); const icon = c.querySelector('i[data-lucide="check"]'); if (icon) icon.classList.add('hidden'); });
       document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
       document.getElementById('commit-name').textContent = '___________';
@@ -401,19 +470,42 @@
       document.getElementById('range-bar-zone').style.left = zonePctLeft + '%'; document.getElementById('range-bar-zone').style.width = zonePctWidth + '%';
       document.getElementById('range-bar-marker').style.left = Math.min(Math.max(markerPct, 2), 98) + '%';
       document.getElementById('range-label-low').textContent = fmtRound50(rLow); document.getElementById('range-label-high').textContent = fmtRound50(rHigh);
+      initAgreedSlider();
     }
 
+    // --- Agreed number: coach and client can move to any figure inside the healthy range ---
+    const agreedSlider = document.getElementById('input-agreed');
+
+    function initAgreedSlider() {
+      const lo = Math.round(state.rangeLow / 50) * 50;
+      let hi = Math.round(state.rangeHigh / 50) * 50;
+      if (hi <= lo) hi = lo + 50;
+      const suggested = Math.min(Math.max(Math.round(state.suggested / 50) * 50, lo), hi);
+      agreedSlider.min = lo; agreedSlider.max = hi; agreedSlider.step = 50; agreedSlider.value = suggested;
+      document.getElementById('agree-min').textContent = fmt(lo);
+      document.getElementById('agree-max').textContent = fmt(hi);
+      document.getElementById('agree-suggested').textContent = 'Suggested: ' + fmt(suggested);
+      updateAgreedDisplay();
+    }
+
+    function updateAgreedDisplay() {
+      state.recommended = parseFloat(agreedSlider.value) || 0;
+      document.getElementById('agreed-value').textContent = fmt(state.recommended);
+    }
+
+    agreedSlider.addEventListener('input', updateAgreedDisplay);
+
     function populateResult() {
-      document.getElementById('big-number').textContent = fmtRound100(state.recommended);
+      document.getElementById('big-number').textContent = fmt(state.recommended);
       document.getElementById('sum-guess').textContent = fmt(state.initialGuess); document.getElementById('sum-wv').textContent = fmt(state.weightedValue); document.getElementById('sum-debt').textContent = fmt(state.totalDebt);
-      document.getElementById('sum-range').textContent = fmtRound50(state.rangeLow) + ' – ' + fmtRound50(state.rangeHigh); document.getElementById('sum-rec').textContent = fmtRound100(state.recommended);
+      document.getElementById('sum-range').textContent = fmtRound50(state.rangeLow) + ' – ' + fmtRound50(state.rangeHigh); document.getElementById('sum-rec').textContent = fmt(state.recommended);
       const pillsContainer = document.getElementById('motiv-pills'); pillsContainer.innerHTML = '';
       state.motivations.forEach(m => { const pill = document.createElement('span'); pill.className = 'pill-tag'; pill.textContent = m; pillsContainer.appendChild(pill); });
     }
 
     function populateCommitment() {
-      document.getElementById('commit-big-num').textContent = fmtRound100(state.recommended);
-      document.getElementById('commit-amount').textContent = fmtRound100(state.recommended);
+      document.getElementById('commit-big-num').textContent = fmt(state.recommended);
+      document.getElementById('commit-amount').textContent = fmt(state.recommended);
       document.getElementById('commit-name').textContent = state.clientName || '___________';
       document.getElementById('input-name').value = state.clientName || '';
       document.getElementById('commit-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
