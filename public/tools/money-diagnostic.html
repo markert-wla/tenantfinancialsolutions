@@ -628,7 +628,6 @@
             <span data-id="358" class="text-white/20">|</span>
             <span data-id="359" class="text-white/40 text-xs tracking-wide">The Financial Shift</span>
         </div>
-        <p data-id="360" class="text-white/30 text-xs">Made by Copilot</p>
     </footer>
 
     <script>
@@ -918,7 +917,7 @@
         } else {
             clientLine.textContent = '';
         }
-        document.getElementById('results-date-line').textContent = 'Assessment Date: June 3, 2026';
+        document.getElementById('results-date-line').textContent = 'Assessment Date: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
         // Composite
         document.getElementById('composite-score').textContent = Math.round(composite);
