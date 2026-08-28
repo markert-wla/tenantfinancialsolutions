@@ -63,7 +63,7 @@
     .lang-btn.active-lang { background:var(--gold); color:var(--navy); }
     .lang-btn:not(.active-lang) { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); }
     .print-only { display: none; }
-    @media print { .print-only { display: block !important; } }
+    @media print { .print-only { display: block !important; } .print-only[data-empty="1"] { display: none !important; } }
     @media print {
       #step-5-commit > div { max-width:100%!important; padding-left:0!important; padding-right:0!important; padding-top:0!important; }
       #step-5-commit { font-size:1.1rem; }
@@ -182,6 +182,7 @@
       </div>
       <div class="mb-6"><h4 class="font-display text-base text-release-red font-semibold mb-3 flex items-center gap-2"><span>🔴</span><span data-i18n="s5_releasing">I am releasing:</span></h4><div id="commit-release-list" class="space-y-2"></div></div>
       <div class="mb-6"><h4 class="font-display text-base text-emerald font-semibold mb-3 flex items-center gap-2"><span>🟢</span><span data-i18n="s5_cultivating">I am cultivating:</span></h4><div id="commit-cultivate-list" class="space-y-2"></div></div>
+      <div id="commit-notes-block" class="print-only mb-6"><h4 class="font-display text-base text-navy font-semibold mb-3 flex items-center gap-2"><span>📝</span><span data-i18n="s4_notes_label">Notes &amp; Reflections</span></h4><p id="commit-notes-text" class="font-body text-sm text-bodytext border-2 border-gold/30 rounded-xl px-4 py-3 bg-gold/5" style="white-space:pre-line;"></p></div>
       <div class="mb-6"><label class="font-display text-base text-navy font-semibold mb-2 block" data-i18n="s5_top_habit_label">My #1 Micro-Habit this week:</label><select id="top-habit-select" class="no-print w-full border-2 border-gray-200 rounded-xl px-4 py-3 font-body text-sm text-bodytext bg-white focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold cursor-pointer"></select><p id="top-habit-print" class="print-only font-body text-base text-navy border-2 border-gold/30 rounded-xl px-4 py-3 bg-gold/5"></p></div>
       <div class="border-t border-gold/20 pt-6 mt-6"><p class="font-display italic text-bodytext/60 text-sm mb-3" data-i18n="s5_signed">Signed with intention,</p><input id="commit-sig-input" type="text" class="w-full md:w-1/2 border-b-2 border-navy/20 pb-2 font-display text-lg text-navy bg-transparent focus:outline-none focus:border-gold transition-colors" placeholder="Your signature" /></div>
       <div class="text-center mt-8 pt-4 border-t border-gold/10"><div class="inline-block bg-gold text-navy font-display font-bold text-sm px-3 py-1 rounded mb-2" style="letter-spacing:2px;">TFS</div><p class="font-body text-bodytext/40 text-xs">Tenant Financial Solutions</p><p class="font-display italic text-gold/70 text-xs mt-1" data-i18n="s5_footer_tagline">Your Financial Future, Elevated.</p></div>
@@ -388,6 +389,19 @@ function renderCommitment(){
   selectedDecrease.forEach(id=>{const emotion=DECREASE_EMOTIONS.find(e=>e.id===id);const habits=DECREASE_HABITS[id];if(!emotion||!habits)return;const o1=document.createElement('option');o1.textContent=`${emotion.emoji} ${emotion.en}: ${lang==='en'?habits.daily_en:habits.daily_es}`;select.appendChild(o1);const o2=document.createElement('option');o2.textContent=`${emotion.emoji} ${emotion.en}: ${lang==='en'?habits.weekly_en:habits.weekly_es}`;select.appendChild(o2);});
   selectedIncrease.forEach(id=>{const emotion=INCREASE_EMOTIONS.find(e=>e.id===id);const habits=INCREASE_HABITS[id];if(!emotion||!habits)return;const o1=document.createElement('option');o1.textContent=`${emotion.emoji} ${emotion.en}: ${lang==='en'?habits.daily_en:habits.daily_es}`;select.appendChild(o1);const o2=document.createElement('option');o2.textContent=`${emotion.emoji} ${emotion.en}: ${lang==='en'?habits.weekly_en:habits.weekly_es}`;select.appendChild(o2);});
   updateTopHabitPrint();
+  updateCommitNotes();
+}
+
+// The notes are typed on an earlier step, so copy them onto the commitment sheet
+// for printing and for the PDF. An empty notes box stays hidden on both.
+function updateCommitNotes(){
+  const src=document.getElementById('notes-textarea');
+  const block=document.getElementById('commit-notes-block');
+  const out=document.getElementById('commit-notes-text');
+  if(!src||!block||!out)return;
+  const text=(src.value||'').trim();
+  out.textContent=text;
+  if(text){block.removeAttribute('data-empty');}else{block.setAttribute('data-empty','1');}
 }
 
 // The dropdown does not survive printing or a PDF, so mirror the choice into text.
@@ -428,8 +442,9 @@ document.getElementById('download-btn').addEventListener('click', async function
   try {
     if (typeof html2canvas !== 'function' || !window.jspdf || !window.jspdf.jsPDF) throw new Error('PDF libraries unavailable');
     updateTopHabitPrint();
+    updateCommitNotes();
     hidden.forEach(el => { el.style.display = 'none'; });
-    printOnly.forEach(el => { el.style.display = 'block'; });
+    printOnly.forEach(el => { if (el.dataset.empty !== '1') el.style.display = 'block'; });
     const canvas = await html2canvas(target, { scale: 3, useCORS: true, backgroundColor: '#ffffff', logging: false, windowWidth: 780, width: 780 });
     hidden.forEach(el => { el.style.display = ''; });
     printOnly.forEach(el => { el.style.display = ''; });
