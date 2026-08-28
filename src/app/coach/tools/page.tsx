@@ -2,6 +2,16 @@ export const dynamic = 'force-dynamic'
 
 const tools = [
   {
+    id: 'money-diagnostic',
+    title: 'Money Diagnostic',
+    subtitle: 'What Are My Money Problems Stemming From?',
+    description: 'A three-pillar diagnostic — People, Process, Perspective — that identifies the root causes of your client\'s financial challenges. Takes 5–8 minutes and produces a personalised breakdown.',
+    emoji: '💰',
+    color: 'from-yellow-900/40 to-yellow-950/40 border-yellow-700/30',
+    badgeColor: 'bg-yellow-900/50 text-yellow-300',
+    href: '/tools/money-diagnostic.html',
+  },
+  {
     id: 'press-pause-number',
     title: 'Press Pause Number',
     subtitle: 'My Personal Press Pause Number',

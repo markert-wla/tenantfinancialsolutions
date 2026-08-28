@@ -45,8 +45,11 @@
         * { box-sizing: border-box; }
         body { font-family: 'Inter', system-ui, sans-serif; background: var(--navy-deep); color: #fff; margin: 0; }
         h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; }
+
         .step-panel { display: none; opacity: 0; transition: opacity 0.5s ease; }
         .step-panel.active { display: block; opacity: 1; }
+
+        /* Star/Slider styles */
         input[type="range"] {
             -webkit-appearance: none; appearance: none;
             width: 100%; height: 8px; border-radius: 999px;
@@ -68,9 +71,13 @@
         .slider-people input[type="range"] { background: linear-gradient(90deg, #bfdbfe 0%, #3b82f6 100%); }
         .slider-process input[type="range"] { background: linear-gradient(90deg, #a7f3d0 0%, #10b981 100%); }
         .slider-perspective input[type="range"] { background: linear-gradient(90deg, #ddd6fe 0%, #8b5cf6 100%); }
-        .progress-segment { transition: all 0.4s ease; }
+
+        .progress-segment {
+            transition: all 0.4s ease;
+        }
         .progress-segment.completed { opacity: 1; }
         .progress-segment.upcoming { opacity: 0.35; }
+
         .tooltip-wrap { position: relative; }
         .tooltip-wrap .tooltip-text {
             visibility: hidden; opacity: 0;
@@ -85,440 +92,557 @@
             border-width: 6px; border-style: solid; border-color: #1e293b transparent transparent transparent;
         }
         .tooltip-wrap:hover .tooltip-text { visibility: visible; opacity: 1; }
+
         @keyframes pulse-glow {
             0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
             50% { box-shadow: 0 0 20px 6px rgba(239,68,68,0.15); }
         }
         .pulse-card { animation: pulse-glow 2.5s ease-in-out infinite; }
+
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(24px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+
         .card-elevated {
             background: #fff; border-radius: 16px; padding: 2rem;
             box-shadow: 0 4px 24px rgba(0,0,0,0.12);
         }
+
         @media print {
             body { background: #fff !important; color: #1a1a2e !important; }
             .no-print { display: none !important; }
             .step-panel { display: block !important; opacity: 1 !important; }
             .card-elevated { box-shadow: none; border: 1px solid #e2e8f0; }
             canvas { max-width: 100% !important; max-height: 300px !important; }
+            #step-results { page-break-inside: avoid; }
         }
     </style>
 </head>
-<body class="min-h-screen font-body">
+<body data-id="0" class="min-h-screen font-body">
+    <app-icon data-id="1" hidden data-icon="wallet" data-palette="Yellow"></app-icon>
+    <app-disclaimer data-id="2" intent="financial"></app-disclaimer>
 
-    <div id="progress-bar-container" class="sticky top-0 z-50 bg-navy-deep/95 backdrop-blur-sm border-b border-white/10 no-print" style="display:none;">
-        <div class="max-w-4xl mx-auto px-4 py-3">
-            <div class="flex items-center gap-2 md:gap-3">
-                <div id="prog-people" class="progress-segment upcoming flex-1 flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style="background:rgba(59,130,246,0.15);color:#60a5fa;">
-                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style="background:#3b82f6;color:#fff;">1</span>
-                    <span class="hidden sm:inline">People</span>
+    <!-- STICKY PROGRESS BAR -->
+    <div data-id="3" id="progress-bar-container" class="sticky top-0 z-50 bg-navy-deep/95 backdrop-blur-sm border-b border-white/10 no-print" style="display:none;">
+        <div data-id="4" class="max-w-4xl mx-auto px-4 py-3">
+            <div data-id="5" class="flex items-center gap-2 md:gap-3">
+                <div data-id="6" id="prog-people" class="progress-segment upcoming flex-1 flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style="background:rgba(59,130,246,0.15);color:#60a5fa;">
+                    <span data-id="7" class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style="background:#3b82f6;color:#fff;">1</span>
+                    <span data-id="8" class="hidden sm:inline">People</span>
                 </div>
-                <div class="text-white/30"><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
-                <div id="prog-process" class="progress-segment upcoming flex-1 flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style="background:rgba(16,185,129,0.15);color:#34d399;">
-                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style="background:#10b981;color:#fff;">2</span>
-                    <span class="hidden sm:inline">Process</span>
+                <div data-id="9" class="text-white/30">
+                    <i data-id="10" data-lucide="chevron-right" class="w-4 h-4"></i>
                 </div>
-                <div class="text-white/30"><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
-                <div id="prog-perspective" class="progress-segment upcoming flex-1 flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style="background:rgba(139,92,246,0.15);color:#a78bfa;">
-                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style="background:#8b5cf6;color:#fff;">3</span>
-                    <span class="hidden sm:inline">Perspective</span>
+                <div data-id="11" id="prog-process" class="progress-segment upcoming flex-1 flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style="background:rgba(16,185,129,0.15);color:#34d399;">
+                    <span data-id="12" class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style="background:#10b981;color:#fff;">2</span>
+                    <span data-id="13" class="hidden sm:inline">Process</span>
                 </div>
-                <div class="text-white/30"><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
-                <div id="prog-results" class="progress-segment upcoming flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style="background:rgba(201,168,76,0.15);color:#e0c97a;">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">Results</span>
+                <div data-id="14" class="text-white/30">
+                    <i data-id="15" data-lucide="chevron-right" class="w-4 h-4"></i>
+                </div>
+                <div data-id="16" id="prog-perspective" class="progress-segment upcoming flex-1 flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style="background:rgba(139,92,246,0.15);color:#a78bfa;">
+                    <span data-id="17" class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style="background:#8b5cf6;color:#fff;">3</span>
+                    <span data-id="18" class="hidden sm:inline">Perspective</span>
+                </div>
+                <div data-id="19" class="text-white/30">
+                    <i data-id="20" data-lucide="chevron-right" class="w-4 h-4"></i>
+                </div>
+                <div data-id="21" id="prog-results" class="progress-segment upcoming flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold" style="background:rgba(201,168,76,0.15);color:#e0c97a;">
+                    <i data-id="22" data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    <span data-id="23" class="hidden sm:inline">Results</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <main class="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
+    <main data-id="24" class="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
 
-        <!-- STEP 0: WELCOME -->
-        <div id="step-welcome" class="step-panel active fade-in-up">
-            <div class="text-center mb-10 pt-6 md:pt-12">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6" style="background:linear-gradient(135deg, #c9a84c 0%, #e0c97a 100%);">
-                    <i data-lucide="wallet" class="w-10 h-10 text-navy-deep"></i>
+        <!-- ============ STEP 0: WELCOME ============ -->
+        <div data-id="25" id="step-welcome" class="step-panel active fade-in-up">
+            <div data-id="26" class="text-center mb-10 pt-6 md:pt-12">
+                <div data-id="27" class="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6" style="background:linear-gradient(135deg, #c9a84c 0%, #e0c97a 100%);">
+                    <i data-id="28" data-lucide="wallet" class="w-10 h-10 text-navy-deep"></i>
                 </div>
-                <h1 class="text-3xl md:text-5xl font-display font-bold text-gold mb-4 leading-tight">What Are My Money Problems<br>Stemming From?</h1>
-                <p class="text-base md:text-lg text-white/60 font-body tracking-wide">TFS Money Diagnostic — <span class="text-people-light">People</span> · <span class="text-process-light">Process</span> · <span class="text-perspective-light">Perspective</span></p>
+                <h1 data-id="29" class="text-3xl md:text-5xl font-display font-bold text-gold mb-4 leading-tight">What Are My Money Problems<br data-id="30">Stemming From?</h1>
+                <p data-id="31" class="text-base md:text-lg text-white/60 font-body tracking-wide">TFS Money Diagnostic — <span data-id="32" class="text-people-light">People</span> · <span data-id="33" class="text-process-light">Process</span> · <span data-id="34" class="text-perspective-light">Perspective</span></p>
             </div>
-            <div class="card-elevated max-w-2xl mx-auto mb-8">
-                <p class="text-txt text-center text-sm md:text-base leading-relaxed mb-8">Identify the root of your financial patterns through our three-pillar diagnostic. This assessment takes about 5–8 minutes and provides a personalized breakdown of where your money challenges originate.</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div class="rounded-xl p-4 text-center border-2 border-people/20 bg-people-faint">
-                        <div class="text-3xl mb-2">👥</div>
-                        <h3 class="font-display font-semibold text-txt text-sm mb-1">People</h3>
-                        <p class="text-xs text-txt/60 leading-relaxed">Who influences your money story and financial behaviors?</p>
+
+            <div data-id="35" class="card-elevated max-w-2xl mx-auto mb-8">
+                <p data-id="36" class="text-txt text-center text-sm md:text-base leading-relaxed mb-8">Identify the root of your financial patterns through our three-pillar diagnostic. This assessment takes about 5–8 minutes and provides a personalized breakdown of where your money challenges originate.</p>
+
+                <div data-id="37" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div data-id="38" class="rounded-xl p-4 text-center border-2 border-people/20 bg-people-faint">
+                        <div data-id="39" class="text-3xl mb-2">👥</div>
+                        <h3 data-id="40" class="font-display font-semibold text-txt text-sm mb-1">People</h3>
+                        <p data-id="41" class="text-xs text-txt/60 leading-relaxed">Who influences your money story and financial behaviors?</p>
                     </div>
-                    <div class="rounded-xl p-4 text-center border-2 border-process/20 bg-process-faint">
-                        <div class="text-3xl mb-2">⚙️</div>
-                        <h3 class="font-display font-semibold text-txt text-sm mb-1">Process</h3>
-                        <p class="text-xs text-txt/60 leading-relaxed">How do you operate with money on a day-to-day basis?</p>
+                    <div data-id="42" class="rounded-xl p-4 text-center border-2 border-process/20 bg-process-faint">
+                        <div data-id="43" class="text-3xl mb-2">⚙️</div>
+                        <h3 data-id="44" class="font-display font-semibold text-txt text-sm mb-1">Process</h3>
+                        <p data-id="45" class="text-xs text-txt/60 leading-relaxed">How do you operate with money on a day-to-day basis?</p>
                     </div>
-                    <div class="rounded-xl p-4 text-center border-2 border-perspective/20 bg-perspective-faint">
-                        <div class="text-3xl mb-2">🧠</div>
-                        <h3 class="font-display font-semibold text-txt text-sm mb-1">Perspective</h3>
-                        <p class="text-xs text-txt/60 leading-relaxed">What lens do you see money through — beliefs, mindset, environment?</p>
+                    <div data-id="46" class="rounded-xl p-4 text-center border-2 border-perspective/20 bg-perspective-faint">
+                        <div data-id="47" class="text-3xl mb-2">🧠</div>
+                        <h3 data-id="48" class="font-display font-semibold text-txt text-sm mb-1">Perspective</h3>
+                        <p data-id="49" class="text-xs text-txt/60 leading-relaxed">What lens do you see money through — beliefs, mindset, environment?</p>
                     </div>
                 </div>
-                <div class="max-w-sm mx-auto mb-6">
-                    <label class="block text-xs font-semibold text-txt/50 uppercase tracking-wider mb-2">Client Name <span class="font-normal">(optional)</span></label>
-                    <input type="text" id="client-name-input" class="w-full h-12 px-4 rounded-xl border-2 border-gray-200 text-txt text-base focus:ring-2 focus:ring-gold focus:border-gold outline-none transition" placeholder="Enter your name…">
+
+                <div data-id="50" class="max-w-sm mx-auto mb-6">
+                    <label data-id="51" class="block text-xs font-semibold text-txt/50 uppercase tracking-wider mb-2">Client Name <span data-id="52" class="font-normal">(optional)</span></label>
+                    <input data-id="53" type="text" id="client-name-input" class="w-full h-12 px-4 rounded-xl border-2 border-gray-200 text-txt text-base focus:ring-2 focus:ring-gold focus:border-gold outline-none transition" placeholder="Enter your name…">
                 </div>
-                <div class="text-center">
-                    <button id="begin-btn" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-navy-deep text-base transition-all hover:scale-105 hover:shadow-lg" style="background:linear-gradient(135deg, #c9a84c 0%, #e0c97a 100%);">
+
+                <div data-id="54" class="text-center">
+                    <button data-id="55" id="begin-btn" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-navy-deep text-base transition-all hover:scale-105 hover:shadow-lg" style="background:linear-gradient(135deg, #c9a84c 0%, #e0c97a 100%);">
                         Begin Diagnostic
-                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        <i data-id="56" data-lucide="arrow-right" class="w-5 h-5"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- STEP 1: PEOPLE -->
-        <div id="step-people" class="step-panel">
-            <div class="mb-8">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-1.5 h-10 rounded-full bg-people"></div>
-                    <span class="text-3xl">👥</span>
-                    <div>
-                        <h2 class="text-2xl md:text-3xl font-display font-bold text-white">People</h2>
-                        <p class="text-people-light text-sm italic">"Who influences your money story?"</p>
+        <!-- ============ STEP 1: PEOPLE ============ -->
+        <div data-id="57" id="step-people" class="step-panel">
+            <div data-id="58" class="mb-8">
+                <div data-id="59" class="flex items-center gap-3 mb-3">
+                    <div data-id="60" class="w-1.5 h-10 rounded-full bg-people"></div>
+                    <span data-id="61" class="text-3xl">👥</span>
+                    <div data-id="62">
+                        <h2 data-id="63" class="text-2xl md:text-3xl font-display font-bold text-white">People</h2>
+                        <p data-id="64" class="text-people-light text-sm italic">"Who influences your money story?"</p>
                     </div>
                 </div>
-                <p class="text-white/60 text-sm leading-relaxed">Think about the top 3 people you spend the most time with. Rate the health of your money relationship with each person across three dimensions.</p>
+                <p data-id="65" class="text-white/60 text-sm leading-relaxed ml-0 md:ml-14">Think about the top 3 people you spend the most time with. Rate the health of your money relationship with each person across three dimensions.</p>
             </div>
-            <div id="people-cards" class="space-y-6 mb-6">
+
+            <!-- Person Cards -->
+            <div data-id="66" id="people-cards" class="space-y-6 mb-6">
                 <!-- Person 1 -->
-                <div class="card-elevated fade-in-up" data-person="0">
-                    <div class="flex items-center gap-3 mb-5">
-                        <span class="w-8 h-8 rounded-full bg-people/10 flex items-center justify-center text-people font-bold text-sm">1</span>
-                        <input type="text" class="person-name flex-1 h-10 px-3 rounded-lg border-2 border-gray-200 text-txt text-sm focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 1 (e.g., Spouse, Parent, Friend)" data-idx="0">
+                <div data-id="67" class="card-elevated fade-in-up" data-person="0">
+                    <div data-id="68" class="flex items-center gap-3 mb-5">
+                        <span data-id="69" class="w-8 h-8 rounded-full bg-people/10 flex items-center justify-center text-people font-bold text-sm">1</span>
+                        <input data-id="70" type="text" class="person-name flex-1 h-10 px-3 rounded-lg border-2 border-gray-200 text-txt text-sm focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 1 (e.g., Spouse, Parent, Friend)" data-idx="0">
                     </div>
-                    <div class="space-y-5 slider-people">
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Time</label><div class="tooltip-text">Low (1) = This person negatively impacts how you spend your time. High (10) = Very healthy time influence.</div></div>
-                                <span class="slider-val text-sm font-bold text-people">5</span>
+                    <div data-id="71" class="space-y-5 slider-people">
+                        <div data-id="72">
+                            <div data-id="73" class="flex justify-between items-center mb-2">
+                                <div data-id="74" class="tooltip-wrap">
+                                    <label data-id="75" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Time</label>
+                                    <div data-id="76" class="tooltip-text">Low (1) = This person negatively impacts how you spend your time. High (10) = Very healthy time influence.</div>
+                                </div>
+                                <span data-id="77" class="slider-val text-sm font-bold text-people">5</span>
                             </div>
-                            <p class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you spend your time?</p>
-                            <input type="range" min="1" max="10" value="5" class="people-slider" data-person="0" data-dim="time">
-                            <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unhealthy</span><span>Very healthy</span></div>
+                            <p data-id="78" class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you spend your time?</p>
+                            <input data-id="79" type="range" min="1" max="10" value="5" class="people-slider" data-person="0" data-dim="time">
+                            <div data-id="80" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="81">Very unhealthy</span><span data-id="82">Very healthy</span></div>
                         </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Money</label><div class="tooltip-text">Low (1) = This person negatively influences your financial decisions. High (10) = Very positive financial influence.</div></div>
-                                <span class="slider-val text-sm font-bold text-people">5</span>
+                        <div data-id="83">
+                            <div data-id="84" class="flex justify-between items-center mb-2">
+                                <div data-id="85" class="tooltip-wrap">
+                                    <label data-id="86" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Money</label>
+                                    <div data-id="87" class="tooltip-text">Low (1) = This person negatively influences your financial decisions. High (10) = Very positive financial influence.</div>
+                                </div>
+                                <span data-id="88" class="slider-val text-sm font-bold text-people">5</span>
                             </div>
-                            <p class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences your financial decisions?</p>
-                            <input type="range" min="1" max="10" value="5" class="people-slider" data-person="0" data-dim="money">
-                            <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unhealthy</span><span>Very healthy</span></div>
+                            <p data-id="89" class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences your financial decisions?</p>
+                            <input data-id="90" type="range" min="1" max="10" value="5" class="people-slider" data-person="0" data-dim="money">
+                            <div data-id="91" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="92">Very unhealthy</span><span data-id="93">Very healthy</span></div>
                         </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Talent</label><div class="tooltip-text">Low (1) = This person discourages your skill development. High (10) = They champion your talents and growth.</div></div>
-                                <span class="slider-val text-sm font-bold text-people">5</span>
+                        <div data-id="94">
+                            <div data-id="95" class="flex justify-between items-center mb-2">
+                                <div data-id="96" class="tooltip-wrap">
+                                    <label data-id="97" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Talent</label>
+                                    <div data-id="98" class="tooltip-text">Low (1) = This person discourages your skill development. High (10) = They champion your talents and growth.</div>
+                                </div>
+                                <span data-id="99" class="slider-val text-sm font-bold text-people">5</span>
                             </div>
-                            <p class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you use your talents/skills?</p>
-                            <input type="range" min="1" max="10" value="5" class="people-slider" data-person="0" data-dim="talent">
-                            <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unhealthy</span><span>Very healthy</span></div>
+                            <p data-id="100" class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you use your talents/skills?</p>
+                            <input data-id="101" type="range" min="1" max="10" value="5" class="people-slider" data-person="0" data-dim="talent">
+                            <div data-id="102" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="103">Very unhealthy</span><span data-id="104">Very healthy</span></div>
                         </div>
                     </div>
                 </div>
+
                 <!-- Person 2 -->
-                <div class="card-elevated fade-in-up" data-person="1">
-                    <div class="flex items-center gap-3 mb-5">
-                        <span class="w-8 h-8 rounded-full bg-people/10 flex items-center justify-center text-people font-bold text-sm">2</span>
-                        <input type="text" class="person-name flex-1 h-10 px-3 rounded-lg border-2 border-gray-200 text-txt text-sm focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 2 (e.g., Sibling, Business Partner)" data-idx="1">
+                <div data-id="105" class="card-elevated fade-in-up" data-person="1">
+                    <div data-id="106" class="flex items-center gap-3 mb-5">
+                        <span data-id="107" class="w-8 h-8 rounded-full bg-people/10 flex items-center justify-center text-people font-bold text-sm">2</span>
+                        <input data-id="108" type="text" class="person-name flex-1 h-10 px-3 rounded-lg border-2 border-gray-200 text-txt text-sm focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 2 (e.g., Sibling, Business Partner)" data-idx="1">
                     </div>
-                    <div class="space-y-5 slider-people">
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Time</label><div class="tooltip-text">Low (1) = This person negatively impacts how you spend your time. High (10) = Very healthy time influence.</div></div>
-                                <span class="slider-val text-sm font-bold text-people">5</span>
+                    <div data-id="109" class="space-y-5 slider-people">
+                        <div data-id="110">
+                            <div data-id="111" class="flex justify-between items-center mb-2">
+                                <div data-id="112" class="tooltip-wrap">
+                                    <label data-id="113" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Time</label>
+                                    <div data-id="114" class="tooltip-text">Low (1) = This person negatively impacts how you spend your time. High (10) = Very healthy time influence.</div>
+                                </div>
+                                <span data-id="115" class="slider-val text-sm font-bold text-people">5</span>
                             </div>
-                            <p class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you spend your time?</p>
-                            <input type="range" min="1" max="10" value="5" class="people-slider" data-person="1" data-dim="time">
-                            <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unhealthy</span><span>Very healthy</span></div>
+                            <p data-id="116" class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you spend your time?</p>
+                            <input data-id="117" type="range" min="1" max="10" value="5" class="people-slider" data-person="1" data-dim="time">
+                            <div data-id="118" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="119">Very unhealthy</span><span data-id="120">Very healthy</span></div>
                         </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Money</label><div class="tooltip-text">Low (1) = This person negatively influences your financial decisions. High (10) = Very positive financial influence.</div></div>
-                                <span class="slider-val text-sm font-bold text-people">5</span>
+                        <div data-id="121">
+                            <div data-id="122" class="flex justify-between items-center mb-2">
+                                <div data-id="123" class="tooltip-wrap">
+                                    <label data-id="124" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Money</label>
+                                    <div data-id="125" class="tooltip-text">Low (1) = This person negatively influences your financial decisions. High (10) = Very positive financial influence.</div>
+                                </div>
+                                <span data-id="126" class="slider-val text-sm font-bold text-people">5</span>
                             </div>
-                            <p class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences your financial decisions?</p>
-                            <input type="range" min="1" max="10" value="5" class="people-slider" data-person="1" data-dim="money">
-                            <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unhealthy</span><span>Very healthy</span></div>
+                            <p data-id="127" class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences your financial decisions?</p>
+                            <input data-id="128" type="range" min="1" max="10" value="5" class="people-slider" data-person="1" data-dim="money">
+                            <div data-id="129" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="130">Very unhealthy</span><span data-id="131">Very healthy</span></div>
                         </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Talent</label><div class="tooltip-text">Low (1) = This person discourages your skill development. High (10) = They champion your talents and growth.</div></div>
-                                <span class="slider-val text-sm font-bold text-people">5</span>
+                        <div data-id="132">
+                            <div data-id="133" class="flex justify-between items-center mb-2">
+                                <div data-id="134" class="tooltip-wrap">
+                                    <label data-id="135" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Talent</label>
+                                    <div data-id="136" class="tooltip-text">Low (1) = This person discourages your skill development. High (10) = They champion your talents and growth.</div>
+                                </div>
+                                <span data-id="137" class="slider-val text-sm font-bold text-people">5</span>
                             </div>
-                            <p class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you use your talents/skills?</p>
-                            <input type="range" min="1" max="10" value="5" class="people-slider" data-person="1" data-dim="talent">
-                            <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unhealthy</span><span>Very healthy</span></div>
+                            <p data-id="138" class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you use your talents/skills?</p>
+                            <input data-id="139" type="range" min="1" max="10" value="5" class="people-slider" data-person="1" data-dim="talent">
+                            <div data-id="140" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="141">Very unhealthy</span><span data-id="142">Very healthy</span></div>
                         </div>
                     </div>
                 </div>
+
                 <!-- Person 3 -->
-                <div class="card-elevated fade-in-up" data-person="2">
-                    <div class="flex items-center gap-3 mb-5">
-                        <span class="w-8 h-8 rounded-full bg-people/10 flex items-center justify-center text-people font-bold text-sm">3</span>
-                        <input type="text" class="person-name flex-1 h-10 px-3 rounded-lg border-2 border-gray-200 text-txt text-sm focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 3 (e.g., Coworker, Mentor)" data-idx="2">
+                <div data-id="143" class="card-elevated fade-in-up" data-person="2">
+                    <div data-id="144" class="flex items-center gap-3 mb-5">
+                        <span data-id="145" class="w-8 h-8 rounded-full bg-people/10 flex items-center justify-center text-people font-bold text-sm">3</span>
+                        <input data-id="146" type="text" class="person-name flex-1 h-10 px-3 rounded-lg border-2 border-gray-200 text-txt text-sm focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 3 (e.g., Coworker, Mentor)" data-idx="2">
                     </div>
-                    <div class="space-y-5 slider-people">
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Time</label><div class="tooltip-text">Low (1) = This person negatively impacts how you spend your time. High (10) = Very healthy time influence.</div></div>
-                                <span class="slider-val text-sm font-bold text-people">5</span>
+                    <div data-id="147" class="space-y-5 slider-people">
+                        <div data-id="148">
+                            <div data-id="149" class="flex justify-between items-center mb-2">
+                                <div data-id="150" class="tooltip-wrap">
+                                    <label data-id="151" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Time</label>
+                                    <div data-id="152" class="tooltip-text">Low (1) = This person negatively impacts how you spend your time. High (10) = Very healthy time influence.</div>
+                                </div>
+                                <span data-id="153" class="slider-val text-sm font-bold text-people">5</span>
                             </div>
-                            <p class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you spend your time?</p>
-                            <input type="range" min="1" max="10" value="5" class="people-slider" data-person="2" data-dim="time">
-                            <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unhealthy</span><span>Very healthy</span></div>
+                            <p data-id="154" class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you spend your time?</p>
+                            <input data-id="155" type="range" min="1" max="10" value="5" class="people-slider" data-person="2" data-dim="time">
+                            <div data-id="156" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="157">Very unhealthy</span><span data-id="158">Very healthy</span></div>
                         </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Money</label><div class="tooltip-text">Low (1) = This person negatively influences your financial decisions. High (10) = Very positive financial influence.</div></div>
-                                <span class="slider-val text-sm font-bold text-people">5</span>
+                        <div data-id="159">
+                            <div data-id="160" class="flex justify-between items-center mb-2">
+                                <div data-id="161" class="tooltip-wrap">
+                                    <label data-id="162" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Money</label>
+                                    <div data-id="163" class="tooltip-text">Low (1) = This person negatively influences your financial decisions. High (10) = Very positive financial influence.</div>
+                                </div>
+                                <span data-id="164" class="slider-val text-sm font-bold text-people">5</span>
                             </div>
-                            <p class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences your financial decisions?</p>
-                            <input type="range" min="1" max="10" value="5" class="people-slider" data-person="2" data-dim="money">
-                            <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unhealthy</span><span>Very healthy</span></div>
+                            <p data-id="165" class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences your financial decisions?</p>
+                            <input data-id="166" type="range" min="1" max="10" value="5" class="people-slider" data-person="2" data-dim="money">
+                            <div data-id="167" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="168">Very unhealthy</span><span data-id="169">Very healthy</span></div>
                         </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Talent</label><div class="tooltip-text">Low (1) = This person discourages your skill development. High (10) = They champion your talents and growth.</div></div>
-                                <span class="slider-val text-sm font-bold text-people">5</span>
+                        <div data-id="170">
+                            <div data-id="171" class="flex justify-between items-center mb-2">
+                                <div data-id="172" class="tooltip-wrap">
+                                    <label data-id="173" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Talent</label>
+                                    <div data-id="174" class="tooltip-text">Low (1) = This person discourages your skill development. High (10) = They champion your talents and growth.</div>
+                                </div>
+                                <span data-id="175" class="slider-val text-sm font-bold text-people">5</span>
                             </div>
-                            <p class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you use your talents/skills?</p>
-                            <input type="range" min="1" max="10" value="5" class="people-slider" data-person="2" data-dim="talent">
-                            <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unhealthy</span><span>Very healthy</span></div>
+                            <p data-id="176" class="text-xs text-txt/50 mb-2 leading-relaxed">How healthy is the way this person influences how you use your talents/skills?</p>
+                            <input data-id="177" type="range" min="1" max="10" value="5" class="people-slider" data-person="2" data-dim="talent">
+                            <div data-id="178" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="179">Very unhealthy</span><span data-id="180">Very healthy</span></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="flex justify-between items-center no-print">
-                <button id="people-back-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 transition">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+
+            <div data-id="181" class="flex justify-between items-center no-print">
+                <button data-id="182" id="people-back-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 transition">
+                    <i data-id="183" data-lucide="arrow-left" class="w-4 h-4"></i> Back
                 </button>
-                <button id="people-next-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-navy-deep text-sm transition-all hover:scale-105" style="background:linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);">
-                    Next: Process <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <button data-id="184" id="people-next-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-navy-deep text-sm transition-all hover:scale-105" style="background:linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);">
+                    Next: Process <i data-id="185" data-lucide="arrow-right" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
 
-        <!-- STEP 2: PROCESS -->
-        <div id="step-process" class="step-panel">
-            <div class="mb-8">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-1.5 h-10 rounded-full bg-process"></div>
-                    <span class="text-3xl">⚙️</span>
-                    <div>
-                        <h2 class="text-2xl md:text-3xl font-display font-bold text-white">Process</h2>
-                        <p class="text-process-light text-sm italic">"How do you operate with money day-to-day?"</p>
+        <!-- ============ STEP 2: PROCESS ============ -->
+        <div data-id="186" id="step-process" class="step-panel">
+            <div data-id="187" class="mb-8">
+                <div data-id="188" class="flex items-center gap-3 mb-3">
+                    <div data-id="189" class="w-1.5 h-10 rounded-full bg-process"></div>
+                    <span data-id="190" class="text-3xl">⚙️</span>
+                    <div data-id="191">
+                        <h2 data-id="192" class="text-2xl md:text-3xl font-display font-bold text-white">Process</h2>
+                        <p data-id="193" class="text-process-light text-sm italic">"How do you operate with money day-to-day?"</p>
                     </div>
                 </div>
-                <p class="text-white/60 text-sm leading-relaxed">Answer honestly — there are no right or wrong answers.</p>
-                <div class="mt-2 px-3 py-2 rounded-lg bg-process/10 border border-process/20 inline-block">
-                    <p class="text-process-light text-xs"><i data-lucide="info" class="w-3 h-3 inline mr-1 align-text-bottom"></i>Note: In this section, a higher rating indicates a greater problem area.</p>
-                </div>
-            </div>
-            <div class="space-y-6 mb-6">
-                <div class="card-elevated fade-in-up slider-process">
-                    <div class="flex items-start gap-3 mb-4">
-                        <span class="w-7 h-7 rounded-full bg-process/10 flex items-center justify-center text-process font-bold text-xs mt-0.5">1</span>
-                        <p class="text-txt text-sm font-medium leading-relaxed">"Do you often feel financially behind where you think you should be?"</p>
-                    </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label><div class="tooltip-text">Low (1) = You never feel behind financially. High (10) = You constantly feel behind.</div></div>
-                        <span class="slider-val text-sm font-bold text-process">5</span>
-                    </div>
-                    <input type="range" min="1" max="10" value="5" class="process-slider" data-q="0">
-                    <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Never / Not at all</span><span>Always / Completely</span></div>
-                </div>
-                <div class="card-elevated fade-in-up slider-process">
-                    <div class="flex items-start gap-3 mb-4">
-                        <span class="w-7 h-7 rounded-full bg-process/10 flex items-center justify-center text-process font-bold text-xs mt-0.5">2</span>
-                        <p class="text-txt text-sm font-medium leading-relaxed">"Do you avoid looking at your bank accounts, bills, or financial statements?"</p>
-                    </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label><div class="tooltip-text">Low (1) = You regularly review your finances. High (10) = You constantly avoid looking at financial information.</div></div>
-                        <span class="slider-val text-sm font-bold text-process">5</span>
-                    </div>
-                    <input type="range" min="1" max="10" value="5" class="process-slider" data-q="1">
-                    <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Never avoid</span><span>Constantly avoid</span></div>
-                </div>
-                <div class="card-elevated fade-in-up slider-process">
-                    <div class="flex items-start gap-3 mb-4">
-                        <span class="w-7 h-7 rounded-full bg-process/10 flex items-center justify-center text-process font-bold text-xs mt-0.5">3</span>
-                        <p class="text-txt text-sm font-medium leading-relaxed">"Do you make financial decisions reactively (emotional spending, panic saving, impulsive choices)?"</p>
-                    </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label><div class="tooltip-text">Low (1) = You make intentional, thoughtful financial decisions. High (10) = Most financial decisions are reactive or emotional.</div></div>
-                        <span class="slider-val text-sm font-bold text-process">5</span>
-                    </div>
-                    <input type="range" min="1" max="10" value="5" class="process-slider" data-q="2">
-                    <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Never</span><span>Almost always</span></div>
+                <p data-id="194" class="text-white/60 text-sm leading-relaxed ml-0 md:ml-14">Answer honestly — there are no right or wrong answers. These questions reveal your behavioral patterns around money management.</p>
+                <div data-id="195" class="ml-0 md:ml-14 mt-2 px-3 py-2 rounded-lg bg-process/10 border border-process/20 inline-block">
+                    <p data-id="196" class="text-process-light text-xs"><i data-id="197" data-lucide="info" class="w-3 h-3 inline mr-1 align-text-bottom"></i>Note: In this section, a higher rating indicates a greater problem area.</p>
                 </div>
             </div>
-            <div class="flex justify-between items-center no-print">
-                <button id="process-back-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 transition">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+
+            <div data-id="198" class="space-y-6 mb-6">
+                <!-- Q1 -->
+                <div data-id="199" class="card-elevated fade-in-up slider-process">
+                    <div data-id="200" class="flex items-start gap-3 mb-4">
+                        <span data-id="201" class="w-7 h-7 rounded-full bg-process/10 flex items-center justify-center text-process font-bold text-xs mt-0.5">1</span>
+                        <div data-id="202" class="flex-1">
+                            <p data-id="203" class="text-txt text-sm font-medium leading-relaxed mb-1">"Do you often feel financially behind where you think you should be?"</p>
+                        </div>
+                    </div>
+                    <div data-id="204" class="flex justify-between items-center mb-2">
+                        <div data-id="205" class="tooltip-wrap">
+                            <label data-id="206" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label>
+                            <div data-id="207" class="tooltip-text">Low (1) = You never feel behind financially. High (10) = You constantly feel behind where you should be.</div>
+                        </div>
+                        <span data-id="208" class="slider-val text-sm font-bold text-process">5</span>
+                    </div>
+                    <input data-id="209" type="range" min="1" max="10" value="5" class="process-slider" data-q="0">
+                    <div data-id="210" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="211">Never / Not at all</span><span data-id="212">Always / Completely</span></div>
+                </div>
+
+                <!-- Q2 -->
+                <div data-id="213" class="card-elevated fade-in-up slider-process">
+                    <div data-id="214" class="flex items-start gap-3 mb-4">
+                        <span data-id="215" class="w-7 h-7 rounded-full bg-process/10 flex items-center justify-center text-process font-bold text-xs mt-0.5">2</span>
+                        <div data-id="216" class="flex-1">
+                            <p data-id="217" class="text-txt text-sm font-medium leading-relaxed mb-1">"Do you avoid looking at your bank accounts, bills, or financial statements?"</p>
+                        </div>
+                    </div>
+                    <div data-id="218" class="flex justify-between items-center mb-2">
+                        <div data-id="219" class="tooltip-wrap">
+                            <label data-id="220" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label>
+                            <div data-id="221" class="tooltip-text">Low (1) = You regularly review your finances. High (10) = You constantly avoid looking at financial information.</div>
+                        </div>
+                        <span data-id="222" class="slider-val text-sm font-bold text-process">5</span>
+                    </div>
+                    <input data-id="223" type="range" min="1" max="10" value="5" class="process-slider" data-q="1">
+                    <div data-id="224" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="225">Never avoid</span><span data-id="226">Constantly avoid</span></div>
+                </div>
+
+                <!-- Q3 -->
+                <div data-id="227" class="card-elevated fade-in-up slider-process">
+                    <div data-id="228" class="flex items-start gap-3 mb-4">
+                        <span data-id="229" class="w-7 h-7 rounded-full bg-process/10 flex items-center justify-center text-process font-bold text-xs mt-0.5">3</span>
+                        <div data-id="230" class="flex-1">
+                            <p data-id="231" class="text-txt text-sm font-medium leading-relaxed mb-1">"Do you make financial decisions reactively (emotional spending, panic saving, impulsive choices)?"</p>
+                        </div>
+                    </div>
+                    <div data-id="232" class="flex justify-between items-center mb-2">
+                        <div data-id="233" class="tooltip-wrap">
+                            <label data-id="234" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label>
+                            <div data-id="235" class="tooltip-text">Low (1) = You make intentional, thoughtful financial decisions. High (10) = Most financial decisions are reactive or emotional.</div>
+                        </div>
+                        <span data-id="236" class="slider-val text-sm font-bold text-process">5</span>
+                    </div>
+                    <input data-id="237" type="range" min="1" max="10" value="5" class="process-slider" data-q="2">
+                    <div data-id="238" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="239">Never</span><span data-id="240">Almost always</span></div>
+                </div>
+            </div>
+
+            <div data-id="241" class="flex justify-between items-center no-print">
+                <button data-id="242" id="process-back-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 transition">
+                    <i data-id="243" data-lucide="arrow-left" class="w-4 h-4"></i> Back
                 </button>
-                <button id="process-next-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-navy-deep text-sm transition-all hover:scale-105" style="background:linear-gradient(135deg, #10b981 0%, #34d399 100%);">
-                    Next: Perspective <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <button data-id="244" id="process-next-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-navy-deep text-sm transition-all hover:scale-105" style="background:linear-gradient(135deg, #10b981 0%, #34d399 100%);">
+                    Next: Perspective <i data-id="245" data-lucide="arrow-right" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
 
-        <!-- STEP 3: PERSPECTIVE -->
-        <div id="step-perspective" class="step-panel">
-            <div class="mb-8">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-1.5 h-10 rounded-full bg-perspective"></div>
-                    <span class="text-3xl">🧠</span>
-                    <div>
-                        <h2 class="text-2xl md:text-3xl font-display font-bold text-white">Perspective</h2>
-                        <p class="text-perspective-light text-sm italic">"What lens do you see money through?"</p>
+        <!-- ============ STEP 3: PERSPECTIVE ============ -->
+        <div data-id="246" id="step-perspective" class="step-panel">
+            <div data-id="247" class="mb-8">
+                <div data-id="248" class="flex items-center gap-3 mb-3">
+                    <div data-id="249" class="w-1.5 h-10 rounded-full bg-perspective"></div>
+                    <span data-id="250" class="text-3xl">🧠</span>
+                    <div data-id="251">
+                        <h2 data-id="252" class="text-2xl md:text-3xl font-display font-bold text-white">Perspective</h2>
+                        <p data-id="253" class="text-perspective-light text-sm italic">"What lens do you see money through?"</p>
                     </div>
                 </div>
-                <p class="text-white/60 text-sm leading-relaxed">Your perspective is shaped by environment, beliefs, and mindset. Rate each honestly.</p>
+                <p data-id="254" class="text-white/60 text-sm leading-relaxed ml-0 md:ml-14">Your perspective is shaped by environment, beliefs, and mindset. Rate each honestly.</p>
             </div>
-            <div class="space-y-6 mb-6">
-                <div class="card-elevated fade-in-up slider-perspective">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="w-7 h-7 rounded-full bg-perspective/10 flex items-center justify-center text-perspective font-bold text-xs">A</span>
-                        <h3 class="font-display font-semibold text-txt text-base">Environment</h3>
-                        <span class="text-xs text-txt/40">(childhood / upbringing)</span>
+
+            <div data-id="255" class="space-y-6 mb-6">
+                <!-- Environment -->
+                <div data-id="256" class="card-elevated fade-in-up slider-perspective">
+                    <div data-id="257" class="flex items-center gap-2 mb-4">
+                        <span data-id="258" class="w-7 h-7 rounded-full bg-perspective/10 flex items-center justify-center text-perspective font-bold text-xs">A</span>
+                        <h3 data-id="259" class="font-display font-semibold text-txt text-base">Environment</h3>
+                        <span data-id="260" class="text-xs text-txt/40">(childhood / upbringing)</span>
                     </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label><div class="tooltip-text">Low (1) = Grew up in financial chaos or instability. High (10) = Grew up in a stable, financially healthy environment.</div></div>
-                        <span class="slider-val text-sm font-bold text-perspective">5</span>
+                    <div data-id="261" class="flex justify-between items-center mb-2">
+                        <div data-id="262" class="tooltip-wrap">
+                            <label data-id="263" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label>
+                            <div data-id="264" class="tooltip-text">Low (1) = Grew up in financial chaos, scarcity, or instability. High (10) = Grew up in a stable, financially healthy environment.</div>
+                        </div>
+                        <span data-id="265" class="slider-val text-sm font-bold text-perspective">5</span>
                     </div>
-                    <p class="text-xs text-txt/50 mb-2 leading-relaxed">"How would you describe the financial environment you grew up in?"</p>
-                    <input type="range" min="1" max="10" value="5" class="perspective-slider" data-dim="environment">
-                    <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very unstable / scarcity</span><span>Very stable / abundant</span></div>
+                    <p data-id="266" class="text-xs text-txt/50 mb-2 leading-relaxed">"How would you describe the financial environment you grew up in?"</p>
+                    <input data-id="267" type="range" min="1" max="10" value="5" class="perspective-slider" data-dim="environment">
+                    <div data-id="268" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="269">Very unstable / scarcity</span><span data-id="270">Very stable / abundant</span></div>
                 </div>
-                <div class="card-elevated fade-in-up slider-perspective">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="w-7 h-7 rounded-full bg-perspective/10 flex items-center justify-center text-perspective font-bold text-xs">B</span>
-                        <h3 class="font-display font-semibold text-txt text-base">Beliefs</h3>
-                        <span class="text-xs text-txt/40">(emotional relationship with money)</span>
+
+                <!-- Beliefs -->
+                <div data-id="271" class="card-elevated fade-in-up slider-perspective">
+                    <div data-id="272" class="flex items-center gap-2 mb-4">
+                        <span data-id="273" class="w-7 h-7 rounded-full bg-perspective/10 flex items-center justify-center text-perspective font-bold text-xs">B</span>
+                        <h3 data-id="274" class="font-display font-semibold text-txt text-base">Beliefs</h3>
+                        <span data-id="275" class="text-xs text-txt/40">(emotional relationship with money)</span>
                     </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label><div class="tooltip-text">Low (1) = Core beliefs about money are very negative and limiting. High (10) = Beliefs are positive, empowering, and growth-oriented.</div></div>
-                        <span class="slider-val text-sm font-bold text-perspective">5</span>
+                    <div data-id="276" class="flex justify-between items-center mb-2">
+                        <div data-id="277" class="tooltip-wrap">
+                            <label data-id="278" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label>
+                            <div data-id="279" class="tooltip-text">Low (1) = Core beliefs about money are very negative and limiting. High (10) = Beliefs are positive, empowering, and growth-oriented.</div>
+                        </div>
+                        <span data-id="280" class="slider-val text-sm font-bold text-perspective">5</span>
                     </div>
-                    <p class="text-xs text-txt/50 mb-2 leading-relaxed">"How positive and empowering are your current core beliefs about money?"</p>
-                    <input type="range" min="1" max="10" value="5" class="perspective-slider" data-dim="beliefs">
-                    <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Very negative / limiting</span><span>Very positive / empowering</span></div>
+                    <p data-id="281" class="text-xs text-txt/50 mb-2 leading-relaxed">"How positive and empowering are your current core beliefs about money?"</p>
+                    <input data-id="282" type="range" min="1" max="10" value="5" class="perspective-slider" data-dim="beliefs">
+                    <div data-id="283" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="284">Very negative / limiting</span><span data-id="285">Very positive / empowering</span></div>
                 </div>
-                <div class="card-elevated fade-in-up slider-perspective">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="w-7 h-7 rounded-full bg-perspective/10 flex items-center justify-center text-perspective font-bold text-xs">C</span>
-                        <h3 class="font-display font-semibold text-txt text-base">Mindset</h3>
-                        <span class="text-xs text-txt/40">(scarcity vs. abundance)</span>
+
+                <!-- Mindset -->
+                <div data-id="286" class="card-elevated fade-in-up slider-perspective">
+                    <div data-id="287" class="flex items-center gap-2 mb-4">
+                        <span data-id="288" class="w-7 h-7 rounded-full bg-perspective/10 flex items-center justify-center text-perspective font-bold text-xs">C</span>
+                        <h3 data-id="289" class="font-display font-semibold text-txt text-base">Mindset</h3>
+                        <span data-id="290" class="text-xs text-txt/40">(scarcity vs. abundance)</span>
                     </div>
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="tooltip-wrap"><label class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label><div class="tooltip-text">Low (1) = Deep scarcity mindset. High (10) = Full abundance mindset.</div></div>
-                        <span class="slider-val text-sm font-bold text-perspective">5</span>
+                    <div data-id="291" class="flex justify-between items-center mb-2">
+                        <div data-id="292" class="tooltip-wrap">
+                            <label data-id="293" class="text-xs font-semibold text-txt/70 uppercase tracking-wider cursor-help">Rating</label>
+                            <div data-id="294" class="tooltip-text">Low (1) = Deep scarcity mindset — always feeling there's never enough. High (10) = Full abundance mindset — trusting in growth and opportunity.</div>
+                        </div>
+                        <span data-id="295" class="slider-val text-sm font-bold text-perspective">5</span>
                     </div>
-                    <p class="text-xs text-txt/50 mb-2 leading-relaxed">"Where do you currently operate on the scarcity-to-abundance spectrum?"</p>
-                    <input type="range" min="1" max="10" value="5" class="perspective-slider" data-dim="mindset">
-                    <div class="flex justify-between text-[10px] text-txt/40 mt-1"><span>Deep scarcity mindset</span><span>Full abundance mindset</span></div>
+                    <p data-id="296" class="text-xs text-txt/50 mb-2 leading-relaxed">"Where do you currently operate on the scarcity-to-abundance spectrum?"</p>
+                    <input data-id="297" type="range" min="1" max="10" value="5" class="perspective-slider" data-dim="mindset">
+                    <div data-id="298" class="flex justify-between text-[10px] text-txt/40 mt-1"><span data-id="299">Deep scarcity mindset</span><span data-id="300">Full abundance mindset</span></div>
                 </div>
             </div>
-            <div class="flex justify-between items-center no-print">
-                <button id="perspective-back-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 transition">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+
+            <div data-id="301" class="flex justify-between items-center no-print">
+                <button data-id="302" id="perspective-back-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 transition">
+                    <i data-id="303" data-lucide="arrow-left" class="w-4 h-4"></i> Back
                 </button>
-                <button id="perspective-next-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-white text-sm transition-all hover:scale-105" style="background:linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
-                    View Results <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                <button data-id="304" id="perspective-next-btn" class="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-white text-sm transition-all hover:scale-105" style="background:linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+                    View Results <i data-id="305" data-lucide="bar-chart-3" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
 
-        <!-- STEP 4: RESULTS -->
-        <div id="step-results" class="step-panel">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:linear-gradient(135deg, #c9a84c 0%, #e0c97a 100%);">
-                    <i data-lucide="bar-chart-3" class="w-7 h-7 text-navy-deep"></i>
+        <!-- ============ STEP 4: RESULTS ============ -->
+        <div data-id="306" id="step-results" class="step-panel">
+            <div data-id="307" class="text-center mb-8">
+                <div data-id="308" class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:linear-gradient(135deg, #c9a84c 0%, #e0c97a 100%);">
+                    <i data-id="309" data-lucide="bar-chart-3" class="w-7 h-7 text-navy-deep"></i>
                 </div>
-                <h2 class="text-2xl md:text-3xl font-display font-bold text-gold mb-2">Your TFS Money Diagnostic Results</h2>
-                <p id="results-client-line" class="text-white/60 text-sm mb-1"></p>
-                <p id="results-date-line" class="text-white/40 text-xs"></p>
-                <p class="text-white/50 text-sm mt-2 italic">Understanding your root money patterns across the three pillars.</p>
+                <h2 data-id="310" class="text-2xl md:text-3xl font-display font-bold text-gold mb-2">Your TFS Money Diagnostic Results</h2>
+                <p data-id="311" id="results-client-line" class="text-white/60 text-sm mb-1"></p>
+                <p data-id="312" id="results-date-line" class="text-white/40 text-xs"></p>
+                <p data-id="313" class="text-white/50 text-sm mt-2 italic">Understanding your root money patterns across the three pillars.</p>
             </div>
-            <div class="card-elevated mb-6 text-center">
-                <p class="text-xs font-semibold text-txt/50 uppercase tracking-wider mb-2">Overall Composite Problem Score</p>
-                <p id="composite-score" class="text-5xl md:text-6xl font-display font-bold text-gold tabular-nums">—</p>
-                <p class="text-xs text-txt/40 mt-1">out of 100 (higher = more problem areas identified)</p>
+
+            <!-- Composite Score -->
+            <div data-id="314" class="card-elevated mb-6 text-center">
+                <p data-id="315" class="text-xs font-semibold text-txt/50 uppercase tracking-wider mb-2">Overall Composite Problem Score</p>
+                <p data-id="316" id="composite-score" class="text-5xl md:text-6xl font-display font-bold text-gold tabular-nums">—</p>
+                <p data-id="317" class="text-xs text-txt/40 mt-1">out of 100 (higher = more problem areas identified)</p>
             </div>
-            <div id="ranking-cards" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="card-elevated">
-                    <h3 class="font-display font-semibold text-txt text-base mb-4 text-center">Problem Score by Pillar</h3>
-                    <div class="relative h-56 md:h-64"><canvas id="chart-bar-a1b2"></canvas></div>
+
+            <!-- Ranking Cards -->
+            <div data-id="318" id="ranking-cards" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"></div>
+
+            <!-- Charts -->
+            <div data-id="319" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div data-id="320" class="card-elevated">
+                    <h3 data-id="321" class="font-display font-semibold text-txt text-base mb-4 text-center">Problem Score by Pillar</h3>
+                    <div data-id="322" class="relative h-56 md:h-64">
+                        <canvas data-id="323" id="chart-bar-a1b2"></canvas>
+                    </div>
                 </div>
-                <div class="card-elevated">
-                    <h3 class="font-display font-semibold text-txt text-base mb-4 text-center">Weighted Contribution to Overall Problem</h3>
-                    <div class="relative h-56 md:h-64"><canvas id="chart-doughnut-c3d4"></canvas></div>
+                <div data-id="324" class="card-elevated">
+                    <h3 data-id="325" class="font-display font-semibold text-txt text-base mb-4 text-center">Weighted Contribution to Overall Problem</h3>
+                    <div data-id="326" class="relative h-56 md:h-64">
+                        <canvas data-id="327" id="chart-doughnut-c3d4"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="card-elevated mb-8 overflow-x-auto">
-                <h3 class="font-display font-semibold text-txt text-base mb-4">Score Summary</h3>
-                <table class="w-full text-sm text-txt">
-                    <thead>
-                        <tr class="border-b-2 border-gray-200">
-                            <th class="text-left py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Pillar</th>
-                            <th class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Raw (/10)</th>
-                            <th class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Health %</th>
-                            <th class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Problem %</th>
-                            <th class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Weight</th>
-                            <th class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Weighted</th>
+
+            <!-- Score Summary Table -->
+            <div data-id="328" class="card-elevated mb-8 overflow-x-auto">
+                <h3 data-id="329" class="font-display font-semibold text-txt text-base mb-4">Score Summary</h3>
+                <table data-id="330" class="w-full text-sm text-txt">
+                    <thead data-id="331">
+                        <tr data-id="332" class="border-b-2 border-gray-200">
+                            <th data-id="333" class="text-left py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Pillar</th>
+                            <th data-id="334" class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Raw (/10)</th>
+                            <th data-id="335" class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Health %</th>
+                            <th data-id="336" class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Problem %</th>
+                            <th data-id="337" class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Weight</th>
+                            <th data-id="338" class="text-center py-2 px-2 text-xs font-semibold uppercase tracking-wider text-txt/50">Weighted</th>
                         </tr>
                     </thead>
-                    <tbody id="score-table-body"></tbody>
+                    <tbody data-id="339" id="score-table-body"></tbody>
                 </table>
             </div>
-            <div id="insights-container" class="space-y-4 mb-8"></div>
-            <div class="card-elevated mb-8" style="background:#fffdf5;">
-                <div class="flex items-center gap-2 mb-3">
-                    <i data-lucide="notebook-pen" class="w-5 h-5 text-gold-dark"></i>
-                    <h3 class="font-display font-semibold text-txt text-base">Coach Notes</h3>
-                    <span class="text-xs text-txt/40">(for TFS Session Use)</span>
+
+            <!-- Insight Paragraphs -->
+            <div data-id="340" id="insights-container" class="space-y-4 mb-8"></div>
+
+            <!-- Coach Notes -->
+            <div data-id="341" class="card-elevated mb-8" style="background:#fffdf5;">
+                <div data-id="342" class="flex items-center gap-2 mb-3">
+                    <i data-id="343" data-lucide="notebook-pen" class="w-5 h-5 text-gold-dark"></i>
+                    <h3 data-id="344" class="font-display font-semibold text-txt text-base">Coach Notes</h3>
+                    <span data-id="345" class="text-xs text-txt/40">(for TFS Session Use)</span>
                 </div>
-                <textarea id="coach-notes-area" class="w-full h-32 p-3 rounded-xl border-2 border-gold/20 text-txt text-sm leading-relaxed outline-none focus:ring-2 focus:ring-gold/30 resize-y" placeholder="Type your coaching observations, action items, and follow-up notes here…"></textarea>
+                <textarea data-id="346" id="coach-notes-area" class="w-full h-32 p-3 rounded-xl border-2 border-gold/20 text-txt text-sm leading-relaxed outline-none focus:ring-2 focus:ring-gold/30 resize-y" placeholder="Type your coaching observations, action items, and follow-up notes here…"></textarea>
             </div>
-            <div class="flex flex-col sm:flex-row justify-center gap-3 no-print">
-                <button id="print-btn" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-navy-deep text-sm transition-all hover:scale-105" style="background:linear-gradient(135deg, #c9a84c 0%, #e0c97a 100%);">
-                    <i data-lucide="printer" class="w-4 h-4"></i> Print / Save Results
+
+            <!-- Action Buttons -->
+            <div data-id="347" class="flex flex-col sm:flex-row justify-center gap-3 no-print">
+                <button data-id="348" id="print-btn" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-navy-deep text-sm transition-all hover:scale-105" style="background:linear-gradient(135deg, #c9a84c 0%, #e0c97a 100%);">
+                    <i data-id="349" data-lucide="printer" class="w-4 h-4"></i> Print / Save Results
                 </button>
-                <button id="restart-btn" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white text-sm border border-white/20 hover:bg-white/10 transition">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Start New Assessment
+                <button data-id="350" id="download-pdf-btn" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-navy-deep text-sm transition-all hover:scale-105" style="background:linear-gradient(135deg, #c9a84c 0%, #e0c97a 100%);">
+                    <i data-id="351" data-lucide="download" class="w-4 h-4"></i> <span data-id="352" id="pdf-btn-text">⬇ Download Results (PDF)</span>
+                </button>
+                <button data-id="353" id="restart-btn" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white text-sm border border-white/20 hover:bg-white/10 transition">
+                    <i data-id="354" data-lucide="rotate-ccw" class="w-4 h-4"></i> Start New Assessment
                 </button>
             </div>
         </div>
     </main>
 
-    <footer class="text-center py-8 border-t border-white/10 mt-8">
-        <div class="flex items-center justify-center gap-2 mb-2">
-            <span class="text-gold font-display font-bold text-sm tracking-wide">TFS</span>
-            <span class="text-white/20">|</span>
-            <span class="text-white/40 text-xs tracking-wide">Tenant Financial Solutions</span>
+    <footer data-id="355" class="text-center py-8 border-t border-white/10 mt-8">
+        <div data-id="356" class="flex items-center justify-center gap-2 mb-2">
+            <span data-id="357" class="text-gold font-display font-bold text-sm tracking-wide">TFS</span>
+            <span data-id="358" class="text-white/20">|</span>
+            <span data-id="359" class="text-white/40 text-xs tracking-wide">The Financial Shift</span>
         </div>
     </footer>
 
     <script>
-    if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") { lucide.createIcons(); }
+    // =========================================================
+    // Icons — progressive enhancement
+    // =========================================================
+    if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
+        lucide.createIcons();
+    }
 
+    // =========================================================
+    // STATE
+    // =========================================================
     const state = {
-        step: 'welcome',
+        step: 'welcome', // welcome | people | process | perspective | results
         clientName: '',
         people: [
             { name: '', time: 5, money: 5, talent: 5 },
@@ -532,6 +656,9 @@
     let barChart = null;
     let doughnutChart = null;
 
+    // =========================================================
+    // NAVIGATION
+    // =========================================================
     const steps = ['welcome', 'people', 'process', 'perspective', 'results'];
     const panels = {};
     steps.forEach(s => { panels[s] = document.getElementById('step-' + s); });
@@ -539,51 +666,113 @@
 
     function goToStep(stepName) {
         state.step = stepName;
-        steps.forEach(s => { panels[s].classList.remove('active'); });
+        steps.forEach(s => {
+            panels[s].classList.remove('active');
+        });
+        // Small delay for transition
         setTimeout(() => {
             panels[stepName].classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 50);
+
+        // Progress bar visibility
         progressBar.style.display = stepName === 'welcome' ? 'none' : 'block';
+
+        // Update progress indicators
         const sectionOrder = ['people', 'process', 'perspective', 'results'];
         const currentIdx = sectionOrder.indexOf(stepName);
         sectionOrder.forEach((sec, i) => {
             const el = document.getElementById('prog-' + sec);
             el.classList.remove('completed', 'upcoming');
-            if (i <= currentIdx) { el.classList.add('completed'); el.style.opacity = '1'; el.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.3)'; }
-            else { el.classList.add('upcoming'); el.style.opacity = '0.35'; el.style.boxShadow = 'none'; }
+            if (i < currentIdx) {
+                el.classList.add('completed');
+                el.style.opacity = '1';
+                el.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.15)';
+            } else if (i === currentIdx) {
+                el.classList.add('completed');
+                el.style.opacity = '1';
+                el.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.3)';
+            } else {
+                el.classList.add('upcoming');
+                el.style.opacity = '0.35';
+                el.style.boxShadow = 'none';
+            }
         });
-        if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") { lucide.createIcons(); }
-        if (stepName === 'results') { computeAndRenderResults(); }
+
+        // Reinitialize icons for new content
+        if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
+            lucide.createIcons();
+        }
+
+        if (stepName === 'results') {
+            computeAndRenderResults();
+        }
     }
 
+    // =========================================================
+    // WELCOME
+    // =========================================================
     document.getElementById('begin-btn').addEventListener('click', () => {
         state.clientName = document.getElementById('client-name-input').value.trim();
         goToStep('people');
     });
 
+    // =========================================================
+    // SLIDER VALUE UPDATES
+    // =========================================================
+    // People sliders
     document.querySelectorAll('.people-slider').forEach(slider => {
         slider.addEventListener('input', () => {
-            const p = parseInt(slider.dataset.person); const dim = slider.dataset.dim; state.people[p][dim] = parseInt(slider.value);
+            const p = parseInt(slider.dataset.person);
+            const dim = slider.dataset.dim;
+            const val = parseInt(slider.value);
+            state.people[p][dim] = val;
         });
     });
+
+    // Process sliders
     document.querySelectorAll('.process-slider').forEach(slider => {
-        slider.addEventListener('input', () => { state.process[parseInt(slider.dataset.q)] = parseInt(slider.value); });
+        slider.addEventListener('input', () => {
+            const q = parseInt(slider.dataset.q);
+            const val = parseInt(slider.value);
+            state.process[q] = val;
+        });
     });
+
+    // Perspective sliders
     document.querySelectorAll('.perspective-slider').forEach(slider => {
-        slider.addEventListener('input', () => { state.perspective[slider.dataset.dim] = parseInt(slider.value); });
+        slider.addEventListener('input', () => {
+            const dim = slider.dataset.dim;
+            const val = parseInt(slider.value);
+            state.perspective[dim] = val;
+        });
     });
+
+    // Robust slider value display updating for all sliders
     document.querySelectorAll('input[type="range"]').forEach(slider => {
         slider.addEventListener('input', () => {
             let parent = slider.parentElement;
-            while (parent && !parent.querySelector('.slider-val')) { parent = parent.parentElement; }
-            if (parent) { const valSpan = parent.querySelector('.slider-val'); if (valSpan) valSpan.textContent = slider.value; }
+            while (parent && !parent.querySelector('.slider-val')) {
+                parent = parent.parentElement;
+            }
+            if (parent) {
+                const valSpan = parent.querySelector('.slider-val');
+                if (valSpan) valSpan.textContent = slider.value;
+            }
         });
     });
+
+    // Person name inputs
     document.querySelectorAll('.person-name').forEach(input => {
-        input.addEventListener('input', () => { state.people[parseInt(input.dataset.idx)].name = input.value.trim(); });
+        input.addEventListener('input', () => {
+            const idx = parseInt(input.dataset.idx);
+            state.people[idx].name = input.value.trim();
+        });
     });
 
+    // =========================================================
+    // NAV BUTTONS (no validation — always proceed)
+    // =========================================================
     document.getElementById('people-back-btn').addEventListener('click', () => goToStep('welcome'));
     document.getElementById('people-next-btn').addEventListener('click', () => goToStep('process'));
     document.getElementById('process-back-btn').addEventListener('click', () => goToStep('people'));
@@ -592,38 +781,154 @@
     document.getElementById('perspective-next-btn').addEventListener('click', () => goToStep('results'));
     document.getElementById('print-btn').addEventListener('click', () => window.print());
     document.getElementById('restart-btn').addEventListener('click', () => {
-        state.clientName = ''; state.people = [{name:'',time:5,money:5,talent:5},{name:'',time:5,money:5,talent:5},{name:'',time:5,money:5,talent:5}]; state.process = [5,5,5]; state.perspective = {environment:5,beliefs:5,mindset:5};
+        // Reset state
+        state.clientName = '';
+        state.people = [
+            { name: '', time: 5, money: 5, talent: 5 },
+            { name: '', time: 5, money: 5, talent: 5 },
+            { name: '', time: 5, money: 5, talent: 5 }
+        ];
+        state.process = [5, 5, 5];
+        state.perspective = { environment: 5, beliefs: 5, mindset: 5 };
+
+        // Reset inputs
         document.getElementById('client-name-input').value = '';
         document.querySelectorAll('.person-name').forEach(el => el.value = '');
-        document.querySelectorAll('input[type="range"]').forEach(el => { el.value = 5; });
+        document.querySelectorAll('input[type="range"]').forEach(el => {
+            el.value = 5;
+        });
         document.querySelectorAll('.slider-val').forEach(el => el.textContent = '5');
         document.getElementById('coach-notes-area').value = '';
+
+        // Destroy charts
         if (barChart) { barChart.destroy(); barChart = null; }
         if (doughnutChart) { doughnutChart.destroy(); doughnutChart = null; }
+
         goToStep('welcome');
     });
 
+    // =========================================================
+    // PDF DOWNLOAD
+    // =========================================================
+    document.getElementById('download-pdf-btn').addEventListener('click', async () => {
+        const btnText = document.getElementById('pdf-btn-text');
+        const originalText = btnText.textContent;
+        btnText.textContent = 'Generating PDF…';
+
+        try {
+            const resultsEl = document.getElementById('step-results');
+
+            // Temporarily hide the action buttons for capture
+            const noPrintEls = resultsEl.querySelectorAll('.no-print');
+            noPrintEls.forEach(el => el.style.display = 'none');
+
+            const canvas = await html2canvas(resultsEl, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#0a1628',
+                logging: false,
+                windowWidth: resultsEl.scrollWidth
+            });
+
+            // Restore buttons
+            noPrintEls.forEach(el => el.style.display = '');
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 8;
+            const usableWidth = pageWidth - margin * 2;
+
+            const imgWidth = usableWidth;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            const usablePageHeight = pageHeight - margin * 2;
+
+            if (imgHeight <= usablePageHeight) {
+                // Fits on one page
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
+            } else {
+                // Multi-page: slice the canvas
+                const totalPages = Math.ceil(imgHeight / usablePageHeight);
+                for (let page = 0; page < totalPages; page++) {
+                    if (page > 0) pdf.addPage();
+
+                    // Calculate slice of original canvas for this page
+                    const sourceY = page * (canvas.height / totalPages);
+                    const sourceHeight = canvas.height / totalPages;
+
+                    // Create a temporary canvas for this slice
+                    const sliceCanvas = document.createElement('canvas');
+                    sliceCanvas.width = canvas.width;
+                    sliceCanvas.height = Math.min(sourceHeight, canvas.height - sourceY);
+                    const sliceCtx = sliceCanvas.getContext('2d');
+                    sliceCtx.drawImage(
+                        canvas,
+                        0, sourceY, canvas.width, sliceCanvas.height,
+                        0, 0, sliceCanvas.width, sliceCanvas.height
+                    );
+
+                    const sliceImgHeight = (sliceCanvas.height * imgWidth) / sliceCanvas.width;
+                    pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, sliceImgHeight);
+                }
+            }
+
+            pdf.save('TFS-Money-Diagnostic-Results.pdf');
+        } catch (err) {
+            console.error('PDF generation failed:', err);
+            alert('PDF generation failed. Please try again or use the Print option.');
+        } finally {
+            btnText.textContent = originalText;
+        }
+    });
+
+    // =========================================================
+    // SCORING & RESULTS
+    // =========================================================
     function computeAndRenderResults() {
+        // --- PEOPLE ---
         const personScores = state.people.map(p => (p.time + p.money + p.talent) / 3);
         const peopleRaw = personScores.reduce((a, b) => a + b, 0) / 3;
-        const peopleHealth = (peopleRaw / 10) * 100; const peopleProblem = 100 - peopleHealth;
+        const peopleHealth = (peopleRaw / 10) * 100;
+        const peopleProblem = 100 - peopleHealth;
+
+        // --- PROCESS ---
         const processRaw = state.process.reduce((a, b) => a + b, 0) / 3;
-        const processHealth = 100 - ((processRaw / 10) * 100); const processProblem = (processRaw / 10) * 100;
+        const processHealth = 100 - ((processRaw / 10) * 100);
+        const processProblem = (processRaw / 10) * 100;
+
+        // --- PERSPECTIVE ---
         const perspRaw = (state.perspective.environment + state.perspective.beliefs + state.perspective.mindset) / 3;
-        const perspHealth = (perspRaw / 10) * 100; const perspProblem = 100 - perspHealth;
-        const peopleWeighted = peopleProblem * 0.35; const processWeighted = processProblem * 0.35; const perspWeighted = perspProblem * 0.30;
+        const perspHealth = (perspRaw / 10) * 100;
+        const perspProblem = 100 - perspHealth;
+
+        // --- WEIGHTED ---
+        const peopleWeighted = peopleProblem * 0.35;
+        const processWeighted = processProblem * 0.35;
+        const perspWeighted = perspProblem * 0.30;
         const composite = peopleWeighted + processWeighted + perspWeighted;
 
+        // Client name & date
         const clientLine = document.getElementById('results-client-line');
-        clientLine.textContent = state.clientName ? 'Prepared for: ' + state.clientName : '';
-        document.getElementById('results-date-line').textContent = 'Assessment Date: ' + new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+        if (state.clientName) {
+            clientLine.textContent = 'Prepared for: ' + state.clientName;
+        } else {
+            clientLine.textContent = '';
+        }
+        document.getElementById('results-date-line').textContent = 'Assessment Date: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Composite
         document.getElementById('composite-score').textContent = Math.round(composite);
 
+        // --- RANKING ---
         const sections = [
             { name: 'People', emoji: '👥', problem: peopleProblem, color: '#3b82f6', colorLight: '#dbeafe' },
             { name: 'Process', emoji: '⚙️', problem: processProblem, color: '#10b981', colorLight: '#d1fae5' },
             { name: 'Perspective', emoji: '🧠', problem: perspProblem, color: '#8b5cf6', colorLight: '#ede9fe' }
-        ].sort((a, b) => b.problem - a.problem);
+        ];
+        sections.sort((a, b) => b.problem - a.problem);
 
         const badges = [
             { label: '🥇 Top Problem Area', bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', pulse: true },
@@ -631,51 +936,187 @@
             { label: '🥉 Lowest Problem Area', bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', pulse: false }
         ];
 
-        const rankContainer = document.getElementById('ranking-cards'); rankContainer.innerHTML = '';
+        const rankContainer = document.getElementById('ranking-cards');
+        rankContainer.innerHTML = '';
         sections.forEach((sec, i) => {
-            const badge = badges[i]; const card = document.createElement('div');
+            const badge = badges[i];
+            const card = document.createElement('div');
             card.className = `card-elevated ${badge.bg} border-2 ${badge.border} ${badge.pulse ? 'pulse-card' : ''} fade-in-up`;
-            card.innerHTML = `<p class="text-xs font-semibold ${badge.text} mb-2">${badge.label}</p><div class="flex items-center gap-2 mb-2"><span class="text-2xl">${sec.emoji}</span><h3 class="font-display font-bold text-txt text-lg">${sec.name}</h3></div><p class="text-3xl font-display font-bold tabular-nums" style="color:${sec.color}">${Math.round(sec.problem)}%</p><p class="text-xs text-txt/50 mt-1">Problem Score</p>`;
+            card.style.animationDelay = (i * 0.15) + 's';
+            card.innerHTML = `
+                <p class="text-xs font-semibold ${badge.text} mb-2">${badge.label}</p>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-2xl">${sec.emoji}</span>
+                    <h3 class="font-display font-bold text-txt text-lg">${sec.name}</h3>
+                </div>
+                <p class="text-3xl font-display font-bold tabular-nums" style="color:${sec.color}">${Math.round(sec.problem)}%</p>
+                <p class="text-xs text-txt/50 mt-1">Problem Score</p>
+            `;
             rankContainer.appendChild(card);
         });
 
+        // --- CHARTS ---
+        // Bar Chart
         const barCtx = document.getElementById('chart-bar-a1b2').getContext('2d');
         if (barChart) barChart.destroy();
-        barChart = new Chart(barCtx, { type: 'bar', data: { labels: ['People','Process','Perspective'], datasets: [{ label: 'Problem Score %', data: [Math.round(peopleProblem),Math.round(processProblem),Math.round(perspProblem)], backgroundColor: ['rgba(59,130,246,0.75)','rgba(16,185,129,0.75)','rgba(139,92,246,0.75)'], borderColor: ['#3b82f6','#10b981','#8b5cf6'], borderWidth: 2, borderRadius: 8, barThickness: 36 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.raw + '%' } } }, scales: { x: { min: 0, max: 100, ticks: { callback: v => v + '%', color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.15)' } }, y: { ticks: { color: '#1a1a2e', font: { family: 'Inter', weight: '600' } }, grid: { display: false } } } } });
+        barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ['People', 'Process', 'Perspective'],
+                datasets: [{
+                    label: 'Problem Score %',
+                    data: [Math.round(peopleProblem), Math.round(processProblem), Math.round(perspProblem)],
+                    backgroundColor: ['rgba(59,130,246,0.75)', 'rgba(16,185,129,0.75)', 'rgba(139,92,246,0.75)'],
+                    borderColor: ['#3b82f6', '#10b981', '#8b5cf6'],
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    barThickness: 36
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.raw + '%'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        min: 0, max: 100,
+                        ticks: { callback: v => v + '%', color: '#94a3b8' },
+                        grid: { color: 'rgba(148,163,184,0.15)' }
+                    },
+                    y: {
+                        ticks: { color: '#1a1a2e', font: { family: 'Inter', weight: '600' } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
 
+        // Doughnut Chart
         const doughCtx = document.getElementById('chart-doughnut-c3d4').getContext('2d');
         if (doughnutChart) doughnutChart.destroy();
-        doughnutChart = new Chart(doughCtx, { type: 'doughnut', data: { labels: ['People (35%)','Process (35%)','Perspective (30%)'], datasets: [{ data: [Math.round(peopleWeighted),Math.round(processWeighted),Math.round(perspWeighted)], backgroundColor: ['rgba(59,130,246,0.8)','rgba(16,185,129,0.8)','rgba(139,92,246,0.8)'], borderColor: ['#3b82f6','#10b981','#8b5cf6'], borderWidth: 2, hoverOffset: 8 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'bottom', labels: { color: '#64748b', font: { family: 'Inter', size: 11 }, padding: 12, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.raw + ' pts' } } } } });
+        doughnutChart = new Chart(doughCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['People (35%)', 'Process (35%)', 'Perspective (30%)'],
+                datasets: [{
+                    data: [Math.round(peopleWeighted), Math.round(processWeighted), Math.round(perspWeighted)],
+                    backgroundColor: ['rgba(59,130,246,0.8)', 'rgba(16,185,129,0.8)', 'rgba(139,92,246,0.8)'],
+                    borderColor: ['#3b82f6', '#10b981', '#8b5cf6'],
+                    borderWidth: 2,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#64748b', font: { family: 'Inter', size: 11 }, padding: 12, usePointStyle: true }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.label + ': ' + ctx.raw + ' pts'
+                        }
+                    }
+                }
+            }
+        });
 
-        const tableBody = document.getElementById('score-table-body'); tableBody.innerHTML = '';
+        // --- SCORE TABLE ---
+        const tableBody = document.getElementById('score-table-body');
+        tableBody.innerHTML = '';
         const rows = [
             { name: 'People', color: '#3b82f6', raw: peopleRaw, health: peopleHealth, problem: peopleProblem, weight: '35%', weighted: peopleWeighted },
             { name: 'Process', color: '#10b981', raw: processRaw, health: processHealth, problem: processProblem, weight: '35%', weighted: processWeighted },
             { name: 'Perspective', color: '#8b5cf6', raw: perspRaw, health: perspHealth, problem: perspProblem, weight: '30%', weighted: perspWeighted }
         ];
         rows.forEach(r => {
-            const tr = document.createElement('tr'); tr.className = 'border-b border-gray-100';
-            tr.innerHTML = `<td class="py-3 px-2 font-semibold text-sm"><span class="inline-block w-2.5 h-2.5 rounded-full mr-2" style="background:${r.color}"></span>${r.name}</td><td class="py-3 px-2 text-center tabular-nums">${r.raw.toFixed(1)}</td><td class="py-3 px-2 text-center tabular-nums">${Math.round(r.health)}%</td><td class="py-3 px-2 text-center tabular-nums font-semibold">${Math.round(r.problem)}%</td><td class="py-3 px-2 text-center">${r.weight}</td><td class="py-3 px-2 text-center tabular-nums font-semibold">${r.weighted.toFixed(1)}</td>`;
+            const tr = document.createElement('tr');
+            tr.className = 'border-b border-gray-100';
+            tr.innerHTML = `
+                <td class="py-3 px-2 font-semibold text-sm"><span class="inline-block w-2.5 h-2.5 rounded-full mr-2" style="background:${r.color}"></span>${r.name}</td>
+                <td class="py-3 px-2 text-center tabular-nums">${r.raw.toFixed(1)}</td>
+                <td class="py-3 px-2 text-center tabular-nums">${Math.round(r.health)}%</td>
+                <td class="py-3 px-2 text-center tabular-nums font-semibold">${Math.round(r.problem)}%</td>
+                <td class="py-3 px-2 text-center">${r.weight}</td>
+                <td class="py-3 px-2 text-center tabular-nums font-semibold">${r.weighted.toFixed(1)}</td>
+            `;
             tableBody.appendChild(tr);
         });
-        const totalTr = document.createElement('tr'); totalTr.className = 'border-t-2 border-gray-300 font-bold';
-        totalTr.innerHTML = `<td class="py-3 px-2 text-sm">Total</td><td class="py-3 px-2 text-center">—</td><td class="py-3 px-2 text-center">—</td><td class="py-3 px-2 text-center">—</td><td class="py-3 px-2 text-center">100%</td><td class="py-3 px-2 text-center tabular-nums" style="color:#a8893a">${composite.toFixed(1)}</td>`;
+        // Total row
+        const totalTr = document.createElement('tr');
+        totalTr.className = 'border-t-2 border-gray-300 font-bold';
+        totalTr.innerHTML = `
+            <td class="py-3 px-2 text-sm">Total</td>
+            <td class="py-3 px-2 text-center">—</td>
+            <td class="py-3 px-2 text-center">—</td>
+            <td class="py-3 px-2 text-center">—</td>
+            <td class="py-3 px-2 text-center">100%</td>
+            <td class="py-3 px-2 text-center tabular-nums text-gold-dark">${composite.toFixed(1)}</td>
+        `;
         tableBody.appendChild(totalTr);
 
-        const insightsContainer = document.getElementById('insights-container'); insightsContainer.innerHTML = '';
+        // --- INSIGHTS ---
+        const insightsContainer = document.getElementById('insights-container');
+        insightsContainer.innerHTML = '';
+
         const insightData = [
-            { name: 'People', emoji: '👥', color: '#3b82f6', bg: 'bg-blue-50', border: 'border-blue-200', problem: peopleProblem, high: "Your relational environment appears to be a significant source of financial friction. The people closest to you may be modeling or reinforcing limiting money behaviors. This is a primary area to explore in coaching.", mid: "Some of your close relationships show signs of financial tension or misalignment. Selective boundary-setting and conversation around money may be beneficial.", low: "Your relational network appears to be a strength. The people around you are largely contributing positively to your financial health." },
-            { name: 'Process', emoji: '⚙️', color: '#10b981', bg: 'bg-emerald-50', border: 'border-emerald-200', problem: processProblem, high: "Your day-to-day financial behaviors show significant reactive and avoidant patterns. Building consistent money processes and systems is a critical coaching priority.", mid: "You show some reactive money behaviors and occasional avoidance. Developing a structured financial routine will help bring clarity and reduce stress.", low: "Your financial processes and behaviors are largely functional. Small refinements to your systems could yield meaningful gains." },
-            { name: 'Perspective', emoji: '🧠', color: '#8b5cf6', bg: 'bg-violet-50', border: 'border-violet-200', problem: perspProblem, high: "Deep-rooted beliefs, environmental conditioning, and a scarcity lens are likely shaping your financial outcomes in a major way. Mindset work is foundational to your progress.", mid: "Your money perspective has some limiting elements, particularly around beliefs or upbringing. Intentional mindset development will support your financial transformation.", low: "Your perspective on money is largely healthy and growth-oriented. Continue to reinforce an abundance mindset and empowering beliefs." }
+            {
+                name: 'People', emoji: '👥', color: '#3b82f6', bg: 'bg-blue-50', border: 'border-blue-200',
+                problem: peopleProblem,
+                high: "Your relational environment appears to be a significant source of financial friction. The people closest to you may be modeling or reinforcing limiting money behaviors. This is a primary area to explore in coaching.",
+                mid: "Some of your close relationships show signs of financial tension or misalignment. Selective boundary-setting and conversation around money may be beneficial.",
+                low: "Your relational network appears to be a strength. The people around you are largely contributing positively to your financial health."
+            },
+            {
+                name: 'Process', emoji: '⚙️', color: '#10b981', bg: 'bg-emerald-50', border: 'border-emerald-200',
+                problem: processProblem,
+                high: "Your day-to-day financial behaviors show significant reactive and avoidant patterns. Building consistent money processes and systems is a critical coaching priority.",
+                mid: "You show some reactive money behaviors and occasional avoidance. Developing a structured financial routine will help bring clarity and reduce stress.",
+                low: "Your financial processes and behaviors are largely functional. Small refinements to your systems could yield meaningful gains."
+            },
+            {
+                name: 'Perspective', emoji: '🧠', color: '#8b5cf6', bg: 'bg-violet-50', border: 'border-violet-200',
+                problem: perspProblem,
+                high: "Deep-rooted beliefs, environmental conditioning, and a scarcity lens are likely shaping your financial outcomes in a major way. Mindset work is foundational to your progress.",
+                mid: "Your money perspective has some limiting elements, particularly around beliefs or upbringing. Intentional mindset development will support your financial transformation.",
+                low: "Your perspective on money is largely healthy and growth-oriented. Continue to reinforce an abundance mindset and empowering beliefs."
+            }
         ];
+
         insightData.forEach(ins => {
-            const text = ins.problem > 60 ? ins.high : ins.problem >= 30 ? ins.mid : ins.low;
-            const div = document.createElement('div'); div.className = `card-elevated ${ins.bg} border-l-4 ${ins.border} fade-in-up`;
-            div.innerHTML = `<div class="flex items-center gap-2 mb-2"><span class="text-lg">${ins.emoji}</span><h4 class="font-display font-semibold text-txt text-sm">${ins.name} Insight</h4><span class="ml-auto text-xs font-bold tabular-nums px-2 py-0.5 rounded-full" style="background:${ins.color}20;color:${ins.color}">${Math.round(ins.problem)}% problem</span></div><p class="text-txt/70 text-sm leading-relaxed">${text}</p>`;
+            let text = '';
+            if (ins.problem > 60) text = ins.high;
+            else if (ins.problem >= 30) text = ins.mid;
+            else text = ins.low;
+
+            const div = document.createElement('div');
+            div.className = `card-elevated ${ins.bg} border-l-4 ${ins.border} fade-in-up`;
+            div.innerHTML = `
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-lg">${ins.emoji}</span>
+                    <h4 class="font-display font-semibold text-txt text-sm">${ins.name} Insight</h4>
+                    <span class="ml-auto text-xs font-bold tabular-nums px-2 py-0.5 rounded-full" style="background:${ins.color}20;color:${ins.color}">${Math.round(ins.problem)}% problem</span>
+                </div>
+                <p class="text-txt/70 text-sm leading-relaxed">${text}</p>
+            `;
             insightsContainer.appendChild(div);
         });
     }
 
+    // =========================================================
+    // INIT — show welcome
+    // =========================================================
     goToStep('welcome');
     </script>
 </body>
