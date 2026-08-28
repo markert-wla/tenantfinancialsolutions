@@ -284,7 +284,7 @@
   <script>
     if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") { lucide.createIcons(); }
 
-    const state = { currentScreen: 0, initialGuess: 0, motivations: [], liquidSavings: 0, totalDebt: 0, monthlyMargin: 0, weightedValue: 0, rangeLow: 0, rangeHigh: 0, rangeMidpoint: 0, suggested: 0, recommended: 0, clientName: '' };
+    const state = { currentScreen: 0, initialGuess: 0, motivations: [], liquidSavings: 0, liquidSavingsEntered: 0, totalDebt: 0, monthlyMargin: 0, weightedValue: 0, rangeLow: 0, rangeHigh: 0, rangeMidpoint: 0, suggested: 0, recommended: 0, clientName: '' };
 
     // This tool deliberately counts liquid savings only up to this amount.
     const SAVINGS_CAP = 10000;
@@ -327,13 +327,18 @@
     const marginInput = document.getElementById('input-margin');
     const liveCalc = document.getElementById('live-calc');
 
-    function computeWeightedValue(s, d, m) { return d >= s ? m * 0.5 : (s + m) / 2; }
+    // Debt is compared against the client's FULL savings figure; only the amount used
+    // inside the formula is capped at SAVINGS_CAP.
+    function computeWeightedValue(sCapped, d, m, sFull) {
+      const compareAgainst = (typeof sFull === 'number' ? sFull : sCapped);
+      return d >= compareAgainst ? m * 0.5 : (sCapped + m) / 2;
+    }
 
     function updateLiveCalc() {
       const entered = parseDollar(savingsInput.value); const s = capSavings(entered); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
       document.getElementById('savings-cap-note').classList.toggle('hidden', entered <= SAVINGS_CAP);
       if (s > 0 && m > 0) {
-        const debtExceedsSavings = d >= s; const wv = computeWeightedValue(s, d, m);
+        const debtExceedsSavings = d >= entered; const wv = computeWeightedValue(s, d, m, entered);
         const lo = wv * 0.20; const hi = wv * 0.40;
         document.getElementById('calc-wv').textContent = fmt(wv);
         document.getElementById('calc-range').textContent = fmtRound50(lo) + ' – ' + fmtRound50(hi);
@@ -361,7 +366,7 @@
     });
 
     function calculate() {
-      state.weightedValue = computeWeightedValue(state.liquidSavings, state.totalDebt, state.monthlyMargin);
+      state.weightedValue = computeWeightedValue(state.liquidSavings, state.totalDebt, state.monthlyMargin, state.liquidSavingsEntered);
       state.rangeLow = state.weightedValue * 0.20; state.rangeHigh = state.weightedValue * 0.40; state.rangeMidpoint = state.weightedValue * 0.30;
       let raw = (state.initialGuess * 0.4) + (state.rangeMidpoint * 0.6);
       if (raw < state.rangeLow * 0.85) raw = state.rangeLow;
@@ -387,13 +392,13 @@
     });
 
     document.getElementById('btn-numbers').addEventListener('click', function () {
-      const s = capSavings(parseDollar(savingsInput.value)); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
+      const entered = parseDollar(savingsInput.value); const s = capSavings(entered); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
       const err = document.getElementById('error-numbers');
       const savingsRaw = savingsInput.value.replace(/[^0-9]/g, ''); const marginRaw = marginInput.value.replace(/[^0-9]/g, '');
       if (!savingsRaw || !marginRaw) { err.textContent = 'Please fill in all three fields to continue.'; err.classList.add('show'); return; }
       if (s <= 0 && m <= 0) { err.textContent = 'Please enter at least one value greater than $0.'; err.classList.add('show'); return; }
       err.classList.remove('show');
-      state.liquidSavings = s; state.totalDebt = d; state.monthlyMargin = m; calculate(); populateComparison(); showScreen(4);
+      state.liquidSavings = s; state.liquidSavingsEntered = entered; state.totalDebt = d; state.monthlyMargin = m; calculate(); populateComparison(); showScreen(4);
     });
 
     document.getElementById('btn-compare').addEventListener('click', function () { populateResult(); showScreen(5); });
@@ -447,7 +452,7 @@
     });
 
     document.getElementById('btn-restart').addEventListener('click', function () {
-      state.initialGuess = 0; state.motivations = []; state.liquidSavings = 0; state.totalDebt = 0; state.monthlyMargin = 0; state.weightedValue = 0; state.rangeLow = 0; state.rangeHigh = 0; state.rangeMidpoint = 0; state.suggested = 0; state.recommended = 0; state.clientName = '';
+      state.initialGuess = 0; state.motivations = []; state.liquidSavings = 0; state.liquidSavingsEntered = 0; state.totalDebt = 0; state.monthlyMargin = 0; state.weightedValue = 0; state.rangeLow = 0; state.rangeHigh = 0; state.rangeMidpoint = 0; state.suggested = 0; state.recommended = 0; state.clientName = '';
       document.getElementById('input-guess').value = ''; savingsInput.value = ''; debtInput.value = ''; marginInput.value = ''; document.getElementById('input-name').value = ''; liveCalc.style.display = 'none';
       document.getElementById('savings-cap-note').classList.add('hidden');
       motivGrid.querySelectorAll('.motivation-card.selected').forEach(c => { c.classList.remove('selected'); const icon = c.querySelector('i[data-lucide="check"]'); if (icon) icon.classList.add('hidden'); });
