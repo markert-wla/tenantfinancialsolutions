@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TFS HOP Goal Setting Sheet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        navy: '#0F1F3D',
+        gold: '#C9A84C',
+        'gold-light': '#FDF3DC',
+        'page-bg': '#F8F9FB',
+        'habit-dark': '#1E3A8A',
+        'habit-light': '#DBEAFE',
+        'outcome-dark': '#065F46',
+        'outcome-light': '#D1FAE5',
+        'perf-dark': '#92400E',
+        'perf-light': '#FEF3C7'
+      }
+    }
+  }
+};
+</script>
+<style>
+:root {
+  --navy: #0F1F3D;
+  --gold: #C9A84C;
+  --gold-light: #FDF3DC;
+  --page-bg: #F8F9FB;
+  --habit-dark: #1E3A8A;
+  --habit-light: #DBEAFE;
+  --outcome-dark: #065F46;
+  --outcome-light: #D1FAE5;
+  --perf-dark: #92400E;
+  --perf-light: #FEF3C7;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--page-bg); color: #1e293b; }
+.card-shadow { box-shadow: var(--card-shadow); }
+.tabular-nums { font-variant-numeric: tabular-nums; }
+.hop-input {
+  width: 100%;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+  resize: vertical;
+}
+.hop-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+.hop-input::placeholder { color: #C4CAD4; font-style: italic; }
+.saved-flash { animation: savedFlash 0.5s; }
+@keyframes savedFlash { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 0 3px rgba(34,197,94,0.35); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-40px); opacity: 0; } }
+.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 12px 20px; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideInRight 0.3s; max-width: 340px; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,31,61,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.25s; padding: 16px; }
+.modal-card { background: #fff; border-radius: 20px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; }
+.status-select { border: 1px solid #E5E7EB; border-radius: 8px; padding: 6px 8px; font-size: 12px; background: #fff; outline: none; width: 100%; }
+.row-card { border: 1px solid #E5E7EB; border-radius: 12px; padding: 12px; background: #fff; }
+.remove-row { opacity: 0; transition: opacity 0.15s; }
+.row-card:hover .remove-row { opacity: 1; }
+.ex-row { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 6px 0; border-bottom: 1px dashed #E5E7EB; }
+.ex-row:last-child { border-bottom: none; }
+.progress-track { width: 100%; height: 8px; background: #E5E7EB; border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 8px; background: var(--gold); border-radius: 999px; transition: width 0.4s ease; }
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff !important; }
+  .hop-input { border: 1px solid #CBD5E1 !important; box-shadow: none !important; }
+  .row-card, .card-shadow { box-shadow: none !important; border: 1px solid #E5E7EB !important; break-inside: avoid; }
+  section, .row-card { break-inside: avoid; }
+  @page { margin: 14mm; }
+}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 no-print" style="background:var(--navy);">
+  <div class="flex items-center justify-between px-4 py-3 gap-3 flex-wrap">
+    <div>
+      <span style="color:var(--gold);font-size:28px;font-weight:800;">TFS</span>
+      <div style="color:#fff;font-size:13px;">HOP Goal Setting Sheet</div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="print-btn" class="px-3 py-1.5 rounded-lg text-sm font-semibold" style="color:var(--gold);border:1px solid var(--gold);background:transparent;">🖨️ Print</button>
+      <button id="reset-btn" class="px-3 py-1.5 rounded-lg text-sm font-semibold border border-red-400 text-red-300 hover:bg-red-500/10">Reset</button>
+    </div>
+  </div>
+  <div class="flex flex-wrap items-center gap-4 px-4 py-2" style="background:#F1F5F9;">
+    <div class="flex items-center gap-2 text-sm">
+      <label class="font-semibold" style="color:var(--navy);">Client Name:</label>
+      <input id="client-name" type="text" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-44" placeholder="Enter name" />
+    </div>
+    <div class="flex items-center gap-2 text-sm">
+      <label class="font-semibold" style="color:var(--navy);">Date:</label>
+      <input id="session-date" type="date" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm" />
+    </div>
+    <div class="flex items-center gap-2 text-sm ml-auto">
+      <span class="text-xs text-gray-500" id="save-status">Saved automatically</span>
+    </div>
+  </div>
+</header>
+
+<main class="px-4 py-6 max-w-6xl mx-auto">
+
+  <!-- TITLE BLOCK -->
+  <div class="rounded-2xl p-5 md:p-6 mb-6" style="background:var(--navy);">
+    <h1 class="text-white font-bold text-xl md:text-2xl">HOP Goal Setting Sheet</h1>
+    <p class="text-sm mt-1" style="color:var(--gold);">Habits · Outcomes · Performance</p>
+    <p class="text-white/70 text-sm mt-3 max-w-3xl leading-relaxed">
+      Great financial goals are built on three layers. <strong class="text-white">Habits</strong> are the small repeatable actions you control every day.
+      <strong class="text-white">Outcomes</strong> are the results those habits produce over time. <strong class="text-white">Performance</strong> is how
+      consistently you show up and how you measure it. Work down the sheet with your coach — habits first.
+    </p>
+  </div>
+
+  <!-- THREE DEFINITION CARDS -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="rounded-2xl overflow-hidden card-shadow bg-white">
+      <div class="h-1.5" style="background:var(--habit-dark);"></div>
+      <div class="p-4">
+        <span class="pill" style="background:var(--habit-light);color:var(--habit-dark);">H — Habits</span>
+        <p class="text-sm text-gray-600 mt-2 leading-relaxed">The daily and weekly actions you fully control. Small, repeatable, and specific enough to tick off.</p>
+      </div>
+    </div>
+    <div class="rounded-2xl overflow-hidden card-shadow bg-white">
+      <div class="h-1.5" style="background:var(--outcome-dark);"></div>
+      <div class="p-4">
+        <span class="pill" style="background:var(--outcome-light);color:var(--outcome-dark);">O — Outcomes</span>
+        <p class="text-sm text-gray-600 mt-2 leading-relaxed">The results your habits create — the number, the milestone, the change you'll be able to point at.</p>
+      </div>
+    </div>
+    <div class="rounded-2xl overflow-hidden card-shadow bg-white">
+      <div class="h-1.5" style="background:var(--perf-dark);"></div>
+      <div class="p-4">
+        <span class="pill" style="background:var(--perf-light);color:var(--perf-dark);">P — Performance</span>
+        <p class="text-sm text-gray-600 mt-2 leading-relaxed">How you'll measure consistency — the check-in, the score, the review that keeps you honest.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXAMPLES -->
+  <section class="mb-6">
+    <button id="examples-toggle" class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm no-print" style="background:var(--gold-light);color:var(--navy);border:1px solid var(--gold);">
+      💡 <span id="examples-toggle-label">Show Examples</span>
+    </button>
+    <div id="examples-panel" class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4" style="display:none;">
+      <div class="bg-white rounded-2xl card-shadow p-4">
+        <span class="pill" style="background:var(--habit-light);color:var(--habit-dark);">Habit examples</span>
+        <div class="mt-2">
+          <div class="ex-row"><span>•</span><span>Check my account balance every morning before coffee.</span></div>
+          <div class="ex-row"><span>•</span><span>Move $25 to savings every payday, automatically.</span></div>
+          <div class="ex-row"><span>•</span><span>Wait 24 hours before any purchase over my Press Pause Number.</span></div>
+          <div class="ex-row"><span>•</span><span>Pack lunch four weekdays out of five.</span></div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl card-shadow p-4">
+        <span class="pill" style="background:var(--outcome-light);color:var(--outcome-dark);">Outcome examples</span>
+        <div class="mt-2">
+          <div class="ex-row"><span>•</span><span>$1,000 starter emergency fund in place.</span></div>
+          <div class="ex-row"><span>•</span><span>Smallest credit card paid to zero.</span></div>
+          <div class="ex-row"><span>•</span><span>Rent paid on the 1st for six months straight.</span></div>
+          <div class="ex-row"><span>•</span><span>Two unused subscriptions cancelled.</span></div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl card-shadow p-4">
+        <span class="pill" style="background:var(--perf-light);color:var(--perf-dark);">Performance examples</span>
+        <div class="mt-2">
+          <div class="ex-row"><span>•</span><span>Weekly 15-minute money check-in every Sunday.</span></div>
+          <div class="ex-row"><span>•</span><span>Track habit streak on the calendar — aim for 4/5 days.</span></div>
+          <div class="ex-row"><span>•</span><span>Review spending buckets with my coach each month.</span></div>
+          <div class="ex-row"><span>•</span><span>Score myself 1–5 on consistency at every session.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANNING GRID -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+
+      <section id="section-habits">
+        <div class="rounded-t-xl px-4 py-3 flex items-center justify-between" style="background:var(--habit-dark);color:#fff;">
+          <div>
+            <span class="font-bold text-sm">🔁 Habits</span>
+            <div class="text-xs opacity-80">What I will do, repeatedly</div>
+          </div>
+          <button class="add-row-btn text-xs font-semibold px-3 py-1.5 rounded-lg no-print" data-cat="habits" style="background:rgba(255,255,255,0.15);color:#fff;">+ Add Habit</button>
+        </div>
+        <div class="bg-white rounded-b-xl card-shadow p-3 space-y-3" id="rows-habits"></div>
+      </section>
+
+      <section id="section-outcomes">
+        <div class="rounded-t-xl px-4 py-3 flex items-center justify-between" style="background:var(--outcome-dark);color:#fff;">
+          <div>
+            <span class="font-bold text-sm">🎯 Outcomes</span>
+            <div class="text-xs opacity-80">What those habits will produce</div>
+          </div>
+          <button class="add-row-btn text-xs font-semibold px-3 py-1.5 rounded-lg no-print" data-cat="outcomes" style="background:rgba(255,255,255,0.15);color:#fff;">+ Add Outcome</button>
+        </div>
+        <div class="bg-white rounded-b-xl card-shadow p-3 space-y-3" id="rows-outcomes"></div>
+      </section>
+
+      <section id="section-performance">
+        <div class="rounded-t-xl px-4 py-3 flex items-center justify-between" style="background:var(--perf-dark);color:#fff;">
+          <div>
+            <span class="font-bold text-sm">📈 Performance</span>
+            <div class="text-xs opacity-80">How I will measure and stay honest</div>
+          </div>
+          <button class="add-row-btn text-xs font-semibold px-3 py-1.5 rounded-lg no-print" data-cat="performance" style="background:rgba(255,255,255,0.15);color:#fff;">+ Add Measure</button>
+        </div>
+        <div class="bg-white rounded-b-xl card-shadow p-3 space-y-3" id="rows-performance"></div>
+      </section>
+
+      <!-- COMMITMENT -->
+      <section class="bg-white rounded-2xl card-shadow p-4 border-2 border-dashed" style="border-color:var(--gold);">
+        <h3 class="font-bold text-sm mb-1" style="color:var(--navy);">✍️ My Commitment</h3>
+        <p class="text-xs text-gray-500 mb-3">One sentence, in your own words — what you're committing to between now and the next session.</p>
+        <textarea id="commitment" rows="3" class="hop-input" placeholder="Between now and my next session, I will..."></textarea>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+          <div>
+            <label class="text-xs font-semibold text-gray-600">Next check-in date</label>
+            <input id="checkin-date" type="date" class="hop-input mt-1" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-gray-600">Accountability partner</label>
+            <input id="partner" type="text" class="hop-input mt-1" placeholder="Who will you tell?" />
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="space-y-4">
+      <div class="rounded-2xl p-4 card-shadow" style="background:var(--gold-light);border:1px solid var(--gold);">
+        <h3 class="font-bold text-sm mb-2" style="color:var(--navy);">TFS Principles</h3>
+        <ol class="text-sm text-gray-700 space-y-2 list-decimal list-inside leading-relaxed">
+          <li><strong>Habits before outcomes.</strong> You control the action, not the result.</li>
+          <li><strong>Small and specific wins.</strong> A goal you can do on a bad day is a goal that sticks.</li>
+          <li><strong>Measure what matters.</strong> If it isn't tracked, it isn't real.</li>
+          <li><strong>Progress over perfection.</strong> Four out of five days is a success, not a failure.</li>
+          <li><strong>Say it out loud.</strong> Commitments shared with someone else get kept.</li>
+        </ol>
+      </div>
+
+      <div class="rounded-2xl p-4 card-shadow bg-white">
+        <h3 class="font-bold text-sm mb-2" style="color:var(--navy);">📊 Progress</h3>
+        <div class="text-xs text-gray-500 mb-1"><span id="progress-label">0 of 0 goals complete</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+          <div><div class="text-lg font-bold tabular-nums" id="count-habits" style="color:var(--habit-dark);">0</div><div class="text-[10px] text-gray-500 uppercase">Habits</div></div>
+          <div><div class="text-lg font-bold tabular-nums" id="count-outcomes" style="color:var(--outcome-dark);">0</div><div class="text-[10px] text-gray-500 uppercase">Outcomes</div></div>
+          <div><div class="text-lg font-bold tabular-nums" id="count-performance" style="color:var(--perf-dark);">0</div><div class="text-[10px] text-gray-500 uppercase">Measures</div></div>
+        </div>
+      </div>
+
+      <div class="rounded-2xl p-4 card-shadow" style="background:var(--perf-light);">
+        <h3 class="font-bold text-sm mb-1" style="color:var(--perf-dark);">💬 Coach Tip</h3>
+        <p class="text-sm text-gray-700 leading-relaxed">
+          If a client jumps straight to an outcome ("I want to be debt free"), gently walk them back a step:
+          <em>"What would you have to do every week for that to happen?"</em> The answer is the habit — write that down first.
+          Outcomes without habits are wishes.
+        </p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="text-center py-6 text-xs text-gray-400">
+  Tenant Financial Solutions — HOP Goal Setting Sheet · Habits · Outcomes · Performance
+</footer>
+
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal" class="modal-overlay no-print" style="display:none;">
+  <div class="modal-card p-6">
+    <p id="confirm-text" class="text-sm text-gray-700 mb-4"></p>
+    <div class="flex gap-2 justify-end">
+      <button id="confirm-no" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-500 bg-gray-100">Cancel</button>
+      <button id="confirm-yes" class="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-red-600">Yes, reset</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container no-print"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var CATS = ['habits', 'outcomes', 'performance'];
+  var LABELS = {
+    habits:      { goal: 'The habit',   goalPh: 'e.g. Move $25 to savings every payday',           why: 'Why it matters',        whyPh: 'What does this protect or make possible?', measure: 'How often',   measurePh: 'e.g. Every payday / 5 days a week' },
+    outcomes:    { goal: 'The outcome', goalPh: 'e.g. $1,000 starter emergency fund in place',     why: 'Why it matters',        whyPh: 'What changes for you when this happens?',   measure: 'How I will know', measurePh: 'e.g. Savings balance hits $1,000' },
+    performance: { goal: 'The measure', goalPh: 'e.g. Weekly 15-minute money check-in on Sunday',  why: 'What it keeps honest',  whyPh: 'Which habit or outcome does this track?',   measure: 'Target',      measurePh: 'e.g. 4 of 5 weeks' }
+  };
+  var COLORS = {
+    habits:      { dark: '#1E3A8A', light: '#DBEAFE' },
+    outcomes:    { dark: '#065F46', light: '#D1FAE5' },
+    performance: { dark: '#92400E', light: '#FEF3C7' }
+  };
+  var STATUSES = ['Not started', 'In progress', 'Done'];
+
+  var state = {
+    clientName: '',
+    sessionDate: '',
+    commitment: '',
+    checkinDate: '',
+    partner: '',
+    examplesOpen: false,
+    rows: { habits: [], outcomes: [], performance: [] }
+  };
+  var confirmCallback = null;
+  var saveTimer = null;
+
+  function uid() { return 'r_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+  function blankRow() { return { id: uid(), goal: '', why: '', measure: '', target: '', status: 'Not started' }; }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  // ---------- persistence ----------
+  var SDK = (typeof window !== 'undefined' && window.AppSDK) ? window.AppSDK : null;
+  var KEY = 'tfs_hop_goal_state';
+
+  function saveState() {
+    try {
+      var json = JSON.stringify(state);
+      if (SDK && SDK.storage && SDK.storage.set) {
+        Promise.resolve(SDK.storage.set(KEY, json)).catch(function () {
+          try { localStorage.setItem(KEY, json); } catch (e) {}
+        });
+      } else {
+        localStorage.setItem(KEY, json);
+      }
+    } catch (e) {}
+    flagSaved();
+  }
+
+  function loadState() {
+    return new Promise(function (resolve) {
+      function fromRaw(raw) {
+        if (raw) {
+          try {
+            var parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') {
+              state = Object.assign({}, state, parsed);
+              state.rows = Object.assign({ habits: [], outcomes: [], performance: [] }, parsed.rows || {});
+              return true;
+            }
+          } catch (e) {}
+        }
+        return false;
+      }
+      if (SDK && SDK.storage && SDK.storage.get) {
+        Promise.resolve(SDK.storage.get(KEY)).then(function (raw) {
+          if (!fromRaw(raw)) { try { fromRaw(localStorage.getItem(KEY)); } catch (e) {} }
+          resolve();
+        }).catch(function () {
+          try { fromRaw(localStorage.getItem(KEY)); } catch (e) {}
+          resolve();
+        });
+      } else {
+        try { fromRaw(localStorage.getItem(KEY)); } catch (e) {}
+        resolve();
+      }
+    });
+  }
+
+  function clearStorage() {
+    try {
+      if (SDK && SDK.storage && SDK.storage.delete) { Promise.resolve(SDK.storage.delete(KEY)).catch(function () {}); }
+      localStorage.removeItem(KEY);
+    } catch (e) {}
+  }
+
+  function flagSaved() {
+    var el = document.getElementById('save-status');
+    if (!el) return;
+    el.textContent = 'Saved ✓';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { el.textContent = 'Saved automatically'; }, 1500);
+  }
+
+  // ---------- toast ----------
+  function showToast(msg, color) {
+    var c = document.getElementById('toast-container');
+    if (!c) return;
+    var el = document.createElement('div');
+    el.className = 'toast';
+    el.style.background = color || '#22c55e';
+    el.textContent = msg;
+    c.appendChild(el);
+    setTimeout(function () {
+      el.style.animation = 'slideUp 0.3s forwards';
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+    }, 2600);
+  }
+
+  function showConfirm(msg, cb) {
+    document.getElementById('confirm-text').textContent = msg;
+    document.getElementById('confirm-modal').style.display = 'flex';
+    confirmCallback = cb;
+  }
+
+  // ---------- rendering ----------
+  function renderRows(cat) {
+    var container = document.getElementById('rows-' + cat);
+    if (!container) return;
+    container.innerHTML = '';
+    var rows = state.rows[cat] || [];
+
+    if (rows.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'text-sm text-gray-400 italic text-center py-6';
+      empty.textContent = 'Nothing here yet — use the button above to add your first entry.';
+      container.appendChild(empty);
+      return;
+    }
+
+    rows.forEach(function (row, idx) {
+      var L = LABELS[cat];
+      var C = COLORS[cat];
+      var card = document.createElement('div');
+      card.className = 'row-card';
+      card.innerHTML =
+        '<div class="flex items-center justify-between mb-2">' +
+          '<span class="pill" style="background:' + C.light + ';color:' + C.dark + ';">#' + (idx + 1) + '</span>' +
+          '<button class="remove-row text-xs text-gray-300 hover:text-red-500 no-print" title="Remove">✕ Remove</button>' +
+        '</div>' +
+        '<label class="text-xs font-semibold text-gray-600">' + L.goal + '</label>' +
+        '<textarea class="hop-input mt-1" data-field="goal" rows="2" placeholder="' + esc(L.goalPh) + '">' + esc(row.goal) + '</textarea>' +
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">' +
+          '<div>' +
+            '<label class="text-xs font-semibold text-gray-600">' + L.why + '</label>' +
+            '<textarea class="hop-input mt-1" data-field="why" rows="2" placeholder="' + esc(L.whyPh) + '">' + esc(row.why) + '</textarea>' +
+          '</div>' +
+          '<div>' +
+            '<label class="text-xs font-semibold text-gray-600">' + L.measure + '</label>' +
+            '<textarea class="hop-input mt-1" data-field="measure" rows="2" placeholder="' + esc(L.measurePh) + '">' + esc(row.measure) + '</textarea>' +
+          '</div>' +
+        '</div>' +
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">' +
+          '<div>' +
+            '<label class="text-xs font-semibold text-gray-600">Target date</label>' +
+            '<input type="date" class="hop-input mt-1" data-field="target" value="' + esc(row.target) + '" />' +
+          '</div>' +
+          '<div>' +
+            '<label class="text-xs font-semibold text-gray-600">Status</label>' +
+            '<select class="status-select mt-1" data-field="status">' +
+              STATUSES.map(function (s) {
+                return '<option value="' + s + '"' + (row.status === s ? ' selected' : '') + '>' + s + '</option>';
+              }).join('') +
+            '</select>' +
+          '</div>' +
+        '</div>';
+
+      Array.prototype.forEach.call(card.querySelectorAll('[data-field]'), function (el) {
+        var field = el.getAttribute('data-field');
+        var evt = (el.tagName === 'SELECT' || el.type === 'date') ? 'change' : 'input';
+        el.addEventListener(evt, function () {
+          row[field] = el.value;
+          saveState();
+          if (field === 'status') { el.classList.add('saved-flash'); setTimeout(function () { el.classList.remove('saved-flash'); }, 500); renderProgress(); }
+        });
+      });
+
+      card.querySelector('.remove-row').addEventListener('click', function () {
+        state.rows[cat] = state.rows[cat].filter(function (r) { return r.id !== row.id; });
+        saveState();
+        renderRows(cat);
+        renderProgress();
+        showToast('Entry removed', '#EF4444');
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+  function renderProgress() {
+    var total = 0, done = 0;
+    CATS.forEach(function (cat) {
+      var rows = state.rows[cat] || [];
+      var counted = rows.filter(function (r) { return (r.goal || '').trim() !== ''; });
+      total += counted.length;
+      done += counted.filter(function (r) { return r.status === 'Done'; }).length;
+      var el = document.getElementById('count-' + cat);
+      if (el) el.textContent = counted.length;
+    });
+    var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = done + ' of ' + total + ' goal' + (total === 1 ? '' : 's') + ' complete';
+  }
+
+  function renderAll() {
+    CATS.forEach(renderRows);
+    renderProgress();
+  }
+
+  // ---------- init ----------
+  function bindTopFields() {
+    var map = [
+      ['client-name', 'clientName', 'input'],
+      ['session-date', 'sessionDate', 'change'],
+      ['commitment', 'commitment', 'input'],
+      ['checkin-date', 'checkinDate', 'change'],
+      ['partner', 'partner', 'input']
+    ];
+    map.forEach(function (m) {
+      var el = document.getElementById(m[0]);
+      if (!el) return;
+      el.value = state[m[1]] || '';
+      el.addEventListener(m[2], function () { state[m[1]] = el.value; saveState(); });
+    });
+  }
+
+  function bindButtons() {
+    Array.prototype.forEach.call(document.querySelectorAll('.add-row-btn'), function (btn) {
+      btn.addEventListener('click', function () {
+        var cat = btn.getAttribute('data-cat');
+        state.rows[cat].push(blankRow());
+        saveState();
+        renderRows(cat);
+        renderProgress();
+        var container = document.getElementById('rows-' + cat);
+        var last = container.querySelector('.row-card:last-child textarea');
+        if (last) last.focus();
+      });
+    });
+
+    var exToggle = document.getElementById('examples-toggle');
+    exToggle.addEventListener('click', function () {
+      state.examplesOpen = !state.examplesOpen;
+      applyExamples();
+      saveState();
+    });
+
+    document.getElementById('print-btn').addEventListener('click', function () { window.print(); });
+
+    document.getElementById('reset-btn').addEventListener('click', function () {
+      showConfirm('This clears everything on this sheet and starts fresh. Are you sure?', function () {
+        clearStorage();
+        state = {
+          clientName: '', sessionDate: '', commitment: '', checkinDate: '', partner: '',
+          examplesOpen: false, rows: { habits: [], outcomes: [], performance: [] }
+        };
+        seedIfEmpty();
+        ['client-name', 'session-date', 'commitment', 'checkin-date', 'partner'].forEach(function (id) {
+          var el = document.getElementById(id); if (el) el.value = '';
+        });
+        applyExamples();
+        saveState();
+        renderAll();
+        showToast('Sheet reset', '#6B7280');
+      });
+    });
+
+    document.getElementById('confirm-yes').addEventListener('click', function () {
+      document.getElementById('confirm-modal').style.display = 'none';
+      if (confirmCallback) confirmCallback();
+      confirmCallback = null;
+    });
+    document.getElementById('confirm-no').addEventListener('click', function () {
+      document.getElementById('confirm-modal').style.display = 'none';
+      confirmCallback = null;
+    });
+  }
+
+  function applyExamples() {
+    document.getElementById('examples-panel').style.display = state.examplesOpen ? 'grid' : 'none';
+    document.getElementById('examples-toggle-label').textContent = state.examplesOpen ? 'Hide Examples' : 'Show Examples';
+  }
+
+  function seedIfEmpty() {
+    CATS.forEach(function (cat) {
+      if (!state.rows[cat] || state.rows[cat].length === 0) {
+        state.rows[cat] = [blankRow(), blankRow()];
+      }
+    });
+  }
+
+  function start() {
+    loadState().then(function () {
+      seedIfEmpty();
+      if (!state.sessionDate) {
+        var d = new Date();
+        state.sessionDate = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+      bindTopFields();
+      bindButtons();
+      applyExamples();
+      renderAll();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+</script>
+</body>
+</html>

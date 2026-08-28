@@ -31,6 +31,16 @@ const tools = [
     badgeColor: 'bg-blue-900/50 text-blue-300',
     href: '/tools/spending-audit.html',
   },
+  {
+    id: 'hop-goal-setting',
+    title: 'HOP Goal Setting Sheet',
+    subtitle: 'Habits · Outcomes · Performance',
+    description: 'An interactive goal-setting sheet where clients build goals in three layers — the Habits they control, the Outcomes those habits produce, and the Performance measures that keep them honest. Includes worked examples, a commitment statement, progress tracking and a print-ready layout.',
+    emoji: '🎯',
+    color: 'from-amber-900/40 to-amber-950/40 border-amber-700/30',
+    badgeColor: 'bg-amber-900/50 text-amber-300',
+    href: '/tools/hop-goal-setting.html',
+  },
 ]
 
 export default function CoachToolsPage() {
