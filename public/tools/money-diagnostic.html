@@ -110,6 +110,20 @@
             box-shadow: 0 4px 24px rgba(0,0,0,0.12);
         }
 
+        /* Readability: text on the white panels renders in dark blue, never white */
+        .card-elevated,
+        .card-elevated h1, .card-elevated h2, .card-elevated h3, .card-elevated h4,
+        .card-elevated p, .card-elevated span, .card-elevated label,
+        .card-elevated td, .card-elevated th, .card-elevated li,
+        .card-elevated div, .card-elevated a,
+        .card-elevated input, .card-elevated textarea, .card-elevated button {
+            color: #1e3a5f;
+        }
+        .card-elevated input::placeholder,
+        .card-elevated textarea::placeholder { color: #64748b; }
+        /* Tooltips sit on a dark bubble — keep their light text */
+        .card-elevated .tooltip-text, .tooltip-wrap .tooltip-text { color: #e2e8f0; }
+
         @media print {
             body { background: #fff !important; color: #1a1a2e !important; }
             .no-print { display: none !important; }
