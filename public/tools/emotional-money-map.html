@@ -6,6 +6,8 @@
     <title>TFS Emotional Money Map Coaching Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <script src="/tools/vendor/html2canvas.min.js"></script>
+    <script src="/tools/vendor/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script>
     tailwind.config = {
@@ -179,6 +181,7 @@
     </div>
     <div class="bg-navy rounded-2xl p-6 md:p-8 text-center mb-8"><p class="font-display text-white/90 text-base md:text-lg italic leading-relaxed" data-i18n="s5_closing_quote">Wealth is built one intentional habit at a time. You've taken the first step. TFS is here for every step that follows.</p><div class="w-10 h-0.5 bg-gold mx-auto mt-4"></div></div>
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 no-print">
+      <button id="download-btn" class="btn-gold flex items-center gap-2 w-full sm:w-auto justify-center"><i data-lucide="download" class="w-5 h-5"></i><span id="download-btn-text" data-i18n="btn_download">Download PDF</span></button>
       <button id="print-btn" class="btn-gold flex items-center gap-2 w-full sm:w-auto justify-center"><i data-lucide="printer" class="w-5 h-5"></i><span data-i18n="btn_print">Print / Save as PDF</span></button>
       <button id="restart-btn" class="btn-outline flex items-center gap-2 w-full sm:w-auto justify-center"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span data-i18n="btn_restart">Start Over</span></button>
     </div>
@@ -290,7 +293,7 @@ const I18N = {
   s5_signed:{en:"Signed with intention,",es:"Firmado con intención,"},
   s5_footer_tagline:{en:"Your Financial Future, Elevated.",es:"Tu Futuro Financiero, Elevado."},
   s5_closing_quote:{en:"Wealth is built one intentional habit at a time. You've taken the first step. TFS is here for every step that follows.",es:"La riqueza se construye un hábito intencional a la vez. Has dado el primer paso. TFS está aquí para cada paso que siga."},
-  btn_print:{en:"Print / Save as PDF",es:"Imprimir / Guardar como PDF"}, btn_restart:{en:"Start Over",es:"Empezar de Nuevo"},
+  btn_print:{en:"Print / Save as PDF",es:"Imprimir / Guardar como PDF"}, btn_download:{en:"Download PDF",es:"Descargar PDF"}, btn_restart:{en:"Start Over",es:"Empezar de Nuevo"},
   step_of:{en:"Step",es:"Paso"}, toast_max3:{en:"Please select only 3 emotions to release.",es:"Por favor selecciona solo 3 emociones a liberar."}, toast_max3_inc:{en:"Please select only 3 emotions to cultivate.",es:"Por favor selecciona solo 3 emociones a cultivar."},
   habit_daily:{en:"Daily (2 min):",es:"Diario (2 min):"}, habit_weekly:{en:"Weekly Ritual:",es:"Ritual Semanal:"},
 };
@@ -392,6 +395,57 @@ document.getElementById('s3-next-btn').addEventListener('click',()=>goToStep(4))
 document.getElementById('s4-back-btn').addEventListener('click',()=>goToStep(3));
 document.getElementById('s4-next-btn').addEventListener('click',()=>goToStep(5));
 document.getElementById('print-btn').addEventListener('click',()=>window.print());
+
+// --- Download the commitment page as a PDF ---
+document.getElementById('download-btn').addEventListener('click', async function () {
+  const label = document.getElementById('download-btn-text');
+  const original = label.textContent;
+  const busyText = currentLang === 'es' ? 'Preparando tu PDF…' : 'Preparing your PDF…';
+  const failText  = currentLang === 'es'
+    ? 'No se pudo crear la descarga. Usa Imprimir / Guardar como PDF.'
+    : 'The download could not be created. Please use Print / Save as PDF instead.';
+  label.textContent = busyText;
+  const target = document.getElementById('step-5-commit');
+  const hidden = target.querySelectorAll('.no-print');
+  try {
+    if (typeof html2canvas !== 'function' || !window.jspdf || !window.jspdf.jsPDF) throw new Error('PDF libraries unavailable');
+    hidden.forEach(el => { el.style.display = 'none'; });
+    const canvas = await html2canvas(target, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, windowWidth: target.scrollWidth });
+    hidden.forEach(el => { el.style.display = ''; });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const margin = 8;
+    const imgWidth = pdf.internal.pageSize.getWidth() - margin * 2;
+    const usablePageHeight = pdf.internal.pageSize.getHeight() - margin * 2;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    if (imgHeight <= usablePageHeight) {
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
+    } else {
+      const totalPages = Math.ceil(imgHeight / usablePageHeight);
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) pdf.addPage();
+        const sourceY = page * (canvas.height / totalPages);
+        const slice = document.createElement('canvas');
+        slice.width = canvas.width;
+        slice.height = Math.min(canvas.height / totalPages, canvas.height - sourceY);
+        slice.getContext('2d').drawImage(canvas, 0, sourceY, canvas.width, slice.height, 0, 0, slice.width, slice.height);
+        pdf.addImage(slice.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, (slice.height * imgWidth) / slice.width);
+      }
+    }
+
+    const nameField = document.getElementById('commit-name-input');
+    const namePart = ((nameField && nameField.value) || '').trim().replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+    pdf.save('TFS-Emotional-Money-Map' + (namePart ? '-' + namePart : '') + '.pdf');
+  } catch (err) {
+    hidden.forEach(el => { el.style.display = ''; });
+    console.error('Emotional Money Map PDF failed:', err);
+    alert(failText);
+  } finally {
+    label.textContent = original;
+  }
+});
 document.getElementById('restart-btn').addEventListener('click',()=>{selectedDecrease=[];selectedIncrease=[];document.querySelectorAll('.emotion-card').forEach(c=>c.classList.remove('selected-decrease','selected-increase'));document.getElementById('decrease-count').textContent='0';document.getElementById('increase-count').textContent='0';document.getElementById('s2-next-btn').disabled=true;document.getElementById('s3-next-btn').disabled=true;document.getElementById('notes-textarea').value='';document.getElementById('commit-name-input').value='';document.getElementById('commit-sig-input').value='';goToStep(0);});
 
 buildDecreaseGrid(); buildIncreaseGrid(); goToStep(0);
