@@ -7,9 +7,9 @@
     <title>What Are My Money Problems Stemming From? — TFS Diagnostic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="/tools/vendor/chart.umd.min.js"></script>
+    <script src="/tools/vendor/html2canvas.min.js"></script>
+    <script src="/tools/vendor/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -121,6 +121,18 @@
         }
         .card-elevated input::placeholder,
         .card-elevated textarea::placeholder { color: #64748b; }
+
+        /* Typing boxes: the browser paints these with its own dark fill (the page
+           uses a dark colour scheme), so they get an explicit dark panel with
+           white text to stay legible in every browser. */
+        .card-elevated input[type="text"],
+        .card-elevated textarea {
+            background: #1e3a5f;
+            color: #ffffff;
+            border-color: rgba(255,255,255,0.28);
+        }
+        .card-elevated input[type="text"]::placeholder,
+        .card-elevated textarea::placeholder { color: rgba(255,255,255,0.7); }
         /* Tooltips sit on a dark bubble — keep their light text */
         .card-elevated .tooltip-text, .tooltip-wrap .tooltip-text { color: #e2e8f0; }
 
@@ -206,7 +218,7 @@
 
                 <div data-id="50" class="max-w-sm mx-auto mb-6">
                     <label data-id="51" class="block text-xs font-semibold text-txt/50 uppercase tracking-wider mb-2">Client Name <span data-id="52" class="font-normal">(optional)</span></label>
-                    <input data-id="53" type="text" id="client-name-input" class="w-full h-12 px-4 rounded-xl border-2 border-gray-200 text-txt text-base focus:ring-2 focus:ring-gold focus:border-gold outline-none transition" placeholder="Enter your name…">
+                    <input data-id="53" type="text" id="client-name-input" class="w-full h-20 px-4 rounded-xl border-2 border-gray-200 text-txt text-lg focus:ring-2 focus:ring-gold focus:border-gold outline-none transition" placeholder="Enter your name…">
                 </div>
 
                 <div data-id="54" class="text-center">
@@ -238,7 +250,7 @@
                 <div data-id="67" class="card-elevated fade-in-up" data-person="0">
                     <div data-id="68" class="flex items-center gap-3 mb-5">
                         <span data-id="69" class="w-8 h-8 rounded-full bg-people/10 flex items-center justify-center text-people font-bold text-sm">1</span>
-                        <input data-id="70" type="text" class="person-name flex-1 h-10 px-3 rounded-lg border-2 border-gray-200 text-txt text-sm focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 1 (e.g., Spouse, Parent, Friend)" data-idx="0">
+                        <input data-id="70" type="text" class="person-name flex-1 h-20 px-3 rounded-lg border-2 border-gray-200 text-txt text-lg focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 1 (e.g., Spouse, Parent, Friend)" data-idx="0">
                     </div>
                     <div data-id="71" class="space-y-5 slider-people">
                         <div data-id="72">
@@ -284,7 +296,7 @@
                 <div data-id="105" class="card-elevated fade-in-up" data-person="1">
                     <div data-id="106" class="flex items-center gap-3 mb-5">
                         <span data-id="107" class="w-8 h-8 rounded-full bg-people/10 flex items-center justify-center text-people font-bold text-sm">2</span>
-                        <input data-id="108" type="text" class="person-name flex-1 h-10 px-3 rounded-lg border-2 border-gray-200 text-txt text-sm focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 2 (e.g., Sibling, Business Partner)" data-idx="1">
+                        <input data-id="108" type="text" class="person-name flex-1 h-20 px-3 rounded-lg border-2 border-gray-200 text-txt text-lg focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 2 (e.g., Sibling, Business Partner)" data-idx="1">
                     </div>
                     <div data-id="109" class="space-y-5 slider-people">
                         <div data-id="110">
@@ -330,7 +342,7 @@
                 <div data-id="143" class="card-elevated fade-in-up" data-person="2">
                     <div data-id="144" class="flex items-center gap-3 mb-5">
                         <span data-id="145" class="w-8 h-8 rounded-full bg-people/10 flex items-center justify-center text-people font-bold text-sm">3</span>
-                        <input data-id="146" type="text" class="person-name flex-1 h-10 px-3 rounded-lg border-2 border-gray-200 text-txt text-sm focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 3 (e.g., Coworker, Mentor)" data-idx="2">
+                        <input data-id="146" type="text" class="person-name flex-1 h-20 px-3 rounded-lg border-2 border-gray-200 text-txt text-lg focus:ring-2 focus:ring-people focus:border-people outline-none" placeholder="Person 3 (e.g., Coworker, Mentor)" data-idx="2">
                     </div>
                     <div data-id="147" class="space-y-5 slider-people">
                         <div data-id="148">
@@ -970,6 +982,10 @@
         });
 
         // --- CHARTS ---
+        // Guarded: if the chart library is ever unavailable, the rest of the
+        // results page (table, insights, coach notes) must still render.
+        try {
+        if (typeof Chart === 'undefined') throw new Error('Chart library unavailable');
         // Bar Chart
         const barCtx = document.getElementById('chart-bar-a1b2').getContext('2d');
         if (barChart) barChart.destroy();
@@ -1045,6 +1061,13 @@
                 }
             }
         });
+        } catch (err) {
+            console.error('Charts could not be drawn:', err);
+            document.querySelectorAll('#step-results canvas').forEach(c => {
+                const box = c.parentElement;
+                if (box) box.innerHTML = '<p class="text-sm text-center px-4 pt-16">Chart unavailable — the same scores are listed in the table below.</p>';
+            });
+        }
 
         // --- SCORE TABLE ---
         const tableBody = document.getElementById('score-table-body');
