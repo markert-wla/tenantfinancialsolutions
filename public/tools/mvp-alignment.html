@@ -295,6 +295,63 @@
       });
     }
 
+    // Up to three individually typed goals per category, added with the + button.
+    const MAX_CUSTOM_GOALS = 3;
+
+    function renderCustomGoals(cat, wrap) {
+      if(!state.customGoals[cat.category]) state.customGoals[cat.category]=[];
+      const list=state.customGoals[cat.category];
+      wrap.innerHTML='';
+      list.forEach((cg,idx)=>{
+        const row=document.createElement('div');
+        row.className='flex items-center gap-2';
+        row.innerHTML=`<input type="text" maxlength="120" class="custom-goal-input flex-1 min-w-0 px-4 py-2.5 rounded-full text-sm bg-white/5 border text-white placeholder-surface-500 focus:outline-none min-h-[44px]" placeholder="Type your own goal\u2026" /><button type="button" class="custom-goal-remove w-9 h-9 flex items-center justify-center rounded-full text-surface-500 hover:text-white hover:bg-white/10 flex-shrink-0" aria-label="Remove this goal"><i data-lucide="x" class="w-4 h-4"></i></button>`;
+        const input=row.querySelector('.custom-goal-input');
+        input.style.borderColor=cat.color+'40';
+        input.value=cg.text||'';
+        input.addEventListener('input',function(){cg.text=this.value;cg.selected=this.value.trim().length>0;updateGoalsCount();});
+        input.addEventListener('focus',function(){this.style.borderColor=cat.color;});
+        input.addEventListener('blur',function(){this.style.borderColor=cat.color+'40';});
+        row.querySelector('.custom-goal-remove').addEventListener('click',function(){list.splice(idx,1);renderCustomGoals(cat,wrap);updateGoalsCount();});
+        wrap.appendChild(row);
+      });
+      if(list.length<MAX_CUSTOM_GOALS){
+        const addBtn=document.createElement('button');
+        addBtn.type='button';
+        addBtn.className='add-custom-goal inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border border-dashed min-h-[44px] transition-all';
+        addBtn.style.borderColor=cat.color+'66';
+        addBtn.style.color=cat.color;
+        addBtn.dataset.addGoalCategory=cat.category;
+        addBtn.innerHTML='<i data-lucide="plus" class="w-4 h-4"></i><span>Add your own goal</span>';
+        addBtn.addEventListener('click',function(){
+          if(list.length>=MAX_CUSTOM_GOALS) return;
+          list.push({text:'',selected:false});
+          renderCustomGoals(cat,wrap);
+          const inputs=wrap.querySelectorAll('.custom-goal-input');
+          if(inputs.length) inputs[inputs.length-1].focus();
+        });
+        wrap.appendChild(addBtn);
+      } else {
+        const note=document.createElement('p');
+        note.className='text-xs text-surface-500';
+        note.textContent='That is the maximum of 3 of your own goals in this category.';
+        wrap.appendChild(note);
+      }
+      if(typeof lucide!=="undefined"&&typeof lucide.createIcons==="function") lucide.createIcons();
+    }
+
+    // Selected preset goals plus any typed goals, grouped by category.
+    function allGoalsGrouped() {
+      const grouped={};
+      state.goals.forEach(g=>{if(!grouped[g.category])grouped[g.category]=[];grouped[g.category].push(g.goal);});
+      Object.keys(state.customGoals||{}).forEach(cat=>{
+        (state.customGoals[cat]||[]).forEach(cg=>{
+          if(cg.selected&&cg.text&&cg.text.trim()){if(!grouped[cat])grouped[cat]=[];grouped[cat].push(cg.text.trim());}
+        });
+      });
+      return grouped;
+    }
+
     function renderGoals() {
       const container=document.getElementById('goals-container'); container.innerHTML='';
       goalsData.forEach(cat=>{
@@ -315,6 +372,10 @@
           });
           grid.appendChild(chip);
         });
+        const customWrap=document.createElement('div');
+        customWrap.className='custom-goals-wrap mt-3 space-y-2';
+        section.appendChild(customWrap);
+        renderCustomGoals(cat,customWrap);
         container.appendChild(section);
       });
       if(typeof lucide!=="undefined"&&typeof lucide.createIcons==="function") lucide.createIcons();
@@ -377,7 +438,7 @@
       const valuesContainer=document.getElementById('summary-values');valuesContainer.innerHTML='';
       state.values.forEach(val=>{const card=document.createElement('div');card.className='bg-navy-800 border border-gold-500/20 rounded-2xl p-5';card.innerHTML=`<div class="flex items-center gap-3 mb-3"><span class="text-3xl">${val.emoji}</span><span class="text-white font-bold text-lg">${val.name}</span></div><p class="text-surface-400 text-sm italic">"${val.description}"</p>`;valuesContainer.appendChild(card);});
       const goalsContainer=document.getElementById('summary-goals');goalsContainer.innerHTML='';
-      const grouped={};state.goals.forEach(g=>{if(!grouped[g.category])grouped[g.category]=[];grouped[g.category].push(g.goal);});
+      const grouped=allGoalsGrouped();
       Object.keys(grouped).forEach(cat=>{const catData=goalsData.find(c=>c.category===cat);const block=document.createElement('div');block.className='bg-navy-800 border border-white/10 rounded-2xl p-5';let goalsHtml=grouped[cat].map(g=>`<div class="flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 mt-0.5 flex-shrink-0" style="color:${catData.color}"></i><span class="text-surface-300 text-sm">${g}</span></div>`).join('');block.innerHTML=`<div class="flex items-center gap-2 mb-3"><span class="text-lg">${catData.emoji}</span><h4 class="font-semibold text-sm" style="color:${catData.color}">${cat}</h4></div><div class="space-y-2">${goalsHtml}</div>`;goalsContainer.appendChild(block);});
       state.actionPlanItems=generateActionPlan().map(a=>({...a,custom:false}));renderActionPlan();
       if(typeof lucide!=="undefined"&&typeof lucide.createIcons==="function") lucide.createIcons();
@@ -429,7 +490,7 @@
       const annualIncome=m.monthlyIncome*12; const dti=annualIncome>0?(m.totalDebts/annualIncome)*100:0;
       const savingsRate=m.monthlyIncome>0?((m.monthlyIncome-m.monthlyExpenses)/m.monthlyIncome)*100:0;
       const valuesHtml=state.values.map(v=>`<div style="margin-bottom:12px;padding:12px;background:#f5f0e0;border-radius:8px;border-left:4px solid #C9A84C;"><strong>${v.emoji} ${v.name}</strong><br/><em>"${v.description}"</em></div>`).join('');
-      const grouped={};state.goals.forEach(g=>{if(!grouped[g.category])grouped[g.category]=[];grouped[g.category].push(g.goal);});
+      const grouped=allGoalsGrouped();
       const goalsHtml=Object.keys(grouped).map(cat=>{const catData=goalsData.find(c=>c.category===cat);const items=grouped[cat].map(g=>`<li style="margin:4px 0;">${g}</li>`).join('');return `<div style="margin-bottom:14px;"><strong style="color:${catData?catData.color:'#333'};">${catData?catData.emoji+' ':' '}${cat}</strong><ul style="margin:6px 0 0 16px;">${items}</ul></div>`;}).join('');
       const actionsHtml=(state.actionPlanItems||[]).map((a,i)=>`<div style="margin-bottom:14px;padding:14px 16px;background:#f9f9f9;border-radius:8px;border-left:4px solid #C9A84C;"><strong>${i+1}. ${a.title}</strong><p style="margin:6px 0 0;color:#555;font-size:0.92em;">${a.description}</p></div>`).join('');
       const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>TFS MVP Blueprint – ${clientName}</title><style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:20px;color:#1f2937;}h1,h2{font-family:serif;}table{width:100%;border-collapse:collapse;}th{background:#0f2759;color:white;padding:10px 12px;text-align:left;font-size:13px;}.stat{display:inline-block;background:#f5f5f5;border-radius:8px;padding:12px 20px;margin:8px;text-align:center;}.stat-val{font-size:24px;font-weight:700;color:#0f2759;}.stat-lbl{font-size:11px;color:#6b7280;margin-top:2px;}</style></head><body><h1 style="color:#0f2759;">TFS MVP Blueprint</h1><p style="color:#6b7280;">Report for <strong>${clientName}</strong> | ${sessionDate}</p><hr style="margin:20px 0;border-color:#e5e7eb;"><h2>💰 Financial Foundation</h2><div><span class="stat"><div class="stat-val">${formatCurrency(netWorth)}</div><div class="stat-lbl">Net Worth</div></span><span class="stat"><div class="stat-val">${formatCurrency(cashFlow)}</div><div class="stat-lbl">Monthly Cash Flow</div></span><span class="stat"><div class="stat-val">${savingsRate.toFixed(1)}%</div><div class="stat-lbl">Savings Rate</div></span><span class="stat"><div class="stat-val">${dti.toFixed(1)}%</div><div class="stat-lbl">Debt-to-Income</div></span></div><h2>🌟 Core Values</h2>${valuesHtml||'<p>No values selected.</p>'}<h2>🎯 Purpose Portfolio</h2>${goalsHtml||'<p>No goals selected.</p>'}<h2>⚡ Coaching Action Plan</h2>${actionsHtml||'<p>No action steps defined.</p>'}<p style="margin-top:30px;color:#6b7280;font-size:12px;">Generated by Tenant Financial Solutions • Money · Values · Purpose</p></body></html>`;
