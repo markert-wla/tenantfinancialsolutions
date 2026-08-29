@@ -54,6 +54,10 @@
     .summary-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr 1fr; } }
     .summary-cell { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; text-align: center; }
+    .lang-toggle { display:inline-flex; border-radius:9999px; overflow:hidden; border:1px solid rgba(255,255,255,0.2); }
+    .lang-btn { padding:5px 13px; font-size:12px; font-weight:600; cursor:pointer; border:none; font-family:inherit; transition:background 0.2s,color 0.2s; }
+    .lang-btn.active-lang { background:var(--gold); color:var(--navy); }
+    .lang-btn:not(.active-lang) { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); }
     .step-label { display: inline-block; background: rgba(14,124,123,0.2); border: 1px solid rgba(14,124,123,0.35); border-radius: 999px; padding: 4px 16px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; color: rgba(255,255,255,0.8); text-transform: uppercase; }
     .error-msg { color: #f87171; font-size: 0.85rem; margin-top: 8px; display: none; }
     .error-msg.show { display: block; }
@@ -75,6 +79,7 @@
       <div class="flex items-center justify-between mb-1.5">
         <span id="progress-label" class="text-xs font-semibold text-white/60 tracking-wide uppercase"></span>
         <span id="progress-pct" class="text-xs font-bold" style="color:var(--teal)"></span>
+        <div class="lang-toggle ml-3 no-print"><button type="button" id="lang-en-bar" class="lang-btn active-lang">🇺🇸 EN</button><button type="button" id="lang-es-bar" class="lang-btn">🇪🇸 ES</button></div>
       </div>
       <div class="progress-track"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
     </div>
@@ -85,21 +90,22 @@
 
       <!-- SCREEN 0: Welcome -->
       <div class="screen active" id="screen-0">
+        <div class="flex justify-end pt-6 no-print"><div class="lang-toggle"><button type="button" id="lang-en-hero" class="lang-btn active-lang">🇺🇸 EN</button><button type="button" id="lang-es-hero" class="lang-btn">🇪🇸 ES</button></div></div>
         <div class="text-center pt-12 md:pt-20">
           <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6" style="background:linear-gradient(135deg,var(--teal),var(--teal-dark))">
             <i data-lucide="pause-circle" class="w-8 h-8 text-white"></i>
           </div>
-          <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 tracking-tight">What's My<br/>Press Pause Number?</h1>
-          <p class="text-base md:text-lg text-white/60 font-medium mb-8">A guided discovery tool by Tenant Financial Solutions</p>
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 tracking-tight"><span data-i18n-html="title">What's My<br/>Press Pause Number?</span></h1>
+          <p class="text-base md:text-lg text-white/60 font-medium mb-8" data-i18n="tagline">A guided discovery tool by Tenant Financial Solutions</p>
           <div class="bg-white/[0.04] rounded-2xl p-6 md:p-8 text-left mb-10 border border-white/[0.06]">
-            <p class="text-white/80 leading-relaxed text-[0.95rem] md:text-base">Your Press Pause Number is the financial yardstick that tells you — with confidence — when it's time to stop, breathe, and wait 24hrs before clicking checkout.</p>
-            <p class="text-white/80 leading-relaxed text-[0.95rem] md:text-base mt-4">This guided experience will help you uncover your number in just a few minutes.</p>
+            <p class="text-white/80 leading-relaxed text-[0.95rem] md:text-base" data-i18n="introP1">Your Press Pause Number is the financial yardstick that tells you — with confidence — when it's time to stop, breathe, and wait 24hrs before clicking checkout.</p>
+            <p class="text-white/80 leading-relaxed text-[0.95rem] md:text-base mt-4" data-i18n="introP2">This guided experience will help you uncover your number in just a few minutes.</p>
           </div>
           <div class="advisory-note text-left mb-10" style="margin-top:0">
-            <p>💡 <strong>This number is about discretionary spending</strong> — the wants and extras. It does not apply to your essentials, such as rent, utilities, groceries, transportation or medication.</p>
+            <p><span data-i18n-html="discretionaryNote">💡 <strong>This number is about discretionary spending</strong> — the wants and extras. It does not apply to your essentials, such as rent, utilities, groceries, transportation or medication.</span></p>
           </div>
           <button id="btn-start" class="btn-primary flex items-center justify-center gap-2">
-            Let's Find My Number <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            <span data-i18n="startBtn">Let's Find My Number</span> <i data-lucide="arrow-right" class="w-5 h-5"></i>
           </button>
         </div>
       </div>
@@ -107,86 +113,86 @@
       <!-- SCREEN 1: Initial Guess -->
       <div class="screen" id="screen-1">
         <div class="pt-16 md:pt-20">
-          <span class="step-label mb-5 block w-fit">Step 1 of 5</span>
-          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">What's Your Gut Telling You?</h2>
-          <p class="text-white/50 font-medium mb-6 text-sm md:text-base">Before we run any numbers, make your best guess.</p>
+          <span class="step-label mb-5 block w-fit" data-i18n="stepLabel1">Step 1 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight" data-i18n="s1Title">What's Your Gut Telling You?</h2>
+          <p class="text-white/50 font-medium mb-6 text-sm md:text-base" data-i18n="s1Sub">Before we run any numbers, make your best guess.</p>
           <div class="bg-white/[0.04] rounded-2xl p-6 md:p-8 border border-white/[0.06] mb-8">
-            <p class="text-white/75 leading-relaxed text-[0.93rem] mb-6">What number have you set as the floor on when you will wait 24hrs before buying?</p>
-            <label class="block text-sm font-semibold text-white/70 mb-2">My initial guess is...</label>
+            <p class="text-white/75 leading-relaxed text-[0.93rem] mb-6" data-i18n="s1Question">What number have you set as the floor on when you will wait 24hrs before buying?</p>
+            <label class="block text-sm font-semibold text-white/70 mb-2" data-i18n="s1Label">My initial guess is...</label>
             <input id="input-guess" type="text" inputmode="numeric" class="dollar-input" placeholder="$0" />
-            <p class="text-white/40 text-xs mt-2.5">There's no wrong answer here. This is just your starting point.</p>
-            <p id="error-guess" class="error-msg">Please enter an amount greater than $0 to continue.</p>
+            <p class="text-white/40 text-xs mt-2.5" data-i18n="s1Help">There's no wrong answer here. This is just your starting point.</p>
+            <p id="error-guess" class="error-msg" data-i18n="errGuess">Please enter an amount greater than $0 to continue.</p>
           </div>
-          <button id="btn-guess" class="btn-primary flex items-center justify-center gap-2">That's My Guess <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+          <button id="btn-guess" class="btn-primary flex items-center justify-center gap-2"><span data-i18n="s1Btn">That's My Guess</span> <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
         </div>
       </div>
 
       <!-- SCREEN 2: Motivations -->
       <div class="screen" id="screen-2">
         <div class="pt-16 md:pt-20">
-          <span class="step-label mb-5 block w-fit">Step 2 of 5</span>
-          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">What's Driving This Decision?</h2>
-          <p class="text-white/50 font-medium mb-6 text-sm md:text-base">Select everything that resonates with you right now.</p>
+          <span class="step-label mb-5 block w-fit" data-i18n="stepLabel2">Step 2 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight" data-i18n="s2Title">What's Driving This Decision?</h2>
+          <p class="text-white/50 font-medium mb-6 text-sm md:text-base" data-i18n="s2Sub">Select everything that resonates with you right now.</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4" id="motivations-grid">
-            <div class="motivation-card" data-value="Starting or growing a business"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🏢 Starting or growing a business</span></div>
-            <div class="motivation-card" data-value="A major life change"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🏠 A major life change (move, family, health)</span></div>
-            <div class="motivation-card" data-value="Going back to school or training"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">📚 Going back to school or training</span></div>
-            <div class="motivation-card" data-value="Burnout or need for rest"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🧘 Burnout or need for rest</span></div>
-            <div class="motivation-card" data-value="Relocating or traveling"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🌍 Relocating or traveling</span></div>
-            <div class="motivation-card" data-value="Pivoting to something new entirely"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium">🔄 Pivoting to something new entirely</span></div>
+            <div class="motivation-card" data-value="Starting or growing a business"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium" data-i18n="motiv_starting_or_growing_a_business">🏢 Starting or growing a business</span></div>
+            <div class="motivation-card" data-value="A major life change"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium" data-i18n="motiv_a_major_life_change">🏠 A major life change (move, family, health)</span></div>
+            <div class="motivation-card" data-value="Going back to school or training"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium" data-i18n="motiv_going_back_to_school_or_training">📚 Going back to school or training</span></div>
+            <div class="motivation-card" data-value="Burnout or need for rest"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium" data-i18n="motiv_burnout_or_need_for_rest">🧘 Burnout or need for rest</span></div>
+            <div class="motivation-card" data-value="Relocating or traveling"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium" data-i18n="motiv_relocating_or_traveling">🌍 Relocating or traveling</span></div>
+            <div class="motivation-card" data-value="Pivoting to something new entirely"><div class="check-box"><i data-lucide="check" class="w-3.5 h-3.5 text-white hidden"></i></div><span class="text-sm font-medium" data-i18n="motiv_pivoting_to_something_new_entirely">🔄 Pivoting to something new entirely</span></div>
           </div>
-          <p class="text-white/40 text-xs mb-6">Your motivations help us understand the weight of your decision — not just the math.</p>
-          <p id="error-motiv" class="error-msg mb-4">Please select at least one motivation to continue.</p>
-          <button id="btn-motiv" class="btn-primary flex items-center justify-center gap-2">These Are My Motivations <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+          <p class="text-white/40 text-xs mb-6" data-i18n="s2Help">Your motivations help us understand the weight of your decision — not just the math.</p>
+          <p id="error-motiv" class="error-msg mb-4" data-i18n="errMotiv">Please select at least one motivation to continue.</p>
+          <button id="btn-motiv" class="btn-primary flex items-center justify-center gap-2"><span data-i18n="s2Btn">These Are My Motivations</span> <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
         </div>
       </div>
 
       <!-- SCREEN 3: Real Numbers -->
       <div class="screen" id="screen-3">
         <div class="pt-16 md:pt-20">
-          <span class="step-label mb-5 block w-fit">Step 3 of 5</span>
-          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">Let's Look at the Real Numbers</h2>
-          <p class="text-white/50 font-medium mb-6 text-sm md:text-base">Enter your best estimates — ballpark figures are perfectly fine.</p>
+          <span class="step-label mb-5 block w-fit" data-i18n="stepLabel3">Step 3 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight" data-i18n="s3Title">Let's Look at the Real Numbers</h2>
+          <p class="text-white/50 font-medium mb-6 text-sm md:text-base" data-i18n="s3Sub">Enter your best estimates — ballpark figures are perfectly fine.</p>
           <div class="space-y-6 mb-6">
             <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06]">
-              <label class="block text-sm font-semibold text-white/80 mb-1">Liquid Savings</label>
-              <p class="text-xs text-white/40 mb-3">Cash you could access right now — counted up to $10,000. Do not include your emergency fund or money you have invested.</p>
+              <label class="block text-sm font-semibold text-white/80 mb-1" data-i18n="lblSavings">Liquid Savings</label>
+              <p class="text-xs text-white/40 mb-3" data-i18n="savingsHelp">Cash you could access right now — counted up to $10,000. Do not include your emergency fund or money you have invested.</p>
               <input id="input-savings" type="text" inputmode="numeric" class="dollar-input" placeholder="$0" />
-              <p id="savings-cap-note" class="text-xs mt-2.5 font-medium hidden" style="color:var(--gold)">This calculator counts liquid savings up to $10,000, so $10,000 is being used.</p>
+              <p id="savings-cap-note" class="text-xs mt-2.5 font-medium hidden" style="color:var(--gold)" data-i18n="capNote">This calculator counts liquid savings up to $10,000, so $10,000 is being used.</p>
             </div>
             <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06]">
-              <label class="block text-sm font-semibold text-white/80 mb-1">Total Debt</label>
-              <p class="text-xs text-white/40 mb-3">The total outstanding debt you currently owe</p>
+              <label class="block text-sm font-semibold text-white/80 mb-1" data-i18n="lblDebt">Total Debt</label>
+              <p class="text-xs text-white/40 mb-3" data-i18n="debtHelp">The total outstanding debt you currently owe</p>
               <input id="input-debt" type="text" inputmode="numeric" class="dollar-input" placeholder="$0" />
-              <p class="text-white/40 text-xs mt-2.5">Enter $0 if you're debt-free — that's great!</p>
+              <p class="text-white/40 text-xs mt-2.5" data-i18n="debtHelp2">Enter $0 if you're debt-free — that's great!</p>
             </div>
             <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06]">
-              <label class="block text-sm font-semibold text-white/80 mb-1">Monthly Margin</label>
-              <p class="text-xs text-white/40 mb-3">Your average monthly surplus after all bills and expenses</p>
+              <label class="block text-sm font-semibold text-white/80 mb-1" data-i18n="lblMargin">Monthly Margin</label>
+              <p class="text-xs text-white/40 mb-3" data-i18n="marginHelp">Your average monthly surplus after all bills and expenses</p>
               <input id="input-margin" type="text" inputmode="numeric" class="dollar-input" placeholder="$0" />
             </div>
           </div>
           <div id="live-calc" class="live-calc-card mb-8" style="display:none;">
-            <p class="text-sm font-semibold mb-1" style="color:var(--teal)">Weighted Value: <span id="calc-wv" class="text-white font-bold">$0</span></p>
-            <p id="calc-formula-note" class="text-xs text-white/50 mb-2">(Liquid Savings + Monthly Margin) ÷ 2</p>
-            <p class="text-sm font-semibold" style="color:var(--teal)">Healthy Range: <span id="calc-range" class="text-white font-bold">$0 – $0</span></p>
-            <p id="calc-debt-warning" class="text-xs mt-3 font-medium hidden" style="color:var(--gold)">⚠️ Since your total debt meets or exceeds your liquid savings, your Weighted Value is based on 50% of your Monthly Margin.</p>
+            <p class="text-sm font-semibold mb-1" style="color:var(--teal)"><span data-i18n="weightedValueLabel">Weighted Value: </span><span id="calc-wv" class="text-white font-bold">$0</span></p>
+            <p id="calc-formula-note" class="text-xs text-white/50 mb-2" data-i18n="formulaNormal">(Liquid Savings + Monthly Margin) ÷ 2</p>
+            <p class="text-sm font-semibold" style="color:var(--teal)"><span data-i18n="healthyRangeLabel">Healthy Range: </span><span id="calc-range" class="text-white font-bold">$0 – $0</span></p>
+            <p id="calc-debt-warning" class="text-xs mt-3 font-medium hidden" style="color:var(--gold)" data-i18n="debtWarning">⚠️ Since your total debt meets or exceeds your liquid savings, your Weighted Value is based on 50% of your Monthly Margin.</p>
           </div>
-          <p id="error-numbers" class="error-msg mb-4">Please fill in all three fields to continue.</p>
-          <button id="btn-numbers" class="btn-primary flex items-center justify-center gap-2">Run My Numbers <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+          <p id="error-numbers" class="error-msg mb-4" data-i18n="errFields">Please fill in all three fields to continue.</p>
+          <button id="btn-numbers" class="btn-primary flex items-center justify-center gap-2"><span data-i18n="s3Btn">Run My Numbers</span> <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
         </div>
       </div>
 
       <!-- SCREEN 4: Comparison -->
       <div class="screen" id="screen-4">
         <div class="pt-16 md:pt-20">
-          <span class="step-label mb-5 block w-fit">Step 4 of 5</span>
-          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">Your Guess vs. Your Numbers</h2>
-          <p class="text-white/50 font-medium mb-8 text-sm md:text-base">Here's what your gut said — and what the numbers are saying.</p>
+          <span class="step-label mb-5 block w-fit" data-i18n="stepLabel4">Step 4 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight" data-i18n="s4Title">Your Guess vs. Your Numbers</h2>
+          <p class="text-white/50 font-medium mb-8 text-sm md:text-base" data-i18n="s4Sub">Here's what your gut said — and what the numbers are saying.</p>
           <div class="summary-grid mb-6">
-            <div class="summary-cell"><p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-1">Your Initial Guess</p><p id="comp-guess" class="text-xl font-bold" style="color:var(--gold)">$0</p></div>
-            <div class="summary-cell"><p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-1">Healthy Pause Range</p><p id="comp-range" class="text-xl font-bold" style="color:var(--teal)">$0 – $0</p></div>
-            <div class="summary-cell"><p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-1">Weighted Value</p><p id="comp-wv" class="text-xl font-bold text-white">$0</p></div>
+            <div class="summary-cell"><p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-1" data-i18n="lblInitialGuess">Your Initial Guess</p><p id="comp-guess" class="text-xl font-bold" style="color:var(--gold)">$0</p></div>
+            <div class="summary-cell"><p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-1" data-i18n="lblHealthyRange">Healthy Pause Range</p><p id="comp-range" class="text-xl font-bold" style="color:var(--teal)">$0 – $0</p></div>
+            <div class="summary-cell"><p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-1" data-i18n="lblWeighted">Weighted Value</p><p id="comp-wv" class="text-xl font-bold text-white">$0</p></div>
           </div>
           <div class="bg-white/[0.04] rounded-2xl p-5 border border-white/[0.06] mb-6">
             <p id="comp-message" class="text-white/80 text-sm leading-relaxed"></p>
@@ -199,48 +205,48 @@
             </div>
             <div class="flex justify-between text-[0.7rem] font-medium mt-1">
               <span style="color:var(--teal)" id="range-label-low">$0</span>
-              <span style="color:var(--gold)">● Your Guess</span>
+              <span style="color:var(--gold)" data-i18n="markerGuess">● Your Guess</span>
               <span style="color:var(--teal)" id="range-label-high">$0</span>
             </div>
           </div>
           <div class="live-calc-card mb-8">
-            <p class="text-sm font-semibold mb-1" style="color:var(--teal)">Agree on Your Number</p>
-            <p class="text-xs text-white/50 mb-4">Slide to the number you and your coach agree on — anywhere inside your healthy pause range.</p>
+            <p class="text-sm font-semibold mb-1" style="color:var(--teal)" data-i18n="agreeTitle">Agree on Your Number</p>
+            <p class="text-xs text-white/50 mb-4" data-i18n="agreeSub">Slide to the number you and your coach agree on — anywhere inside your healthy pause range.</p>
             <p id="agreed-value" class="text-3xl font-black mb-4" style="color:var(--gold)">$0</p>
             <input id="input-agreed" type="range" class="range-slider" min="0" max="100" step="50" value="0" />
             <div class="flex justify-between text-[0.7rem] font-semibold mt-2 text-white/45">
               <span id="agree-min">$0</span>
-              <span id="agree-suggested" class="text-center">Suggested: $0</span>
+              <span id="agree-suggested" class="text-center" data-i18n="suggestedInit">Suggested: $0</span>
               <span id="agree-max">$0</span>
             </div>
           </div>
-          <button id="btn-compare" class="btn-primary flex items-center justify-center gap-2">Show Me My Number <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+          <button id="btn-compare" class="btn-primary flex items-center justify-center gap-2"><span data-i18n="s4Btn">Show Me My Number</span> <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
         </div>
       </div>
 
       <!-- SCREEN 5: Result -->
       <div class="screen" id="screen-5">
         <div class="pt-16 md:pt-20 text-center">
-          <span class="step-label mb-5 inline-block">Step 5 of 5</span>
-          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">Your Press Pause Number</h2>
-          <p class="text-white/50 font-medium mb-8 text-sm md:text-base">This is the number that balances your instincts with your financial reality.</p>
+          <span class="step-label mb-5 inline-block" data-i18n="stepLabel5">Step 5 of 5</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight" data-i18n="s5Title">Your Press Pause Number</h2>
+          <p class="text-white/50 font-medium mb-8 text-sm md:text-base" data-i18n="s5Sub">This is the number that balances your instincts with your financial reality.</p>
           <div class="mb-8"><p id="big-number" class="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight" style="color:var(--gold);text-shadow:0 4px 24px rgba(212,175,55,0.25)">$0</p></div>
           <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.06] text-left mb-6">
-            <p class="text-white/70 text-sm leading-relaxed">Your Press Pause Number blends your intuition with your actual financial picture. It sits inside the healthy pause range your numbers support — set at the figure you settled on together with your coach.</p>
+            <p class="text-white/70 text-sm leading-relaxed" data-i18n="s5Explain">Your Press Pause Number blends your intuition with your actual financial picture. It sits inside the healthy pause range your numbers support — set at the figure you settled on together with your coach.</p>
           </div>
           <div class="bg-white/[0.04] rounded-2xl p-5 border border-white/[0.06] text-left mb-6 space-y-2.5">
-            <div class="flex justify-between text-sm"><span class="text-white/50">Your Initial Guess</span><span id="sum-guess" class="font-semibold">$0</span></div>
-            <div class="flex justify-between text-sm"><span class="text-white/50">Weighted Value</span><span id="sum-wv" class="font-semibold">$0</span></div>
-            <div class="flex justify-between text-sm"><span class="text-white/50">Total Debt</span><span id="sum-debt" class="font-semibold">$0</span></div>
-            <div class="flex justify-between text-sm"><span class="text-white/50">Healthy Range</span><span id="sum-range" class="font-semibold">$0 – $0</span></div>
+            <div class="flex justify-between text-sm"><span class="text-white/50" data-i18n="lblInitialGuess">Your Initial Guess</span><span id="sum-guess" class="font-semibold">$0</span></div>
+            <div class="flex justify-between text-sm"><span class="text-white/50" data-i18n="lblWeighted">Weighted Value</span><span id="sum-wv" class="font-semibold">$0</span></div>
+            <div class="flex justify-between text-sm"><span class="text-white/50" data-i18n="lblDebt">Total Debt</span><span id="sum-debt" class="font-semibold">$0</span></div>
+            <div class="flex justify-between text-sm"><span class="text-white/50" data-i18n="lblRange">Healthy Range</span><span id="sum-range" class="font-semibold">$0 – $0</span></div>
             <hr class="border-white/10 my-1" />
-            <div class="flex justify-between text-sm"><span class="font-semibold" style="color:var(--gold)">Your Press Pause Number</span><span id="sum-rec" class="font-bold" style="color:var(--gold)">$0</span></div>
+            <div class="flex justify-between text-sm"><span class="font-semibold" style="color:var(--gold)" data-i18n="s5Title">Your Press Pause Number</span><span id="sum-rec" class="font-bold" style="color:var(--gold)">$0</span></div>
           </div>
           <div class="text-left mb-8">
-            <p class="text-xs text-white/40 font-semibold uppercase tracking-wide mb-2">You're doing this because:</p>
+            <p class="text-xs text-white/40 font-semibold uppercase tracking-wide mb-2" data-i18n="becauseLabel">You're doing this because:</p>
             <div id="motiv-pills" class="flex flex-wrap gap-2"></div>
           </div>
-          <button id="btn-commit" class="btn-primary flex items-center justify-center gap-2">I'm Ready to Commit <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+          <button id="btn-commit" class="btn-primary flex items-center justify-center gap-2"><span data-i18n="s5Btn">I'm Ready to Commit</span> <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
         </div>
       </div>
 
@@ -250,29 +256,29 @@
           <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5" style="background:linear-gradient(135deg,var(--gold),var(--gold-dark))">
             <i data-lucide="award" class="w-7 h-7" style="color:var(--navy)"></i>
           </div>
-          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">I'm Pressing Pause with Confidence.</h2>
-          <p class="text-white/50 font-medium mb-6 text-sm md:text-base">You've done the work. Now own your number.</p>
+          <h2 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight" data-i18n="s6Title">I'm Pressing Pause with Confidence.</h2>
+          <p class="text-white/50 font-medium mb-6 text-sm md:text-base" data-i18n="s6Sub">You've done the work. Now own your number.</p>
           <p id="commit-big-num" class="text-4xl md:text-5xl font-black mb-8" style="color:var(--gold);text-shadow:0 4px 24px rgba(212,175,55,0.25)">$0</p>
           <div class="text-left mb-6">
-            <label class="block text-sm font-semibold text-white/70 mb-2">Your Name</label>
-            <input id="input-name" type="text" class="name-input" placeholder="Enter your full name" />
+            <label class="block text-sm font-semibold text-white/70 mb-2" data-i18n="lblName">Your Name</label>
+            <input id="input-name" type="text" class="name-input" placeholder="Enter your full name" data-i18n-ph="phName" />
           </div>
           <div class="commitment-card text-left mb-8">
-            <p class="leading-relaxed">I, <strong id="commit-name" style="color:var(--gold)">___________</strong>, commit to my Press Pause Number of <strong id="commit-amount" style="color:var(--gold)">$0</strong>.</p>
-            <p class="leading-relaxed mt-4">I understand this number represents the financial foundation I need to make my move with clarity, not fear. I will use this number as my guide — not as a ceiling, but as a launchpad.</p>
-            <p class="leading-relaxed mt-4 text-white/60 italic">— Signed with intention on <span id="commit-date"></span></p>
+            <p class="leading-relaxed"><span data-i18n="commitPre">I, </span><strong id="commit-name" style="color:var(--gold)">___________</strong><span data-i18n="commitMid">, commit to my Press Pause Number of </span><strong id="commit-amount" style="color:var(--gold)">$0</strong><span data-i18n="commitEnd">.</span></p>
+            <p class="leading-relaxed mt-4" data-i18n="commitP2">I understand this number represents the financial foundation I need to make my move with clarity, not fear. I will use this number as my guide — not as a ceiling, but as a launchpad.</p>
+            <p class="leading-relaxed mt-4 text-white/60 italic"><span data-i18n="signedOn">— Signed with intention on </span><span id="commit-date"></span></p>
           </div>
           <div id="commit-motiv-pills" class="mb-8 text-left">
-            <p class="text-xs text-white/40 font-semibold uppercase tracking-wide mb-2">Your motivations:</p>
+            <p class="text-xs text-white/40 font-semibold uppercase tracking-wide mb-2" data-i18n="yourMotivations">Your motivations:</p>
             <div id="motiv-pills-commit" class="flex flex-wrap gap-2"></div>
           </div>
           <div class="space-y-3 no-print">
-            <button id="btn-download" class="btn-primary flex items-center justify-center gap-2"><i data-lucide="download" class="w-5 h-5"></i> <span id="download-btn-text">Download My Commitment</span></button>
-            <button id="btn-print" class="btn-primary flex items-center justify-center gap-2"><i data-lucide="printer" class="w-5 h-5"></i> Print My Commitment</button>
-            <button id="btn-restart" class="btn-secondary flex items-center justify-center gap-2"><i data-lucide="rotate-ccw" class="w-5 h-5"></i> Start Over</button>
+            <button id="btn-download" class="btn-primary flex items-center justify-center gap-2"><i data-lucide="download" class="w-5 h-5"></i> <span id="download-btn-text" data-i18n="downloadBtn">Download My Commitment</span></button>
+            <button id="btn-print" class="btn-primary flex items-center justify-center gap-2"><i data-lucide="printer" class="w-5 h-5"></i> <span data-i18n="printBtn">Print My Commitment</span></button>
+            <button id="btn-restart" class="btn-secondary flex items-center justify-center gap-2"><i data-lucide="rotate-ccw" class="w-5 h-5"></i> <span data-i18n="restartBtn">Start Over</span></button>
           </div>
           <div class="advisory-note text-left mt-8">
-            <p>💡 If you have no monthly margin or liquid savings, press pause for <strong>every purchase</strong> outside of your monthly necessities.</p>
+            <p><span data-i18n-html="advisoryNote">💡 If you have no monthly margin or liquid savings, press pause for <strong>every purchase</strong> outside of your monthly necessities.</span></p>
           </div>
         </div>
       </div>
@@ -281,12 +287,13 @@
   </main>
 
   <footer class="no-print text-center py-8 px-4">
-    <p class="text-white/30 text-xs">© Tenant Financial Solutions | Helping you move with clarity.</p>
+    <p class="text-white/30 text-xs" data-i18n="footer">© Tenant Financial Solutions | Helping you move with clarity.</p>
   </footer>
 
   <script>
     if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") { lucide.createIcons(); }
 
+    const I18N = {"tagline": {"en": "A guided discovery tool by Tenant Financial Solutions", "es": "Una herramienta guiada de descubrimiento de Tenant Financial Solutions"}, "introP1": {"en": "Your Press Pause Number is the financial yardstick that tells you — with confidence — when it's time to stop, breathe, and wait 24hrs before clicking checkout.", "es": "Tu Número de Pausa es la medida financiera que te dice —con confianza— cuándo es momento de detenerte, respirar y esperar 24 horas antes de comprar."}, "introP2": {"en": "This guided experience will help you uncover your number in just a few minutes.", "es": "Esta experiencia guiada te ayudará a descubrir tu número en solo unos minutos."}, "s1Title": {"en": "What's Your Gut Telling You?", "es": "¿Qué Te Dice Tu Instinto?"}, "s1Sub": {"en": "Before we run any numbers, make your best guess.", "es": "Antes de calcular nada, haz tu mejor estimación."}, "s1Question": {"en": "What number have you set as the floor on when you will wait 24hrs before buying?", "es": "¿Qué cantidad has fijado como el mínimo a partir del cual esperarás 24 horas antes de comprar?"}, "s1Label": {"en": "My initial guess is...", "es": "Mi estimación inicial es..."}, "s1Help": {"en": "There's no wrong answer here. This is just your starting point.", "es": "Aquí no hay respuestas incorrectas. Éste es solo tu punto de partida."}, "errGuess": {"en": "Please enter an amount greater than $0 to continue.", "es": "Ingresa una cantidad mayor a $0 para continuar."}, "s2Title": {"en": "What's Driving This Decision?", "es": "¿Qué Impulsa Esta Decisión?"}, "s2Sub": {"en": "Select everything that resonates with you right now.", "es": "Selecciona todo lo que resuene contigo en este momento."}, "s2Help": {"en": "Your motivations help us understand the weight of your decision — not just the math.", "es": "Tus motivaciones nos ayudan a entender el peso de tu decisión — no solo las cuentas."}, "errMotiv": {"en": "Please select at least one motivation to continue.", "es": "Selecciona al menos una motivación para continuar."}, "s3Title": {"en": "Let's Look at the Real Numbers", "es": "Veamos Los Números Reales"}, "s3Sub": {"en": "Enter your best estimates — ballpark figures are perfectly fine.", "es": "Ingresa tus mejores estimaciones — las cifras aproximadas están bien."}, "lblSavings": {"en": "Liquid Savings", "es": "Ahorros Líquidos"}, "savingsHelp": {"en": "Cash you could access right now — counted up to $10,000. Do not include your emergency fund or money you have invested.", "es": "Efectivo al que podrías acceder ahora mismo — se cuenta hasta $10,000. No incluyas tu fondo de emergencia ni dinero que tengas invertido."}, "capNote": {"en": "This calculator counts liquid savings up to $10,000, so $10,000 is being used.", "es": "Esta calculadora cuenta ahorros líquidos hasta $10,000, así que se está usando $10,000."}, "lblDebt": {"en": "Total Debt", "es": "Deuda Total"}, "debtHelp": {"en": "The total outstanding debt you currently owe", "es": "El total de la deuda pendiente que debes actualmente"}, "debtHelp2": {"en": "Enter $0 if you're debt-free — that's great!", "es": "Ingresa $0 si no tienes deudas — ¡excelente!"}, "lblMargin": {"en": "Monthly Margin", "es": "Margen Mensual"}, "marginHelp": {"en": "Your average monthly surplus after all bills and expenses", "es": "Tu excedente mensual promedio después de todas las cuentas y gastos"}, "errFields": {"en": "Please fill in all three fields to continue.", "es": "Completa los tres campos para continuar."}, "s4Title": {"en": "Your Guess vs. Your Numbers", "es": "Tu Estimación vs. Tus Números"}, "s4Sub": {"en": "Here's what your gut said — and what the numbers are saying.", "es": "Esto es lo que dijo tu instinto — y lo que dicen los números."}, "lblInitialGuess": {"en": "Your Initial Guess", "es": "Tu Estimación Inicial"}, "lblHealthyRange": {"en": "Healthy Pause Range", "es": "Rango Saludable de Pausa"}, "lblWeighted": {"en": "Weighted Value", "es": "Valor Ponderado"}, "markerGuess": {"en": "● Your Guess", "es": "● Tu Estimación"}, "agreeTitle": {"en": "Agree on Your Number", "es": "Acuerden Su Número"}, "agreeSub": {"en": "Slide to the number you and your coach agree on — anywhere inside your healthy pause range.", "es": "Desliza hasta el número que tú y tu coach acuerden — en cualquier punto dentro de tu rango saludable."}, "s5Title": {"en": "Your Press Pause Number", "es": "Tu Número de Pausa"}, "s5Sub": {"en": "This is the number that balances your instincts with your financial reality.", "es": "Éste es el número que equilibra tu instinto con tu realidad financiera."}, "s5Explain": {"en": "Your Press Pause Number blends your intuition with your actual financial picture. It sits inside the healthy pause range your numbers support — set at the figure you settled on together with your coach.", "es": "Tu Número de Pausa combina tu intuición con tu panorama financiero real. Está dentro del rango saludable que tus números respaldan — fijado en la cifra que acordaste junto con tu coach."}, "lblRange": {"en": "Healthy Range", "es": "Rango Saludable"}, "becauseLabel": {"en": "You're doing this because:", "es": "Estás haciendo esto porque:"}, "s6Title": {"en": "I'm Pressing Pause with Confidence.", "es": "Estoy Pausando con Confianza."}, "s6Sub": {"en": "You've done the work. Now own your number.", "es": "Hiciste el trabajo. Ahora haz tuyo tu número."}, "lblName": {"en": "Your Name", "es": "Tu Nombre"}, "commitP2": {"en": "I understand this number represents the financial foundation I need to make my move with clarity, not fear. I will use this number as my guide — not as a ceiling, but as a launchpad.", "es": "Entiendo que este número representa la base financiera que necesito para dar mi paso con claridad, no con miedo. Usaré este número como guía — no como un techo, sino como un punto de despegue."}, "yourMotivations": {"en": "Your motivations:", "es": "Tus motivaciones:"}, "footer": {"en": "© Tenant Financial Solutions | Helping you move with clarity.", "es": "© Tenant Financial Solutions | Ayudándote a avanzar con claridad."}, "startBtn": {"en": "Let's Find My Number", "es": "Encontremos Mi Número"}, "s1Btn": {"en": "That's My Guess", "es": "Ésa Es Mi Estimación"}, "s2Btn": {"en": "These Are My Motivations", "es": "Éstas Son Mis Motivaciones"}, "s3Btn": {"en": "Run My Numbers", "es": "Calcular Mis Números"}, "s4Btn": {"en": "Show Me My Number", "es": "Muéstrame Mi Número"}, "s5Btn": {"en": "I'm Ready to Commit", "es": "Estoy Listo para Comprometerme"}, "title": {"en": "What's My<br/>Press Pause Number?", "es": "¿Cuál Es Mi<br/>Número de Pausa?"}, "discretionaryNote": {"en": "💡 <strong>This number is about discretionary spending</strong> — the wants and extras. It does not apply to your essentials, such as rent, utilities, groceries, transportation or medication.", "es": "💡 <strong>Este número es sobre gastos discrecionales</strong> — los deseos y los extras. No aplica a tus gastos esenciales, como renta, servicios, comida, transporte o medicamentos."}, "advisoryNote": {"en": "💡 If you have no monthly margin or liquid savings, press pause for <strong>every purchase</strong> outside of your monthly necessities.", "es": "💡 Si no tienes margen mensual ni ahorros líquidos, haz una pausa antes de <strong>cada compra</strong> que esté fuera de tus necesidades mensuales."}, "commitPre": {"en": "I, ", "es": "Yo, "}, "commitMid": {"en": ", commit to my Press Pause Number of ", "es": ", me comprometo con mi Número de Pausa de "}, "commitEnd": {"en": ".", "es": "."}, "signedOn": {"en": "— Signed with intention on ", "es": "— Firmado con intención el "}, "downloadBtn": {"en": "Download My Commitment", "es": "Descargar Mi Compromiso"}, "printBtn": {"en": "Print My Commitment", "es": "Imprimir Mi Compromiso"}, "restartBtn": {"en": "Start Over", "es": "Empezar de Nuevo"}, "phName": {"en": "Enter your full name", "es": "Escribe tu nombre completo"}, "motiv_starting_or_growing_a_business": {"en": "🏢 Starting or growing a business", "es": "🏢 Iniciar o hacer crecer un negocio"}, "pill_motiv_starting_or_growing_a_business": {"en": "Starting or growing a business", "es": "Iniciar o hacer crecer un negocio"}, "motiv_a_major_life_change": {"en": "🏠 A major life change (move, family, health)", "es": "🏠 Un cambio de vida importante (mudanza, familia, salud)"}, "pill_motiv_a_major_life_change": {"en": "A major life change", "es": "Un cambio de vida importante"}, "motiv_going_back_to_school_or_training": {"en": "📚 Going back to school or training", "es": "📚 Volver a estudiar o capacitarme"}, "pill_motiv_going_back_to_school_or_training": {"en": "Going back to school or training", "es": "Volver a estudiar o capacitarme"}, "motiv_burnout_or_need_for_rest": {"en": "🧘 Burnout or need for rest", "es": "🧘 Agotamiento o necesidad de descanso"}, "pill_motiv_burnout_or_need_for_rest": {"en": "Burnout or need for rest", "es": "Agotamiento o necesidad de descanso"}, "motiv_relocating_or_traveling": {"en": "🌍 Relocating or traveling", "es": "🌍 Mudarme o viajar"}, "pill_motiv_relocating_or_traveling": {"en": "Relocating or traveling", "es": "Mudarme o viajar"}, "motiv_pivoting_to_something_new_entirely": {"en": "🔄 Pivoting to something new entirely", "es": "🔄 Cambiar por completo de rumbo"}, "pill_motiv_pivoting_to_something_new_entirely": {"en": "Pivoting to something new entirely", "es": "Cambiar por completo de rumbo"}, "stepOf": {"en": "Step {n} of 5", "es": "Paso {n} de 5"}, "weightedValueLabel": {"en": "Weighted Value: ", "es": "Valor Ponderado: "}, "healthyRangeLabel": {"en": "Healthy Range: ", "es": "Rango Saludable: "}, "formulaNormal": {"en": "(Liquid Savings + Monthly Margin) ÷ 2", "es": "(Ahorros Líquidos + Margen Mensual) ÷ 2"}, "formulaDebt": {"en": "Weighted Value = Monthly Margin × 50%", "es": "Valor Ponderado = Margen Mensual × 50%"}, "debtWarning": {"en": "⚠️ Since your total debt meets or exceeds your liquid savings, your Weighted Value is based on 50% of your Monthly Margin.", "es": "⚠️ Como tu deuda total iguala o supera tus ahorros líquidos, tu Valor Ponderado se basa en el 50% de tu Margen Mensual."}, "errFieldsJs": {"en": "Please fill in all three fields to continue.", "es": "Completa los tres campos para continuar."}, "errAtLeastOne": {"en": "Please enter at least one value greater than $0.", "es": "Ingresa al menos un valor mayor a $0."}, "msgConservative": {"en": "Your gut was a bit conservative. Your numbers suggest you may be able to pause with more confidence than you thought.", "es": "Tu instinto fue algo conservador. Tus números sugieren que puedes pausar con más confianza de la que pensabas."}, "msgOnTarget": {"en": "Great instincts! Your gut guess landed right in the healthy range your numbers support.", "es": "¡Buen instinto! Tu estimación cayó justo dentro del rango saludable que tus números respaldan."}, "msgHigh": {"en": "Your gut was reaching higher than the numbers suggest right now. Let's find a number that's both ambitious and grounded.", "es": "Tu instinto apuntó más alto de lo que los números sugieren por ahora. Busquemos una cifra ambiciosa y a la vez realista."}, "suggested": {"en": "Suggested: ", "es": "Sugerido: "}, "preparingPdf": {"en": "Preparing your PDF…", "es": "Preparando tu PDF…"}, "downloadFailed": {"en": "The download could not be created. Please use Print My Commitment instead.", "es": "No se pudo crear la descarga. Usa Imprimir Mi Compromiso en su lugar."}, "stepLabel1": {"en": "Step 1 of 5", "es": "Paso 1 de 5"}, "stepLabel2": {"en": "Step 2 of 5", "es": "Paso 2 de 5"}, "stepLabel3": {"en": "Step 3 of 5", "es": "Paso 3 de 5"}, "stepLabel4": {"en": "Step 4 of 5", "es": "Paso 4 de 5"}, "stepLabel5": {"en": "Step 5 of 5", "es": "Paso 5 de 5"}, "suggestedInit": {"en": "Suggested: $0", "es": "Sugerido: $0"}};
     const state = { currentScreen: 0, initialGuess: 0, motivations: [], liquidSavings: 0, liquidSavingsEntered: 0, totalDebt: 0, monthlyMargin: 0, weightedValue: 0, rangeLow: 0, rangeHigh: 0, rangeMidpoint: 0, suggested: 0, recommended: 0, clientName: '' };
 
     // This tool deliberately counts liquid savings only up to this amount.
@@ -314,7 +321,7 @@
         progressWrap.style.display = 'block';
         const pct = (idx / 5) * 100;
         document.getElementById('progress-fill').style.width = pct + '%';
-        document.getElementById('progress-label').textContent = 'Step ' + idx + ' of 5';
+        document.getElementById('progress-label').textContent = t('stepOf').replace('{n}', idx);
         document.getElementById('progress-pct').textContent = Math.round(pct) + '%';
       } else { progressWrap.style.display = 'none'; }
       screens.forEach(s => s.classList.remove('print-target'));
@@ -348,8 +355,8 @@
         liveCalc.style.display = 'block';
         const formulaNote = document.getElementById('calc-formula-note');
         const debtWarn = document.getElementById('calc-debt-warning');
-        if (debtExceedsSavings) { formulaNote.textContent = 'Weighted Value = Monthly Margin × 50%'; debtWarn.classList.remove('hidden'); }
-        else { formulaNote.textContent = '(Liquid Savings + Monthly Margin) ÷ 2'; debtWarn.classList.add('hidden'); }
+        if (debtExceedsSavings) { formulaNote.textContent = t('formulaDebt'); debtWarn.classList.remove('hidden'); }
+        else { formulaNote.textContent = t('formulaNormal'); debtWarn.classList.add('hidden'); }
       } else { liveCalc.style.display = 'none'; }
     }
     savingsInput.addEventListener('input', updateLiveCalc);
@@ -398,8 +405,8 @@
       const entered = parseDollar(savingsInput.value); const s = capSavings(entered); const d = parseDollar(debtInput.value); const m = parseDollar(marginInput.value);
       const err = document.getElementById('error-numbers');
       const savingsRaw = savingsInput.value.replace(/[^0-9]/g, ''); const marginRaw = marginInput.value.replace(/[^0-9]/g, '');
-      if (!savingsRaw || !marginRaw) { err.textContent = 'Please fill in all three fields to continue.'; err.classList.add('show'); return; }
-      if (s <= 0 && m <= 0) { err.textContent = 'Please enter at least one value greater than $0.'; err.classList.add('show'); return; }
+      if (!savingsRaw || !marginRaw) { err.textContent = t('errFieldsJs'); err.classList.add('show'); return; }
+      if (s <= 0 && m <= 0) { err.textContent = t('errAtLeastOne'); err.classList.add('show'); return; }
       err.classList.remove('show');
       state.liquidSavings = s; state.liquidSavingsEntered = entered; state.totalDebt = d; state.monthlyMargin = m; calculate(); populateComparison(); showScreen(4);
     });
@@ -412,7 +419,7 @@
     document.getElementById('btn-download').addEventListener('click', async function () {
       const btnText = document.getElementById('download-btn-text');
       const original = btnText.textContent;
-      btnText.textContent = 'Preparing your PDF…';
+      btnText.textContent = t('preparingPdf');
       const target = document.getElementById('screen-6');
       const hidden = target.querySelectorAll('.no-print');
       try {
@@ -448,7 +455,7 @@
       } catch (err) {
         hidden.forEach(el => { el.style.display = ''; });
         console.error('Commitment PDF failed:', err);
-        alert('The download could not be created. Please use Print My Commitment instead.');
+        alert(t('downloadFailed'));
       } finally {
         btnText.textContent = original;
       }
@@ -469,9 +476,9 @@
       document.getElementById('comp-range').textContent = fmtRound50(state.rangeLow) + ' – ' + fmtRound50(state.rangeHigh);
       document.getElementById('comp-wv').textContent = fmt(state.weightedValue);
       const msgEl = document.getElementById('comp-message'); const guess = state.initialGuess; const rLow = state.rangeLow; const rHigh = state.rangeHigh;
-      if (guess < rLow) msgEl.textContent = "Your gut was a bit conservative. Your numbers suggest you may be able to pause with more confidence than you thought.";
-      else if (guess >= rLow && guess <= rHigh) msgEl.textContent = "Great instincts! Your gut guess landed right in the healthy range your numbers support.";
-      else msgEl.textContent = "Your gut was reaching higher than the numbers suggest right now. Let's find a number that's both ambitious and grounded.";
+      if (guess < rLow) msgEl.textContent = t('msgConservative');
+      else if (guess >= rLow && guess <= rHigh) msgEl.textContent = t('msgOnTarget');
+      else msgEl.textContent = t('msgHigh');
       const barMax = Math.max(guess, rHigh) * 1.3;
       document.getElementById('range-bar-max').textContent = fmt(barMax);
       const zonePctLeft = (rLow / barMax) * 100; const zonePctWidth = ((rHigh - rLow) / barMax) * 100; const markerPct = (guess / barMax) * 100;
@@ -492,7 +499,7 @@
       agreedSlider.min = lo; agreedSlider.max = hi; agreedSlider.step = 50; agreedSlider.value = suggested;
       document.getElementById('agree-min').textContent = fmt(lo);
       document.getElementById('agree-max').textContent = fmt(hi);
-      document.getElementById('agree-suggested').textContent = 'Suggested: ' + fmt(suggested);
+      document.getElementById('agree-suggested').textContent = t('suggested') + fmt(suggested);
       updateAgreedDisplay();
     }
 
@@ -508,7 +515,7 @@
       document.getElementById('sum-guess').textContent = fmt(state.initialGuess); document.getElementById('sum-wv').textContent = fmt(state.weightedValue); document.getElementById('sum-debt').textContent = fmt(state.totalDebt);
       document.getElementById('sum-range').textContent = fmtRound50(state.rangeLow) + ' – ' + fmtRound50(state.rangeHigh); document.getElementById('sum-rec').textContent = fmt(state.recommended);
       const pillsContainer = document.getElementById('motiv-pills'); pillsContainer.innerHTML = '';
-      state.motivations.forEach(m => { const pill = document.createElement('span'); pill.className = 'pill-tag'; pill.textContent = m; pillsContainer.appendChild(pill); });
+      state.motivations.forEach(m => { const pill = document.createElement('span'); pill.className = 'pill-tag'; pill.textContent = motivLabel(m); pillsContainer.appendChild(pill); });
     }
 
     function populateCommitment() {
@@ -516,10 +523,49 @@
       document.getElementById('commit-amount').textContent = fmt(state.recommended);
       document.getElementById('commit-name').textContent = state.clientName || '___________';
       document.getElementById('input-name').value = state.clientName || '';
-      document.getElementById('commit-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('commit-date').textContent = new Date().toLocaleDateString(currentLang === 'es' ? 'es-ES' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       const pillsContainer = document.getElementById('motiv-pills-commit'); pillsContainer.innerHTML = '';
-      state.motivations.forEach(m => { const pill = document.createElement('span'); pill.className = 'pill-tag'; pill.textContent = m; pillsContainer.appendChild(pill); });
+      state.motivations.forEach(m => { const pill = document.createElement('span'); pill.className = 'pill-tag'; pill.textContent = motivLabel(m); pillsContainer.appendChild(pill); });
     }
+
+
+    let currentLang = 'en';
+    function t(key) { const e = I18N[key]; return e ? (e[currentLang] || e.en) : key; }
+    function motivLabel(value) {
+        const key = 'pill_motiv_' + value.toLowerCase().replace(/[^a-z]+/g, '_').replace(/^_|_$/g, '');
+        return I18N[key] ? t(key) : value;
+    }
+
+    function applyLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const k = el.getAttribute('data-i18n'); if (I18N[k]) el.textContent = t(k);
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+            const k = el.getAttribute('data-i18n-html'); if (I18N[k]) el.innerHTML = t(k);
+        });
+        document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+            const k = el.getAttribute('data-i18n-ph'); if (I18N[k]) el.placeholder = t(k);
+        });
+        document.querySelectorAll('.lang-btn').forEach(b => {
+            b.classList.toggle('active-lang', b.id.indexOf('lang-' + lang) === 0);
+        });
+        // anything already on screen has to be rebuilt in the new language
+        updateLiveCalc();
+        if (state.currentScreen >= 4) populateComparison();
+        if (state.currentScreen >= 5) populateResult();
+        if (state.currentScreen === 6) populateCommitment();
+        showScreen(state.currentScreen);
+        if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") lucide.createIcons();
+    }
+
+    ['lang-en-bar', 'lang-en-hero'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.addEventListener('click', () => applyLanguage('en'));
+    });
+    ['lang-es-bar', 'lang-es-hero'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.addEventListener('click', () => applyLanguage('es'));
+    });
 
     showScreen(0);
   </script>
