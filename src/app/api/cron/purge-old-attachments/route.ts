@@ -9,21 +9,30 @@ const STORAGE_BATCH  = 100
 /**
  * GET /api/cron/purge-old-attachments
  *
- * PII safeguard: uploaded files are kept for at most 30 days. This platform is
- * not certified for storing sensitive personal information (tax returns, SSNs,
- * bank statements), so anything clients or coaches upload is purged on a
- * rolling window rather than retained indefinitely.
+ * Retention rules:
+ *   1. Client → coach uploads (client_documents / client-documents bucket) are
+ *      deleted 30 days after upload.
+ *   2. Coach → client attachments (coach_message_attachments / coach-documents
+ *      bucket) have NO expiry — they are kept for as long as the client exists
+ *      on TFS.
+ *   3. Everything of a client's, in both directions, is destroyed when their
+ *      account is deleted — whether they delete it themselves (see
+ *      purge-deleted-accounts) or an admin removes them (see
+ *      /api/admin/clients/[id]). Nothing here sweeps on that basis.
  *
- * Covers both upload surfaces:
- *   - coach_message_attachments → coach-documents bucket (coach → client)
- *   - client_documents          → client-documents bucket (client → coach)
+ * A client with a deletion request pending is left alone until the account is
+ * actually deleted, because that request can still be cancelled.
  *
- * Storage objects are removed first; DB rows are only deleted for batches
- * whose files were successfully removed, so a storage failure never leaves an
+ * Storage objects are removed first; DB rows are only deleted for batches whose
+ * files were successfully removed, so a storage failure never leaves an
  * unreferenced file lingering — the batch is retried on the next run.
  *
  * Vercel Cron always dispatches a GET request — this must stay GET, not POST.
  */
+
+type FileRow = { id: string; file_path: string }
+type PurgeResult = { deleted: number; failed: number; error?: string }
+
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
   const secret     = process.env.CRON_SECRET
@@ -35,23 +44,17 @@ export async function GET(req: NextRequest) {
   const service = createServiceClient()
   const cutoff  = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString()
 
-  async function purge(table: string, bucket: string, dateColumn: string) {
-    const { data: rows, error } = await service
-      .from(table)
-      .select('id, file_path')
-      .lt(dateColumn, cutoff)
-
-    if (error) return { deleted: 0, failed: 0, error: error.message }
-
+  /** Removes the given rows from storage, then from the table. */
+  async function removeRows(table: string, bucket: string, rows: FileRow[]): Promise<PurgeResult> {
     let deleted = 0
     let failed  = 0
 
-    for (let i = 0; i < (rows ?? []).length; i += STORAGE_BATCH) {
-      const batch = rows!.slice(i, i + STORAGE_BATCH)
+    for (let i = 0; i < rows.length; i += STORAGE_BATCH) {
+      const batch = rows.slice(i, i + STORAGE_BATCH)
 
       const { error: removeErr } = await service.storage
         .from(bucket)
-        .remove(batch.map(r => r.file_path))
+        .remove(batch.map(r => r.file_path).filter(Boolean))
       if (removeErr) {
         failed += batch.length
         continue
@@ -68,15 +71,27 @@ export async function GET(req: NextRequest) {
     return { deleted, failed }
   }
 
-  const [messageAttachments, clientDocuments] = await Promise.all([
-    purge('coach_message_attachments', 'coach-documents', 'created_at'),
-    purge('client_documents', 'client-documents', 'uploaded_at'),
-  ])
+  // ---------------------------------------------------------------------------
+  // Client → coach uploads older than the retention window.
+  // (Coach → client attachments are intentionally NOT swept by age.)
+  // ---------------------------------------------------------------------------
+  let clientDocuments: PurgeResult = { deleted: 0, failed: 0 }
+  const { data: expiredRows, error: expiredErr } = await service
+    .from('client_documents')
+    .select('id, file_path')
+    .lt('uploaded_at', cutoff)
 
-  const result = { cutoff, messageAttachments, clientDocuments }
+  if (expiredErr) clientDocuments = { deleted: 0, failed: 0, error: expiredErr.message }
+  else            clientDocuments = await removeRows('client_documents', 'client-documents', (expiredRows ?? []) as FileRow[])
 
-  if (messageAttachments.failed || clientDocuments.failed ||
-      messageAttachments.error  || clientDocuments.error) {
+  const result = {
+    cutoff,
+    retentionDays: RETENTION_DAYS,
+    clientDocuments,
+    coachAttachments: 'retained until the client account is deleted',
+  }
+
+  if (clientDocuments.failed || clientDocuments.error) {
     console.error('[purge-old-attachments] incomplete purge:', JSON.stringify(result))
   }
 
