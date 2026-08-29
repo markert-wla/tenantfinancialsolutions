@@ -288,10 +288,10 @@ export default function CoachMessagesClient({ clients }: { clients: Client[] }) 
                   <span className="font-semibold">Privacy notice:</span> message attachments are not
                   certified for sensitive personal information — do not send tax documents, Social
                   Security numbers, or account details, and remind clients not to share them either.
-                  Files you send stay available for <span className="font-semibold">as long as the client is active
-                  on TFS</span>. Documents a client sends you are{' '}
+                  Files you send stay available for <span className="font-semibold">as long as the client has a
+                  TFS account</span>. Documents a client sends you are{' '}
                   <span className="font-semibold">deleted 30 days after upload</span>, so download or print those
-                  within the window. Everything is destroyed once a client is no longer active.
+                  within the window. Everything is destroyed if the client's account is deleted.
                 </p>
               </div>
             </div>

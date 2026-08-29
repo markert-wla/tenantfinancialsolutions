@@ -113,8 +113,8 @@ export default function PortalMessagesClient({
             <h2 className="font-serif font-bold text-tfs-navy text-lg">Messages from Your Coach</h2>
           </div>
           <p className="text-xs text-tfs-slate mb-3">
-            Files your coach sends you stay here for as long as your account is active on TFS, and are
-            destroyed if your account closes — download or print anything you want to keep for good.
+            Files your coach sends you stay here for as long as you have a TFS account, and are destroyed
+            if your account is deleted — download or print anything you want to keep for good.
           </p>
           <div className="space-y-3">
             {coachMessages.map(m => {

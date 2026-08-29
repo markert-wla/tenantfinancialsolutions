@@ -13,11 +13,12 @@ const STORAGE_BATCH  = 100
  *   1. Client → coach uploads (client_documents / client-documents bucket) are
  *      deleted 30 days after upload.
  *   2. Coach → client attachments (coach_message_attachments / coach-documents
- *      bucket) have NO expiry for as long as the client is active on TFS.
- *   3. Either direction: once a client is no longer active
- *      (profiles.is_active = false), everything of theirs is destroyed
- *      regardless of age. Files also go when an account is fully deleted —
- *      see purge-deleted-accounts.
+ *      bucket) have NO expiry — they are kept for as long as the client exists
+ *      on TFS.
+ *   3. Everything of a client's, in both directions, is destroyed when their
+ *      account is deleted — whether they delete it themselves (see
+ *      purge-deleted-accounts) or an admin removes them (see
+ *      /api/admin/clients/[id]). Nothing here sweeps on that basis.
  *
  * A client with a deletion request pending is left alone until the account is
  * actually deleted, because that request can still be cancelled.
@@ -71,43 +72,8 @@ export async function GET(req: NextRequest) {
   }
 
   // ---------------------------------------------------------------------------
-  // 1. Clients who are no longer active — destroy everything, both directions.
-  // ---------------------------------------------------------------------------
-  const { data: inactiveClients, error: inactiveErr } = await service
-    .from('profiles')
-    .select('id')
-    .eq('role', 'client')
-    .eq('is_active', false)
-
-  const inactiveIds = (inactiveClients ?? []).map(c => c.id)
-  let inactiveClientFiles: PurgeResult = { deleted: 0, failed: 0 }
-
-  if (inactiveErr) {
-    inactiveClientFiles = { deleted: 0, failed: 0, error: inactiveErr.message }
-  } else if (inactiveIds.length > 0) {
-    for (const [table, bucket] of [
-      ['client_documents', 'client-documents'],
-      ['coach_message_attachments', 'coach-documents'],
-    ] as const) {
-      const { data: rows, error } = await service
-        .from(table)
-        .select('id, file_path')
-        .in('client_id', inactiveIds)
-
-      if (error) {
-        inactiveClientFiles.error = error.message
-        continue
-      }
-
-      const result = await removeRows(table, bucket, (rows ?? []) as FileRow[])
-      inactiveClientFiles.deleted += result.deleted
-      inactiveClientFiles.failed  += result.failed
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // 2. Client → coach uploads older than the retention window.
-  //    (Coach → client attachments are intentionally NOT swept by age.)
+  // Client → coach uploads older than the retention window.
+  // (Coach → client attachments are intentionally NOT swept by age.)
   // ---------------------------------------------------------------------------
   let clientDocuments: PurgeResult = { deleted: 0, failed: 0 }
   const { data: expiredRows, error: expiredErr } = await service
@@ -121,14 +87,11 @@ export async function GET(req: NextRequest) {
   const result = {
     cutoff,
     retentionDays: RETENTION_DAYS,
-    inactiveClients: inactiveIds.length,
-    inactiveClientFiles,
     clientDocuments,
-    coachAttachments: 'retained while the client is active',
+    coachAttachments: 'retained until the client account is deleted',
   }
 
-  if (clientDocuments.failed || clientDocuments.error ||
-      inactiveClientFiles.failed || inactiveClientFiles.error) {
+  if (clientDocuments.failed || clientDocuments.error) {
     console.error('[purge-old-attachments] incomplete purge:', JSON.stringify(result))
   }
 
