@@ -7,8 +7,8 @@ const tools = [
     subtitle: 'What Are My Money Problems Stemming From?',
     description: 'A three-pillar diagnostic — People, Process, Perspective — that identifies the root causes of your client\'s financial challenges. Takes 5–8 minutes and produces a personalised breakdown.',
     emoji: '💰',
-    color: 'from-yellow-900/40 to-yellow-950/40 border-yellow-700/30',
-    badgeColor: 'bg-yellow-900/50 text-yellow-300',
+    color: 'from-yellow-900 to-yellow-950 border-yellow-600',
+    badgeColor: 'bg-yellow-800 text-yellow-100',
     href: '/tools/money-diagnostic.html',
   },
   {
@@ -17,8 +17,8 @@ const tools = [
     subtitle: 'My Personal Press Pause Number',
     description: 'A guided 5-step discovery tool that helps clients calculate the dollar threshold at which they should pause, breathe, and wait 24 hrs before any purchase — blending gut instinct with real financial data.',
     emoji: '⏸️',
-    color: 'from-teal-900/40 to-teal-950/40 border-teal-700/30',
-    badgeColor: 'bg-teal-900/50 text-teal-300',
+    color: 'from-teal-900 to-teal-950 border-teal-600',
+    badgeColor: 'bg-teal-800 text-teal-100',
     href: '/tools/press-pause-number.html',
   },
   {
@@ -27,8 +27,8 @@ const tools = [
     subtitle: 'Money · Values · Purpose',
     description: 'A full coaching framework that maps a client\'s financial snapshot, core values, and life goals into a personalised MVP Blueprint — complete with an editable action plan and downloadable summary.',
     emoji: '🚀',
-    color: 'from-blue-900/40 to-blue-950/40 border-blue-700/30',
-    badgeColor: 'bg-blue-900/50 text-blue-300',
+    color: 'from-blue-900 to-blue-950 border-blue-600',
+    badgeColor: 'bg-blue-800 text-blue-100',
     href: '/tools/mvp-alignment.html',
   },
   {
@@ -37,8 +37,8 @@ const tools = [
     subtitle: 'Understand the emotions driving financial decisions',
     description: 'A bilingual (EN/ES) coaching experience where clients identify 3 emotions holding their finances back and 3 they want to cultivate — then receive personalised micro-habits and a printable commitment card.',
     emoji: '🗺️',
-    color: 'from-emerald-900/40 to-emerald-950/40 border-emerald-700/30',
-    badgeColor: 'bg-emerald-900/50 text-emerald-300',
+    color: 'from-emerald-900 to-emerald-950 border-emerald-600',
+    badgeColor: 'bg-emerald-800 text-emerald-100',
     href: '/tools/emotional-money-map.html',
   },
   {
@@ -47,8 +47,8 @@ const tools = [
     subtitle: '30-Day Spending Audit Tool',
     description: 'A bilingual (EN/ES) drag-and-drop audit tool where clients categorise 30 days of transactions into Spend Fixed, Spend Freely, and Unexpected buckets — with a subscription tracker, donut & bar charts, and a printable summary.',
     emoji: '🪣',
-    color: 'from-blue-900/40 to-blue-950/40 border-blue-700/30',
-    badgeColor: 'bg-blue-900/50 text-blue-300',
+    color: 'from-blue-900 to-blue-950 border-blue-600',
+    badgeColor: 'bg-blue-800 text-blue-100',
     href: '/tools/spending-audit.html',
   },
   {
@@ -57,8 +57,8 @@ const tools = [
     subtitle: 'Habits · Outcomes · Performance',
     description: 'An interactive goal-setting sheet where clients build goals in three layers — the Habits they control, the Outcomes those habits produce, and the Performance measures that keep them honest. Includes worked examples, a commitment statement, progress tracking and a print-ready layout.',
     emoji: '🎯',
-    color: 'from-amber-900/40 to-amber-950/40 border-amber-700/30',
-    badgeColor: 'bg-amber-900/50 text-amber-300',
+    color: 'from-amber-900 to-amber-950 border-amber-600',
+    badgeColor: 'bg-amber-800 text-amber-100',
     href: '/tools/hop-goal-setting.html',
   },
 ]
@@ -68,7 +68,7 @@ export default function CoachToolsPage() {
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-yellow-400 mb-2">Coaching Tools</h1>
-        <p className="text-yellow-400/80 text-sm">
+        <p className="text-tfs-navy text-sm">
           Interactive tools to use with your clients during sessions. Each tool opens in a new tab so you can run it alongside your coaching call.
         </p>
       </div>
@@ -77,7 +77,7 @@ export default function CoachToolsPage() {
         {tools.map((tool) => (
           <div
             key={tool.id}
-            className={`bg-gradient-to-br ${tool.color} border rounded-2xl p-6 flex flex-col gap-4`}
+            className={`bg-gradient-to-br ${tool.color} border-2 rounded-2xl p-6 flex flex-col gap-4 shadow-md`}
           >
             <div className="flex items-start gap-4">
               <span className="text-4xl leading-none">{tool.emoji}</span>
@@ -89,7 +89,7 @@ export default function CoachToolsPage() {
               </div>
             </div>
 
-            <p className="text-white/60 text-sm leading-relaxed flex-1">
+            <p className="text-white/80 text-sm leading-relaxed flex-1">
               {tool.description}
             </p>
 
