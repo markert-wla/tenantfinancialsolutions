@@ -43,9 +43,35 @@ export async function GET(req: NextRequest) {
   const purged: string[] = []
   const failed: string[] = []
 
+  /**
+   * Storage objects are not covered by the database cascade, so a deleted
+   * account would otherwise leave its files sitting in the buckets. Remove
+   * them in both directions before the account itself goes.
+   */
+  async function purgeStoredFiles(clientId: string) {
+    for (const [table, bucket] of [
+      ['client_documents', 'client-documents'],
+      ['coach_message_attachments', 'coach-documents'],
+    ] as const) {
+      const { data: rows, error } = await service
+        .from(table)
+        .select('file_path')
+        .eq('client_id', clientId)
+      if (error) {
+        console.error(`[Purge] Could not list ${table} for ${clientId}:`, error.message)
+        continue
+      }
+      const paths = (rows ?? []).map(r => r.file_path).filter(Boolean)
+      if (paths.length === 0) continue
+      const { error: removeErr } = await service.storage.from(bucket).remove(paths)
+      if (removeErr) console.error(`[Purge] Could not remove ${bucket} files for ${clientId}:`, removeErr.message)
+    }
+  }
+
   for (const p of due) {
     const name = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email
     try {
+      await purgeStoredFiles(p.id)
       await service.from('bookings').delete().eq('client_id', p.id)
       await service.from('promo_codes').update({ created_by: null }).eq('created_by', p.id)
       if (p.email) {
