@@ -56,13 +56,30 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--page
 .txn-card [data-field="date"] { color: #4B5563; font-weight: 600; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
 .card-shadow { box-shadow: var(--card-shadow); }
-.txn-card { width: 170px; min-width: 170px; background: #fff; border-radius: var(--card-radius); box-shadow: var(--card-shadow); cursor: grab; transition: transform 0.15s, box-shadow 0.15s; position: relative; padding: 10px; flex-shrink: 0; }
+.txn-card { width: 170px; min-width: 170px; background: #fff; border: 2px solid #94A3B8; border-radius: var(--card-radius); box-shadow: var(--card-shadow); cursor: grab; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; padding: 10px; flex-shrink: 0; }
+.txn-card:hover { border-color: var(--navy); }
 .txn-card:hover { transform: scale(1.02); box-shadow: 0 4px 16px rgba(0,0,0,0.13); }
 .txn-card.dragging { opacity: 0.6; transform: rotate(2deg); cursor: grabbing; }
 .txn-card .edit-cue, .txn-card .delete-btn { opacity: 0; transition: opacity 0.15s; }
 .txn-card:hover .edit-cue, .txn-card:hover .delete-btn { opacity: 1; }
 @keyframes greenFlash { 0%,100%{ border-color: transparent; } 50%{ border-color: #22c55e; } }
-.drop-col { border-radius: var(--col-radius); min-height: 200px; transition: border-color 0.2s, background 0.2s; }
+.drop-col {
+  border-radius: 10px 10px 38px 38px;   /* wide mouth, rounded base — bucket profile */
+  min-height: 220px;
+  border-width: 3px !important;
+  border-style: solid !important;
+  transition: border-color 0.2s, background 0.2s;
+  box-shadow: inset 0 -10px 18px -12px rgba(0,0,0,0.28), 0 4px 14px rgba(0,0,0,0.10);
+  padding-bottom: 18px;
+  font-size: 1.05rem;                    /* larger text inside each bucket */
+}
+#col-fixed      { border-color: var(--fixed-dark) !important; }
+#col-freely     { border-color: var(--freely-dark) !important; }
+#col-unexpected { border-color: var(--unexpected-dark) !important; }
+.drop-col > div:first-child { border-radius: 6px 6px 0 0; }          /* header sits in the mouth */
+.drop-col .col-total { font-size: 1.05rem; font-weight: 800; color: var(--navy); }
+.drop-col .col-count { font-size: 0.95rem; font-weight: 600; }
+.drop-col [data-i18n$="Desc"] { font-size: 0.9rem; }
 .drop-col.drag-over-fixed { border: 2px dashed var(--fixed-dark) !important; background: rgba(30,58,138,0.04); }
 .drop-col.drag-over-freely { border: 2px dashed var(--freely-dark) !important; background: rgba(6,95,70,0.04); }
 .drop-col.drag-over-unexpected { border: 2px dashed var(--unexpected-dark) !important; background: rgba(146,64,14,0.04); }
@@ -251,7 +268,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--page
 <div id="columns-row-cr01" class="flex flex-col md:flex-row gap-4 mb-4">
 <div id="col-fixed" class="drop-col flex-1 bg-white p-3 border-2 border-transparent" data-col="fixed">
 <div class="rounded-t-xl px-3 py-2 flex items-center justify-between" style="background:var(--fixed-dark);color:#fff;">
-<div><span class="font-bold text-sm">&#128274; <span data-i18n="spendFixed">Spend Fixed</span></span><div class="text-xs opacity-80" data-i18n="fixedDesc">Recurring &amp; predictable</div></div>
+<div><span class="font-bold text-base">&#128274; <span data-i18n="spendFixed">Spend Fixed</span></span><div class="text-sm opacity-90" data-i18n="fixedDesc">Recurring &amp; predictable</div></div>
 <button class="col-clear-btn text-xs opacity-70 hover:opacity-100 no-print" data-col="fixed">&times;</button>
 </div>
 <div class="flex items-center justify-between px-2 py-1.5 text-xs text-gray-500">
@@ -264,7 +281,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--page
 </div>
 <div id="col-freely" class="drop-col flex-1 bg-white p-3 border-2 border-transparent" data-col="freely">
 <div class="rounded-t-xl px-3 py-2 flex items-center justify-between" style="background:var(--freely-dark);color:#fff;">
-<div><span class="font-bold text-sm">&#128722; <span data-i18n="spendFreely">Spend Freely</span></span><div class="text-xs opacity-80" data-i18n="freelyDesc">Discretionary &amp; lifestyle</div></div>
+<div><span class="font-bold text-base">&#128722; <span data-i18n="spendFreely">Spend Freely</span></span><div class="text-sm opacity-90" data-i18n="freelyDesc">Discretionary &amp; lifestyle</div></div>
 <button class="col-clear-btn text-xs opacity-70 hover:opacity-100 no-print" data-col="freely">&times;</button>
 </div>
 <div class="flex items-center justify-between px-2 py-1.5 text-xs text-gray-500">
@@ -277,7 +294,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--page
 </div>
 <div id="col-unexpected" class="drop-col flex-1 bg-white p-3 border-2 border-transparent" data-col="unexpected">
 <div class="rounded-t-xl px-3 py-2 flex items-center justify-between" style="background:var(--unexpected-dark);color:#fff;">
-<div><span class="font-bold text-sm">&#9889; <span data-i18n="unexpected">Unexpected</span></span><div class="text-xs opacity-80" data-i18n="unexpectedDesc">Unplanned &amp; irregular</div></div>
+<div><span class="font-bold text-base">&#9889; <span data-i18n="unexpected">Unexpected</span></span><div class="text-sm opacity-90" data-i18n="unexpectedDesc">Unplanned &amp; irregular</div></div>
 <button class="col-clear-btn text-xs opacity-70 hover:opacity-100 no-print" data-col="unexpected">&times;</button>
 </div>
 <div class="flex items-center justify-between px-2 py-1.5 text-xs text-gray-500">
