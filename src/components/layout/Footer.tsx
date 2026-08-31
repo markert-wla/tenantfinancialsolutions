@@ -83,7 +83,7 @@ export default function Footer() {
               className="h-10 w-auto object-contain mb-4 rounded"
             />
             <p className="text-sm text-gray-300 leading-relaxed">
-              Tenant Focused &ndash; Community Impact.<br />
+              Tenant Focused &ndash; Community <span className="text-[1.5em] leading-none text-[#C08B3C]">Impact</span>.<br />
               Real People &ndash; Real Coaching.
             </p>
           </div>
