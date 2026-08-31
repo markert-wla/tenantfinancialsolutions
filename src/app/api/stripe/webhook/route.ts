@@ -3,6 +3,8 @@ import { getStripe, listLiveSubscriptions, tierForSubscription, VALID_TIERS } fr
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
+import { getSessionCycle } from '@/lib/sessions/cycle'
+import { planWelcomeBody } from '@/lib/sessions/cycleEmails'
 import Stripe from 'stripe'
 
 // Raw body required for Stripe signature verification
@@ -153,14 +155,51 @@ export async function POST(req: NextRequest) {
           const userId = meta?.supabase_user_id
           const tier   = tierForSubscription(sub)
           if (userId && tier && ['starter', 'advantage'].includes(tier)) {
+            // Anchor the client's session window to the day their subscription
+            // starts, so each payment buys a full month of use. Only for clients
+            // on the anniversary window — anyone who predates that change keeps
+            // the 1st-of-the-month reset they signed up under.
+            const { data: existing } = await supabase
+              .from('profiles')
+              .select('uses_anniversary_cycle, session_cycle_anchor, first_name, email, timezone')
+              .eq('id', userId)
+              .single()
+
+            const anchorsToPayment = !!existing?.uses_anniversary_cycle
+            const anchorIso = new Date((sub.start_date ?? Math.floor(Date.now() / 1000)) * 1000).toISOString()
+
             await supabase
               .from('profiles')
               .update({
                 plan_tier:              tier,
                 stripe_subscription_id: sub.id,
                 stripe_customer_id:     sub.customer as string,
+                // Paying starts a fresh allowance from the payment date.
+                ...(anchorsToPayment ? {
+                  session_cycle_anchor:     anchorIso,
+                  session_cycle_started_at: anchorIso,
+                  sessions_used_this_month: 0,
+                  cycle_reminder_sent_for:  null,
+                } : {}),
               })
               .eq('id', userId)
+
+            if (existing?.email) {
+              const cycle = getSessionCycle(
+                { uses_anniversary_cycle: anchorsToPayment, session_cycle_anchor: anchorIso },
+                new Date(),
+              )
+              await sendEmail({
+                to: existing.email,
+                subject: `Welcome to the ${tier === 'advantage' ? 'Advantage' : 'Starter'} Plan — how your sessions work`,
+                html: brandedEmail(planWelcomeBody({
+                  firstName: existing.first_name ?? 'there',
+                  tier,
+                  cycle,
+                  timezone: existing.timezone ?? 'America/New_York',
+                })),
+              })
+            }
           }
         } catch (err) {
           console.error('[webhook] Failed to update plan on checkout.session.completed:', err)

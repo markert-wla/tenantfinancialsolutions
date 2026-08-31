@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
 import { SESSION_LIMITS } from '@/lib/stripe'
+import { getSessionCycle, sessionsUsedThisCycle, formatCycleRenewal } from '@/lib/sessions/cycle'
 
 function esc(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
   // --- Load client profile ---
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
-    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone, free_trial_expires_at, coach_id, extra_sessions, applied_code_type, promo_expires_at, client_type')
+    .select('first_name, last_name, email, plan_tier, sessions_used_this_month, timezone, free_trial_expires_at, coach_id, extra_sessions, applied_code_type, promo_expires_at, client_type, uses_anniversary_cycle, session_cycle_anchor, session_cycle_started_at')
     .eq('id', user.id)
     .single()
 
@@ -53,8 +54,13 @@ export async function POST(req: NextRequest) {
   }
 
   const tier          = profile.plan_tier ?? 'free'
-  const used          = profile.sessions_used_this_month ?? 0
+  // The allowance runs on the client's own window (or the calendar month for
+  // clients who predate that change); a count left over from a previous window
+  // reads as zero.
+  const cycle         = getSessionCycle(profile)
+  const used          = sessionsUsedThisCycle(profile)
   const extraSessions = profile.extra_sessions ?? 0
+  const renewsOn      = formatCycleRenewal(cycle, profile.timezone ?? 'America/New_York')
 
   // --- Promo code type enforcement ---
   const promoActive = !profile.promo_expires_at || new Date(profile.promo_expires_at) >= new Date()
@@ -74,7 +80,7 @@ export async function POST(req: NextRequest) {
     // Tenant partner benefit: capped at 2 sessions/month; admin-gifted extras override.
     if (used >= 2 && extraSessions === 0) {
       return NextResponse.json(
-        { error: "You've used your 2 sessions for this month. Your Tenant Partner benefit resets monthly. Contact your property manager if you need additional support." },
+        { error: `You've used your 2 sessions for this window. Your Tenant Partner benefit renews on ${renewsOn}. Contact your property manager if you need additional support.` },
         { status: 403 }
       )
     }
@@ -107,7 +113,7 @@ export async function POST(req: NextRequest) {
     }
     if (used >= limit) {
       return NextResponse.json(
-        { error: `You've used all ${limit} session${limit !== 1 ? 's' : ''} for this month. Upgrade or wait for the monthly reset.`, upgrade: true },
+        { error: `You've used all ${limit} session${limit !== 1 ? 's' : ''} for this window. Your allowance renews on ${renewsOn} — or upgrade to book sooner.`, upgrade: true },
         { status: 403 }
       )
     }
@@ -202,10 +208,13 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Update session counters; save coach_id on first booking ---
+  // `used` is the count for the CURRENT window, so stamping the window start
+  // alongside it is what retires a count carried over from the last one.
   await service
     .from('profiles')
     .update({
       sessions_used_this_month: used + 1,
+      session_cycle_started_at: cycle.start.toISOString(),
       ...(extraSessions > 0 ? { extra_sessions: extraSessions - 1 } : {}),
       ...(!profile.coach_id ? { coach_id: coachId } : {}),
     })
