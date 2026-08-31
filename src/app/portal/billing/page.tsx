@@ -8,6 +8,8 @@ import UpgradeButtons from '@/components/portal/UpgradeButtons'
 import ApplyPromoCode from '@/components/portal/ApplyPromoCode'
 import Link from 'next/link'
 import { CreditCard } from 'lucide-react'
+import { SESSION_LIMITS } from '@/lib/stripe'
+import { getSessionCycle, formatCycleRange, formatCycleDeadline, formatCycleRenewal } from '@/lib/sessions/cycle'
 
 export const metadata: Metadata = { title: 'Billing — Portal' }
 
@@ -24,7 +26,7 @@ export default async function PortalBillingPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan_tier, stripe_customer_id, free_trial_expires_at, promo_code_used')
+    .select('plan_tier, stripe_customer_id, free_trial_expires_at, promo_code_used, timezone, client_type, applied_code_type, uses_anniversary_cycle, session_cycle_anchor, session_cycle_started_at')
     .eq('id', user.id)
     .single()
 
@@ -32,6 +34,18 @@ export default async function PortalBillingPage() {
   const isPaid     = tier !== 'free'
   const hasStripe  = !!profile?.stripe_customer_id
   const isPromoUser = isPaid && !hasStripe && !!profile?.promo_code_used
+
+  // The client's own coaching month — spelled out so the dates are never a
+  // surprise. Community Connect plans have no individual sessions to explain.
+  const isTenantPartner = profile?.client_type === 'property_tenant'
+  const isGroupComp     = profile?.applied_code_type === 'group_comp'
+  const isFullComp      = profile?.applied_code_type === 'full_comp'
+  const userTz          = profile?.timezone ?? 'America/New_York'
+  const cycle           = getSessionCycle(profile, new Date())
+  const sessionsPerMonth = isFullComp
+    ? (isTenantPartner ? 2 : null)
+    : (SESSION_LIMITS[tier] ?? 0)
+  const showWindow = !isGroupComp && sessionsPerMonth !== null && sessionsPerMonth > 0 && (isPaid || isFullComp)
 
   const trialExpiry = profile?.free_trial_expires_at
     ? new Date(profile.free_trial_expires_at)
@@ -88,6 +102,27 @@ export default async function PortalBillingPage() {
           <UpgradeButtons currentTier={tier} />
         )}
       </div>
+
+      {showWindow && (
+        <div className="card mb-6">
+          <p className="text-xs text-tfs-slate uppercase tracking-wide mb-2">Your coaching month</p>
+          <p className="font-bold text-tfs-navy mb-1">
+            {sessionsPerMonth} session{sessionsPerMonth !== 1 ? 's' : ''} · {formatCycleRange(cycle, userTz)}
+          </p>
+          <p className="text-sm text-tfs-slate">
+            {cycle.isAnniversary
+              ? <>Your coaching month runs from your own {isFullComp ? 'start' : 'signup'} date, not the 1st of the calendar month{isFullComp ? '' : ', so every payment gives you a full month of use'}. Book by{' '}
+                  <strong className="text-tfs-navy">{formatCycleDeadline(cycle, userTz)}</strong>; your next {sessionsPerMonth} session{sessionsPerMonth !== 1 ? 's' : ''} unlock on{' '}
+                  <strong className="text-tfs-navy">{formatCycleRenewal(cycle, userTz)}</strong>.</>
+              : <>Your sessions reset on the 1st of each month. Book by{' '}
+                  <strong className="text-tfs-navy">{formatCycleDeadline(cycle, userTz)}</strong>; your next {sessionsPerMonth} session{sessionsPerMonth !== 1 ? 's' : ''} unlock on{' '}
+                  <strong className="text-tfs-navy">{formatCycleRenewal(cycle, userTz)}</strong>.</>}
+          </p>
+          <p className="text-sm text-tfs-slate mt-2">
+            Unused sessions don&apos;t carry over. We&apos;ll email you 3 days before your month ends if you still have one left.
+          </p>
+        </div>
+      )}
 
       <ApplyPromoCode />
 

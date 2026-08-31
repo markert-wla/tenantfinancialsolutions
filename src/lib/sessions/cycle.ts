@@ -147,10 +147,16 @@ export function formatCycleDeadline(
   }).format(cycle.lastDay)
 }
 
-/** Short form of the whole window — e.g. "Aug 30 – Sep 29". */
+/**
+ * Short form of the whole window — e.g. "Aug 30 – Sep 29".
+ *
+ * Both ends are read from midday rather than the raw turnover instant: a window
+ * that begins at 00:00 UTC is still the previous evening in US timezones, and
+ * rendering that directly would show the client a start date a day early.
+ */
 export function formatCycleRange(cycle: SessionCycle, timezone = 'America/New_York'): string {
   const fmt = new Intl.DateTimeFormat('en-US', { timeZone: timezone, month: 'short', day: 'numeric' })
-  return `${fmt.format(cycle.start)} – ${fmt.format(cycle.lastDay)}`
+  return `${fmt.format(new Date(cycle.start.getTime() + 12 * 3_600_000))} – ${fmt.format(cycle.lastDay)}`
 }
 
 /**

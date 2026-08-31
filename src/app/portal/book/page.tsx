@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import BookingClient from '@/components/portal/BookingClient'
 import IntakeQuestionnaire from '@/components/portal/IntakeQuestionnaire'
 import { SESSION_LIMITS } from '@/lib/stripe'
+import { getSessionCycle, sessionsUsedThisCycle, formatCycleDeadline, formatCycleRenewal } from '@/lib/sessions/cycle'
 
 export const metadata: Metadata = { title: 'Book a Session' }
 
@@ -20,19 +21,27 @@ export default async function BookPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan_tier, sessions_used_this_month, timezone, coach_id, extra_sessions, applied_code_type, promo_expires_at, intake_completed_at')
+    .select('plan_tier, sessions_used_this_month, timezone, coach_id, extra_sessions, applied_code_type, promo_expires_at, intake_completed_at, client_type, uses_anniversary_cycle, session_cycle_anchor, session_cycle_started_at')
     .eq('id', user.id)
     .single()
 
   const tier          = profile?.plan_tier ?? 'free'
-  const used          = profile?.sessions_used_this_month ?? 0
   const extraSessions = profile?.extra_sessions ?? 0
   const userTz        = profile?.timezone ?? 'America/New_York'
   const buyMode       = searchParams.buy === '1'
 
+  // Sessions run on the client's own monthly window (calendar month for clients
+  // who predate that change), so a count from a finished window reads as zero.
+  const cycle         = getSessionCycle(profile, new Date())
+  const used          = sessionsUsedThisCycle(profile, new Date())
+  const cycleDeadline = formatCycleDeadline(cycle, userTz, { withYear: false })
+  const cycleRenewal  = formatCycleRenewal(cycle, userTz)
+
   // Promo code type enforcement
   const promoActive = !profile?.promo_expires_at || new Date(profile.promo_expires_at) >= new Date()
   const activeCodeType = promoActive ? (profile?.applied_code_type ?? null) : null
+
+  const isTenantPartner = profile?.client_type === 'property_tenant'
 
   let canBook: boolean
   let remaining: number
@@ -41,8 +50,16 @@ export default async function BookPage({
     canBook   = false
     remaining = 0
   } else if (activeCodeType === 'full_comp') {
-    canBook   = true
-    remaining = 99
+    // Tenant Partners get 2 comped sessions a month — the same cap the booking
+    // API enforces — so their window and remaining count read the same here as
+    // everywhere else. Non-tenant partnership plans stay uncapped.
+    if (isTenantPartner) {
+      canBook   = used < 2
+      remaining = Math.max(0, 2 - used)
+    } else {
+      canBook   = true
+      remaining = 99
+    }
   } else {
     const limit = SESSION_LIMITS[tier] ?? 0
     canBook     = extraSessions > 0 || (limit > 0 && used < limit)
@@ -93,6 +110,8 @@ export default async function BookPage({
           userTimezone={userTz}
           canBook={buyMode ? true : canBook}
           sessionsRemaining={remaining}
+          cycleDeadline={(activeCodeType === 'full_comp' && !isTenantPartner) || extraSessions > 0 ? null : cycleDeadline}
+          cycleRenewal={cycleRenewal}
           tier={tier}
           activeCodeType={activeCodeType}
           defaultCoachId={defaultCoachId}

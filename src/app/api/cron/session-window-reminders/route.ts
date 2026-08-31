@@ -63,9 +63,7 @@ export async function GET(req: NextRequest) {
   const { data: rows, error } = await service
     .from('profiles')
     .select(
-      'id, first_name, email, timezone, plan_tier, client_type, applied_code_type, promo_expires_at, ' +
-      'sessions_used_this_month, extra_sessions, uses_anniversary_cycle, session_cycle_anchor, ' +
-      'session_cycle_started_at, cycle_reminder_sent_for'
+      'id, first_name, email, timezone, plan_tier, client_type, applied_code_type, promo_expires_at, sessions_used_this_month, extra_sessions, uses_anniversary_cycle, session_cycle_anchor, session_cycle_started_at, cycle_reminder_sent_for'
     )
     .eq('role', 'client')
     .eq('is_active', true)

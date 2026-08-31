@@ -28,6 +28,10 @@ interface Props {
   userTimezone:      string
   canBook:           boolean
   sessionsRemaining: number
+  /** Last day of the client's current session window, e.g. "September 29". */
+  cycleDeadline?:    string | null
+  /** Day their next allowance unlocks, e.g. "September 30". */
+  cycleRenewal?:     string | null
   tier:              string
   activeCodeType:    string | null
   defaultCoachId:    string | null
@@ -37,7 +41,7 @@ interface Props {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export default function BookingClient({ coaches, userTimezone, canBook, sessionsRemaining, tier, activeCodeType, defaultCoachId, assignedCoachId, buyMode = false }: Props) {
+export default function BookingClient({ coaches, userTimezone, canBook, sessionsRemaining, cycleDeadline = null, cycleRenewal = null, tier, activeCodeType, defaultCoachId, assignedCoachId, buyMode = false }: Props) {
   const [selectedCoachId, setSelectedCoachId] = useState<string>(defaultCoachId ?? 'any')
   const [weekOffset,      setWeekOffset]      = useState(0)
   const [slotDays,        setSlotDays]        = useState<SlotDay[]>([])
@@ -217,7 +221,9 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
             ? 'Your partnership plan includes TFS Community Connect sessions. Individual one-on-one sessions require an upgraded plan.'
             : tier === 'free'
               ? 'Individual coaching sessions are available on Starter and Advantage plans.'
-              : `You've used all your sessions for this month. Upgrade for more, or check back next month.`}
+              : cycleRenewal
+                ? `You've used all your sessions for this month. Your next sessions unlock on ${cycleRenewal} — or upgrade to book sooner.`
+                : `You've used all your sessions for this month. Upgrade for more, or check back next month.`}
         </p>
         {!isGroupComp && <a href="/portal/billing" className="btn-primary text-sm">View Plans &amp; Upgrade</a>}
         {isGroupComp && <a href="/portal/group-sessions" className="btn-primary text-sm">View TFS Community Connect</a>}
@@ -243,6 +249,11 @@ export default function BookingClient({ coaches, userTimezone, canBook, sessions
       ) : (
         <div className="mb-6 px-4 py-3 rounded-lg bg-tfs-teal/10 border border-tfs-teal/20 text-tfs-teal-button text-sm font-medium">
           You have <strong>{sessionsRemaining}</strong> session{sessionsRemaining !== 1 ? 's' : ''} remaining this month.
+          {cycleDeadline && (
+            <span className="block text-tfs-navy font-normal mt-1">
+              Book by <strong>{cycleDeadline}</strong> — unused sessions don&apos;t carry over to next month.
+            </span>
+          )}
         </div>
       )}
 

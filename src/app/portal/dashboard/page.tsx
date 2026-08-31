@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { CalendarPlus, Users, CalendarCheck, MessageSquare } from 'lucide-react'
 import ExtraSessionCard from '@/components/portal/ExtraSessionCard'
 import { SESSION_LIMITS } from '@/lib/stripe'
+import { getSessionCycle, sessionsUsedThisCycle, formatCycleDeadline, formatCycleRenewal, formatCycleRange } from '@/lib/sessions/cycle'
 import { tzShort } from '@/lib/timezones'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -26,15 +27,21 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, plan_tier, sessions_used_this_month, extra_sessions, timezone, applied_code_type, promo_expires_at, client_type')
+    .select('first_name, plan_tier, sessions_used_this_month, extra_sessions, timezone, applied_code_type, promo_expires_at, client_type, uses_anniversary_cycle, session_cycle_anchor, session_cycle_started_at')
     .eq('id', user.id)
     .single()
 
   const tier    = profile?.plan_tier ?? 'free'
-  const used    = profile?.sessions_used_this_month ?? 0
   const extras  = profile?.extra_sessions ?? 0
   const userTz  = profile?.timezone ?? 'America/New_York'
   const isTopTier = tier === 'advantage'
+
+  // The client's current session window — their own monthly date if they joined
+  // after that change, otherwise the calendar month.
+  const cycle    = getSessionCycle(profile, now)
+  const used     = sessionsUsedThisCycle(profile, now)
+  const useByDay = formatCycleDeadline(cycle, userTz, { withYear: false })
+  const renewsOn = formatCycleRenewal(cycle, userTz)
 
   const promoActive = !profile?.promo_expires_at || new Date(profile.promo_expires_at) >= new Date()
   const activeCodeType = promoActive ? (profile?.applied_code_type ?? null) : null
@@ -58,8 +65,8 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
     .order('start_time_utc', { ascending: true })
     .limit(3)
 
-  // Count completed sessions this month (past start time, confirmed)
-  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  // Count completed sessions in the current window (past start time, confirmed)
+  const firstOfMonth = cycle.start.toISOString()
   const { count: completedThisMonth } = await supabase
     .from('bookings')
     .select('*', { count: 'exact', head: true })
@@ -160,7 +167,12 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Sessions used */}
         <div className="card">
-          <p className="text-sm text-tfs-slate mb-1">Sessions this month</p>
+          <p className="text-sm text-tfs-slate mb-1">
+            Sessions this month
+            {!isGroupComp && !(isFullComp && !isTenantPartner) && (
+              <span className="block text-xs text-tfs-slate/80 mt-0.5">{formatCycleRange(cycle, userTz)}</span>
+            )}
+          </p>
           {isGroupComp ? (
             <p className="text-sm text-tfs-slate italic mt-1">TFS Community Connect plan — individual sessions not included.</p>
           ) : (
@@ -171,7 +183,7 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
               </p>
               {atLimit && (
                 <p className="text-xs text-orange-600 mt-1">
-                  Monthly limit reached{!isTopTier && !isTenantPartner && (
+                  Renews {renewsOn}{!isTopTier && !isTenantPartner && (
                     <> — <Link href="/portal/billing" className="underline">Upgrade</Link></>
                   )}
                 </p>
@@ -212,20 +224,27 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
             ) : atLimit ? (
               isTopTier ? (
                 <p className="text-tfs-navy font-medium text-sm">
-                  Monthly sessions used. Buy a single session or wait for the monthly reset.
+                  Sessions used for this month. Buy a single session, or your next ones unlock {renewsOn}.
                 </p>
               ) : (
                 <p className="text-tfs-navy font-medium text-sm">
-                  Monthly sessions used.{' '}
-                  <Link href="/portal/billing" className="text-tfs-teal-button hover:underline">Upgrade</Link> or wait for the monthly reset.
+                  Sessions used for this month.{' '}
+                  <Link href="/portal/billing" className="text-tfs-teal-button hover:underline">Upgrade</Link> or wait until {renewsOn}.
                 </p>
               )
             ) : (
-              <p className="text-tfs-navy font-medium">
-                You have{' '}
-                <span className="text-tfs-teal-button font-bold">{extras > 0 ? extras : limit - used}</span>{' '}
-                session{(extras > 0 ? extras : limit - used) !== 1 ? 's' : ''} remaining this month.
-              </p>
+              <>
+                <p className="text-tfs-navy font-medium">
+                  You have{' '}
+                  <span className="text-tfs-teal-button font-bold">{extras > 0 ? extras : limit - used}</span>{' '}
+                  session{(extras > 0 ? extras : limit - used) !== 1 ? 's' : ''} remaining this month.
+                </p>
+                {extras === 0 && (
+                  <p className="text-xs text-tfs-slate mt-1">
+                    Book by <strong className="text-tfs-navy">{useByDay}</strong> — unused sessions don&apos;t carry over.
+                  </p>
+                )}
+              </>
             )}
           </div>
           {!isGroupComp && (atLimit && isTopTier ? (
