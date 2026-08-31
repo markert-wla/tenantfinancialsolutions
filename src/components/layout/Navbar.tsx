@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
+import type { CSSProperties } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -17,6 +18,31 @@ const NAV_LINKS = [
 ]
 
 const PUBLIC_PAGES = new Set(['/', '/about', '/our-story', '/services', '/faq', '/contact'])
+
+// "Impact" in the tagline is set in a heavy Helvetica Neue with a raised,
+// embossed finish. Helvetica Neue ships with macOS/iOS; Arial Black is the
+// closest weight-for-weight match on Windows/Android, so it heads the fallback
+// list rather than a webfont (no third-party font requests).
+const IMPACT_FONT =
+  "'Helvetica Neue', HelveticaNeue, Helvetica, 'Arial Black', 'Arial Bold', Arial, sans-serif"
+
+// White luxe emboss — used wherever the tagline sits on the navy background.
+const IMPACT_EMBOSS: CSSProperties = {
+  fontFamily: IMPACT_FONT,
+  fontWeight: 900,
+  color: '#FFFFFF',
+  textShadow:
+    '0 -1px 0 rgba(0,0,0,0.40), 0 1px 1px rgba(0,0,0,0.65), 0 2px 4px rgba(0,0,0,0.45)',
+}
+
+// Once the header turns white on scroll, white lettering would vanish, so the
+// same heavy face keeps the brass gold with a light raised edge instead.
+const IMPACT_ON_WHITE: CSSProperties = {
+  fontFamily: IMPACT_FONT,
+  fontWeight: 900,
+  color: '#C08B3C',
+  textShadow: '0 1px 0 rgba(255,255,255,0.95), 0 1px 2px rgba(0,0,0,0.28)',
+}
 
 // Portal links shown in place of public nav when logged in as admin
 const ADMIN_PORTAL_LINKS = [
@@ -162,7 +188,13 @@ export default function Navbar() {
             )}
           </div>
           <span className="text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase leading-none pl-0.5 text-tfs-gold">
-            Tenant Focused – Community <span className="text-[1.5em] leading-none text-[#C08B3C]">Impact</span>
+            Tenant Focused – Community{' '}
+            <span
+              className="text-[1.5em] leading-none"
+              style={scrolled ? IMPACT_ON_WHITE : IMPACT_EMBOSS}
+            >
+              Impact
+            </span>
           </span>
         </div>
 

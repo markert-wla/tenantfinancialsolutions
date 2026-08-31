@@ -3,8 +3,22 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { CSSProperties } from 'react'
 
 const PORTAL_PREFIXES = ['/admin', '/coach', '/portal', '/manager']
+
+// "Impact" in the tagline — heavy Helvetica Neue with a white luxe emboss.
+// Helvetica Neue ships with macOS/iOS; Arial Black is the closest match
+// elsewhere, so it heads the fallback list (no third-party font requests).
+// The footer is always on navy, so the white emboss applies in every state.
+const IMPACT_EMBOSS: CSSProperties = {
+  fontFamily:
+    "'Helvetica Neue', HelveticaNeue, Helvetica, 'Arial Black', 'Arial Bold', Arial, sans-serif",
+  fontWeight: 900,
+  color: '#FFFFFF',
+  textShadow:
+    '0 -1px 0 rgba(0,0,0,0.40), 0 1px 1px rgba(0,0,0,0.65), 0 2px 4px rgba(0,0,0,0.45)',
+}
 
 function IconInstagram() {
   return (
@@ -83,7 +97,8 @@ export default function Footer() {
               className="h-10 w-auto object-contain mb-4 rounded"
             />
             <p className="text-sm text-gray-300 leading-relaxed">
-              Tenant Focused &ndash; Community <span className="text-[1.5em] leading-none text-[#C08B3C]">Impact</span>.<br />
+              Tenant Focused &ndash; Community{' '}
+              <span className="text-[1.5em] leading-none" style={IMPACT_EMBOSS}>Impact</span>.<br />
               Real People &ndash; Real Coaching.
             </p>
           </div>
