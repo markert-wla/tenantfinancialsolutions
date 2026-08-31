@@ -162,7 +162,7 @@ export default function Navbar() {
             )}
           </div>
           <span className="text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase leading-none pl-0.5 text-tfs-gold">
-            Tenant Focused – Community Impact
+            Tenant Focused – Community <span className="text-[1.5em] leading-none">Impact</span>
           </span>
         </div>
 
