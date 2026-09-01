@@ -3,7 +3,6 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { IMPACT_METALLIC } from './impactTagline'
 
 const PORTAL_PREFIXES = ['/admin', '/coach', '/portal', '/manager']
 
@@ -84,8 +83,7 @@ export default function Footer() {
               className="h-10 w-auto object-contain mb-4 rounded"
             />
             <p className="text-sm text-gray-300 leading-relaxed">
-              Tenant Focused &ndash; Community{' '}
-              <span className="text-[1.5em] leading-none" style={IMPACT_METALLIC}>Impact</span>.<br />
+              Tenant Focused &ndash; Community Impact.<br />
               Real People &ndash; Real Coaching.
             </p>
           </div>
