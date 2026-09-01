@@ -4,10 +4,10 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { CalendarPlus, Users, CalendarCheck, MessageSquare } from 'lucide-react'
+import { CalendarPlus, Users, CalendarCheck, MessageSquare, Clock } from 'lucide-react'
 import ExtraSessionCard from '@/components/portal/ExtraSessionCard'
 import { SESSION_LIMITS } from '@/lib/stripe'
-import { getSessionCycle, sessionsUsedThisCycle, formatCycleDeadline, formatCycleRenewal, formatCycleRange } from '@/lib/sessions/cycle'
+import { getSessionCycle, sessionsUsedThisCycle, formatCycleDeadline, formatCycleRenewal, formatCycleRange, hoursUntilCycleEnd } from '@/lib/sessions/cycle'
 import { tzShort } from '@/lib/timezones'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -106,6 +106,22 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
 
   const canBook  = (isFullComp && !isTenantPartner) || (limit > 0 && used < limit) || extras > 0
   const atLimit  = !(isFullComp && !isTenantPartner) && !isGroupComp && limit > 0 && used >= limit && extras === 0
+
+  // Countdown to the end of the current window: how long the client still has
+  // to use this period's sessions before they expire. Rounded up, so a window
+  // with any part of today left still reads as a day they can book in.
+  const daysLeft  = Math.max(0, Math.ceil(hoursUntilCycleEnd(cycle, now) / 24))
+  const remaining = Math.max(0, limit - used)
+
+  // Whether this is the last of several — an Advantage client who has used one
+  // of their two reads "your final session for this period".
+  const countdownSubject = remaining === 1
+    ? (limit > 1 ? 'your final session for this period' : 'your session')
+    : `your ${remaining} sessions`
+
+  const countdownText = daysLeft <= 1
+    ? `Today is the last day to book ${countdownSubject} — after today ${remaining === 1 ? 'it expires' : 'they expire'}.`
+    : `You have ${daysLeft} days to book ${countdownSubject} before ${remaining === 1 ? 'it expires' : 'they expire'}.`
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
@@ -239,6 +255,12 @@ export default async function PortalDashboard({ searchParams }: { searchParams: 
                   <span className="text-tfs-teal-button font-bold">{extras > 0 ? extras : limit - used}</span>{' '}
                   session{(extras > 0 ? extras : limit - used) !== 1 ? 's' : ''} remaining this month.
                 </p>
+                {extras === 0 && remaining > 0 && (
+                  <p className={`text-sm font-semibold mt-1.5 flex items-start gap-1.5 ${daysLeft <= 7 ? 'text-orange-600' : 'text-tfs-teal-button'}`}>
+                    <Clock size={15} className="shrink-0 mt-0.5" />
+                    <span>{countdownText}</span>
+                  </p>
+                )}
                 {extras === 0 && (
                   <p className="text-xs text-tfs-slate mt-1">
                     Book by <strong className="text-tfs-navy">{useByDay}</strong> — unused sessions don&apos;t carry over.
