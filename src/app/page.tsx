@@ -172,7 +172,7 @@ export default async function HomePage({
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 grid lg:grid-cols-2">
-          <div className="py-14 lg:py-16">
+          <div className="min-w-0 py-14 lg:py-16">
             <h1>
               <Image
                 src="/images/build-financial-confidence.webp"
@@ -195,7 +195,7 @@ export default async function HomePage({
                 { icon: Building2, label: 'Property Management Groups', desc: 'Stronger Tenant Stability & Partnerships' },
                 { icon: Heart, label: 'Non-Profit Organizations', desc: 'Continuing Therapeutic Progress' },
               ].map(({ icon: Icon, label, desc }) => (
-                <li key={label} className="flex flex-col items-center text-center w-28 sm:w-36">
+                <li key={label} className="flex flex-col items-center text-center flex-1 min-w-0 sm:flex-none sm:w-36">
                   <span className="w-14 h-14 rounded-full border-2 border-tfs-gold-dark flex items-center justify-center mb-2">
                     <Icon className="w-6 h-6 text-tfs-gold-dark" aria-hidden="true" />
                   </span>
