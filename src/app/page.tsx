@@ -173,9 +173,16 @@ export default async function HomePage({
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 grid lg:grid-cols-2">
           <div className="py-14 lg:py-16">
-            <h1 className="font-serif text-4xl sm:text-5xl leading-tight">
-              <span className="block text-tfs-navy">Your financial future.</span>
-              <span className="block italic text-tfs-gold-dark">Our focused guidance.</span>
+            <h1>
+              <Image
+                src="/images/build-financial-confidence.webp"
+                alt="Helping Tenants Build Financial Confidence"
+                width={1024}
+                height={1024}
+                sizes="(min-width: 640px) 28rem, 100vw"
+                className="w-full max-w-md h-auto"
+                priority
+              />
             </h1>
             <div className="mt-5 h-px max-w-md bg-gradient-to-r from-tfs-gold-dark/70 to-transparent" aria-hidden="true" />
             <p className="mt-4 text-base sm:text-lg font-semibold text-tfs-gold-dark">
