@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { ChevronRight, Users, Building2, HeartHandshake, UserCheck, TrendingUp, Sunrise } from 'lucide-react'
+import { ChevronRight, Users, Building2, HeartHandshake, UserCheck, Heart } from 'lucide-react'
 import HeroCTAButton from '@/components/layout/HeroCTAButton'
 import CoachCard from '@/components/public/CoachCard'
 
@@ -191,15 +191,16 @@ export default async function HomePage({
 
             <ul className="mt-8 flex gap-4 sm:gap-10">
               {[
-                { icon: UserCheck, label: 'Personalized Coaching' },
-                { icon: TrendingUp, label: 'Stronger Financial Habits' },
-                { icon: Sunrise, label: 'Lasting Financial Freedom' },
-              ].map(({ icon: Icon, label }) => (
-                <li key={label} className="flex flex-col items-center text-center w-24 sm:w-28">
+                { icon: UserCheck, label: 'Tenants & Couples', desc: 'Transformational Financial Coaching' },
+                { icon: Building2, label: 'Property Management Groups', desc: 'Stronger Tenant Stability & Partnerships' },
+                { icon: Heart, label: 'Non-Profit Organizations', desc: 'Continuing Therapeutic Progress' },
+              ].map(({ icon: Icon, label, desc }) => (
+                <li key={label} className="flex flex-col items-center text-center w-28 sm:w-36">
                   <span className="w-14 h-14 rounded-full border-2 border-tfs-gold-dark flex items-center justify-center mb-2">
                     <Icon className="w-6 h-6 text-tfs-gold-dark" aria-hidden="true" />
                   </span>
-                  <span className="text-sm text-tfs-navy leading-snug">{label}</span>
+                  <span className="text-sm font-bold text-tfs-navy leading-snug">{label}</span>
+                  <span className="mt-1 text-xs text-tfs-navy leading-snug">{desc}</span>
                 </li>
               ))}
             </ul>
@@ -209,11 +210,10 @@ export default async function HomePage({
             </h2>
             <div className="mt-3 h-1 w-16 bg-tfs-gold-dark" aria-hidden="true" />
             <p className="mt-5 text-tfs-navy max-w-md leading-relaxed">
-              Financial stress shouldn&rsquo;t stand in the way of your goals.
-            </p>
-            <p className="mt-3 text-tfs-navy max-w-md leading-relaxed">
-              We help you build confidence, reduce stress, and create practical plans
-              for a more secure, empowered tomorrow.
+              TFS equips individuals, property groups, and nonprofits with coaching that
+              strengthens financial confidence and long-term stability. Through our monthly{' '}
+              <strong>TFS Community Connect</strong>, clients celebrate wins, share progress,
+              and receive guidance that keeps them moving forward &mdash; together.
             </p>
 
             {/* Hidden on mobile — the CTA lives in the navbar there */}
