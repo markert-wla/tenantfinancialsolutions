@@ -65,14 +65,18 @@ export async function POST(req: NextRequest) {
 
   const emails = subscribers.map(s => s.email)
 
-  // Send in batches of 50 to respect Resend limits
-  const BATCH = 50
+  // Send one email per subscriber so no recipient can see any other address
   let sent = 0
-  for (let i = 0; i < emails.length; i += BATCH) {
-    const batch = emails.slice(i, i + BATCH)
-    await sendEmail({ to: batch, subject: subject.trim(), html: wrappedHtml })
-    sent += batch.length
+  let failed = 0
+  for (const email of emails) {
+    try {
+      await sendEmail({ to: [email], subject: subject.trim(), html: wrappedHtml })
+      sent += 1
+    } catch (err) {
+      failed += 1
+      console.error('[Newsletter send] Send failed for one subscriber:', err)
+    }
   }
 
-  return NextResponse.json({ ok: true, sent })
+  return NextResponse.json({ ok: true, sent, failed })
 }

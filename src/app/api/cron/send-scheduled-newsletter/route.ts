@@ -68,23 +68,27 @@ export async function GET(req: NextRequest) {
 
   const emails = subscribers.map((s: { email: string }) => s.email)
 
-  // Send in batches of 50 to respect Resend limits
-  const BATCH = 50
+  // Send one email per subscriber so no recipient can see any other address
   let sent = 0
-  try {
-    for (let i = 0; i < emails.length; i += BATCH) {
-      const batch = emails.slice(i, i + BATCH)
-      await sendEmail({ to: batch, subject: draft.subject as string, html: wrappedHtml })
-      sent += batch.length
+  let failed = 0
+  for (const email of emails) {
+    try {
+      await sendEmail({ to: [email], subject: draft.subject as string, html: wrappedHtml })
+      sent += 1
+    } catch (err) {
+      failed += 1
+      console.error('[Newsletter cron] Send failed for one subscriber:', err)
     }
-  } catch (err) {
-    console.error('[Newsletter cron] Send error after', sent, 'sent:', err)
-    return NextResponse.json({ error: 'Send failed mid-batch', sent }, { status: 500 })
+  }
+
+  if (sent === 0 && failed > 0) {
+    console.error('[Newsletter cron] All sends failed — keeping draft.')
+    return NextResponse.json({ error: 'Send failed', sent, failed }, { status: 500 })
   }
 
   // Clear the draft — so next week it only sends if a new draft is saved
   await service.from('newsletter_drafts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
-  console.log(`[Newsletter cron] Successfully sent to ${sent} subscribers.`)
-  return NextResponse.json({ ok: true, sent })
+  console.log(`[Newsletter cron] Successfully sent to ${sent} subscribers (${failed} failed).`)
+  return NextResponse.json({ ok: true, sent, failed })
 }
