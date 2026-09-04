@@ -123,7 +123,7 @@ export default async function HomePage({
         {/* ── MOBILE image (hidden on lg+) ── */}
         <div className="relative aspect-[4/3] lg:hidden">
           <Image
-            src="/images/home-hero-tree-of-life.webp"
+            src="/images/home-hero-tree-of-life-condensed.webp"
             alt="A calm sitting area with a velvet armchair, marble side table, and a Tenant Financial Solutions mug"
             fill
             sizes="100vw"
@@ -154,7 +154,7 @@ export default async function HomePage({
         {/* ── DESKTOP background image (hidden below lg) — resized to object-center ── */}
         <div className="absolute inset-0 hidden lg:block" aria-hidden="true">
           <Image
-            src="/images/home-hero-tree-of-life.webp"
+            src="/images/home-hero-tree-of-life-condensed.webp"
             alt=""
             fill
             sizes="100vw"
