@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle, XCircle, Edit3, X, Flag, Lock, Share2 } from 'lucide-react'
+import { CheckCircle, XCircle, Edit3, X, Flag, Lock, Share2, UserX } from 'lucide-react'
 
 type Session = {
   id: string
   start_time_utc: string
   end_time_utc: string
-  status: 'confirmed' | 'pending' | 'cancelled'
+  status: 'confirmed' | 'pending' | 'cancelled' | 'no_show'
   notes: string | null
   client_notes: string | null
   client_message: string | null
@@ -22,6 +22,7 @@ const STATUS_BADGE: Record<string, string> = {
   confirmed: 'bg-green-100 text-green-700',
   pending:   'bg-yellow-100 text-yellow-700',
   cancelled: 'bg-red-100 text-red-600',
+  no_show:   'bg-orange-100 text-orange-700',
 }
 
 const TIER_LABEL: Record<string, string> = {
@@ -40,6 +41,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
   const [clientNoteText, setClientNoteText] = useState('')
   const [flaggingId, setFlaggingId]   = useState<string | null>(null)
   const [flagReason, setFlagReason]   = useState('')
+  const [noShowId, setNoShowId]       = useState<string | null>(null)
   const [updating, setUpdating]       = useState<string | null>(null)
   const [filter, setFilter]           = useState<'upcoming' | 'past' | 'all'>('upcoming')
   const [apiError, setApiError]       = useState('')
@@ -96,6 +98,14 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
     setFlagReason('')
   }
 
+  async function submitNoShow() {
+    if (!noShowId) return
+    await patch(noShowId, { status: 'no_show', attended: false })
+    setNoShowId(null)
+  }
+
+  const noShowTarget = sessions.find(s => s.id === noShowId)
+
   return (
     <div>
       {apiError && (
@@ -143,7 +153,7 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                         </span>
                       )}
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[s.status]}`}>
-                        {s.status}
+                        {s.status === 'no_show' ? 'No-Show' : s.status}
                       </span>
                       {s.flagged && (
                         <span className="text-xs bg-red-100 text-red-700 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -180,11 +190,11 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
 
                   <div className="flex items-center gap-1 shrink-0">
                     {/* Attended toggle — only for past sessions */}
-                    {new Date(s.start_time_utc) < now && s.status !== 'cancelled' && (
+                    {new Date(s.start_time_utc) < now && s.status !== 'cancelled' && s.status !== 'no_show' && (
                       <button
                         onClick={() => patch(s.id, { attended: !s.attended })}
                         disabled={updating === s.id}
-                        title={s.attended ? 'Mark no-show' : 'Mark attended'}
+                        title={s.attended ? 'Mark not attended' : 'Mark attended'}
                         className={`p-1.5 rounded-lg transition-colors ${
                           s.attended
                             ? 'text-green-600 hover:text-green-700 bg-green-50'
@@ -192,6 +202,18 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
                         }`}
                       >
                         <CheckCircle size={16} />
+                      </button>
+                    )}
+
+                    {/* No-show — only for past, still-confirmed sessions */}
+                    {new Date(s.start_time_utc) < now && s.status === 'confirmed' && (
+                      <button
+                        onClick={() => setNoShowId(s.id)}
+                        disabled={updating === s.id}
+                        title="Mark as no-show"
+                        className="p-1.5 rounded-lg text-tfs-slate hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                      >
+                        <UserX size={16} />
                       </button>
                     )}
 
@@ -273,6 +295,43 @@ export default function SessionsClient({ sessions: initial, coachTz }: Props) {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* No-show modal */}
+      {noShowId && noShowTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="font-serif font-bold text-tfs-navy flex items-center gap-2">
+                <UserX size={16} className="text-orange-500" /> Mark as No-Show
+              </h3>
+              <button onClick={() => setNoShowId(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-tfs-slate mb-2">
+                Mark{' '}
+                <strong className="text-tfs-navy">
+                  {noShowTarget.profiles?.first_name} {noShowTarget.profiles?.last_name}
+                </strong>
+                &rsquo;s session on <strong className="text-tfs-navy">{fmt(noShowTarget.start_time_utc)}</strong> as a no-show?
+              </p>
+              <p className="text-sm text-tfs-slate mb-5">
+                Admins can see every no-show on the Bookings page. If this client is on the Free plan,
+                their session counter is reset automatically so they can rebook.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setNoShowId(null)} className="btn-outline">Go Back</button>
+                <button
+                  onClick={submitNoShow}
+                  disabled={!!updating}
+                  className="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50"
+                >
+                  {updating ? 'Saving…' : 'Mark No-Show'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

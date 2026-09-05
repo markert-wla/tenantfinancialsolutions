@@ -58,6 +58,19 @@ export async function PATCH(
     update.flagged     = true
     update.flag_reason = body.flag_reason.trim().slice(0, 1000) || null
   }
+  if (body.status === 'no_show') {
+    if (booking.status === 'no_show') {
+      return NextResponse.json({ ok: true })
+    }
+    if (booking.status === 'cancelled') {
+      return NextResponse.json({ error: 'Cannot mark a cancelled session as a no-show' }, { status: 400 })
+    }
+    if (new Date(booking.start_time_utc) > new Date()) {
+      return NextResponse.json({ error: 'Cannot mark a future session as a no-show' }, { status: 400 })
+    }
+    update.status   = 'no_show'
+    update.attended = false
+  }
   if (body.status === 'cancelled') {
     if (booking.status === 'cancelled') {
       return NextResponse.json({ error: 'Already cancelled' }, { status: 400 })
@@ -77,6 +90,25 @@ export async function PATCH(
   if (error) {
     console.error('[Sessions PATCH] Update failed:', error.message, error.details)
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  if (update.status === 'no_show') {
+    // Same rule the admin dashboard uses: free-plan clients get their session
+    // counter reset so they can rebook their one free Connection Session.
+    const service = createServiceClient()
+    const { data: clientProfile } = await service
+      .from('profiles')
+      .select('plan_tier, sessions_used_this_month')
+      .eq('id', booking.client_id)
+      .single()
+
+    if (clientProfile?.plan_tier === 'free' && (clientProfile.sessions_used_this_month ?? 0) > 0) {
+      const { error: resetErr } = await service
+        .from('profiles')
+        .update({ sessions_used_this_month: 0 })
+        .eq('id', booking.client_id)
+      if (resetErr) console.error('[Sessions PATCH] No-show counter reset failed:', resetErr.message)
+    }
   }
 
   if (update.status === 'cancelled') {
