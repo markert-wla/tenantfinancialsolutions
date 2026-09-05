@@ -36,7 +36,7 @@ export default async function CoachLayout({ children }: { children: React.ReactN
         <AdminNavLink href="/coach/sessions">     <CalendarDays size={16} />    Sessions          </AdminNavLink>
         <AdminNavLink href="/coach/attendance">   <ClipboardList size={16} />   Attendance        </AdminNavLink>
         <AdminNavLink href="/coach/availability"> <Clock size={16} />           Availability      </AdminNavLink>
-        <AdminNavLink href="/coach/messages">     <MessageSquare size={16} />   Messages to Client</AdminNavLink>
+        <AdminNavLink href="/coach/messages">     <MessageSquare size={16} />   Message Client    </AdminNavLink>
         <AdminNavLink href="/coach/tools">        <Wrench size={16} />          Coaching Tools    </AdminNavLink>
         <AdminNavLink href="/coach/profile">      <UserCircle size={16} />      Profile           </AdminNavLink>
       </nav>

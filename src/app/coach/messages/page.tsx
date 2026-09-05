@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import CoachMessagesClient from '@/components/coach/CoachMessagesClient'
 
-export const metadata: Metadata = { title: 'Messages to Client — Coach' }
+export const metadata: Metadata = { title: 'Message Client — Coach' }
 
 export default async function CoachMessagesPage() {
   const supabase = createClient()
@@ -40,7 +40,7 @@ export default async function CoachMessagesPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-1">Messages to Client</h1>
+        <h1 className="text-3xl font-serif font-bold text-tfs-navy mb-1">Message Client</h1>
         <p className="text-sm text-tfs-slate">
           Select a client and send them a message. They&rsquo;ll see it in their portal under &ldquo;Message Coach&rdquo;.
         </p>
