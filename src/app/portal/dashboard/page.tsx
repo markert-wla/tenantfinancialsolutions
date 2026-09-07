@@ -2,11 +2,12 @@ export const dynamic = 'force-dynamic'
 
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { CalendarPlus, Users, CalendarCheck, MessageSquare } from 'lucide-react'
 import ExtraSessionCard from '@/components/portal/ExtraSessionCard'
-import { SESSION_LIMITS } from '@/lib/stripe'
+import { SESSION_LIMITS, getStripe } from '@/lib/stripe'
+import { reconcileCheckoutSession } from '@/lib/stripe-sync'
 import { tzShort } from '@/lib/timezones'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -17,10 +18,23 @@ const TIER_LABEL: Record<string, string> = {
   advantage: 'Advantage Plan',
 }
 
-export default async function PortalDashboard({ searchParams }: { searchParams: { welcome?: string; upgraded?: string } }) {
+export default async function PortalDashboard({ searchParams }: { searchParams: { welcome?: string; upgraded?: string; session_id?: string } }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  // Just back from Stripe Checkout: apply the paid plan ourselves before
+  // reading the profile, so the client sees it even if the webhook that
+  // normally does this is late or never arrives. Best effort — a failure here
+  // must never keep the dashboard from rendering.
+  const checkoutSessionId = searchParams.session_id
+  if (checkoutSessionId && /^cs_(live|test)_[A-Za-z0-9]+$/.test(checkoutSessionId)) {
+    try {
+      await reconcileCheckoutSession(getStripe(), createServiceClient(), checkoutSessionId, user.id)
+    } catch (err) {
+      console.error('[dashboard] checkout reconciliation failed:', (err as Error).message)
+    }
+  }
 
   const now = new Date()
 
