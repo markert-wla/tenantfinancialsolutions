@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getStripe, listLiveSubscriptions, tierForSubscription, VALID_TIERS } from '@/lib/stripe'
+import { syncSubscriptionToProfile } from '@/lib/stripe-sync'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
@@ -7,6 +8,27 @@ import Stripe from 'stripe'
 
 // Raw body required for Stripe signature verification
 export const dynamic = 'force-dynamic'
+
+/**
+ * Thrown when a write we depend on failed for a reason a retry could fix (the
+ * database was unreachable, Stripe's API timed out). The route answers 500 so
+ * Stripe redelivers the event — for up to three days, with each failed attempt
+ * visible in the Stripe dashboard. Before this the route answered 200 no
+ * matter what happened after signature verification, so a failed write was
+ * indistinguishable from a successful one.
+ *
+ * Deterministic problems (missing metadata, unknown price) are logged and
+ * answered 200: retrying would just fail the same way.
+ */
+class RetryLater extends Error {}
+
+type WriteResult = { error: { message: string } | null }
+
+/** Await a Supabase write and turn a failure into a retry. */
+async function mustSucceed(label: string, write: PromiseLike<WriteResult>) {
+  const { error } = await write
+  if (error) throw new RetryLater(`${label}: ${error.message}`)
+}
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text()
@@ -46,35 +68,29 @@ export async function POST(req: NextRequest) {
 
   console.log(`[webhook] Received ${event.type} (${event.id})`)
 
+  try {
+    await handleEvent(event)
+  } catch (err: unknown) {
+    if (err instanceof RetryLater) {
+      console.error(`[webhook] ${event.type} (${event.id}) NOT applied — ${err.message} — answering 500 so Stripe retries`)
+      return NextResponse.json({ error: err.message }, { status: 500 })
+    }
+    console.error(`[webhook] ${event.type} (${event.id}) threw:`, err)
+    return NextResponse.json({ error: 'Webhook handler error' }, { status: 500 })
+  }
+
+  return NextResponse.json({ received: true })
+}
+
+async function handleEvent(event: Stripe.Event) {
   const supabase = createServiceClient()
 
   switch (event.type) {
     case 'customer.subscription.created':
     case 'customer.subscription.updated': {
-      const sub  = event.data.object as Stripe.Subscription
-      const meta = sub.metadata
-      // Metadata first, price id as the fallback. A plan switched inside
-      // Stripe's billing portal keeps its original metadata, so trusting
-      // metadata alone wrote the *old* tier back over the new one. An
-      // unresolvable tier is left alone rather than defaulted to 'free' —
-      // downgrading a paying client on an event we don't understand is worse
-      // than leaving plan_tier where it is.
-      const tier = tierForSubscription(sub)
-      if (meta?.supabase_user_id && tier && VALID_TIERS.includes(tier)) {
-        await supabase
-          .from('profiles')
-          .update({
-            plan_tier:              tier,
-            stripe_subscription_id: sub.id,
-            stripe_customer_id:     sub.customer as string,
-          })
-          .eq('id', meta.supabase_user_id)
-      } else if (meta?.supabase_user_id) {
-        console.error(
-          `[webhook] ${event.type}: could not resolve a tier for ${sub.id} ` +
-          `(user ${meta.supabase_user_id}) — plan_tier left unchanged`
-        )
-      }
+      const sub    = event.data.object as Stripe.Subscription
+      const result = await syncSubscriptionToProfile(supabase, sub, event.type)
+      if (!result.ok && result.retryable) throw new RetryLater(result.reason)
       break
     }
 
@@ -94,11 +110,14 @@ export async function POST(req: NextRequest) {
         // Can't confirm what's left, so take the cautious branch: only touch the
         // profile if it names this exact subscription.
         console.error(`[webhook] could not list subscriptions for ${customerId}:`, err)
-        await supabase
-          .from('profiles')
-          .update({ plan_tier: 'free', stripe_subscription_id: null })
-          .eq('stripe_customer_id', customerId)
-          .eq('stripe_subscription_id', sub.id)
+        await mustSucceed(
+          `downgrade ${customerId} (exact match)`,
+          supabase
+            .from('profiles')
+            .update({ plan_tier: 'free', stripe_subscription_id: null })
+            .eq('stripe_customer_id', customerId)
+            .eq('stripe_subscription_id', sub.id)
+        )
         break
       }
 
@@ -114,10 +133,13 @@ export async function POST(req: NextRequest) {
         const survivor = remaining[0]
         const tier     = tierForSubscription(survivor)
         if (tier && VALID_TIERS.includes(tier)) {
-          await supabase
-            .from('profiles')
-            .update({ plan_tier: tier, stripe_subscription_id: survivor.id })
-            .eq('stripe_customer_id', customerId)
+          await mustSucceed(
+            `repoint ${customerId} at ${survivor.id}`,
+            supabase
+              .from('profiles')
+              .update({ plan_tier: tier, stripe_subscription_id: survivor.id })
+              .eq('stripe_customer_id', customerId)
+          )
         } else {
           console.error(
             `[webhook] ${sub.id} cancelled but surviving ${survivor.id} has no resolvable tier ` +
@@ -130,97 +152,122 @@ export async function POST(req: NextRequest) {
       // Nothing left running — a real cancellation. Rows with no recorded
       // subscription id are legacy/manual upgrades, matched on customer alone so
       // they still downgrade.
-      await supabase
-        .from('profiles')
-        .update({ plan_tier: 'free', stripe_subscription_id: null })
-        .eq('stripe_customer_id', customerId)
-        .or(`stripe_subscription_id.eq.${sub.id},stripe_subscription_id.is.null`)
+      await mustSucceed(
+        `downgrade ${customerId}`,
+        supabase
+          .from('profiles')
+          .update({ plan_tier: 'free', stripe_subscription_id: null })
+          .eq('stripe_customer_id', customerId)
+          .or(`stripe_subscription_id.eq.${sub.id},stripe_subscription_id.is.null`)
+      )
+      console.log(`[webhook] ${customerId} downgraded to free after ${sub.id} was cancelled`)
       break
     }
 
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
 
-      // Handle subscription upgrades (free → Starter / Advantage).
-      // checkout.session.completed fires reliably on every successful checkout,
-      // so we update plan_tier here as the primary path. The
-      // customer.subscription.created handler above acts as a second layer.
+      // Subscription upgrades (free → Starter / Advantage). This is the same
+      // write customer.subscription.created performs; whichever event lands
+      // first does the work and the other is a harmless repeat.
       if (session.mode === 'subscription' && session.subscription) {
+        let sub: Stripe.Subscription
         try {
-          const stripe = getStripe()
-          const sub  = await stripe.subscriptions.retrieve(session.subscription as string)
-          const meta = sub.metadata
-          const userId = meta?.supabase_user_id
-          const tier   = tierForSubscription(sub)
-          if (userId && tier && ['starter', 'advantage'].includes(tier)) {
-            await supabase
-              .from('profiles')
-              .update({
-                plan_tier:              tier,
-                stripe_subscription_id: sub.id,
-                stripe_customer_id:     sub.customer as string,
-              })
-              .eq('id', userId)
-          }
+          sub = await getStripe().subscriptions.retrieve(session.subscription as string)
         } catch (err) {
-          console.error('[webhook] Failed to update plan on checkout.session.completed:', err)
+          throw new RetryLater(`could not retrieve ${session.subscription}: ${(err as Error).message}`)
         }
+        const result = await syncSubscriptionToProfile(supabase, sub, event.type)
+        if (!result.ok && result.retryable) throw new RetryLater(result.reason)
       }
 
-      // Handle one-off session credit purchases
+      // One-off session credit purchases
       if (session.mode === 'payment' && session.metadata?.type === 'session_credit') {
         const userId   = session.metadata.supabase_user_id
         const coachId  = session.metadata.coach_id  ?? null
         const startUtc = session.metadata.start_utc ?? null
         const endUtc   = session.metadata.end_utc   ?? null
 
-        if (userId) {
-          if (coachId && startUtc && endUtc) {
-            // Slot was pre-selected — create the booking directly
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('first_name, last_name, email, timezone, sessions_used_this_month, coach_id')
-              .eq('id', userId)
-              .single()
+        if (!userId) {
+          console.error(`[webhook] session_credit checkout ${session.id} has no supabase_user_id — nothing granted`)
+          break
+        }
 
-            const { data: coach } = await supabase
-              .from('coaches')
-              .select('display_name, email')
-              .eq('id', coachId)
-              .single()
+        if (coachId && startUtc && endUtc) {
+          // Slot was pre-selected — create the booking directly.
+          //
+          // Stripe delivers an event more than once whenever a previous
+          // attempt failed (or, rarely, at random), so check for the booking
+          // before creating it. Without this, a retry would double-book the
+          // slot and charge a second session against the client's count.
+          const { data: existing, error: existingErr } = await supabase
+            .from('bookings')
+            .select('id')
+            .eq('client_id', userId)
+            .eq('coach_id', coachId)
+            .eq('start_time_utc', startUtc)
+            .neq('status', 'cancelled')
+            .limit(1)
+          if (existingErr) throw new RetryLater(`booking lookup: ${existingErr.message}`)
+          if (existing && existing.length > 0) {
+            console.log(`[webhook] session_credit ${session.id}: booking ${existing[0].id} already exists — skipping`)
+            break
+          }
 
-            // Coaches can set a notification email (profiles.contact_email) that overrides their login email
-            const { data: coachProfile } = await supabase
-              .from('profiles')
-              .select('contact_email')
-              .eq('id', coachId)
-              .single()
-            const coachNotifyEmail = coachProfile?.contact_email ?? coach?.email
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, email, timezone, sessions_used_this_month, coach_id')
+            .eq('id', userId)
+            .single()
 
-            await supabase.from('bookings').insert({
+          const { data: coach } = await supabase
+            .from('coaches')
+            .select('display_name, email')
+            .eq('id', coachId)
+            .single()
+
+          // Coaches can set a notification email (profiles.contact_email) that overrides their login email
+          const { data: coachProfile } = await supabase
+            .from('profiles')
+            .select('contact_email')
+            .eq('id', coachId)
+            .single()
+          const coachNotifyEmail = coachProfile?.contact_email ?? coach?.email
+
+          await mustSucceed(
+            `create booking for ${userId}`,
+            supabase.from('bookings').insert({
               client_id:      userId,
               coach_id:       coachId,
               start_time_utc: startUtc,
               end_time_utc:   endUtc,
               status:         'confirmed',
             })
+          )
 
-            await supabase.from('profiles').update({
-              sessions_used_this_month: (profile?.sessions_used_this_month ?? 0) + 1,
-              ...(!profile?.coach_id ? { coach_id: coachId } : {}),
-            }).eq('id', userId)
+          // Deliberately not retried: the booking above now exists, and a
+          // redelivery would stop at the duplicate check without ever reaching
+          // this line. Loud log instead so an admin can correct the count.
+          const { error: countErr } = await supabase.from('profiles').update({
+            sessions_used_this_month: (profile?.sessions_used_this_month ?? 0) + 1,
+            ...(!profile?.coach_id ? { coach_id: coachId } : {}),
+          }).eq('id', userId)
+          if (countErr) {
+            console.error(`[webhook] session_credit ${session.id}: booking created but session count NOT incremented for ${userId}: ${countErr.message}`)
+          }
 
-            // Confirmation emails
-            if (profile && coach) {
-              const clientTz  = profile.timezone ?? 'America/New_York'
-              const startDate = new Date(startUtc)
-              const fmt = new Intl.DateTimeFormat('en-US', {
-                timeZone: clientTz, weekday: 'long', month: 'long',
-                day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
-              })
-              const displayTime = fmt.format(startDate)
-              const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+          // Confirmation emails — never fail the event over these.
+          if (profile && coach) {
+            const clientTz  = profile.timezone ?? 'America/New_York'
+            const startDate = new Date(startUtc)
+            const fmt = new Intl.DateTimeFormat('en-US', {
+              timeZone: clientTz, weekday: 'long', month: 'long',
+              day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
+            })
+            const displayTime = fmt.format(startDate)
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
 
+            try {
               await Promise.all([
                 sendEmail({
                   to: profile.email,
@@ -244,19 +291,27 @@ export async function POST(req: NextRequest) {
                   `),
                 }),
               ])
+            } catch (err) {
+              console.error(`[webhook] session_credit ${session.id}: confirmation email failed:`, err)
             }
-          } else {
-            // No slot selected — grant a session credit to use later
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('extra_sessions')
-              .eq('id', userId)
-              .single()
-            await supabase
+          }
+          console.log(`[webhook] session_credit ${session.id}: booking created for ${userId} with ${coachId} at ${startUtc}`)
+        } else {
+          // No slot selected — grant a session credit to use later
+          const { data: profile, error: readErr } = await supabase
+            .from('profiles')
+            .select('extra_sessions')
+            .eq('id', userId)
+            .single()
+          if (readErr) throw new RetryLater(`read extra_sessions for ${userId}: ${readErr.message}`)
+          await mustSucceed(
+            `grant session credit to ${userId}`,
+            supabase
               .from('profiles')
               .update({ extra_sessions: (profile?.extra_sessions ?? 0) + 1 })
               .eq('id', userId)
-          }
+          )
+          console.log(`[webhook] session_credit ${session.id}: credit granted to ${userId}`)
         }
       }
       break
@@ -265,13 +320,18 @@ export async function POST(req: NextRequest) {
     case 'invoice.payment_failed': {
       const invoice    = event.data.object as Stripe.Invoice
       const customerId = invoice.customer as string
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('email, first_name')
         .eq('stripe_customer_id', customerId)
         .single()
 
-      if (profile?.email) {
+      if (error || !profile?.email) {
+        console.error(`[webhook] invoice.payment_failed: no profile email for ${customerId}${error ? `: ${error.message}` : ''}`)
+        break
+      }
+
+      try {
         await sendEmail({
           to: profile.email,
           subject: 'Action needed: Payment failed for your TFS membership',
@@ -286,10 +346,10 @@ export async function POST(req: NextRequest) {
             </p>
           `),
         })
+      } catch (err) {
+        console.error(`[webhook] invoice.payment_failed: email to ${customerId} failed:`, err)
       }
       break
     }
   }
-
-  return NextResponse.json({ received: true })
 }

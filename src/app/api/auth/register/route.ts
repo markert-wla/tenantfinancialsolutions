@@ -257,7 +257,7 @@ export async function POST(req: NextRequest) {
           customer: customer.id,
           mode: 'subscription',
           line_items: [{ price: priceId, quantity: 1 }],
-          success_url: `${siteUrl}/portal/dashboard?welcome=1`,
+          success_url: `${siteUrl}/portal/dashboard?welcome=1&session_id={CHECKOUT_SESSION_ID}`,
           cancel_url:  `${siteUrl}/api/auth/cancel-checkout?uid=${userId}`,
           subscription_data: {
             metadata: { supabase_user_id: userId, tier: billedTier },
