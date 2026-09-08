@@ -193,7 +193,7 @@ export default async function HomePage({
               {[
                 { icon: UserCheck, label: 'Individuals & Couples', desc: 'Personal Financial Coaching' },
                 { icon: Building2, label: 'Property Management Groups', desc: 'Stronger Tenant Stability' },
-                { icon: Heart, label: 'Non-Profit Organizations', desc: 'Continuing Therapeutic Progress' },
+                { icon: Heart, label: 'Non-Profit Organizations', desc: 'Client Progress Support' },
               ].map(({ icon: Icon, label, desc }) => (
                 <li key={label} className="flex flex-col items-center text-center flex-1 min-w-0 sm:flex-none sm:w-36">
                   <span className="w-14 h-14 rounded-full border-2 border-tfs-gold-dark flex items-center justify-center mb-2">
