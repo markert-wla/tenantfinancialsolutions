@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { ChevronRight, Users, Building2, HeartHandshake, UserCheck, Heart } from 'lucide-react'
+import { ChevronRight, Users, Building2, HeartHandshake, Heart } from 'lucide-react'
 import HeroCTAButton from '@/components/layout/HeroCTAButton'
 import CoachCard from '@/components/public/CoachCard'
 
@@ -191,7 +191,7 @@ export default async function HomePage({
 
             <ul className="mt-8 flex gap-4 sm:gap-10">
               {[
-                { icon: UserCheck, label: 'Individuals & Couples', desc: 'Personal Financial Coaching' },
+                { icon: Users, label: 'Individuals & Couples', desc: 'Personal Financial Coaching' },
                 { icon: Building2, label: 'Property Management Groups', desc: 'Stronger Tenant Stability' },
                 { icon: Heart, label: 'Non-Profit Organizations', desc: 'Client Progress Support' },
               ].map(({ icon: Icon, label, desc }) => (
