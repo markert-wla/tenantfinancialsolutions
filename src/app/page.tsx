@@ -191,7 +191,7 @@ export default async function HomePage({
 
             <ul className="mt-8 flex gap-4 sm:gap-10">
               {[
-                { icon: UserCheck, label: 'Tenants & Couples', desc: 'Transformational Financial Coaching' },
+                { icon: UserCheck, label: 'Individuals & Couples', desc: 'Personal Financial Coaching' },
                 { icon: Building2, label: 'Property Management Groups', desc: 'Stronger Tenant Stability' },
                 { icon: Heart, label: 'Non-Profit Organizations', desc: 'Continuing Therapeutic Progress' },
               ].map(({ icon: Icon, label, desc }) => (
