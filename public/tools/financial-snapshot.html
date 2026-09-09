@@ -81,6 +81,9 @@ th {
 th.r, td.r { text-align: right; }
 td { font-size: 12.5px; padding: 7px 4px 3px; border-bottom: 1px solid var(--line); }
 td.name { border-bottom: none; white-space: nowrap; }
+tr.totals td { border-bottom: none; border-top: 2px solid var(--navy); padding-top: 6px; }
+tr.totals td.name { font-weight: 800; color: var(--navy); text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px; }
+tr.totals input.calc { font-weight: 700; color: var(--navy); }
 .checkline { display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: center; padding: 5px 0; font-size: 13px; }
 .box { display: inline-block; width: 12px; height: 12px; border: 1.4px solid var(--navy); margin-right: 5px; vertical-align: -1px; }
 .notelines .ln { display: block; border-bottom: 1px solid var(--line); height: 22px; }
@@ -205,15 +208,16 @@ td.name { border-bottom: none; white-space: nowrap; }
         <tr><th>Debt</th><th class="r">Balance</th><th class="r">Monthly Payment</th><th class="r">Interest Rate</th></tr>
       </thead>
       <tbody>
-        <tr><td class="name">Mortgage</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
-        <tr><td class="name">Credit Card #1</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
-        <tr><td class="name">Credit Card #2</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
-        <tr><td class="name">Credit Card #3</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
-        <tr><td class="name">Auto Loan</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
-        <tr><td class="name">Student Loan</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
-        <tr><td class="name">Personal Loan</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
-        <tr><td class="name">Medical Debt</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
-        <tr><td class="name">Other</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
+        <tr><td class="name">Mortgage</td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtbal" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" data-sum="debtrate" /></td></tr>
+        <tr><td class="name">Credit Card #1</td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtbal" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" data-sum="debtrate" /></td></tr>
+        <tr><td class="name">Credit Card #2</td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtbal" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" data-sum="debtrate" /></td></tr>
+        <tr><td class="name">Credit Card #3</td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtbal" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" data-sum="debtrate" /></td></tr>
+        <tr><td class="name">Auto Loan</td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtbal" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" data-sum="debtrate" /></td></tr>
+        <tr><td class="name">Student Loan</td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtbal" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" data-sum="debtrate" /></td></tr>
+        <tr><td class="name">Personal Loan</td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtbal" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" data-sum="debtrate" /></td></tr>
+        <tr><td class="name">Medical Debt</td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtbal" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" data-sum="debtrate" /></td></tr>
+        <tr><td class="name">Other</td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtbal" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" data-sum="debtrate" /></td></tr>
+        <tr class="totals"><td class="name">Totals</td><td><input type="text" class="cell calc" id="debt-total-balance" readonly tabindex="-1" /></td><td><input type="text" class="cell calc" id="debt-total-payment" readonly tabindex="-1" /></td><td><input type="text" class="cell calc" id="debt-avg-rate" readonly tabindex="-1" /></td></tr>
       </tbody>
     </table>
   </section>
@@ -312,13 +316,13 @@ td.name { border-bottom: none; white-space: nowrap; }
     return isNaN(v) ? 0 : v;
   }
   function sum(group) {
-    var total = 0, filled = false;
+    var total = 0, filled = false, count = 0;
     var fields = document.querySelectorAll('input[data-sum="' + group + '"]');
     for (var i = 0; i < fields.length; i++) {
-      if (String(fields[i].value).trim() !== '') filled = true;
+      if (String(fields[i].value).trim() !== '') { filled = true; count++; }
       total += num(fields[i]);
     }
-    return { total: total, filled: filled };
+    return { total: total, filled: filled, count: count };
   }
   function money(n) {
     return (n < 0 ? '-' : '') + '$' + Math.abs(n).toLocaleString('en-US', {
@@ -333,9 +337,14 @@ td.name { border-bottom: none; white-space: nowrap; }
     var income = sum('income');
     var expenses = sum('expenses');
     var debt = sum('debtpay');
+    var debtBal = sum('debtbal');
+    var debtRate = sum('debtrate');
     var anything = income.filled || expenses.filled || debt.filled;
     set('total-income', income.filled ? money(income.total) : '');
     set('total-expenses', expenses.filled ? money(expenses.total) : '');
+    set('debt-total-balance', debtBal.filled ? money(debtBal.total) : '');
+    set('debt-total-payment', debt.filled ? money(debt.total) : '');
+    set('debt-avg-rate', debtRate.count ? (debtRate.total / debtRate.count).toFixed(2) + '%' : '');
     set('snap-income', income.filled ? money(income.total) : '');
     set('snap-expenses', expenses.filled ? money(expenses.total) : '');
     set('snap-debt', debt.filled ? money(debt.total) : '');
