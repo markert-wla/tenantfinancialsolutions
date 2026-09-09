@@ -61,6 +61,16 @@ const tools = [
     badgeColor: 'bg-amber-800 text-amber-100',
     href: '/tools/hop-goal-setting.html',
   },
+  {
+    id: 'financial-snapshot',
+    title: 'Tenant Financial Snapshot & Budget',
+    subtitle: 'Financial Snapshot & Monthly Budget',
+    description: 'A print-and-fill worksheet covering client information, monthly income, expenses, debt, savings & cash, retirement, insurance, financial goals and the monthly snapshot. Opens ready to print and complete by hand with your client.',
+    emoji: '📋',
+    color: 'from-slate-800 to-slate-950 border-slate-500',
+    badgeColor: 'bg-slate-700 text-slate-100',
+    href: '/tools/financial-snapshot.html',
+  },
 ]
 
 export default function CoachToolsPage() {
