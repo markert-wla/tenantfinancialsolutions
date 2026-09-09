@@ -1,0 +1,16 @@
+{
+  "intake": {},
+  "manifest": [
+    {
+      "kind": "photo",
+      "repoPath": "public/images/business/copilot-20260903-092800.webp",
+      "originalName": "Copilot_20260903_092800.png"
+    },
+    {
+      "kind": "doc",
+      "repoPath": "business-info/tenant-financial-snapshot-budget-1-1.md",
+      "originalName": "Tenant Financial Snapshot & Budget (1) (1).pdf",
+      "extractedTextPath": "business-info/tenant-financial-snapshot-budget-1-1.md"
+    }
+  ]
+}
