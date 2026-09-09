@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TFS Financial Snapshot &amp; Monthly Budget</title>
+<style>
+:root {
+  --navy: #0F1F3D;
+  --gold: #C9A84C;
+  --gold-light: #FDF3DC;
+  --page-bg: #F8F9FB;
+  --line: #E5E7EB;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--page-bg);
+  color: #1E293B;
+  min-height: 100vh;
+  font-size: 14px;
+}
+header.bar {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--navy);
+}
+.bar-top {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; padding: 12px 16px;
+}
+.brand { color: var(--gold); font-size: 26px; font-weight: 800; line-height: 1; }
+.brand-sub { color: #fff; font-size: 13px; margin-top: 2px; }
+.bar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  padding: 7px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  background: transparent; color: var(--gold); border: 1px solid var(--gold);
+  cursor: pointer; font-family: inherit;
+}
+.btn:hover { background: rgba(201,168,76,0.12); }
+.btn-danger { color: #FCA5A5; border-color: #F87171; }
+.btn-danger:hover { background: rgba(248,113,113,0.12); }
+.client-bar {
+  background: #F1F5F9; padding: 10px 16px;
+  display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center;
+}
+.field { display: flex; align-items: center; gap: 8px; flex: 1 1 200px; min-width: 0; }
+.field label { font-weight: 600; color: var(--navy); white-space: nowrap; font-size: 13px; }
+.field input { flex: 1 1 auto; min-width: 0; }
+.save-note { font-size: 12px; color: #64748B; margin-left: auto; }
+main { padding: 20px 16px 60px; max-width: 1100px; margin: 0 auto; }
+.intro {
+  background: var(--gold-light); border: 1px solid var(--gold);
+  border-radius: 12px; padding: 12px 14px; font-size: 13px;
+  color: #4A3A0E; margin-bottom: 20px;
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+section.card {
+  background: #fff; border: 1px solid var(--line); border-radius: 16px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+section.card h2 {
+  font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase;
+  color: var(--navy); padding-bottom: 8px; margin-bottom: 12px;
+  border-bottom: 2px solid var(--gold);
+}
+h3.group {
+  font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;
+  letter-spacing: 0.4px; margin: 14px 0 6px;
+}
+h3.group:first-of-type { margin-top: 0; }
+.row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 0; flex-wrap: wrap;
+}
+.row > span.rl { flex: 1 1 130px; min-width: 0; font-size: 13px; color: #334155; }
+.money-wrap { position: relative; flex: 0 1 130px; min-width: 110px; }
+.money-wrap::before {
+  content: "$"; position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+  color: #94A3B8; font-size: 13px; pointer-events: none;
+}
+input, textarea, select {
+  width: 100%; border: 1px solid var(--line); border-radius: 8px;
+  padding: 7px 9px; font-size: 13px; font-family: inherit; color: #1E293B;
+  background: #fff; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.money-wrap input { padding-left: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+}
+input::placeholder, textarea::placeholder { color: #C4CAD4; }
+textarea { resize: vertical; min-height: 76px; }
+.subtotal {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  margin-top: 12px; padding-top: 10px; border-top: 2px solid var(--line);
+  font-weight: 800; color: var(--navy); font-size: 14px; flex-wrap: wrap;
+}
+.subtotal .amt { font-variant-numeric: tabular-nums; }
+.debt-head, .debt-row {
+  display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,0.8fr);
+  gap: 8px; align-items: center;
+}
+.debt-head {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748B;
+  letter-spacing: 0.3px; margin-bottom: 6px;
+}
+.debt-head span:not(:first-child) { text-align: right; }
+.debt-row { padding: 3px 0; }
+.debt-row > span.rl { font-size: 13px; color: #334155; }
+.debt-row .money-wrap { flex: none; min-width: 0; }
+.rate-wrap { position: relative; }
+.rate-wrap::after {
+  content: "%"; position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+  color: #94A3B8; font-size: 13px; pointer-events: none;
+}
+.rate-wrap input { padding-right: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+.checks { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 8px; }
+.check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #334155; }
+.check input { width: 16px; height: 16px; accent-color: var(--gold); }
+.snapshot {
+  background: var(--navy); border-radius: 16px; padding: 18px; margin-top: 22px;
+  color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.snapshot h2 {
+  font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px;
+}
+.snap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.snap-item { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 14px; }
+.snap-item .k { font-size: 12px; color: rgba(255,255,255,0.75); margin-bottom: 4px; }
+.snap-item .v { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; word-break: break-word; }
+.snap-item.remaining { background: var(--gold); color: var(--navy); }
+.snap-item.remaining .k { color: rgba(15,31,61,0.7); }
+.snap-item.remaining.negative { background: #B91C1C; color: #fff; }
+.snap-item.remaining.negative .k { color: rgba(255,255,255,0.8); }
+.full { grid-column: 1 / -1; }
+@media (max-width: 520px) {
+  .debt-head { display: none; }
+  .debt-row {
+    grid-template-columns: 1fr 1fr; gap: 6px 8px;
+    padding: 8px 0; border-bottom: 1px dashed var(--line);
+  }
+  .debt-row > span.rl { grid-column: 1 / -1; font-weight: 600; }
+  .debt-row .rate-wrap { grid-column: 1 / -1; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 11px; }
+  main { padding: 0; max-width: none; }
+  .grid { display: block; }
+  section.card, .snapshot { box-shadow: none !important; break-inside: avoid; margin-bottom: 12px; }
+  .snapshot { background: #fff !important; color: #000 !important; border: 2px solid var(--navy); }
+  .snapshot h2 { color: var(--navy) !important; }
+  .snap-item { background: #F1F5F9 !important; }
+  .snap-item .k { color: #475569 !important; }
+  .snap-item.remaining, .snap-item.remaining.negative { background: #F1F5F9 !important; color: #000 !important; }
+  .snap-item.remaining .k, .snap-item.remaining.negative .k { color: #475569 !important; }
+  input, textarea { border: 1px solid #CBD5E1 !important; box-shadow: none !important; }
+  @page { margin: 12mm; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar no-print">
+  <div class="bar-top">
+    <div>
+      <div class="brand">TFS</div>
+      <div class="brand-sub">Financial Snapshot &amp; Monthly Budget</div>
+    </div>
+    <div class="bar-actions">
+      <button type="button" class="btn" id="print-btn">&#128424; Print</button>
+      <button type="button" class="btn btn-danger" id="reset-btn">Reset</button>
+    </div>
+  </div>
+  <div class="client-bar">
+    <div class="field"><label for="c-name">Name:</label><input id="c-name" type="text" placeholder="Client name" /></div>
+    <div class="field"><label for="c-date">Date:</label><input id="c-date" type="date" /></div>
+    <div class="field"><label for="c-email">Email:</label><input id="c-email" type="email" placeholder="name@email.com" /></div>
+    <div class="field"><label for="c-phone">Phone:</label><input id="c-phone" type="tel" placeholder="(555) 555-5555" /></div>
+    <span class="save-note" id="save-note">Saved automatically in this browser</span>
+  </div>
+</header>
+
+<main>
+  <div class="intro no-print">
+    Fill this in with your client during the session &mdash; income, expenses, debt and savings.
+    Totals update as you type, and the Monthly Snapshot at the bottom shows what&rsquo;s left over each month.
+    Use Print for a paper copy or to save it as a PDF.
+  </div>
+
+  <div class="grid">
+
+    <!-- MONTHLY INCOME -->
+    <section class="card">
+      <h2>Monthly Income</h2>
+      <div id="income-rows"></div>
+      <div class="subtotal"><span>Total Monthly Income</span><span class="amt" id="total-income">$0.00</span></div>
+    </section>
+
+    <!-- MONTHLY DEBT -->
+    <section class="card">
+      <h2>Monthly Debt</h2>
+      <div class="debt-head"><span>Debt</span><span>Balance</span><span>Payment</span><span>Rate</span></div>
+      <div id="debt-rows"></div>
+      <div class="subtotal"><span>Total Balances</span><span class="amt" id="total-debt-balance">$0.00</span></div>
+      <div class="subtotal"><span>Total Monthly Payments</span><span class="amt" id="total-debt-payment">$0.00</span></div>
+    </section>
+
+    <!-- MONTHLY EXPENSES -->
+    <section class="card full">
+      <h2>Monthly Expenses</h2>
+      <div class="grid" style="gap:14px;">
+        <div>
+          <h3 class="group">Housing</h3>
+          <div id="exp-housing"></div>
+          <h3 class="group">Transportation</h3>
+          <div id="exp-transport"></div>
+        </div>
+        <div>
+          <h3 class="group">Food</h3>
+          <div id="exp-food"></div>
+          <h3 class="group">Health</h3>
+          <div id="exp-health"></div>
+        </div>
+        <div>
+          <h3 class="group">Personal &amp; Other</h3>
+          <div id="exp-personal"></div>
+        </div>
+      </div>
+      <div class="subtotal"><span>Total Monthly Expenses</span><span class="amt" id="total-expenses">$0.00</span></div>
+    </section>
+
+    <!-- SAVINGS & CASH -->
+    <section class="card">
+      <h2>Savings &amp; Cash</h2>
+      <div id="savings-rows"></div>
+      <div class="subtotal"><span>Total Savings &amp; Cash</span><span class="amt" id="total-savings">$0.00</span></div>
+    </section>
+
+    <!-- RETIREMENT -->
+    <section class="card">
+      <h2>Retirement</h2>
+      <div id="retirement-rows"></div>
+      <div class="subtotal"><span>Total Retirement</span><span class="amt" id="total-retirement">$0.00</span></div>
+    </section>
+
+    <!-- INSURANCE -->
+    <section class="card">
+      <h2>Insurance</h2>
+      <h3 class="group">Life Insurance</h3>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="life-term" /> Term</label>
+        <label class="check"><input type="checkbox" id="life-whole" /> Whole Life</label>
+      </div>
+      <div id="insurance-rows"></div>
+    </section>
+
+    <!-- GOALS & CONCERNS -->
+    <section class="card">
+      <h2>Financial Goals</h2>
+      <div style="font-size:13px;color:#475569;margin-bottom:8px;">What are your top 3 financial goals?</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <input id="goal-1" type="text" placeholder="1." />
+        <input id="goal-2" type="text" placeholder="2." />
+        <input id="goal-3" type="text" placeholder="3." />
+      </div>
+      <h3 class="group">Questions or Concerns</h3>
+      <textarea id="concerns" placeholder="Anything the client wants to raise..."></textarea>
+    </section>
+
+  </div>
+
+  <!-- MONTHLY SNAPSHOT -->
+  <div class="snapshot">
+    <h2>Monthly Snapshot</h2>
+    <div class="snap-grid">
+      <div class="snap-item"><div class="k">Total Monthly Income</div><div class="v" id="snap-income">$0.00</div></div>
+      <div class="snap-item"><div class="k">Total Monthly Expenses</div><div class="v" id="snap-expenses">$0.00</div></div>
+      <div class="snap-item"><div class="k">Monthly Debt Payments</div><div class="v" id="snap-debt">$0.00</div></div>
+      <div class="snap-item remaining" id="snap-remaining-box"><div class="k">Money Remaining</div><div class="v" id="snap-remaining">$0.00</div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'tfs-financial-snapshot-v1';
+
+  var INCOME = ['Paycheck 1', 'Paycheck 2', 'Spouse Income', 'Social Security', 'Pension', 'Rental Income', 'Child Support', 'Other Income'];
+  var HOUSING = ['Mortgage / Rent', 'HOA', 'Property Taxes', 'Homeowners / Renters Insurance', 'Electric', 'Gas', 'Water', 'Trash', 'Internet', 'Cell Phone', 'Streaming / Cable'];
+  var TRANSPORT = ['Car Payment', 'Gas', 'Auto Insurance', 'Maintenance', 'Registration'];
+  var FOOD = ['Groceries', 'Dining Out', 'Coffee / Snacks'];
+  var HEALTH = ['Health Insurance', 'Medical', 'Dental', 'Vision', 'Medications'];
+  var PERSONAL = ['Clothing', 'Hair / Nails', 'Gym', 'Entertainment', 'Subscriptions', 'Pet Expenses', 'Childcare', 'Giving', 'Miscellaneous'];
+  var DEBTS = ['Mortgage', 'Credit Card #1', 'Credit Card #2', 'Credit Card #3', 'Auto Loan', 'Student Loan', 'Personal Loan', 'Medical Debt', 'Other'];
+  var SAVINGS = ['Checking', 'Savings', 'Emergency Fund', 'Money Market', 'High Yield Savings', 'CD #1', 'CD #2', 'Cash', 'Other'];
+  var RETIREMENT = ['401(k)', '403(b)', '457', 'Traditional IRA', 'Roth IRA', 'Pension', 'Annuities', 'Brokerage', 'HSA', 'Other'];
+  var INSURANCE = ['Coverage Amount', 'Monthly Premium', 'Long-Term Care', 'Disability'];
+
+  function slug(text) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  function moneyRow(prefix, label) {
+    var id = prefix + '-' + slug(label);
+    return '<div class="row"><span class="rl">' + label + '</span>' +
+      '<span class="money-wrap"><input type="text" inputmode="decimal" id="' + id +
+      '" data-group="' + prefix + '" data-money="1" placeholder="0.00" /></span></div>';
+  }
+
+  function fillMoneyRows(containerId, prefix, labels) {
+    var host = document.getElementById(containerId);
+    if (!host) return;
+    var html = '';
+    for (var i = 0; i < labels.length; i++) html += moneyRow(prefix, labels[i]);
+    host.innerHTML = html;
+  }
+
+  function fillDebtRows() {
+    var host = document.getElementById('debt-rows');
+    if (!host) return;
+    var html = '';
+    for (var i = 0; i < DEBTS.length; i++) {
+      var base = 'debt-' + slug(DEBTS[i]);
+      html += '<div class="debt-row"><span class="rl">' + DEBTS[i] + '</span>' +
+        '<span class="money-wrap"><input type="text" inputmode="decimal" id="' + base + '-balance" data-group="debt-balance" data-money="1" placeholder="0.00" aria-label="' + DEBTS[i] + ' balance" /></span>' +
+        '<span class="money-wrap"><input type="text" inputmode="decimal" id="' + base + '-payment" data-group="debt-payment" data-money="1" placeholder="0.00" aria-label="' + DEBTS[i] + ' monthly payment" /></span>' +
+        '<span class="rate-wrap"><input type="text" inputmode="decimal" id="' + base + '-rate" placeholder="0.0" aria-label="' + DEBTS[i] + ' interest rate" /></span></div>';
+    }
+    host.innerHTML = html;
+  }
+
+  fillMoneyRows('income-rows', 'income', INCOME);
+  fillMoneyRows('exp-housing', 'expenses', HOUSING.map(function (l) { return 'Housing ' + l; }));
+  fillMoneyRows('exp-transport', 'expenses', TRANSPORT.map(function (l) { return 'Transport ' + l; }));
+  fillMoneyRows('exp-food', 'expenses', FOOD.map(function (l) { return 'Food ' + l; }));
+  fillMoneyRows('exp-health', 'expenses', HEALTH.map(function (l) { return 'Health ' + l; }));
+  fillMoneyRows('exp-personal', 'expenses', PERSONAL);
+  fillDebtRows();
+  fillMoneyRows('savings-rows', 'savings', SAVINGS);
+  fillMoneyRows('retirement-rows', 'retirement', RETIREMENT);
+  fillMoneyRows('insurance-rows', 'insurance', INSURANCE);
+
+  // Strip the group word we prefixed onto duplicate expense labels for display.
+  var expenseHosts = ['exp-housing', 'exp-transport', 'exp-food', 'exp-health'];
+  expenseHosts.forEach(function (hostId) {
+    var labels = document.querySelectorAll('#' + hostId + ' .rl');
+    for (var i = 0; i < labels.length; i++) {
+      labels[i].textContent = labels[i].textContent.replace(/^(Housing|Transport|Food|Health)\s/, '');
+    }
+  });
+
+  function num(el) {
+    if (!el) return 0;
+    var v = parseFloat(String(el.value).replace(/[^0-9.\-]/g, ''));
+    return isFinite(v) ? v : 0;
+  }
+
+  function fmt(value) {
+    var neg = value < 0;
+    var s = Math.abs(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return (neg ? '-$' : '$') + s;
+  }
+
+  function sumGroup(group) {
+    var inputs = document.querySelectorAll('[data-group="' + group + '"]');
+    var total = 0;
+    for (var i = 0; i < inputs.length; i++) total += num(inputs[i]);
+    return total;
+  }
+
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  function recalc() {
+    var income = sumGroup('income');
+    var expenses = sumGroup('expenses');
+    var debtPayment = sumGroup('debt-payment');
+    var remaining = income - expenses - debtPayment;
+
+    setText('total-income', fmt(income));
+    setText('total-expenses', fmt(expenses));
+    setText('total-debt-balance', fmt(sumGroup('debt-balance')));
+    setText('total-debt-payment', fmt(debtPayment));
+    setText('total-savings', fmt(sumGroup('savings')));
+    setText('total-retirement', fmt(sumGroup('retirement')));
+
+    setText('snap-income', fmt(income));
+    setText('snap-expenses', fmt(expenses));
+    setText('snap-debt', fmt(debtPayment));
+    setText('snap-remaining', fmt(remaining));
+
+    var box = document.getElementById('snap-remaining-box');
+    if (box) {
+      if (remaining < 0) box.classList.add('negative');
+      else box.classList.remove('negative');
+    }
+  }
+
+  function allFields() {
+    return document.querySelectorAll('input, textarea');
+  }
+
+  function save() {
+    try {
+      var data = {};
+      var fields = allFields();
+      for (var i = 0; i < fields.length; i++) {
+        var f = fields[i];
+        if (!f.id) continue;
+        data[f.id] = f.type === 'checkbox' ? f.checked : f.value;
+      }
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) { /* storage unavailable — form still works */ }
+  }
+
+  function load() {
+    try {
+      var raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      var fields = allFields();
+      for (var i = 0; i < fields.length; i++) {
+        var f = fields[i];
+        if (!f.id || !(f.id in data)) continue;
+        if (f.type === 'checkbox') f.checked = !!data[f.id];
+        else f.value = data[f.id];
+      }
+    } catch (e) { /* ignore unreadable saved data */ }
+  }
+
+  document.addEventListener('input', function () { recalc(); save(); });
+  document.addEventListener('change', function () { recalc(); save(); });
+
+  document.addEventListener('blur', function (event) {
+    var el = event.target;
+    if (!el || !el.getAttribute || el.getAttribute('data-money') !== '1') return;
+    if (String(el.value).trim() === '') return;
+    var v = parseFloat(String(el.value).replace(/[^0-9.\-]/g, ''));
+    if (isFinite(v)) { el.value = v.toFixed(2); save(); }
+  }, true);
+
+  var printBtn = document.getElementById('print-btn');
+  if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
+
+  var resetBtn = document.getElementById('reset-btn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      if (!window.confirm('Clear everything on this worksheet and start fresh?')) return;
+      var fields = allFields();
+      for (var i = 0; i < fields.length; i++) {
+        if (fields[i].type === 'checkbox') fields[i].checked = false;
+        else fields[i].value = '';
+      }
+      try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+      recalc();
+    });
+  }
+
+  load();
+  recalc();
+})();
+</script>
+</body>
+</html>
