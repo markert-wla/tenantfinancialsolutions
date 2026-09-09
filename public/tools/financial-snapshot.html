@@ -54,6 +54,21 @@ h3:first-of-type { margin-top: 0; }
 .fr.total { padding-top: 9px; }
 .fr.total .lbl { font-weight: 800; color: var(--navy); text-transform: uppercase; font-size: 11.5px; letter-spacing: 0.4px; white-space: normal; }
 .fr.total .ln { border-bottom: 2px solid var(--navy); }
+/* typable fields styled to look like the fill-in lines */
+input.ln, input.cell {
+  font-family: inherit; font-size: 13px; color: #1E293B;
+  background: transparent; border: none; border-bottom: 1px solid var(--line);
+  border-radius: 0; padding: 0 2px; width: 100%; min-width: 0;
+  -webkit-appearance: none; appearance: none;
+}
+input.ln:focus, input.cell:focus { outline: none; border-bottom-color: var(--gold); background: #FEFCE8; }
+.fr input.ln { flex: 1 1 60px; min-width: 40px; height: 17px; }
+.fr.total input.ln { border-bottom: 2px solid var(--navy); font-weight: 800; color: var(--navy); }
+input.calc { background: transparent; font-weight: 700; }
+input.cell { font-size: 12.5px; border-bottom: none; text-align: right; height: 18px; }
+input.box { width: 13px; height: 13px; margin-right: 5px; vertical-align: -2px; accent-color: var(--navy); }
+.checkline label { cursor: pointer; }
+.notelines input.ln { display: block; width: 100%; height: 22px; }
 .wide { display: block; padding: 6px 0; }
 .wide .lbl { font-size: 13px; display: block; margin-bottom: 2px; }
 .wide .ln { display: block; border-bottom: 1px solid var(--line); height: 19px; }
@@ -77,6 +92,8 @@ td.name { border-bottom: none; white-space: nowrap; }
   .no-print { display: none !important; }
   .sheet { box-shadow: none; max-width: none; padding: 0; }
   h2 { background: var(--navy) !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  input.ln, input.cell { font-size: 11.5px; background: transparent !important; color: #1E293B; }
+  input.box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .masthead, section { break-inside: avoid; }
   @page { margin: 12mm; }
 }
@@ -100,12 +117,12 @@ td.name { border-bottom: none; white-space: nowrap; }
     <h2>Client Information</h2>
     <div class="cols">
       <div>
-        <div class="fr"><span class="lbl">Name:</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Email:</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Name:</span><input type="text" class="ln" /></div>
+        <div class="fr"><span class="lbl">Email:</span><input type="text" class="ln" /></div>
       </div>
       <div>
-        <div class="fr"><span class="lbl">Date:</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Phone:</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Date:</span><input type="text" class="ln" /></div>
+        <div class="fr"><span class="lbl">Phone:</span><input type="text" class="ln" /></div>
       </div>
     </div>
   </section>
@@ -114,19 +131,19 @@ td.name { border-bottom: none; white-space: nowrap; }
     <h2>Monthly Income</h2>
     <div class="cols">
       <div>
-        <div class="fr"><span class="lbl">Paycheck 1</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Paycheck 2</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Spouse Income</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Social Security</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Paycheck 1</span><input type="text" inputmode="decimal" class="ln money" data-sum="income" /></div>
+        <div class="fr"><span class="lbl">Paycheck 2</span><input type="text" inputmode="decimal" class="ln money" data-sum="income" /></div>
+        <div class="fr"><span class="lbl">Spouse Income</span><input type="text" inputmode="decimal" class="ln money" data-sum="income" /></div>
+        <div class="fr"><span class="lbl">Social Security</span><input type="text" inputmode="decimal" class="ln money" data-sum="income" /></div>
       </div>
       <div>
-        <div class="fr"><span class="lbl">Pension</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Rental Income</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Child Support</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Other Income</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Pension</span><input type="text" inputmode="decimal" class="ln money" data-sum="income" /></div>
+        <div class="fr"><span class="lbl">Rental Income</span><input type="text" inputmode="decimal" class="ln money" data-sum="income" /></div>
+        <div class="fr"><span class="lbl">Child Support</span><input type="text" inputmode="decimal" class="ln money" data-sum="income" /></div>
+        <div class="fr"><span class="lbl">Other Income</span><input type="text" inputmode="decimal" class="ln money" data-sum="income" /></div>
       </div>
     </div>
-    <div class="fr total"><span class="lbl">Total Monthly Income</span><span class="ln"></span></div>
+    <div class="fr total"><span class="lbl">Total Monthly Income</span><input type="text" class="ln calc" id="total-income" readonly tabindex="-1" /></div>
   </section>
 
   <section>
@@ -134,51 +151,51 @@ td.name { border-bottom: none; white-space: nowrap; }
     <div class="cols">
       <div>
         <h3>Housing</h3>
-        <div class="fr"><span class="lbl">Mortgage / Rent</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">HOA</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Property Taxes</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Homeowners / Renters Ins.</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Electric</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Gas</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Water</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Trash</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Internet</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Cell Phone</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Streaming / Cable</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Mortgage / Rent</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">HOA</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Property Taxes</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Homeowners / Renters Ins.</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Electric</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Gas</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Water</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Trash</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Internet</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Cell Phone</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Streaming / Cable</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
 
         <h3>Transportation</h3>
-        <div class="fr"><span class="lbl">Car Payment</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Gas</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Auto Insurance</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Maintenance</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Registration</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Car Payment</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Gas</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Auto Insurance</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Maintenance</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Registration</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
       </div>
       <div>
         <h3>Food</h3>
-        <div class="fr"><span class="lbl">Groceries</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Dining Out</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Coffee / Snacks</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Groceries</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Dining Out</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Coffee / Snacks</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
 
         <h3>Health</h3>
-        <div class="fr"><span class="lbl">Health Insurance</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Medical</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Dental</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Vision</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Medications</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Health Insurance</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Medical</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Dental</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Vision</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Medications</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
 
         <h3>Personal</h3>
-        <div class="fr"><span class="lbl">Clothing</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Hair / Nails</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Gym</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Entertainment</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Subscriptions</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Pet Expenses</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Childcare</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Giving</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Miscellaneous</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Clothing</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Hair / Nails</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Gym</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Entertainment</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Subscriptions</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Pet Expenses</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Childcare</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Giving</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
+        <div class="fr"><span class="lbl">Miscellaneous</span><input type="text" inputmode="decimal" class="ln money" data-sum="expenses" /></div>
       </div>
     </div>
-    <div class="fr total"><span class="lbl">Total Monthly Expenses</span><span class="ln"></span></div>
+    <div class="fr total"><span class="lbl">Total Monthly Expenses</span><input type="text" class="ln calc" id="total-expenses" readonly tabindex="-1" /></div>
   </section>
 
   <section>
@@ -188,15 +205,15 @@ td.name { border-bottom: none; white-space: nowrap; }
         <tr><th>Debt</th><th class="r">Balance</th><th class="r">Monthly Payment</th><th class="r">Interest Rate</th></tr>
       </thead>
       <tbody>
-        <tr><td class="name">Mortgage</td><td></td><td></td><td></td></tr>
-        <tr><td class="name">Credit Card #1</td><td></td><td></td><td></td></tr>
-        <tr><td class="name">Credit Card #2</td><td></td><td></td><td></td></tr>
-        <tr><td class="name">Credit Card #3</td><td></td><td></td><td></td></tr>
-        <tr><td class="name">Auto Loan</td><td></td><td></td><td></td></tr>
-        <tr><td class="name">Student Loan</td><td></td><td></td><td></td></tr>
-        <tr><td class="name">Personal Loan</td><td></td><td></td><td></td></tr>
-        <tr><td class="name">Medical Debt</td><td></td><td></td><td></td></tr>
-        <tr><td class="name">Other</td><td></td><td></td><td></td></tr>
+        <tr><td class="name">Mortgage</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
+        <tr><td class="name">Credit Card #1</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
+        <tr><td class="name">Credit Card #2</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
+        <tr><td class="name">Credit Card #3</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
+        <tr><td class="name">Auto Loan</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
+        <tr><td class="name">Student Loan</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
+        <tr><td class="name">Personal Loan</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
+        <tr><td class="name">Medical Debt</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
+        <tr><td class="name">Other</td><td><input type="text" inputmode="decimal" class="cell money" /></td><td><input type="text" inputmode="decimal" class="cell money" data-sum="debtpay" /></td><td><input type="text" inputmode="decimal" class="cell" /></td></tr>
       </tbody>
     </table>
   </section>
@@ -205,28 +222,28 @@ td.name { border-bottom: none; white-space: nowrap; }
     <div class="cols">
       <div>
         <h2>Savings &amp; Cash</h2>
-        <div class="fr"><span class="lbl">Checking</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Savings</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Emergency Fund</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Money Market</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">High Yield Savings</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">CD #1</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">CD #2</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Cash</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Other</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Checking</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Savings</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Emergency Fund</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Money Market</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">High Yield Savings</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">CD #1</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">CD #2</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Cash</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Other</span><input type="text" inputmode="decimal" class="ln money" /></div>
       </div>
       <div>
         <h2>Retirement</h2>
-        <div class="fr"><span class="lbl">401(k)</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">403(b)</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">457</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Traditional IRA</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Roth IRA</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Pension</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Annuities</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Brokerage</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">HSA</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Other</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">401(k)</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">403(b)</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">457</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Traditional IRA</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Roth IRA</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Pension</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Annuities</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Brokerage</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">HSA</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Other</span><input type="text" inputmode="decimal" class="ln money" /></div>
       </div>
     </div>
   </section>
@@ -237,16 +254,16 @@ td.name { border-bottom: none; white-space: nowrap; }
       <div>
         <h3>Life Insurance</h3>
         <div class="checkline">
-          <span><span class="box"></span>Term</span>
-          <span><span class="box"></span>Whole Life</span>
+          <label><input type="checkbox" class="box" />Term</label>
+          <label><input type="checkbox" class="box" />Whole Life</label>
         </div>
-        <div class="fr"><span class="lbl">Coverage $</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Monthly Premium</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Coverage $</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Monthly Premium</span><input type="text" inputmode="decimal" class="ln money" /></div>
       </div>
       <div>
         <h3>Other Coverage</h3>
-        <div class="fr"><span class="lbl">Long-Term Care</span><span class="ln"></span></div>
-        <div class="fr"><span class="lbl">Disability</span><span class="ln"></span></div>
+        <div class="fr"><span class="lbl">Long-Term Care</span><input type="text" inputmode="decimal" class="ln money" /></div>
+        <div class="fr"><span class="lbl">Disability</span><input type="text" inputmode="decimal" class="ln money" /></div>
       </div>
     </div>
   </section>
@@ -255,29 +272,29 @@ td.name { border-bottom: none; white-space: nowrap; }
     <h2>Financial Goals</h2>
     <div class="notelines">
       <div class="wide"><span class="lbl">What are your top 3 financial goals?</span></div>
-      <div class="fr"><span class="lbl">1.</span><span class="ln"></span></div>
-      <div class="fr"><span class="lbl">2.</span><span class="ln"></span></div>
-      <div class="fr"><span class="lbl">3.</span><span class="ln"></span></div>
+      <div class="fr"><span class="lbl">1.</span><input type="text" class="ln" /></div>
+      <div class="fr"><span class="lbl">2.</span><input type="text" class="ln" /></div>
+      <div class="fr"><span class="lbl">3.</span><input type="text" class="ln" /></div>
     </div>
   </section>
 
   <section>
     <h2>Questions or Concerns</h2>
     <div class="notelines">
-      <span class="ln"></span>
-      <span class="ln"></span>
-      <span class="ln"></span>
-      <span class="ln"></span>
+      <input type="text" class="ln" />
+      <input type="text" class="ln" />
+      <input type="text" class="ln" />
+      <input type="text" class="ln" />
     </div>
   </section>
 
   <section>
     <h2>Monthly Snapshot</h2>
     <div class="snapshot">
-      <div class="fr"><span class="lbl">Total Monthly Income $</span><span class="ln"></span></div>
-      <div class="fr"><span class="lbl">Total Monthly Expenses $</span><span class="ln"></span></div>
-      <div class="fr"><span class="lbl">Monthly Debt Payments $</span><span class="ln"></span></div>
-      <div class="fr total"><span class="lbl">Money Remaining $</span><span class="ln"></span></div>
+      <div class="fr"><span class="lbl">Total Monthly Income $</span><input type="text" class="ln calc" id="snap-income" readonly tabindex="-1" /></div>
+      <div class="fr"><span class="lbl">Total Monthly Expenses $</span><input type="text" class="ln calc" id="snap-expenses" readonly tabindex="-1" /></div>
+      <div class="fr"><span class="lbl">Monthly Debt Payments $</span><input type="text" class="ln calc" id="snap-debt" readonly tabindex="-1" /></div>
+      <div class="fr total"><span class="lbl">Money Remaining $</span><input type="text" class="ln calc" id="snap-remaining" readonly tabindex="-1" /></div>
     </div>
   </section>
 
@@ -289,6 +306,45 @@ td.name { border-bottom: none; white-space: nowrap; }
 (function () {
   var btn = document.getElementById('print-btn');
   if (btn) btn.addEventListener('click', function () { window.print(); });
+
+  function num(el) {
+    var v = parseFloat(String(el.value).replace(/[^0-9.\-]/g, ''));
+    return isNaN(v) ? 0 : v;
+  }
+  function sum(group) {
+    var total = 0, filled = false;
+    var fields = document.querySelectorAll('input[data-sum="' + group + '"]');
+    for (var i = 0; i < fields.length; i++) {
+      if (String(fields[i].value).trim() !== '') filled = true;
+      total += num(fields[i]);
+    }
+    return { total: total, filled: filled };
+  }
+  function money(n) {
+    return (n < 0 ? '-' : '') + '$' + Math.abs(n).toLocaleString('en-US', {
+      minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
+  }
+  function set(id, value) {
+    var el = document.getElementById(id);
+    if (el) el.value = value;
+  }
+  function recalc() {
+    var income = sum('income');
+    var expenses = sum('expenses');
+    var debt = sum('debtpay');
+    var anything = income.filled || expenses.filled || debt.filled;
+    set('total-income', income.filled ? money(income.total) : '');
+    set('total-expenses', expenses.filled ? money(expenses.total) : '');
+    set('snap-income', income.filled ? money(income.total) : '');
+    set('snap-expenses', expenses.filled ? money(expenses.total) : '');
+    set('snap-debt', debt.filled ? money(debt.total) : '');
+    set('snap-remaining', anything ? money(income.total - expenses.total - debt.total) : '');
+  }
+  document.addEventListener('input', function (e) {
+    if (e.target && e.target.hasAttribute('data-sum')) recalc();
+  });
+  recalc();
 })();
 </script>
 </body>

@@ -65,7 +65,7 @@ const tools = [
     id: 'financial-snapshot',
     title: 'Tenant Financial Snapshot & Budget',
     subtitle: 'Financial Snapshot & Monthly Budget',
-    description: 'A print-and-fill worksheet covering client information, monthly income, expenses, debt, savings & cash, retirement, insurance, financial goals and the monthly snapshot. Opens ready to print and complete by hand with your client.',
+    description: 'A fillable worksheet covering client information, monthly income, expenses, debt, savings & cash, retirement, insurance, financial goals and the monthly snapshot. Type straight into it on screen — income, expense and debt totals add themselves — then print or save a copy.',
     emoji: '📋',
     color: 'from-slate-800 to-slate-950 border-slate-500',
     badgeColor: 'bg-slate-700 text-slate-100',
