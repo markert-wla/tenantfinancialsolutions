@@ -283,10 +283,22 @@
     }
     .sig-block { flex: 1 1 240px; }
     .sig-line {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        border: none;
         border-bottom: 2px solid #333;
+        border-radius: 0;
+        background: transparent;
         height: 36px;
         margin-bottom: 6px;
+        padding: 0 4px;
+        font-family: 'Segoe Script', 'Bradley Hand', 'Brush Script MT', cursive;
+        font-size: 1.25rem;
+        color: #1a1a1a;
+        outline: none;
     }
+    .sig-line:focus { border-bottom-color: #0077ff; }
     .sig-label { font-size: 0.85rem; color: #555; font-weight: 600; }
 
     .notes-print {
@@ -464,11 +476,11 @@
 
         <div class="sig-row">
             <div class="sig-block">
-                <div class="sig-line"></div>
+                <input type="text" class="sig-line" id="clientSig" autocomplete="off" aria-label="Client signature and date">
                 <div class="sig-label" id="clientSigLabel">Client signature &nbsp;·&nbsp; Date</div>
             </div>
             <div class="sig-block">
-                <div class="sig-line"></div>
+                <input type="text" class="sig-line" id="coachSig" autocomplete="off" aria-label="Coach signature and date">
                 <div class="sig-label" id="coachSigLabel">Coach signature &nbsp;·&nbsp; Date</div>
             </div>
         </div>
