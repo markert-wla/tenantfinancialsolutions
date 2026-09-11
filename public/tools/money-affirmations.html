@@ -902,11 +902,38 @@ function downloadPdf() {
     btn.innerText = busyLabel;
     document.body.classList.add("pdf-mode");
 
+    // Swap the signature inputs for plain-text divs in the real page BEFORE the
+    // PDF library measures anything. Doing this inside the library's clone (as
+    // before) changed the layout after page breaks were computed, so a page edge
+    // could land across the signatures and cut them off. Swapping first means the
+    // measured layout and the captured layout are identical.
+    var sigSwaps = [];
+    ["clientSig", "coachSig"].forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input || !input.parentNode) return;
+        var div = document.createElement("div");
+        div.className = "sig-line";
+        div.style.height = "auto";
+        div.style.minHeight = "48px";
+        div.style.lineHeight = "1.9";
+        div.style.paddingTop = "6px";
+        div.style.paddingBottom = "10px";
+        div.style.overflow = "visible";
+        div.appendChild(document.createTextNode(input.value));
+        input.style.display = "none";
+        input.parentNode.insertBefore(div, input);
+        sigSwaps.push({ input: input, div: div });
+    });
+
     var name = document.getElementById("clientName").value.trim();
     var slug = name ? "-" + name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") : "";
     var file = (state.lang === "es" ? "declaracion-afirmaciones-de-dinero" : "money-affirmations-declaration") + slug + ".pdf";
 
     function cleanup() {
+        sigSwaps.forEach(function (s) {
+            if (s.div.parentNode) s.div.parentNode.removeChild(s.div);
+            s.input.style.display = "";
+        });
         document.body.classList.remove("pdf-mode");
         btn.disabled = false;
         btn.innerText = t("downloadBtn");
@@ -916,26 +943,7 @@ function downloadPdf() {
         margin: [12, 12, 14, 12],
         filename: file,
         image: { type: "jpeg", quality: 0.95 },
-        html2canvas: {
-            scale: 2,
-            onclone: function (doc) {
-                // Draw typed signatures as plain text so they always show in the PDF
-                ["clientSig", "coachSig"].forEach(function (id) {
-                    var orig = document.getElementById(id);
-                    var clone = doc.getElementById(id);
-                    if (!orig || !clone || !clone.parentNode) return;
-                    var div = doc.createElement("div");
-                    div.className = "sig-line";
-                    div.style.height = "auto";
-                    div.style.minHeight = "44px";
-                    div.style.lineHeight = "1.5";
-                    div.style.paddingTop = "8px";
-                    div.style.overflow = "visible";
-                    div.appendChild(doc.createTextNode(orig.value));
-                    clone.parentNode.replaceChild(div, clone);
-                });
-            }
-        },
+        html2canvas: { scale: 2 },
         jsPDF: { unit: "mm", format: "letter", orientation: "portrait" },
         pagebreak: { mode: ["css", "legacy"], avoid: [".sig-row", ".sig-block", ".declaration-text", ".notes-print", ".sheet-info"] }
     }).from(document.getElementById("page4")).save()
