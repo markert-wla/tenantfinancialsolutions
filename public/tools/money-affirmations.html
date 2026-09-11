@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TFS Money Affirmations Tool</title>
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #f7f7f9;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    header {
+        background: #1a1a1a;
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 40px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+        margin-top: 0;
+        font-size: 1.4rem;
+        color: #222;
+    }
+
+    .section {
+        margin-bottom: 40px;
+    }
+
+    label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    textarea, select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        font-size: 1rem;
+    }
+
+    button {
+        background: #1a1a1a;
+        color: white;
+        padding: 14px 22px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #333;
+    }
+
+    #output {
+        background: #fafafa;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        margin-top: 20px;
+        white-space: pre-wrap;
+    }
+
+    .print-btn {
+        margin-top: 20px;
+        background: #0077ff;
+    }
+
+    .print-btn:hover {
+        background: #005fcc;
+    }
+</style>
+
+</head>
+<body>
+
+<header>
+    <h1>TFS Money Affirmations Tool</h1>
+</header>
+
+<div class="container">
+
+    <!-- LANGUAGE TOGGLE -->
+    <div class="section">
+        <h2>Language / Idioma</h2>
+        <select id="language" onchange="updateLanguage()">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+        </select>
+    </div>
+
+    <!-- DEFINITION -->
+    <div class="section">
+        <h2 id="definitionTitle">What is a Money Affirmation?</h2>
+        <p id="definitionText">
+            A Money Affirmation is a Personal Line in the Sand. It defines who you refuse to be with money and who you are becoming. 
+            These affirmations help you align your People decisions, your Process choices, and your Perspective about money — 
+            creating a healthier, more confident financial identity.
+        </p>
+    </div>
+
+    <!-- NEGATIVE TENDENCIES -->
+    <div class="section">
+        <h2 id="negativeTitle">Step 1: Choose 3–5 Things You Do NOT Want to Be With Money</h2>
+        <label id="negativeLabel">Select up to 5 statements OR write in your own:</label>
+
+        <select id="negativeSelect" multiple size="8">
+            <option value="I don’t want to be someone who avoids my bills.">I don’t want to be someone who avoids my bills.</option>
+            <option value="I don’t want to be someone who spends out of stress or emotion.">I don’t want to be someone who spends out of stress or emotion.</option>
+            <option value="I don’t want to be someone who ignores my financial responsibilities.">I don’t want to be someone who ignores my financial responsibilities.</option>
+            <option value="I don’t want to be someone who lets others pressure me into financial decisions.">I don’t want to be someone who lets others pressure me into financial decisions.</option>
+            <option value="I don’t want to be someone who avoids looking at my numbers.">I don’t want to be someone who avoids looking at my numbers.</option>
+            <option value="I don’t want to be someone who repeats unhealthy money habits.">I don’t want to be someone who repeats unhealthy money habits.</option>
+        </select>
+
+        <label>Add your own (optional):</label>
+        <textarea id="negCustom1" rows="2"></textarea>
+        <textarea id="negCustom2" rows="2"></textarea>
+        <textarea id="negCustom3" rows="2"></textarea>
+    </div>
+
+    <!-- POSITIVE AFFIRMATIONS -->
+    <div class="section">
+        <h2 id="positiveTitle">Step 2: Choose 3–5 Money Affirmations (Who You Want to Become)</h2>
+        <label id="positiveLabel">Select up to 5 affirmations OR write in your own:</label>
+
+        <select id="affirmations" multiple size="10">
+            <option value="I honor my boundaries with money and protect my peace.">I honor my boundaries with money and protect my peace.</option>
+            <option value="I make thoughtful financial decisions that build my future.">I make thoughtful financial decisions that build my future.</option>
+            <option value="I stay in control of my money and my momentum.">I stay in control of my money and my momentum.</option>
+            <option value="I deserve financial freedom and stability.">I deserve financial freedom and stability.</option>
+            <option value="I move through life with order, clarity, and confidence.">I move through life with order, clarity, and confidence.</option>
+            <option value="I trust myself with money and make decisions with confidence.">I trust myself with money and make decisions with confidence.</option>
+            <option value="I build a peaceful and healthy relationship with money.">I build a peaceful and healthy relationship with money.</option>
+            <option value="I choose progress over perfection in my financial journey.">I choose progress over perfection in my financial journey.</option>
+            <option value="I am becoming someone who plans, prepares, and prospers.">I am becoming someone who plans, prepares, and prospers.</option>
+            <option value="I am creating a future that reflects my values and my growth.">I am creating a future that reflects my values and my growth.</option>
+        </select>
+
+        <label>Add your own (optional):</label>
+        <textarea id="affCustom1" rows="2"></textarea>
+        <textarea id="affCustom2" rows="2"></textarea>
+        <textarea id="affCustom3" rows="2"></textarea>
+    </div>
+
+    <!-- GENERATE -->
+    <div class="section">
+        <h2 id="generateTitle">Step 3: Generate Your Personal Affirmation Sheet</h2>
+        <button onclick="generateSheet()">Generate</button>
+    </div>
+
+    <div id="output"></div>
+
+    <button class="print-btn" onclick="window.print()">Download / Print</button>
+
+</div>
+
+<script>
+function updateLanguage() {
+    const lang = document.getElementById("language").value;
+
+    const text = {
+        en: {
+            definitionTitle: "What is a Money Affirmation?",
+            definitionText: "A Money Affirmation is a Personal Line in the Sand. It defines who you refuse to be with money and who you are becoming. These affirmations help you align your People decisions, your Process choices, and your Perspective about money — creating a healthier, more confident financial identity.",
+            negativeTitle: "Step 1: Choose 3–5 Things You Do NOT Want to Be With Money",
+            negativeLabel: "Select up to 5 statements OR write in your own:",
+            positiveTitle: "Step 2: Choose 3–5 Money Affirmations (Who You Want to Become)",
+            positiveLabel: "Select up to 5 affirmations OR write in your own:",
+            generateTitle: "Step 3: Generate Your Personal Affirmation Sheet"
+        },
+        es: {
+            definitionTitle: "¿Qué es una Afirmación de Dinero?",
+            definitionText: "Una Afirmación de Dinero es una Línea Personal en la Arena. Define quién te niegas a ser con el dinero y en quién te estás convirtiendo. Estas afirmaciones alinean tus decisiones con personas, tus procesos y tu perspectiva sobre el dinero — creando una identidad financiera más saludable y segura.",
+            negativeTitle: "Paso 1: Elige 3–5 cosas que NO quieres ser con el dinero",
+            negativeLabel: "Selecciona hasta 5 declaraciones o escribe las tuyas:",
+            positiveTitle: "Paso 2: Elige 3–5 Afirmaciones de Dinero (Quién quieres ser)",
+            positiveLabel: "Selecciona hasta 5 afirmaciones o escribe las tuyas:",
+            generateTitle: "Paso 3: Genera tu hoja personal de afirmaciones"
+        }
+    };
+
+    Object.keys(text[lang]).forEach(id => {
+        document.getElementById(id).innerText = text[lang][id];
+    });
+
+    document.getElementById("definitionText").innerText = text[lang].definitionText;
+}
+
+function generateSheet() {
+    const negativesSelected = Array.from(document.getElementById("negativeSelect").selectedOptions)
+        .map(opt => opt.value);
+
+    const negativesCustom = [
+        document.getElementById("negCustom1").value.trim(),
+        document.getElementById("negCustom2").value.trim(),
+        document.getElementById("negCustom3").value.trim()
+    ].filter(x => x.length > 0);
+
+    const negatives = negativesSelected.concat(negativesCustom).slice(0, 5);
+
+    const affSelected = Array.from(document.getElementById("affirmations").selectedOptions)
+        .map(opt => opt.value);
+
+    const affCustom = [
+        document.getElementById("affCustom1").value.trim(),
+        document.getElementById("affCustom2").value.trim(),
+        document.getElementById("affCustom3").value.trim()
+    ].filter(x => x.length > 0);
+
+    const affirmations = affSelected.concat(affCustom).slice(0, 5);
+
+    let sheet = "MY PERSONAL LINES IN THE SAND\n\n";
+
+    sheet += "Who I REFUSE to be with money:\n";
+    negatives.forEach((n, i) => sheet += `${i+1}. ${n}\n`);
+    sheet += "\n";
+
+    sheet += "Who I am BECOMING with money:\n";
+    affirmations.forEach((a, i) => sheet += `${i+1}. ${a}\n`);
+
+    document.getElementById("output").innerText = sheet;
+}
+</script>
+
+</body>
+</html>
