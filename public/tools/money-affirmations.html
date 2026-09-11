@@ -313,6 +313,13 @@
 
     .print-btn { margin-top: 20px; background: #0077ff; }
     .print-btn:hover { background: #005fcc; }
+    .action-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    body.pdf-mode header, body.pdf-mode .toolbar, body.pdf-mode .nav-row,
+    body.pdf-mode .no-print, body.pdf-mode .warning { display: none !important; }
+    body.pdf-mode #coachNotes { display: none; }
+    body.pdf-mode .notes-print { display: block; }
+    body.pdf-mode .container { box-shadow: none; border-radius: 0; margin: 0 auto; }
 
     @media print {
         body { background: white; }
@@ -489,7 +496,10 @@
         <textarea id="coachNotes" rows="6" oninput="document.getElementById('notesPrint').innerText = this.value"></textarea>
         <div class="notes-print" id="notesPrint"></div>
 
-        <button class="print-btn no-print" onclick="window.print()" id="printBtn">Download / Print</button>
+        <div class="action-row no-print">
+            <button class="print-btn" type="button" onclick="downloadPdf()" id="downloadBtn">Download PDF</button>
+            <button class="print-btn" type="button" onclick="window.print()" id="printBtn">Print</button>
+        </div>
     </section>
 
     <div class="nav-row">
@@ -499,6 +509,7 @@
 
 </div>
 
+<script src="vendor/html2pdf.bundle.min.js"></script>
 <script>
 var NEG = {
     en: [
@@ -635,7 +646,10 @@ var UI = {
         clientSigLabel: "Client signature \u00a0\u00b7\u00a0 Date",
         coachSigLabel: "Coach signature \u00a0\u00b7\u00a0 Date",
         notesLabel: "Coach notes:",
-        printBtn: "Download / Print",
+        printBtn: "Print",
+        downloadBtn: "Download PDF",
+        downloadBusy: "Preparing PDF\u2026",
+        downloadError: "Sorry \u2014 the PDF could not be created on this device. Use the Print button and choose \u201cSave as PDF\u201d instead.",
         back: "Back",
         next: "Next",
         none: "(none selected yet)"
@@ -676,7 +690,10 @@ var UI = {
         clientSigLabel: "Firma del cliente \u00a0\u00b7\u00a0 Fecha",
         coachSigLabel: "Firma del coach \u00a0\u00b7\u00a0 Fecha",
         notesLabel: "Notas del coach:",
-        printBtn: "Descargar / Imprimir",
+        printBtn: "Imprimir",
+        downloadBtn: "Descargar PDF",
+        downloadBusy: "Preparando PDF\u2026",
+        downloadError: "Lo sentimos \u2014 no se pudo crear el PDF en este dispositivo. Usa el bot\u00f3n Imprimir y elige \u201cGuardar como PDF\u201d.",
         back: "Atr\u00e1s",
         next: "Siguiente",
         none: "(a\u00fan no hay selecciones)"
@@ -851,7 +868,7 @@ function setLanguage(lang) {
         "negativeTitle","negDragNote","negBankTitle","negChosenTitle",
         "positiveTitle","posDragNote","posBankTitle","posChosenTitle",
         "sheetTitle","sheetSub","sheetNameLabel","sheetDateLabel","sheetNegTitle","sheetPosTitle",
-        "declarationText","clientSigLabel","coachSigLabel","notesLabel","printBtn"];
+        "declarationText","clientSigLabel","coachSigLabel","notesLabel","printBtn","downloadBtn"];
     ids.forEach(function (id) {
         var el = document.getElementById(id);
         if (el && UI[lang][id] !== undefined) el.innerText = UI[lang][id];
@@ -870,6 +887,55 @@ function setLanguage(lang) {
     renderPick("neg");
     renderPick("pos");
     renderSheet();
+}
+
+function downloadPdf() {
+    renderSheet();
+    var btn = document.getElementById("downloadBtn");
+    var busyLabel = t("downloadBusy");
+    btn.disabled = true;
+    btn.innerText = busyLabel;
+    document.body.classList.add("pdf-mode");
+
+    var name = document.getElementById("clientName").value.trim();
+    var slug = name ? "-" + name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") : "";
+    var file = (state.lang === "es" ? "declaracion-afirmaciones-de-dinero" : "money-affirmations-declaration") + slug + ".pdf";
+
+    function cleanup() {
+        document.body.classList.remove("pdf-mode");
+        btn.disabled = false;
+        btn.innerText = t("downloadBtn");
+    }
+
+    html2pdf().set({
+        margin: [12, 12, 14, 12],
+        filename: file,
+        image: { type: "jpeg", quality: 0.95 },
+        html2canvas: {
+            scale: 2,
+            onclone: function (doc) {
+                // Draw typed signatures as plain text so they always show in the PDF
+                ["clientSig", "coachSig"].forEach(function (id) {
+                    var orig = document.getElementById(id);
+                    var clone = doc.getElementById(id);
+                    if (!orig || !clone || !clone.parentNode) return;
+                    var div = doc.createElement("div");
+                    div.className = "sig-line";
+                    div.style.lineHeight = "30px";
+                    div.style.height = "36px";
+                    div.appendChild(doc.createTextNode(orig.value));
+                    clone.parentNode.replaceChild(div, clone);
+                });
+            }
+        },
+        jsPDF: { unit: "mm", format: "letter", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"] }
+    }).from(document.getElementById("page4")).save()
+        .then(cleanup)
+        .catch(function () {
+            cleanup();
+            alert(t("downloadError"));
+        });
 }
 
 setupDropZone("neg");
