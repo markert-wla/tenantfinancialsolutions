@@ -320,6 +320,11 @@
     body.pdf-mode #coachNotes { display: none; }
     body.pdf-mode .notes-print { display: block; }
     body.pdf-mode .container { box-shadow: none; border-radius: 0; margin: 0 auto; }
+    body.pdf-mode .sig-row, body.pdf-mode .sig-block, body.pdf-mode .declaration-text,
+    body.pdf-mode .notes-print, body.pdf-mode .sheet-info {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
 
     @media print {
         body { background: white; }
@@ -921,15 +926,18 @@ function downloadPdf() {
                     if (!orig || !clone || !clone.parentNode) return;
                     var div = doc.createElement("div");
                     div.className = "sig-line";
-                    div.style.lineHeight = "30px";
-                    div.style.height = "36px";
+                    div.style.height = "auto";
+                    div.style.minHeight = "44px";
+                    div.style.lineHeight = "1.5";
+                    div.style.paddingTop = "8px";
+                    div.style.overflow = "visible";
                     div.appendChild(doc.createTextNode(orig.value));
                     clone.parentNode.replaceChild(div, clone);
                 });
             }
         },
         jsPDF: { unit: "mm", format: "letter", orientation: "portrait" },
-        pagebreak: { mode: ["css", "legacy"] }
+        pagebreak: { mode: ["css", "legacy"], avoid: [".sig-row", ".sig-block", ".declaration-text", ".notes-print", ".sheet-info"] }
     }).from(document.getElementById("page4")).save()
         .then(cleanup)
         .catch(function () {
