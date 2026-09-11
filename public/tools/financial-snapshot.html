@@ -19,7 +19,7 @@ body {
   padding: 16px;
 }
 .toolbar {
-  max-width: 8.5in; margin: 0 auto 14px; display: flex; justify-content: flex-end;
+  max-width: 8.5in; margin: 0 auto 14px; display: flex; justify-content: flex-end; gap: 10px;
 }
 .btn {
   padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;
@@ -90,6 +90,14 @@ tr.totals input.calc { font-weight: 700; color: var(--navy); }
 .snapshot { border: 2px solid var(--navy); border-radius: 4px; padding: 12px 14px 14px; margin-top: 6px; }
 .snapshot .fr .lbl { font-weight: 700; }
 .foot { margin-top: 18px; padding-top: 8px; border-top: 1px solid #CBD5E1; font-size: 10.5px; color: #64748B; text-align: center; }
+/* PDF download mode */
+body.pdf-mode { background: #fff; padding: 0; }
+body.pdf-mode .no-print { display: none !important; }
+body.pdf-mode .sheet { box-shadow: none; }
+body.pdf-mode .masthead, body.pdf-mode section {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
 @media print {
   body { background: #fff; padding: 0; font-size: 11.5px; }
   .no-print { display: none !important; }
@@ -105,6 +113,7 @@ tr.totals input.calc { font-weight: 700; color: var(--navy); }
 <body>
 
 <div class="toolbar no-print">
+  <button type="button" class="btn" id="download-btn">&#11015; Download PDF</button>
   <button type="button" class="btn" id="print-btn">&#128424; Print this worksheet</button>
 </div>
 
@@ -304,10 +313,82 @@ tr.totals input.calc { font-weight: 700; color: var(--navy); }
 
 </div>
 
+<script src="vendor/html2pdf.bundle.min.js"></script>
 <script>
 (function () {
   var btn = document.getElementById('print-btn');
   if (btn) btn.addEventListener('click', function () { window.print(); });
+
+  var dlBtn = document.getElementById('download-btn');
+  if (dlBtn) dlBtn.addEventListener('click', downloadPdf);
+
+  function downloadPdf() {
+    if (typeof html2pdf === 'undefined') {
+      alert('Sorry \u2014 the PDF could not be created on this device. Use the Print button and choose \u201cSave as PDF\u201d instead.');
+      return;
+    }
+    dlBtn.disabled = true;
+    dlBtn.innerText = 'Preparing PDF\u2026';
+    document.body.classList.add('pdf-mode');
+
+    // Swap every input for plain text/marks BEFORE the PDF library measures the
+    // page, so typed values always show and page breaks match the captured layout.
+    var swaps = [];
+    var inputs = document.querySelectorAll('.sheet input');
+    for (var i = 0; i < inputs.length; i++) {
+      var input = inputs[i];
+      var repl;
+      if (input.type === 'checkbox') {
+        repl = document.createElement('span');
+        repl.style.cssText = 'display:inline-block;width:12px;height:12px;border:1.4px solid #0F1F3D;' +
+          'margin-right:5px;vertical-align:-1px;text-align:center;line-height:11px;' +
+          'font-size:10px;font-weight:800;color:#0F1F3D;';
+        if (input.checked) repl.appendChild(document.createTextNode('\u2713'));
+      } else {
+        repl = document.createElement('div');
+        repl.className = input.className;
+        var cs = window.getComputedStyle(input);
+        repl.style.fontSize = cs.fontSize;
+        repl.style.fontWeight = cs.fontWeight;
+        repl.style.color = cs.color;
+        repl.style.textAlign = cs.textAlign;
+        repl.style.borderBottom = cs.borderBottomWidth + ' ' + cs.borderBottomStyle + ' ' + cs.borderBottomColor;
+        repl.style.padding = cs.padding;
+        repl.style.minHeight = input.offsetHeight + 'px';
+        repl.style.height = 'auto';
+        repl.style.overflow = 'visible';
+        repl.style.background = 'transparent';
+        repl.appendChild(document.createTextNode(input.value));
+      }
+      input.style.display = 'none';
+      input.parentNode.insertBefore(repl, input);
+      swaps.push({ input: input, repl: repl });
+    }
+
+    function cleanup() {
+      for (var j = 0; j < swaps.length; j++) {
+        if (swaps[j].repl.parentNode) swaps[j].repl.parentNode.removeChild(swaps[j].repl);
+        swaps[j].input.style.display = '';
+      }
+      document.body.classList.remove('pdf-mode');
+      dlBtn.disabled = false;
+      dlBtn.innerHTML = '&#11015; Download PDF';
+    }
+
+    html2pdf().set({
+      margin: [12, 12, 14, 12],
+      filename: 'tfs-financial-snapshot-budget.pdf',
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['section', '.masthead', 'table', '.snapshot', '.fr'] }
+    }).from(document.querySelector('.sheet')).save()
+      .then(cleanup)
+      .catch(function () {
+        cleanup();
+        alert('Sorry \u2014 the PDF could not be created on this device. Use the Print button and choose \u201cSave as PDF\u201d instead.');
+      });
+  }
 
   function num(el) {
     var v = parseFloat(String(el.value).replace(/[^0-9.\-]/g, ''));
