@@ -6,16 +6,19 @@
 <title>TFS Money Affirmations Tool</title>
 
 <style>
+    * { box-sizing: border-box; }
+
     body {
         font-family: 'Inter', sans-serif;
-        background: #f7f7f9;
+        background: linear-gradient(160deg, #f3e8ff 0%, #fce7f3 50%, #e0f2fe 100%);
         margin: 0;
         padding: 0;
         color: #333;
+        min-height: 100vh;
     }
 
     header {
-        background: #1a1a1a;
+        background: linear-gradient(90deg, #7c3aed 0%, #db2777 60%, #f59e0b 100%);
         color: white;
         padding: 30px 20px;
         text-align: center;
@@ -27,39 +30,174 @@
         letter-spacing: 1px;
     }
 
+    header p {
+        margin: 8px 0 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+
     .container {
         max-width: 900px;
-        margin: 40px auto;
+        margin: 30px auto 60px;
         background: white;
         padding: 30px;
         border-radius: 12px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
 
-    h2 {
-        margin-top: 0;
-        font-size: 1.4rem;
-        color: #222;
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f3e8ff;
     }
 
-    .section {
-        margin-bottom: 40px;
+    .toolbar select {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid #c4b5fd;
+        font-size: 0.95rem;
+        background: #faf5ff;
     }
 
-    label {
-        font-weight: 600;
-        display: block;
-        margin-bottom: 8px;
+    .page-indicator {
+        font-weight: 700;
+        color: #7c3aed;
+        background: #f3e8ff;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 0.9rem;
     }
 
-    textarea, select {
+    h2 { margin-top: 0; font-size: 1.4rem; color: #222; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .accent-bar {
+        height: 6px;
+        border-radius: 999px;
+        margin-bottom: 18px;
+        background: linear-gradient(90deg, #7c3aed, #db2777);
+    }
+    .page-neg .accent-bar { background: linear-gradient(90deg, #dc2626, #f97316); }
+    .page-pos .accent-bar { background: linear-gradient(90deg, #16a34a, #14b8a6); }
+    .page-dec .accent-bar { background: linear-gradient(90deg, #f59e0b, #7c3aed); }
+
+    label { font-weight: 600; display: block; margin-bottom: 8px; }
+
+    input[type="text"], input[type="date"], textarea {
         width: 100%;
         padding: 12px;
         border-radius: 8px;
         border: 1px solid #ccc;
+        font-size: 1rem;
+        background: #fdfcff;
+    }
+
+    .info-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+    .info-row > div { flex: 1 1 220px; }
+
+    .callout {
+        border-radius: 10px;
+        padding: 16px 18px;
         margin-bottom: 20px;
+        line-height: 1.6;
+    }
+    .callout.purple { background: #f3e8ff; border-left: 6px solid #7c3aed; }
+    .callout.pink { background: #fce7f3; border-left: 6px solid #db2777; }
+    .callout.blue { background: #e0f2fe; border-left: 6px solid #0284c7; }
+
+    .dragnote {
+        font-size: 0.95rem;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-bottom: 18px;
+    }
+    .page-neg .dragnote { background: #fee2e2; color: #991b1b; border: 1px dashed #dc2626; }
+    .page-pos .dragnote { background: #dcfce7; color: #166534; border: 1px dashed #16a34a; }
+
+    .pick-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    @media (max-width: 700px) {
+        .pick-grid { grid-template-columns: 1fr; }
+    }
+
+    .bank, .chosen-zone {
+        border-radius: 12px;
+        padding: 14px;
+        min-height: 200px;
+    }
+    .bank { background: #fafafa; border: 1px solid #e5e7eb; max-height: 480px; overflow-y: auto; }
+
+    .page-neg .chosen-zone { background: #fef2f2; border: 2px dashed #dc2626; }
+    .page-pos .chosen-zone { background: #f0fdf4; border: 2px dashed #16a34a; }
+    .chosen-zone.dragover { box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.25); }
+
+    .col-title {
+        font-weight: 700;
+        margin: 0 0 10px;
         font-size: 1rem;
     }
+
+    ul.cards { list-style: none; margin: 0; padding: 0; }
+
+    ul.cards li {
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        line-height: 1.4;
+        cursor: grab;
+        user-select: none;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        background: white;
+    }
+
+    .page-neg ul.cards li { border: 1px solid #fca5a5; color: #b91c1c; }
+    .page-pos ul.cards li { border: 1px solid #86efac; color: #15803d; }
+
+    ul.cards li.used { opacity: 0.35; cursor: default; }
+
+    ul.cards li .grip { opacity: 0.5; font-weight: 700; }
+
+    .chosen-zone ul.cards li { cursor: default; }
+
+    .remove-btn {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 1;
+    }
+
+    .counter { font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; }
+    .page-neg .counter { color: #b91c1c; }
+    .page-pos .counter { color: #15803d; }
+
+    .empty-hint { color: #9ca3af; font-size: 0.9rem; font-style: italic; }
+
+    .custom-add { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .custom-add input { flex: 1 1 180px; }
 
     button {
         background: #1a1a1a;
@@ -71,27 +209,111 @@
         cursor: pointer;
         transition: 0.2s;
     }
+    button:hover { background: #333; }
 
-    button:hover {
-        background: #333;
+    .btn-purple { background: #7c3aed; }
+    .btn-purple:hover { background: #6d28d9; }
+    .btn-small { padding: 10px 16px; font-size: 0.9rem; }
+
+    .warning {
+        display: none;
+        background: #fef3c7;
+        border-left: 6px solid #f59e0b;
+        color: #92400e;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-top: 16px;
+        font-weight: 600;
     }
 
-    #output {
-        background: #fafafa;
-        padding: 20px;
+    .nav-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f3e8ff;
+    }
+
+    /* Declaration sheet */
+    .sheet-title {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #7c3aed;
+        margin-bottom: 4px;
+    }
+    .sheet-sub { text-align: center; color: #6b7280; margin-top: 0; }
+
+    .sheet-info {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 18px 0 24px;
+        font-size: 1rem;
+    }
+    .sheet-info span { font-weight: 700; }
+
+    .sheet-list { border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; }
+    .sheet-list.neg { background: #fef2f2; border: 1px solid #fca5a5; }
+    .sheet-list.pos { background: #f0fdf4; border: 1px solid #86efac; }
+    .sheet-list h3 { margin: 0 0 10px; font-size: 1.05rem; }
+    .sheet-list.neg h3, .sheet-list.neg li { color: #b91c1c; }
+    .sheet-list.pos h3, .sheet-list.pos li { color: #15803d; }
+    .sheet-list ol { margin: 0; padding-left: 22px; }
+    .sheet-list li { margin-bottom: 6px; line-height: 1.5; }
+
+    .declaration-text {
+        background: #fffbeb;
+        border: 1px solid #fcd34d;
         border-radius: 10px;
-        border: 1px solid #ddd;
-        margin-top: 20px;
+        padding: 16px 18px;
+        line-height: 1.7;
+        margin-bottom: 24px;
+    }
+
+    .sig-row {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+    .sig-block { flex: 1 1 240px; }
+    .sig-line {
+        border-bottom: 2px solid #333;
+        height: 36px;
+        margin-bottom: 6px;
+    }
+    .sig-label { font-size: 0.85rem; color: #555; font-weight: 600; }
+
+    .notes-print {
+        display: none;
+        border: 1px solid #c4b5fd;
+        border-radius: 10px;
+        padding: 14px;
+        min-height: 120px;
         white-space: pre-wrap;
+        line-height: 1.6;
     }
 
-    .print-btn {
-        margin-top: 20px;
-        background: #0077ff;
-    }
+    .print-btn { margin-top: 20px; background: #0077ff; }
+    .print-btn:hover { background: #005fcc; }
 
-    .print-btn:hover {
-        background: #005fcc;
+    @media print {
+        body { background: white; }
+        header, .toolbar, .nav-row, .no-print, .warning { display: none !important; }
+        .container { box-shadow: none; margin: 0; padding: 0; max-width: none; border-radius: 0; }
+        .page { display: none !important; }
+        #page4 { display: block !important; }
+        #coachNotes { display: none; }
+        .notes-print { display: block; }
+        .sheet-list.neg, .sheet-list.pos, .declaration-text {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
     }
 </style>
 
@@ -100,151 +322,545 @@
 
 <header>
     <h1>TFS Money Affirmations Tool</h1>
+    <p id="hdrSub">My Personal Lines in the Sand</p>
 </header>
 
 <div class="container">
 
-    <!-- LANGUAGE TOGGLE -->
-    <div class="section">
-        <h2>Language / Idioma</h2>
-        <select id="language" onchange="updateLanguage()">
-            <option value="en">English</option>
-            <option value="es">Español</option>
-        </select>
+    <div class="toolbar">
+        <div>
+            <select id="language" onchange="setLanguage(this.value)" aria-label="Language / Idioma">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+            </select>
+        </div>
+        <div class="page-indicator" id="pageIndicator">Page 1 of 4</div>
     </div>
 
-    <!-- DEFINITION -->
-    <div class="section">
-        <h2 id="definitionTitle">What is a Money Affirmation?</h2>
-        <p id="definitionText">
-            A Money Affirmation is a Personal Line in the Sand. It defines who you refuse to be with money and who you are becoming. 
-            These affirmations help you align your People decisions, your Process choices, and your Perspective about money — 
-            creating a healthier, more confident financial identity.
-        </p>
-    </div>
+    <!-- PAGE 1: PARTICIPANT + DEFINITION + PURPOSE -->
+    <section class="page active" id="page1">
+        <div class="accent-bar"></div>
+        <h2 id="p1Title">Welcome</h2>
 
-    <!-- NEGATIVE TENDENCIES -->
-    <div class="section">
+        <div class="info-row">
+            <div>
+                <label for="clientName" id="nameLabel">Participant name:</label>
+                <input type="text" id="clientName" oninput="renderSheet()">
+            </div>
+            <div>
+                <label for="sessionDate" id="dateLabel">Date:</label>
+                <input type="date" id="sessionDate" oninput="renderSheet()">
+            </div>
+        </div>
+
+        <div class="callout purple">
+            <strong id="definitionTitle">What is a Money Affirmation?</strong><br>
+            <span id="definitionText">
+                A Money Affirmation is a Personal Line in the Sand. It defines who you refuse to be with money and who you are becoming.
+                These affirmations help you align your People decisions, your Process choices, and your Perspective about money —
+                creating a healthier, more confident financial identity.
+            </span>
+        </div>
+
+        <div class="callout pink">
+            <strong id="purposeTitle">The purpose of this tool</strong><br>
+            <span id="purposeText">
+                This tool helps you draw your own lines in the sand. You will choose 3–5 money beliefs you refuse to carry any longer,
+                then 3–5 affirmations for who you are becoming — and seal them with a declaration that you and your coach sign together.
+            </span>
+        </div>
+
+        <div class="callout blue">
+            <span id="howText">
+                There are 4 pages. Use the Next and Back buttons to move through them. On the selection pages, drag and drop
+                each statement you choose into your list (on a phone or tablet, just tap a statement to add it).
+            </span>
+        </div>
+    </section>
+
+    <!-- PAGE 2: NEGATIVE -->
+    <section class="page page-neg" id="page2">
+        <div class="accent-bar"></div>
         <h2 id="negativeTitle">Step 1: Choose 3–5 Things You Do NOT Want to Be With Money</h2>
-        <label id="negativeLabel">Select up to 5 statements OR write in your own:</label>
+        <div class="dragnote" id="negDragNote">Drag and drop a statement into the box on the right to select it (on a phone, just tap it). Choose 3 to 5.</div>
 
-        <select id="negativeSelect" multiple size="8">
-            <option value="I don’t want to be someone who avoids my bills.">I don’t want to be someone who avoids my bills.</option>
-            <option value="I don’t want to be someone who spends out of stress or emotion.">I don’t want to be someone who spends out of stress or emotion.</option>
-            <option value="I don’t want to be someone who ignores my financial responsibilities.">I don’t want to be someone who ignores my financial responsibilities.</option>
-            <option value="I don’t want to be someone who lets others pressure me into financial decisions.">I don’t want to be someone who lets others pressure me into financial decisions.</option>
-            <option value="I don’t want to be someone who avoids looking at my numbers.">I don’t want to be someone who avoids looking at my numbers.</option>
-            <option value="I don’t want to be someone who repeats unhealthy money habits.">I don’t want to be someone who repeats unhealthy money habits.</option>
-        </select>
+        <div class="pick-grid">
+            <div class="bank">
+                <p class="col-title" id="negBankTitle">Statements to choose from:</p>
+                <ul class="cards" id="negBank"></ul>
+            </div>
+            <div>
+                <div class="chosen-zone" id="negZone">
+                    <p class="col-title" id="negChosenTitle">Who I REFUSE to be with money:</p>
+                    <p class="counter" id="negCounter"></p>
+                    <ul class="cards" id="negChosen"></ul>
+                    <p class="empty-hint" id="negEmpty">Drop statements here…</p>
+                </div>
+                <div class="custom-add">
+                    <input type="text" id="negCustomInput" maxlength="200">
+                    <button type="button" class="btn-purple btn-small" id="negAddBtn" onclick="addCustom('neg')">Add your own</button>
+                </div>
+            </div>
+        </div>
 
-        <label>Add your own (optional):</label>
-        <textarea id="negCustom1" rows="2"></textarea>
-        <textarea id="negCustom2" rows="2"></textarea>
-        <textarea id="negCustom3" rows="2"></textarea>
-    </div>
+        <div class="warning" id="negWarning"></div>
+    </section>
 
-    <!-- POSITIVE AFFIRMATIONS -->
-    <div class="section">
+    <!-- PAGE 3: POSITIVE -->
+    <section class="page page-pos" id="page3">
+        <div class="accent-bar"></div>
         <h2 id="positiveTitle">Step 2: Choose 3–5 Money Affirmations (Who You Want to Become)</h2>
-        <label id="positiveLabel">Select up to 5 affirmations OR write in your own:</label>
+        <div class="dragnote" id="posDragNote">Drag and drop an affirmation into the box on the right to select it (on a phone, just tap it). Choose 3 to 5.</div>
 
-        <select id="affirmations" multiple size="10">
-            <option value="I honor my boundaries with money and protect my peace.">I honor my boundaries with money and protect my peace.</option>
-            <option value="I make thoughtful financial decisions that build my future.">I make thoughtful financial decisions that build my future.</option>
-            <option value="I stay in control of my money and my momentum.">I stay in control of my money and my momentum.</option>
-            <option value="I deserve financial freedom and stability.">I deserve financial freedom and stability.</option>
-            <option value="I move through life with order, clarity, and confidence.">I move through life with order, clarity, and confidence.</option>
-            <option value="I trust myself with money and make decisions with confidence.">I trust myself with money and make decisions with confidence.</option>
-            <option value="I build a peaceful and healthy relationship with money.">I build a peaceful and healthy relationship with money.</option>
-            <option value="I choose progress over perfection in my financial journey.">I choose progress over perfection in my financial journey.</option>
-            <option value="I am becoming someone who plans, prepares, and prospers.">I am becoming someone who plans, prepares, and prospers.</option>
-            <option value="I am creating a future that reflects my values and my growth.">I am creating a future that reflects my values and my growth.</option>
-        </select>
+        <div class="pick-grid">
+            <div class="bank">
+                <p class="col-title" id="posBankTitle">Affirmations to choose from:</p>
+                <ul class="cards" id="posBank"></ul>
+            </div>
+            <div>
+                <div class="chosen-zone" id="posZone">
+                    <p class="col-title" id="posChosenTitle">Who I am BECOMING with money:</p>
+                    <p class="counter" id="posCounter"></p>
+                    <ul class="cards" id="posChosen"></ul>
+                    <p class="empty-hint" id="posEmpty">Drop affirmations here…</p>
+                </div>
+                <div class="custom-add">
+                    <input type="text" id="posCustomInput" maxlength="200">
+                    <button type="button" class="btn-purple btn-small" id="posAddBtn" onclick="addCustom('pos')">Add your own</button>
+                </div>
+            </div>
+        </div>
 
-        <label>Add your own (optional):</label>
-        <textarea id="affCustom1" rows="2"></textarea>
-        <textarea id="affCustom2" rows="2"></textarea>
-        <textarea id="affCustom3" rows="2"></textarea>
+        <div class="warning" id="posWarning"></div>
+    </section>
+
+    <!-- PAGE 4: DECLARATION -->
+    <section class="page page-dec" id="page4">
+        <div class="accent-bar"></div>
+
+        <p class="sheet-title" id="sheetTitle">MY PERSONAL LINES IN THE SAND</p>
+        <p class="sheet-sub" id="sheetSub">Money Affirmations Declaration</p>
+
+        <div class="sheet-info">
+            <div><span id="sheetNameLabel">Participant:</span> <span id="sheetName">____________________</span></div>
+            <div><span id="sheetDateLabel">Date:</span> <span id="sheetDate">____________</span></div>
+        </div>
+
+        <div class="sheet-list neg">
+            <h3 id="sheetNegTitle">Who I REFUSE to be with money:</h3>
+            <ol id="sheetNegList"></ol>
+        </div>
+
+        <div class="sheet-list pos">
+            <h3 id="sheetPosTitle">Who I am BECOMING with money:</h3>
+            <ol id="sheetPosList"></ol>
+        </div>
+
+        <div class="declaration-text" id="declarationText">
+            I have named the money beliefs I am leaving behind and chosen the affirmations I am stepping into.
+            These are my Personal Lines in the Sand. I commit to reading my affirmations daily and to letting my
+            People decisions, my Process choices, and my Perspective about money reflect who I am becoming.
+        </div>
+
+        <div class="sig-row">
+            <div class="sig-block">
+                <div class="sig-line"></div>
+                <div class="sig-label" id="clientSigLabel">Client signature &nbsp;·&nbsp; Date</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-line"></div>
+                <div class="sig-label" id="coachSigLabel">Coach signature &nbsp;·&nbsp; Date</div>
+            </div>
+        </div>
+
+        <label for="coachNotes" id="notesLabel">Coach notes:</label>
+        <textarea id="coachNotes" rows="6" oninput="document.getElementById('notesPrint').innerText = this.value"></textarea>
+        <div class="notes-print" id="notesPrint"></div>
+
+        <button class="print-btn no-print" onclick="window.print()" id="printBtn">Download / Print</button>
+    </section>
+
+    <div class="nav-row">
+        <button type="button" id="backBtn" onclick="goPage(-1)">Back</button>
+        <button type="button" class="btn-purple" id="nextBtn" onclick="goPage(1)">Next</button>
     </div>
-
-    <!-- GENERATE -->
-    <div class="section">
-        <h2 id="generateTitle">Step 3: Generate Your Personal Affirmation Sheet</h2>
-        <button onclick="generateSheet()">Generate</button>
-    </div>
-
-    <div id="output"></div>
-
-    <button class="print-btn" onclick="window.print()">Download / Print</button>
 
 </div>
 
 <script>
-function updateLanguage() {
-    const lang = document.getElementById("language").value;
+var NEG = {
+    en: [
+        "I\u2019ll never have enough money.",
+        "Money is the root of all evil.",
+        "I can\u2019t trust myself with money.",
+        "I\u2019ll always be poor.",
+        "I don\u2019t deserve to be wealthy.",
+        "Money is superficial and doesn\u2019t matter.",
+        "I\u2019ll spend it all before I can save.",
+        "I\u2019m too broke to invest.",
+        "I\u2019ll never find a good paying job.",
+        "I can\u2019t handle money responsibility.",
+        "I\u2019ll always be stuck in debt.",
+        "Money is only for the rich.",
+        "I\u2019ll never get a raise.",
+        "I\u2019ll always have to work extra hours to make ends meet.",
+        "I\u2019ll never be financially free.",
+        "Money is dangerous and I should avoid it.",
+        "I\u2019ll always have to borrow to survive.",
+        "I\u2019ll never attract financial opportunities.",
+        "I\u2019ll always be behind on bills.",
+        "I\u2019ll never be able to save for the future."
+    ],
+    es: [
+        "Nunca tendr\u00e9 suficiente dinero.",
+        "El dinero es la ra\u00edz de todos los males.",
+        "No puedo confiar en m\u00ed mismo con el dinero.",
+        "Siempre ser\u00e9 pobre.",
+        "No merezco ser rico.",
+        "El dinero es superficial y no importa.",
+        "Lo gastar\u00e9 todo antes de poder ahorrar.",
+        "Estoy demasiado quebrado para invertir.",
+        "Nunca encontrar\u00e9 un trabajo bien pagado.",
+        "No puedo manejar la responsabilidad del dinero.",
+        "Siempre estar\u00e9 atrapado en deudas.",
+        "El dinero es solo para los ricos.",
+        "Nunca me dar\u00e1n un aumento.",
+        "Siempre tendr\u00e9 que trabajar horas extra para llegar a fin de mes.",
+        "Nunca ser\u00e9 libre financieramente.",
+        "El dinero es peligroso y debo evitarlo.",
+        "Siempre tendr\u00e9 que pedir prestado para sobrevivir.",
+        "Nunca atraer\u00e9 oportunidades financieras.",
+        "Siempre estar\u00e9 atrasado con las facturas.",
+        "Nunca podr\u00e9 ahorrar para el futuro."
+    ]
+};
 
-    const text = {
-        en: {
-            definitionTitle: "What is a Money Affirmation?",
-            definitionText: "A Money Affirmation is a Personal Line in the Sand. It defines who you refuse to be with money and who you are becoming. These affirmations help you align your People decisions, your Process choices, and your Perspective about money — creating a healthier, more confident financial identity.",
-            negativeTitle: "Step 1: Choose 3–5 Things You Do NOT Want to Be With Money",
-            negativeLabel: "Select up to 5 statements OR write in your own:",
-            positiveTitle: "Step 2: Choose 3–5 Money Affirmations (Who You Want to Become)",
-            positiveLabel: "Select up to 5 affirmations OR write in your own:",
-            generateTitle: "Step 3: Generate Your Personal Affirmation Sheet"
-        },
-        es: {
-            definitionTitle: "¿Qué es una Afirmación de Dinero?",
-            definitionText: "Una Afirmación de Dinero es una Línea Personal en la Arena. Define quién te niegas a ser con el dinero y en quién te estás convirtiendo. Estas afirmaciones alinean tus decisiones con personas, tus procesos y tu perspectiva sobre el dinero — creando una identidad financiera más saludable y segura.",
-            negativeTitle: "Paso 1: Elige 3–5 cosas que NO quieres ser con el dinero",
-            negativeLabel: "Selecciona hasta 5 declaraciones o escribe las tuyas:",
-            positiveTitle: "Paso 2: Elige 3–5 Afirmaciones de Dinero (Quién quieres ser)",
-            positiveLabel: "Selecciona hasta 5 afirmaciones o escribe las tuyas:",
-            generateTitle: "Paso 3: Genera tu hoja personal de afirmaciones"
+var POS = {
+    en: [
+        "I am grateful for money.",
+        "I love money because money loves me.",
+        "I am worthy of the wealth I desire.",
+        "I release all negative energy over money.",
+        "Money is the root of joy and comfort.",
+        "Money and spirituality can co-exist in harmony.",
+        "Money and love can be friends.",
+        "I am at peace with having a lot of money.",
+        "I am grateful for all the money I have now.",
+        "I have a positive money mindset.",
+        "I deserve to be rich.",
+        "I deserve money in my life.",
+        "I am grateful for all that money brings me.",
+        "I let go of all my limiting beliefs around money.",
+        "I let go of all my fears around money.",
+        "I know anyone can be wealthy, including me.",
+        "Every day, I choose money and wealth.",
+        "All the money I have brings me joy.",
+        "I am worthy of a wealthy life.",
+        "My wealth comes from being honest and authentic in everything I do."
+    ],
+    es: [
+        "Estoy agradecido por el dinero.",
+        "Amo el dinero porque el dinero me ama.",
+        "Soy digno de la riqueza que deseo.",
+        "Libero toda energ\u00eda negativa sobre el dinero.",
+        "El dinero es fuente de alegr\u00eda y comodidad.",
+        "El dinero y la espiritualidad pueden coexistir en armon\u00eda.",
+        "El dinero y el amor pueden ser amigos.",
+        "Estoy en paz con tener mucho dinero.",
+        "Estoy agradecido por todo el dinero que tengo ahora.",
+        "Tengo una mentalidad positiva sobre el dinero.",
+        "Merezco ser rico.",
+        "Merezco dinero en mi vida.",
+        "Estoy agradecido por todo lo que el dinero me trae.",
+        "Suelto todas mis creencias limitantes sobre el dinero.",
+        "Suelto todos mis miedos sobre el dinero.",
+        "S\u00e9 que cualquiera puede ser pr\u00f3spero, incluido yo.",
+        "Cada d\u00eda elijo el dinero y la riqueza.",
+        "Todo el dinero que tengo me trae alegr\u00eda.",
+        "Soy digno de una vida pr\u00f3spera.",
+        "Mi riqueza proviene de ser honesto y aut\u00e9ntico en todo lo que hago."
+    ]
+};
+
+var UI = {
+    en: {
+        hdrSub: "My Personal Lines in the Sand",
+        pageIndicator: "Page {n} of 4",
+        p1Title: "Welcome",
+        nameLabel: "Participant name:",
+        dateLabel: "Date:",
+        definitionTitle: "What is a Money Affirmation?",
+        definitionText: "A Money Affirmation is a Personal Line in the Sand. It defines who you refuse to be with money and who you are becoming. These affirmations help you align your People decisions, your Process choices, and your Perspective about money \u2014 creating a healthier, more confident financial identity.",
+        purposeTitle: "The purpose of this tool",
+        purposeText: "This tool helps you draw your own lines in the sand. You will choose 3\u20135 money beliefs you refuse to carry any longer, then 3\u20135 affirmations for who you are becoming \u2014 and seal them with a declaration that you and your coach sign together.",
+        howText: "There are 4 pages. Use the Next and Back buttons to move through them. On the selection pages, drag and drop each statement you choose into your list (on a phone or tablet, just tap a statement to add it).",
+        negativeTitle: "Step 1: Choose 3\u20135 Things You Do NOT Want to Be With Money",
+        negDragNote: "Drag and drop a statement into the box on the right to select it (on a phone, just tap it). Choose 3 to 5.",
+        negBankTitle: "Statements to choose from:",
+        negChosenTitle: "Who I REFUSE to be with money:",
+        positiveTitle: "Step 2: Choose 3\u20135 Money Affirmations (Who You Want to Become)",
+        posDragNote: "Drag and drop an affirmation into the box on the right to select it (on a phone, just tap it). Choose 3 to 5.",
+        posBankTitle: "Affirmations to choose from:",
+        posChosenTitle: "Who I am BECOMING with money:",
+        addBtn: "Add your own",
+        customPlaceholder: "Write your own\u2026",
+        counter: "{n} of 5 selected \u2014 choose 3 to 5",
+        emptyNeg: "Drop statements here\u2026",
+        emptyPos: "Drop affirmations here\u2026",
+        warnMin: "Please choose at least 3 before continuing.",
+        warnMax: "You already have 5 \u2014 remove one before adding another.",
+        sheetTitle: "MY PERSONAL LINES IN THE SAND",
+        sheetSub: "Money Affirmations Declaration",
+        sheetNameLabel: "Participant:",
+        sheetDateLabel: "Date:",
+        sheetNegTitle: "Who I REFUSE to be with money:",
+        sheetPosTitle: "Who I am BECOMING with money:",
+        declarationText: "I have named the money beliefs I am leaving behind and chosen the affirmations I am stepping into. These are my Personal Lines in the Sand. I commit to reading my affirmations daily and to letting my People decisions, my Process choices, and my Perspective about money reflect who I am becoming.",
+        clientSigLabel: "Client signature \u00a0\u00b7\u00a0 Date",
+        coachSigLabel: "Coach signature \u00a0\u00b7\u00a0 Date",
+        notesLabel: "Coach notes:",
+        printBtn: "Download / Print",
+        back: "Back",
+        next: "Next",
+        none: "(none selected yet)"
+    },
+    es: {
+        hdrSub: "Mis L\u00edneas Personales en la Arena",
+        pageIndicator: "P\u00e1gina {n} de 4",
+        p1Title: "Bienvenido",
+        nameLabel: "Nombre del participante:",
+        dateLabel: "Fecha:",
+        definitionTitle: "\u00bfQu\u00e9 es una Afirmaci\u00f3n de Dinero?",
+        definitionText: "Una Afirmaci\u00f3n de Dinero es una L\u00ednea Personal en la Arena. Define qui\u00e9n te niegas a ser con el dinero y en qui\u00e9n te est\u00e1s convirtiendo. Estas afirmaciones alinean tus decisiones con personas, tus procesos y tu perspectiva sobre el dinero \u2014 creando una identidad financiera m\u00e1s saludable y segura.",
+        purposeTitle: "El prop\u00f3sito de esta herramienta",
+        purposeText: "Esta herramienta te ayuda a trazar tus propias l\u00edneas en la arena. Elegir\u00e1s de 3 a 5 creencias sobre el dinero que te niegas a seguir cargando, luego de 3 a 5 afirmaciones de qui\u00e9n quieres ser \u2014 y las sellar\u00e1s con una declaraci\u00f3n que t\u00fa y tu coach firman juntos.",
+        howText: "Hay 4 p\u00e1ginas. Usa los botones Siguiente y Atr\u00e1s para avanzar. En las p\u00e1ginas de selecci\u00f3n, arrastra y suelta cada declaraci\u00f3n que elijas hacia tu lista (en un tel\u00e9fono o tableta, solo t\u00f3cala para agregarla).",
+        negativeTitle: "Paso 1: Elige 3\u20135 cosas que NO quieres ser con el dinero",
+        negDragNote: "Arrastra y suelta una declaraci\u00f3n en el cuadro de la derecha para seleccionarla (en un tel\u00e9fono, solo t\u00f3cala). Elige de 3 a 5.",
+        negBankTitle: "Declaraciones para elegir:",
+        negChosenTitle: "Qui\u00e9n me NIEGO a ser con el dinero:",
+        positiveTitle: "Paso 2: Elige 3\u20135 Afirmaciones de Dinero (Qui\u00e9n quieres ser)",
+        posDragNote: "Arrastra y suelta una afirmaci\u00f3n en el cuadro de la derecha para seleccionarla (en un tel\u00e9fono, solo t\u00f3cala). Elige de 3 a 5.",
+        posBankTitle: "Afirmaciones para elegir:",
+        posChosenTitle: "En qui\u00e9n me estoy CONVIRTIENDO con el dinero:",
+        addBtn: "Agregar la tuya",
+        customPlaceholder: "Escribe la tuya\u2026",
+        counter: "{n} de 5 seleccionadas \u2014 elige de 3 a 5",
+        emptyNeg: "Suelta las declaraciones aqu\u00ed\u2026",
+        emptyPos: "Suelta las afirmaciones aqu\u00ed\u2026",
+        warnMin: "Por favor elige al menos 3 antes de continuar.",
+        warnMax: "Ya tienes 5 \u2014 quita una antes de agregar otra.",
+        sheetTitle: "MIS L\u00cdNEAS PERSONALES EN LA ARENA",
+        sheetSub: "Declaraci\u00f3n de Afirmaciones de Dinero",
+        sheetNameLabel: "Participante:",
+        sheetDateLabel: "Fecha:",
+        sheetNegTitle: "Qui\u00e9n me NIEGO a ser con el dinero:",
+        sheetPosTitle: "En qui\u00e9n me estoy CONVIRTIENDO con el dinero:",
+        declarationText: "He nombrado las creencias sobre el dinero que dejo atr\u00e1s y he elegido las afirmaciones que adopto. Estas son mis L\u00edneas Personales en la Arena. Me comprometo a leer mis afirmaciones cada d\u00eda y a que mis decisiones con personas, mis procesos y mi perspectiva sobre el dinero reflejen la persona en la que me estoy convirtiendo.",
+        clientSigLabel: "Firma del cliente \u00a0\u00b7\u00a0 Fecha",
+        coachSigLabel: "Firma del coach \u00a0\u00b7\u00a0 Fecha",
+        notesLabel: "Notas del coach:",
+        printBtn: "Descargar / Imprimir",
+        back: "Atr\u00e1s",
+        next: "Siguiente",
+        none: "(a\u00fan no hay selecciones)"
+    }
+};
+
+var state = {
+    lang: "en",
+    page: 1,
+    neg: [],   // items: {t:'p', i:index} or {t:'c', text:string}
+    pos: []
+};
+
+function t(key) { return UI[state.lang][key]; }
+
+function itemText(kind, item) {
+    if (item.t === "p") {
+        return (kind === "neg" ? NEG : POS)[state.lang][item.i];
+    }
+    return item.text;
+}
+
+function isUsed(kind, idx) {
+    return state[kind].some(function (it) { return it.t === "p" && it.i === idx; });
+}
+
+function addItem(kind, item) {
+    var list = state[kind];
+    if (list.length >= 5) {
+        showWarning(kind, t("warnMax"));
+        return;
+    }
+    hideWarning(kind);
+    list.push(item);
+    renderPick(kind);
+    renderSheet();
+}
+
+function removeItem(kind, pos) {
+    state[kind].splice(pos, 1);
+    hideWarning(kind);
+    renderPick(kind);
+    renderSheet();
+}
+
+function addCustom(kind) {
+    var input = document.getElementById(kind + "CustomInput");
+    var val = input.value.trim();
+    if (!val) return;
+    if (state[kind].length >= 5) { showWarning(kind, t("warnMax")); return; }
+    addItem(kind, { t: "c", text: val });
+    input.value = "";
+}
+
+function showWarning(kind, msg) {
+    var el = document.getElementById(kind + "Warning");
+    el.innerText = msg;
+    el.style.display = "block";
+}
+function hideWarning(kind) {
+    document.getElementById(kind + "Warning").style.display = "none";
+}
+
+function renderPick(kind) {
+    var source = (kind === "neg" ? NEG : POS)[state.lang];
+    var bank = document.getElementById(kind + "Bank");
+    bank.innerHTML = "";
+    source.forEach(function (txt, idx) {
+        var li = document.createElement("li");
+        var used = isUsed(kind, idx);
+        li.innerHTML = '<span class="grip">\u22ee\u22ee</span> ';
+        li.appendChild(document.createTextNode(txt));
+        if (used) {
+            li.className = "used";
+        } else {
+            li.draggable = true;
+            li.addEventListener("dragstart", function (e) {
+                e.dataTransfer.setData("text/plain", kind + ":" + idx);
+            });
+            li.addEventListener("click", function () {
+                addItem(kind, { t: "p", i: idx });
+            });
         }
-    };
-
-    Object.keys(text[lang]).forEach(id => {
-        document.getElementById(id).innerText = text[lang][id];
+        bank.appendChild(li);
     });
 
-    document.getElementById("definitionText").innerText = text[lang].definitionText;
+    var chosen = document.getElementById(kind + "Chosen");
+    chosen.innerHTML = "";
+    state[kind].forEach(function (item, pos) {
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(itemText(kind, item)));
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "remove-btn";
+        btn.innerText = "\u00d7";
+        btn.setAttribute("aria-label", "Remove");
+        btn.addEventListener("click", function () { removeItem(kind, pos); });
+        li.appendChild(btn);
+        chosen.appendChild(li);
+    });
+
+    document.getElementById(kind + "Empty").style.display = state[kind].length ? "none" : "block";
+    document.getElementById(kind + "Counter").innerText = t("counter").replace("{n}", String(state[kind].length));
 }
 
-function generateSheet() {
-    const negativesSelected = Array.from(document.getElementById("negativeSelect").selectedOptions)
-        .map(opt => opt.value);
-
-    const negativesCustom = [
-        document.getElementById("negCustom1").value.trim(),
-        document.getElementById("negCustom2").value.trim(),
-        document.getElementById("negCustom3").value.trim()
-    ].filter(x => x.length > 0);
-
-    const negatives = negativesSelected.concat(negativesCustom).slice(0, 5);
-
-    const affSelected = Array.from(document.getElementById("affirmations").selectedOptions)
-        .map(opt => opt.value);
-
-    const affCustom = [
-        document.getElementById("affCustom1").value.trim(),
-        document.getElementById("affCustom2").value.trim(),
-        document.getElementById("affCustom3").value.trim()
-    ].filter(x => x.length > 0);
-
-    const affirmations = affSelected.concat(affCustom).slice(0, 5);
-
-    let sheet = "MY PERSONAL LINES IN THE SAND\n\n";
-
-    sheet += "Who I REFUSE to be with money:\n";
-    negatives.forEach((n, i) => sheet += `${i+1}. ${n}\n`);
-    sheet += "\n";
-
-    sheet += "Who I am BECOMING with money:\n";
-    affirmations.forEach((a, i) => sheet += `${i+1}. ${a}\n`);
-
-    document.getElementById("output").innerText = sheet;
+function setupDropZone(kind) {
+    var zone = document.getElementById(kind + "Zone");
+    zone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        zone.classList.add("dragover");
+    });
+    zone.addEventListener("dragleave", function () { zone.classList.remove("dragover"); });
+    zone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        zone.classList.remove("dragover");
+        var data = e.dataTransfer.getData("text/plain") || "";
+        var parts = data.split(":");
+        if (parts.length === 2 && parts[0] === kind) {
+            var idx = parseInt(parts[1], 10);
+            if (!isNaN(idx) && !isUsed(kind, idx)) {
+                addItem(kind, { t: "p", i: idx });
+            }
+        }
+    });
 }
+
+function renderSheet() {
+    var name = document.getElementById("clientName").value.trim();
+    var date = document.getElementById("sessionDate").value;
+    document.getElementById("sheetName").innerText = name || "____________________";
+    document.getElementById("sheetDate").innerText = date || "____________";
+
+    ["neg", "pos"].forEach(function (kind) {
+        var ol = document.getElementById("sheet" + (kind === "neg" ? "Neg" : "Pos") + "List");
+        ol.innerHTML = "";
+        if (!state[kind].length) {
+            var li = document.createElement("li");
+            li.style.listStyle = "none";
+            li.style.fontStyle = "italic";
+            li.appendChild(document.createTextNode(t("none")));
+            ol.appendChild(li);
+            return;
+        }
+        state[kind].forEach(function (item) {
+            var li = document.createElement("li");
+            li.appendChild(document.createTextNode(itemText(kind, item)));
+            ol.appendChild(li);
+        });
+    });
+}
+
+function goPage(delta) {
+    if (delta > 0) {
+        if (state.page === 2 && state.neg.length < 3) { showWarning("neg", t("warnMin")); return; }
+        if (state.page === 3 && state.pos.length < 3) { showWarning("pos", t("warnMin")); return; }
+    }
+    var next = Math.min(4, Math.max(1, state.page + delta));
+    state.page = next;
+    for (var i = 1; i <= 4; i++) {
+        document.getElementById("page" + i).classList.toggle("active", i === next);
+    }
+    document.getElementById("backBtn").style.visibility = next === 1 ? "hidden" : "visible";
+    document.getElementById("nextBtn").style.visibility = next === 4 ? "hidden" : "visible";
+    document.getElementById("pageIndicator").innerText = t("pageIndicator").replace("{n}", String(next));
+    if (next === 4) renderSheet();
+    window.scrollTo(0, 0);
+}
+
+function setLanguage(lang) {
+    state.lang = lang;
+    var ids = ["hdrSub","p1Title","nameLabel","dateLabel","definitionTitle","definitionText","purposeTitle","purposeText","howText",
+        "negativeTitle","negDragNote","negBankTitle","negChosenTitle",
+        "positiveTitle","posDragNote","posBankTitle","posChosenTitle",
+        "sheetTitle","sheetSub","sheetNameLabel","sheetDateLabel","sheetNegTitle","sheetPosTitle",
+        "declarationText","clientSigLabel","coachSigLabel","notesLabel","printBtn"];
+    ids.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && UI[lang][id] !== undefined) el.innerText = UI[lang][id];
+    });
+    document.getElementById("negAddBtn").innerText = t("addBtn");
+    document.getElementById("posAddBtn").innerText = t("addBtn");
+    document.getElementById("negCustomInput").placeholder = t("customPlaceholder");
+    document.getElementById("posCustomInput").placeholder = t("customPlaceholder");
+    document.getElementById("negEmpty").innerText = t("emptyNeg");
+    document.getElementById("posEmpty").innerText = t("emptyPos");
+    document.getElementById("backBtn").innerText = t("back");
+    document.getElementById("nextBtn").innerText = t("next");
+    document.getElementById("pageIndicator").innerText = t("pageIndicator").replace("{n}", String(state.page));
+    hideWarning("neg");
+    hideWarning("pos");
+    renderPick("neg");
+    renderPick("pos");
+    renderSheet();
+}
+
+setupDropZone("neg");
+setupDropZone("pos");
+window.addEventListener("beforeprint", renderSheet);
+setLanguage("en");
+goPage(0);
 </script>
 
 </body>
