@@ -1,6 +1,20 @@
 export const dynamic = 'force-dynamic'
 
-const tools = [
+type Tool = {
+  id: string
+  title: string
+  subtitle: string
+  description: string
+  emoji: string
+  color: string
+  badgeColor: string
+  href: string
+  titleColor?: string
+  descColor?: string
+  linkColor?: string
+}
+
+const tools: Tool[] = [
   {
     id: 'money-diagnostic',
     title: 'Money Diagnostic',
@@ -71,6 +85,19 @@ const tools = [
     badgeColor: 'bg-slate-700 text-slate-100',
     href: '/tools/financial-snapshot.html',
   },
+  {
+    id: 'money-affirmations',
+    title: 'Money Affirmations',
+    subtitle: 'My Personal Lines in the Sand',
+    description: 'A bilingual (EN/ES) tool where clients choose 3–5 things they refuse to be with money and 3–5 affirmations of who they are becoming — or write their own — then generate a personal affirmation sheet to print or save.',
+    emoji: '✨',
+    color: 'from-pink-100 to-purple-200 border-pink-300',
+    badgeColor: 'bg-pink-200 text-pink-900',
+    titleColor: 'text-purple-950',
+    descColor: 'text-purple-950/80',
+    linkColor: 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-950',
+    href: '/tools/money-affirmations.html',
+  },
 ]
 
 export default function CoachToolsPage() {
@@ -95,11 +122,11 @@ export default function CoachToolsPage() {
                 <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2 ${tool.badgeColor}`}>
                   {tool.subtitle}
                 </span>
-                <h2 className="text-white font-bold text-lg leading-tight">{tool.title}</h2>
+                <h2 className={`${tool.titleColor ?? 'text-white'} font-bold text-lg leading-tight`}>{tool.title}</h2>
               </div>
             </div>
 
-            <p className="text-white/80 text-sm leading-relaxed flex-1">
+            <p className={`${tool.descColor ?? 'text-white/80'} text-sm leading-relaxed flex-1`}>
               {tool.description}
             </p>
 
@@ -107,7 +134,7 @@ export default function CoachToolsPage() {
               href={tool.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors"
+              className={`inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl ${tool.linkColor ?? 'bg-white/10 hover:bg-white/20 text-white'} text-sm font-semibold transition-colors`}
             >
               Open Tool
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
