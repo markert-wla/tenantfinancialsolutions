@@ -31,8 +31,8 @@ const tools: Tool[] = [
     subtitle: 'My Personal Press Pause Number',
     description: 'A guided 5-step discovery tool that helps clients calculate the dollar threshold at which they should pause, breathe, and wait 24 hrs before any purchase — blending gut instinct with real financial data.',
     emoji: '⏸️',
-    color: 'from-teal-900 to-teal-950 border-teal-600',
-    badgeColor: 'bg-teal-800 text-teal-100',
+    color: 'from-red-800 to-red-950 border-red-600',
+    badgeColor: 'bg-red-900 text-red-100',
     href: '/tools/press-pause-number.html',
   },
   {
