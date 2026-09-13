@@ -116,6 +116,15 @@ const tools: Tool[] = [
     color: '#3F6E8C',
     href: '/tools/tfs-carfit.html',
   },
+  {
+    id: 'tfs-variable-income',
+    title: 'TFS Variable Income',
+    subtitle: 'Baseline · Low-Month Plan · Priority Ladder · Stabilizer',
+    description: 'A four-step tool for tenants with irregular, commission, gig or hourly income: set the Baseline Survival Target, follow the Low-Month Survival Plan when earnings dip, assign every extra dollar in high months down the four-tier priority ladder, then pay themselves a fixed "salary" using the Income Stabilizer method. Includes a live allocation calculator, an income-variability snapshot and session reflection prompts.',
+    emoji: '📈',
+    color: '#4338CA',
+    href: '/tools/tfs-variable-income.html',
+  },
 ]
 
 export default function CoachToolsPage() {
