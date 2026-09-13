@@ -102,7 +102,7 @@ const tools: Tool[] = [
     id: 'tfs-carfit',
     title: 'TFS CarFit',
     subtitle: 'Car Buying Blueprint · Budget · Time Frame · Commitment',
-    description: 'A four-step car buying tool: rate needs and wants for the vehicle blueprint, compare three candidate vehicles against the 25% net-worth and 10% cash-flow guardrails with Consumer Reports grades, apply the 50% repair rule and build a sinking-fund savings plan, then capture the client\'s signed commitment.',
+    description: 'A four-step car buying tool: rate needs and wants for the vehicle blueprint, compare three candidate vehicles against the 20% net-worth and 10% cash-flow guardrails with Consumer Reports grades, apply the 50% repair rule and build a sinking-fund savings plan, then capture the client\'s signed commitment.',
     emoji: '🚗',
     color: 'from-teal-900 to-teal-950 border-teal-600',
     badgeColor: 'bg-teal-800 text-teal-100',

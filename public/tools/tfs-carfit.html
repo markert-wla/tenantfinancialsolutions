@@ -6,16 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
     :root {
-        --primary: #1f4f7b;
-        --accent: #4a90e2;
+        --primary: #115e59;
+        --accent: #0d9488;
         --danger: #d9534f;
         --success: #5cb85c;
-        --bg: #dce6f0;
-        --card-bg: #f4f8fc;
+        --bg: #dcecea;
+        --card-bg: #f2fbfa;
     }
     body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: linear-gradient(160deg, #d7e4f0 0%, #e2e7ed 45%, #cfdde9 100%);
+        background: linear-gradient(160deg, #d8ebe8 0%, #e6efee 45%, #cbe4e0 100%);
         margin: 0;
         padding: 0;
         color: #333;
@@ -37,6 +37,8 @@
         width: 95%;
         max-width: 1100px;
         margin: 20px auto 40px;
+        position: relative;
+        z-index: 1;
     }
     .toolbar {
         display: flex;
@@ -47,10 +49,10 @@
         width: auto;
         padding: 7px 10px;
         border-radius: 8px;
-        border: 1px solid #b7c6d6;
-        background: #f4f8fc;
+        border: 1px solid #9ec9c3;
+        background: #f2fbfa;
         font-size: 13px;
-        color: #1f4f7b;
+        color: #115e59;
         font-weight: 600;
     }
     .vehicle-banner {
@@ -62,12 +64,12 @@
     }
     .vehicle-banner figure {
         margin: 0;
-        background: linear-gradient(180deg, #f7fafd 0%, #e7eef5 100%);
-        border: 1px solid #c5d4e3;
+        background: linear-gradient(180deg, #f5fcfb 0%, #e0f1ee 100%);
+        border: 1px solid #b3d8d2;
         border-radius: 12px;
         padding: 12px 18px 8px;
         text-align: center;
-        box-shadow: 0 2px 6px rgba(31, 79, 123, 0.10);
+        box-shadow: 0 2px 6px rgba(17, 94, 89, 0.12);
         flex: 1 1 150px;
         max-width: 220px;
         min-width: 0;
@@ -88,13 +90,13 @@
         text-transform: uppercase;
     }
     .card {
-        background: linear-gradient(180deg, #f7fafd 0%, #eaf0f6 100%);
+        background: linear-gradient(180deg, #f6fdfc 0%, #e6f4f2 100%);
         padding: 18px 20px;
         margin-bottom: 18px;
         border-radius: 12px;
-        border: 1px solid #c9d7e4;
+        border: 1px solid #bfdeda;
         border-top: 4px solid var(--accent);
-        box-shadow: 0 2px 6px rgba(31, 79, 123, 0.10);
+        box-shadow: 0 2px 6px rgba(17, 94, 89, 0.12);
     }
     .card h2 {
         margin-top: 0;
@@ -108,14 +110,14 @@
         font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #5a7794;
+        color: #4a7d78;
     }
     .section-title {
         font-size: 15px;
         margin-top: 14px;
         margin-bottom: 6px;
         font-weight: 600;
-        color: #35526e;
+        color: #1f6b64;
     }
     label {
         font-size: 13px;
@@ -127,7 +129,7 @@
         width: 100%;
         padding: 8px 10px;
         border-radius: 6px;
-        border: 1px solid #b7c6d6;
+        border: 1px solid #a6cdc8;
         font-size: 13px;
         box-sizing: border-box;
         background: #fff;
@@ -153,7 +155,7 @@
         padding: 4px 10px;
         border-radius: 999px;
         font-size: 11px;
-        background: #dce9f8;
+        background: #cdeae6;
         color: var(--primary);
         margin-bottom: 8px;
     }
@@ -184,22 +186,22 @@
         margin-top: 10px;
     }
     button:hover {
-        background: #357abd;
+        background: #0f766e;
     }
     .btn-secondary {
-        background: #d9dfe8;
-        color: #333;
+        background: #cce6e3;
+        color: #10504b;
     }
     .btn-secondary:hover {
-        background: #c3cbd7;
+        background: #b5dbd6;
     }
     .summary-box {
-        background: #eef4fa;
+        background: #e9f6f4;
         border-radius: 10px;
         padding: 10px 12px;
         font-size: 13px;
         margin-top: 10px;
-        border: 1px solid #c9d7e4;
+        border: 1px solid #bfdeda;
     }
     .commitment-item {
         font-size: 13px;
@@ -214,7 +216,7 @@
         flex-wrap: wrap;
         gap: 10px;
         margin-top: 14px;
-        border-top: 1px solid #c9d7e4;
+        border-top: 1px solid #bfdeda;
         padding-top: 6px;
     }
     @media (max-width: 768px) {
@@ -227,6 +229,27 @@
         .toolbar, .doc-actions, button { display: none !important; }
         .card { box-shadow: none; break-inside: avoid; }
     }
+    .roadside {
+        display: none;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 120px;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.9;
+    }
+    .roadside.left { left: 0; }
+    .roadside.right { right: 0; }
+    .roadside svg { width: 100%; height: 100%; display: block; }
+    @media (min-width: 1360px) {
+        .roadside { display: block; }
+        .container { width: calc(100% - 320px); }
+    }
+    @media print {
+        .roadside { display: none !important; }
+    }
+    body.pdf-mode .roadside { display: none !important; }
     body.pdf-mode { background: #fff; }
     body.pdf-mode .toolbar,
     body.pdf-mode button { display: none !important; }
@@ -234,6 +257,44 @@
 </style>
 </head>
 <body>
+
+<!-- DECORATIVE ROADSIDES -->
+<div class="roadside left" aria-hidden="true">
+    <svg viewBox="0 0 120 900" preserveAspectRatio="xMidYMid slice" focusable="false">
+        <path d="M60 -40 C 10 110, 110 250, 60 400 C 10 550, 110 700, 60 940"
+              fill="none" stroke="#3f4f55" stroke-width="46" stroke-linecap="round"/>
+        <path d="M60 -40 C 10 110, 110 250, 60 400 C 10 550, 110 700, 60 940"
+              fill="none" stroke="#cfe8e3" stroke-width="2.5" stroke-dasharray="16 18"/>
+        <g transform="translate(61,255) rotate(180)">
+            <rect x="-17" y="-27" width="7" height="13" rx="3" fill="#1c2b2a"/>
+            <rect x="10" y="-27" width="7" height="13" rx="3" fill="#1c2b2a"/>
+            <rect x="-17" y="14" width="7" height="13" rx="3" fill="#1c2b2a"/>
+            <rect x="10" y="14" width="7" height="13" rx="3" fill="#1c2b2a"/>
+            <rect x="-14" y="-30" width="28" height="60" rx="10" fill="#0d9488"/>
+            <path d="M-10 -18 L10 -18 L7 -8 L-7 -8 Z" fill="#d3f0ec"/>
+            <path d="M-8 16 L8 16 L10 24 L-10 24 Z" fill="#bfe6e1"/>
+            <rect x="-11" y="-4" width="22" height="12" rx="3" fill="#0b6f68"/>
+        </g>
+    </svg>
+</div>
+<div class="roadside right" aria-hidden="true">
+    <svg viewBox="0 0 120 900" preserveAspectRatio="xMidYMid slice" focusable="false">
+        <path d="M60 -40 C 110 120, 10 260, 60 410 C 110 560, 10 700, 60 940"
+              fill="none" stroke="#3f4f55" stroke-width="46" stroke-linecap="round"/>
+        <path d="M60 -40 C 110 120, 10 260, 60 410 C 110 560, 10 700, 60 940"
+              fill="none" stroke="#cfe8e3" stroke-width="2.5" stroke-dasharray="16 18"/>
+        <g transform="translate(59,620)">
+            <rect x="-17" y="-27" width="7" height="13" rx="3" fill="#1c2b2a"/>
+            <rect x="10" y="-27" width="7" height="13" rx="3" fill="#1c2b2a"/>
+            <rect x="-17" y="14" width="7" height="13" rx="3" fill="#1c2b2a"/>
+            <rect x="10" y="14" width="7" height="13" rx="3" fill="#1c2b2a"/>
+            <rect x="-14" y="-30" width="28" height="60" rx="10" fill="#14958a"/>
+            <path d="M-10 -18 L10 -18 L7 -8 L-7 -8 Z" fill="#d3f0ec"/>
+            <path d="M-8 16 L8 16 L10 24 L-10 24 Z" fill="#bfe6e1"/>
+            <rect x="-11" y="-4" width="22" height="12" rx="3" fill="#0b6f68"/>
+        </g>
+    </svg>
+</div>
 
 <div id="pdfRoot">
 
@@ -255,9 +316,9 @@
 <div class="vehicle-banner">
     <figure>
         <svg viewBox="0 0 150 64" role="img" aria-label="Car">
-            <path d="M14 44 L18 32 Q20 27 27 26 L46 24 Q54 13 66 12 L88 12 Q100 13 108 24 L126 26 Q134 28 136 34 L138 44 Q138 49 132 49 L20 49 Q14 49 14 44 Z" fill="#4a90e2"/>
-            <path d="M56 24 Q61 16 68 15 L75 15 L75 24 Z" fill="#d6e7fa"/>
-            <path d="M79 15 L87 15 Q96 16 102 24 L79 24 Z" fill="#d6e7fa"/>
+            <path d="M14 44 L18 32 Q20 27 27 26 L46 24 Q54 13 66 12 L88 12 Q100 13 108 24 L126 26 Q134 28 136 34 L138 44 Q138 49 132 49 L20 49 Q14 49 14 44 Z" fill="#0d9488"/>
+            <path d="M56 24 Q61 16 68 15 L75 15 L75 24 Z" fill="#d3f0ec"/>
+            <path d="M79 15 L87 15 Q96 16 102 24 L79 24 Z" fill="#d3f0ec"/>
             <circle cx="44" cy="49" r="9" fill="#2c3e50"/><circle cx="44" cy="49" r="4" fill="#aab7c4"/>
             <circle cx="110" cy="49" r="9" fill="#2c3e50"/><circle cx="110" cy="49" r="4" fill="#aab7c4"/>
         </svg>
@@ -265,9 +326,9 @@
     </figure>
     <figure>
         <svg viewBox="0 0 150 64" role="img" aria-label="SUV">
-            <path d="M14 46 L14 32 Q14 27 20 26 L36 24 L44 12 Q46 9 52 9 L102 9 Q108 9 111 13 L119 24 L131 26 Q136 27 136 32 L136 46 Q136 50 131 50 L19 50 Q14 50 14 46 Z" fill="#5b7f9d"/>
-            <path d="M48 24 L52 15 Q53 13 56 13 L72 13 L72 24 Z" fill="#d9e6f0"/>
-            <path d="M76 13 L100 13 Q104 13 106 16 L112 24 L76 24 Z" fill="#d9e6f0"/>
+            <path d="M14 46 L14 32 Q14 27 20 26 L36 24 L44 12 Q46 9 52 9 L102 9 Q108 9 111 13 L119 24 L131 26 Q136 27 136 32 L136 46 Q136 50 131 50 L19 50 Q14 50 14 46 Z" fill="#0f766e"/>
+            <path d="M48 24 L52 15 Q53 13 56 13 L72 13 L72 24 Z" fill="#d3f0ec"/>
+            <path d="M76 13 L100 13 Q104 13 106 16 L112 24 L76 24 Z" fill="#d3f0ec"/>
             <circle cx="44" cy="50" r="9" fill="#2c3e50"/><circle cx="44" cy="50" r="4" fill="#aab7c4"/>
             <circle cx="108" cy="50" r="9" fill="#2c3e50"/><circle cx="108" cy="50" r="4" fill="#aab7c4"/>
         </svg>
@@ -275,9 +336,9 @@
     </figure>
     <figure>
         <svg viewBox="0 0 150 64" role="img" aria-label="Truck">
-            <path d="M14 46 L14 22 Q14 18 19 18 L60 18 L60 46 Z" fill="#3f5f7d"/>
-            <path d="M60 46 L60 10 Q60 7 64 7 L88 7 Q92 7 94 10 L102 22 L128 24 Q135 25 136 31 L137 46 Q137 50 132 50 L18 50 Q14 50 14 46 Z" fill="#7d92a8"/>
-            <path d="M66 12 L86 12 Q89 12 90 14 L96 22 L66 22 Z" fill="#dde8f1"/>
+            <path d="M14 46 L14 22 Q14 18 19 18 L60 18 L60 46 Z" fill="#0b5f57"/>
+            <path d="M60 46 L60 10 Q60 7 64 7 L88 7 Q92 7 94 10 L102 22 L128 24 Q135 25 136 31 L137 46 Q137 50 132 50 L18 50 Q14 50 14 46 Z" fill="#14958a"/>
+            <path d="M66 12 L86 12 Q89 12 90 14 L96 22 L66 22 Z" fill="#d3f0ec"/>
             <circle cx="42" cy="50" r="9" fill="#2c3e50"/><circle cx="42" cy="50" r="4" fill="#aab7c4"/>
             <circle cx="112" cy="50" r="9" fill="#2c3e50"/><circle cx="112" cy="50" r="4" fill="#aab7c4"/>
         </svg>
@@ -297,59 +358,10 @@
     </ul>
 </div>
 
-<!-- STEP 1: VEHICLE BLUEPRINT -->
+<!-- STEP 1: BUDGET & SHORTLIST -->
 <div class="card">
     <div class="step-tag" data-i18n="step1Tag">Step 1</div>
-    <h2 data-i18n="step1Title">Vehicle Blueprint – Needs & Wants</h2>
-
-    <div class="section-title" data-i18n="needsTitle">Needs (Non‑Negotiables) – Rate 1–5</div>
-    <div class="grid-2">
-        <div>
-            <label data-i18n="lblSafety">Safety</label>
-            <input type="number" id="safety" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblMpg">MPG / Fuel Efficiency</label>
-            <input type="number" id="mpg" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblPassengers">Passenger Needs</label>
-            <input type="number" id="passengers" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblReliability">Reliability</label>
-            <input type="number" id="reliability" min="1" max="5" placeholder="1–5">
-        </div>
-    </div>
-
-    <div class="section-title" data-i18n="wantsTitle">Wants (Preferences) – Rate 1–5</div>
-    <div class="grid-2">
-        <div>
-            <label data-i18n="lblComfort">Comfort & Features</label>
-            <input type="number" id="comfort" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblStyle">Style / Brand Image</label>
-            <input type="number" id="style" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblCargo">Cargo Space</label>
-            <input type="number" id="cargo" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblOtherNotes">Other Notes</label>
-            <textarea id="blueprintNotes" data-i18n-ph="phBlueprintNotes" placeholder="Special needs, child seats, AWD, towing, etc."></textarea>
-        </div>
-    </div>
-
-    <button class="btn-secondary" onclick="summarizeBlueprint()" data-i18n="btnSummarize">Summarize Blueprint</button>
-    <div id="blueprintSummary" class="summary-box"></div>
-</div>
-
-<!-- STEP 2: BUDGET & SHORTLIST -->
-<div class="card">
-    <div class="step-tag" data-i18n="step2Tag">Step 2</div>
-    <h2 data-i18n="step2Title">Budget & Vehicle Shortlist</h2>
+    <h2 data-i18n="step1Title">Budget & Vehicle Shortlist</h2>
 
     <div class="section-title" data-i18n="snapshotTitle">Client Financial Snapshot</div>
     <div class="grid-2">
@@ -421,12 +433,90 @@
 
     <button onclick="calculateBudget()" data-i18n="btnBudget">Run Budget & Guardrails</button>
     <div id="budgetAlerts" class="summary-box"></div>
+
+    <div class="section-title" data-i18n="agreedTitle">Agreed Range – Coach & Client</div>
+    <p style="font-size:12px; margin:0;" data-i18n="agreedIntro">Coach and client agree on the range the client will shop within. Complete the column that applies.</p>
+    <div class="grid-3">
+        <div>
+            <strong style="font-size:13px;" data-i18n="agreedCash">Cash Purchase Range (total price $)</strong>
+            <label data-i18n="lblRangeLow">Low ($)</label>
+            <input type="number" id="cashRangeLow">
+            <label data-i18n="lblRangeHigh">High ($)</label>
+            <input type="number" id="cashRangeHigh">
+        </div>
+        <div>
+            <strong style="font-size:13px;" data-i18n="agreedFinance">Finance Range (monthly payment $)</strong>
+            <label data-i18n="lblRangeLow">Low ($)</label>
+            <input type="number" id="financeRangeLow">
+            <label data-i18n="lblRangeHigh">High ($)</label>
+            <input type="number" id="financeRangeHigh">
+        </div>
+        <div>
+            <strong style="font-size:13px;" data-i18n="agreedLease">Lease Range (monthly payment $)</strong>
+            <label data-i18n="lblRangeLow">Low ($)</label>
+            <input type="number" id="leaseRangeLow">
+            <label data-i18n="lblRangeHigh">High ($)</label>
+            <input type="number" id="leaseRangeHigh">
+        </div>
+    </div>
+    <div class="commitment-item">
+        <input type="checkbox" id="rangeAgreed"> <span data-i18n="agreedCheck">Coach and client agree on the range above.</span>
+    </div>
+</div>
+
+<!-- STEP 2: VEHICLE BLUEPRINT -->
+<div class="card">
+    <div class="step-tag" data-i18n="step2Tag">Step 2</div>
+    <h2 data-i18n="step2Title">Vehicle Blueprint – Needs & Wants</h2>
+
+    <div class="section-title" data-i18n="needsTitle">Needs (Non‑Negotiables) – Rate 1–5</div>
+    <div class="grid-2">
+        <div>
+            <label data-i18n="lblSafety">Safety</label>
+            <input type="number" id="safety" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblMpg">MPG / Fuel Efficiency</label>
+            <input type="number" id="mpg" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblPassengers">Passenger Needs</label>
+            <input type="number" id="passengers" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblReliability">Reliability</label>
+            <input type="number" id="reliability" min="1" max="5" placeholder="1–5">
+        </div>
+    </div>
+
+    <div class="section-title" data-i18n="wantsTitle">Wants (Preferences) – Rate 1–5</div>
+    <div class="grid-2">
+        <div>
+            <label data-i18n="lblComfort">Comfort & Features</label>
+            <input type="number" id="comfort" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblStyle">Style / Brand Image</label>
+            <input type="number" id="style" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblCargo">Cargo Space</label>
+            <input type="number" id="cargo" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblOtherNotes">Other Notes</label>
+            <textarea id="blueprintNotes" data-i18n-ph="phBlueprintNotes" placeholder="Special needs, child seats, AWD, towing, etc."></textarea>
+        </div>
+    </div>
+
+    <button class="btn-secondary" onclick="summarizeBlueprint()" data-i18n="btnSummarize">Summarize Blueprint</button>
+    <div id="blueprintSummary" class="summary-box"></div>
 </div>
 
 <!-- STEP 3: TIME FRAME -->
 <div class="card">
     <div class="step-tag" data-i18n="step3Tag">Step 3</div>
-    <h2 data-i18n="step3Title">The Best Time to Buy a Car Is When You Do Not Need One</h2>
+    <h2 data-i18n="step3Title">Time-Frame (The best time to buy a car is when you do not need to)</h2>
 
     <div class="section-title" data-i18n="repairTitle">Current Transportation – 50% Repair Rule</div>
     <div class="grid-2">
@@ -489,7 +579,7 @@
 
     <div class="section-title" data-i18n="guardrailsTitle">Guardrails & Commitments</div>
     <div class="commitment-item">
-        <input type="checkbox" id="c1"> <span data-i18n="commit1">Vehicle price ≤ 25% of net worth</span>
+        <input type="checkbox" id="c1"> <span data-i18n="commit1">Vehicle price ≤ 20% of net worth</span>
     </div>
     <div class="commitment-item">
         <input type="checkbox" id="c2"> <span data-i18n="commit2">Payment (if any) ≤ 10% of monthly cash flow</span>
@@ -552,14 +642,14 @@ var I18N = {
         ownershipLi1: "<strong>Cash purchase</strong> – ideally 2+ years old, private sale often best value.",
         ownershipLi2: "<strong>Financing</strong> – acceptable if conservative and within guardrails.",
         ownershipLi3: "<strong>Leasing</strong> – typically the most expensive way to drive a vehicle.",
-        step1Tag: "Step 1", step1Title: "Vehicle Blueprint – Needs & Wants",
+        step1Tag: "Step 1", step1Title: "Budget & Vehicle Shortlist",
         needsTitle: "Needs (Non‑Negotiables) – Rate 1–5",
         lblSafety: "Safety", lblMpg: "MPG / Fuel Efficiency", lblPassengers: "Passenger Needs", lblReliability: "Reliability",
         wantsTitle: "Wants (Preferences) – Rate 1–5",
         lblComfort: "Comfort & Features", lblStyle: "Style / Brand Image", lblCargo: "Cargo Space", lblOtherNotes: "Other Notes",
         phBlueprintNotes: "Special needs, child seats, AWD, towing, etc.",
         btnSummarize: "Summarize Blueprint",
-        step2Tag: "Step 2", step2Title: "Budget & Vehicle Shortlist",
+        step2Tag: "Step 2", step2Title: "Vehicle Blueprint – Needs & Wants",
         snapshotTitle: "Client Financial Snapshot",
         lblNetworth: "Total Net Worth ($)", phNetworth: "e.g., 150000",
         lblIncome: "Monthly Net Income ($)", phIncome: "e.g., 4500",
@@ -578,7 +668,14 @@ var I18N = {
         crSatisfactionA: "Owner Satisfaction", crSatisfactionB: "Owner Satisfaction", crSatisfactionC: "Owner Satisfaction",
         crOverallA: "Overall", crOverallB: "Overall", crOverallC: "Overall",
         btnBudget: "Run Budget & Guardrails",
-        step3Tag: "Step 3", step3Title: "The Best Time to Buy a Car Is When You Do Not Need One",
+        agreedTitle: "Agreed Range – Coach & Client",
+        agreedIntro: "Coach and client agree on the range the client will shop within. Complete the column that applies.",
+        agreedCash: "Cash Purchase Range (total price $)",
+        agreedFinance: "Finance Range (monthly payment $)",
+        agreedLease: "Lease Range (monthly payment $)",
+        lblRangeLow: "Low ($)", lblRangeHigh: "High ($)",
+        agreedCheck: "Coach and client agree on the range above.",
+        step3Tag: "Step 3", step3Title: "Time-Frame (The best time to buy a car is when you do not need to)",
         repairTitle: "Current Transportation – 50% Repair Rule",
         lblMarketValue: "Current Vehicle Market Value ($)", phMarketValue: "e.g., 6000",
         lblRepairCost: "Upcoming Repair Cost ($)", phRepairCost: "e.g., 3500",
@@ -596,7 +693,7 @@ var I18N = {
         ownCash: "Cash", ownFinance: "Finance", ownLease: "Lease",
         lblPurchaseWindow: "Target Purchase Window", phPurchaseWindow: "e.g., within 3–4 months",
         guardrailsTitle: "Guardrails & Commitments",
-        commit1: "Vehicle price ≤ 25% of net worth",
+        commit1: "Vehicle price ≤ 20% of net worth",
         commit2: "Payment (if any) ≤ 10% of monthly cash flow",
         commit3: "Loan term (if financing) ≤ 4 years",
         commit4: "I commit to buying within my financial boundaries, not emotional pressure.",
@@ -615,8 +712,8 @@ var I18N = {
         sumComfort: "Comfort", sumStyle: "Style", sumCargo: "Cargo",
         sumNotes: "Notes:", sumNoNotes: "None noted.",
         outPrice: "Price:", outOfNetworth: "of net worth", outPayment: "Payment:", outOfCashflow: "of monthly cash flow",
-        alertNetworth: "⚠ Over 25% of Net Worth – high‑risk for client.",
-        okNetworth: "✓ Within 25% net worth guardrail.",
+        alertNetworth: "⚠ Over 20% of Net Worth – high‑risk for client.",
+        okNetworth: "✓ Within 20% net worth guardrail.",
         alertPayment: "⚠ Payment exceeds 10% of monthly cash flow.",
         okPayment: "✓ Payment within 10% cash‑flow guardrail.",
         okCash: "✓ Cash purchase – no monthly payment strain.",
@@ -630,7 +727,7 @@ var I18N = {
         sinkTimeFrame: "Time Frame:", sinkNeeded: "Amount still needed:", sinkMonthly: "Monthly savings goal (sinking fund):",
         tfLabel1: "1 month or less", tfLabel2: "1–6 months", tfLabel3: "6–12 months",
         notSet: "(not set)", noClient: "(client)", noCoach: "(coach)", noDate: "(date)",
-        chkShort1: "Price ≤ 25% net worth", chkShort2: "Payment ≤ 10% cash flow", chkShort3: "Loan term ≤ 4 years",
+        chkShort1: "Price ≤ 20% net worth", chkShort2: "Payment ≤ 10% cash flow", chkShort3: "Loan term ≤ 4 years",
         chkShort4: "Financial boundaries over emotion", chkShort5: "Consumer Reports research completed", chkShort6: "Numbers reviewed with coach",
         outVehicle: "Vehicle:", outOwnership: "Ownership:", outWindow: "Purchase Window:",
         outCommitments: "Commitments:", outNoCommitments: "No commitments checked yet.",
@@ -646,14 +743,14 @@ var I18N = {
         ownershipLi1: "<strong>Compra al contado</strong> – idealmente con 2+ años de antigüedad; la venta entre particulares suele ofrecer el mejor valor.",
         ownershipLi2: "<strong>Financiamiento</strong> – aceptable si es conservador y dentro de los límites.",
         ownershipLi3: "<strong>Arrendamiento (leasing)</strong> – normalmente la forma más cara de conducir un vehículo.",
-        step1Tag: "Paso 1", step1Title: "Perfil del vehículo – Necesidades y deseos",
+        step1Tag: "Paso 1", step1Title: "Presupuesto y lista de vehículos",
         needsTitle: "Necesidades (no negociables) – Califica 1–5",
         lblSafety: "Seguridad", lblMpg: "MPG / Eficiencia de combustible", lblPassengers: "Necesidades de pasajeros", lblReliability: "Confiabilidad",
         wantsTitle: "Deseos (preferencias) – Califica 1–5",
         lblComfort: "Comodidad y equipamiento", lblStyle: "Estilo / Imagen de marca", lblCargo: "Espacio de carga", lblOtherNotes: "Otras notas",
         phBlueprintNotes: "Necesidades especiales, sillas infantiles, AWD, remolque, etc.",
         btnSummarize: "Resumir perfil",
-        step2Tag: "Paso 2", step2Title: "Presupuesto y lista de vehículos",
+        step2Tag: "Paso 2", step2Title: "Perfil del vehículo – Necesidades y deseos",
         snapshotTitle: "Panorama financiero del cliente",
         lblNetworth: "Patrimonio neto total ($)", phNetworth: "ej., 150000",
         lblIncome: "Ingreso neto mensual ($)", phIncome: "ej., 4500",
@@ -672,7 +769,14 @@ var I18N = {
         crSatisfactionA: "Satisfacción del propietario", crSatisfactionB: "Satisfacción del propietario", crSatisfactionC: "Satisfacción del propietario",
         crOverallA: "General", crOverallB: "General", crOverallC: "General",
         btnBudget: "Analizar presupuesto y límites",
-        step3Tag: "Paso 3", step3Title: "El mejor momento para comprar un auto es cuando no lo necesitas",
+        agreedTitle: "Rango acordado – Coach y cliente",
+        agreedIntro: "El coach y el cliente acuerdan el rango dentro del cual el cliente buscará. Completa la columna que corresponda.",
+        agreedCash: "Rango de compra al contado (precio total $)",
+        agreedFinance: "Rango financiado (pago mensual $)",
+        agreedLease: "Rango de arrendamiento (pago mensual $)",
+        lblRangeLow: "Mínimo ($)", lblRangeHigh: "Máximo ($)",
+        agreedCheck: "El coach y el cliente acuerdan el rango anterior.",
+        step3Tag: "Paso 3", step3Title: "Plazo (El mejor momento para comprar un auto es cuando no lo necesitas)",
         repairTitle: "Transporte actual – Regla del 50% en reparaciones",
         lblMarketValue: "Valor de mercado del vehículo actual ($)", phMarketValue: "ej., 6000",
         lblRepairCost: "Costo de la reparación pendiente ($)", phRepairCost: "ej., 3500",
@@ -690,7 +794,7 @@ var I18N = {
         ownCash: "Al contado", ownFinance: "Financiado", ownLease: "Arrendado (lease)",
         lblPurchaseWindow: "Plazo objetivo de compra", phPurchaseWindow: "ej., dentro de 3–4 meses",
         guardrailsTitle: "Límites y compromisos",
-        commit1: "Precio del vehículo ≤ 25% del patrimonio neto",
+        commit1: "Precio del vehículo ≤ 20% del patrimonio neto",
         commit2: "Pago (si lo hay) ≤ 10% del flujo de efectivo mensual",
         commit3: "Plazo del préstamo (si financia) ≤ 4 años",
         commit4: "Me comprometo a comprar dentro de mis límites financieros, no por presión emocional.",
@@ -708,8 +812,8 @@ var I18N = {
         sumComfort: "Comodidad", sumStyle: "Estilo", sumCargo: "Carga",
         sumNotes: "Notas:", sumNoNotes: "Sin notas.",
         outPrice: "Precio:", outOfNetworth: "del patrimonio neto", outPayment: "Pago:", outOfCashflow: "del flujo de efectivo mensual",
-        alertNetworth: "⚠ Supera el 25% del patrimonio neto – alto riesgo para el cliente.",
-        okNetworth: "✓ Dentro del límite del 25% del patrimonio neto.",
+        alertNetworth: "⚠ Supera el 20% del patrimonio neto – alto riesgo para el cliente.",
+        okNetworth: "✓ Dentro del límite del 20% del patrimonio neto.",
         alertPayment: "⚠ El pago supera el 10% del flujo de efectivo mensual.",
         okPayment: "✓ Pago dentro del límite del 10% del flujo de efectivo.",
         okCash: "✓ Compra al contado – sin carga de pago mensual.",
@@ -723,7 +827,7 @@ var I18N = {
         sinkTimeFrame: "Plazo:", sinkNeeded: "Monto que aún falta:", sinkMonthly: "Meta de ahorro mensual (fondo de ahorro):",
         tfLabel1: "1 mes o menos", tfLabel2: "1–6 meses", tfLabel3: "6–12 meses",
         notSet: "(sin definir)", noClient: "(cliente)", noCoach: "(coach)", noDate: "(fecha)",
-        chkShort1: "Precio ≤ 25% del patrimonio neto", chkShort2: "Pago ≤ 10% del flujo de efectivo", chkShort3: "Plazo del préstamo ≤ 4 años",
+        chkShort1: "Precio ≤ 20% del patrimonio neto", chkShort2: "Pago ≤ 10% del flujo de efectivo", chkShort3: "Plazo del préstamo ≤ 4 años",
         chkShort4: "Límites financieros por encima de la emoción", chkShort5: "Investigación en Consumer Reports completada", chkShort6: "Números revisados con el coach",
         outVehicle: "Vehículo:", outOwnership: "Adquisición:", outWindow: "Plazo de compra:",
         outCommitments: "Compromisos:", outNoCommitments: "Aún no se han marcado compromisos.",
@@ -821,7 +925,7 @@ function calculateBudget() {
 
         out += `<strong>${v.name}</strong><br>`;
         out += `${t("outPrice")} $${v.price.toLocaleString()} (${netPct.toFixed(1)}% ${t("outOfNetworth")})`;
-        if (netPct > 25) {
+        if (netPct > 20) {
             out += `<div class="alert">${t("alertNetworth")}</div>`;
         } else {
             out += `<div class="success">${t("okNetworth")}</div>`;
@@ -838,7 +942,7 @@ function calculateBudget() {
             out += `<div class="success">${t("okCash")}</div>`;
         }
 
-        out += `<br><strong>${t("outCr")}</strong> ${t("outCrSafety")} ${v.safety}, ${t("outCrReliability")} ${v.reliability}, ${t("outCrSatisfaction")} ${v.satisfaction}, ${t("outCrOverall")} ${v.overall}<br><hr style="border:none;border-top:1px solid #c9d7e4;margin:8px 0;">`;
+        out += `<br><strong>${t("outCr")}</strong> ${t("outCrSafety")} ${v.safety}, ${t("outCrReliability")} ${v.reliability}, ${t("outCrSatisfaction")} ${v.satisfaction}, ${t("outCrOverall")} ${v.overall}<br><hr style="border:none;border-top:1px solid #bfdeda;margin:8px 0;">`;
     });
 
     document.getElementById("budgetAlerts").innerHTML = out || t("outNoVehicles");
@@ -937,16 +1041,16 @@ function downloadPdf() {
         var repl;
         if (field.type === "checkbox") {
             repl = document.createElement("span");
-            repl.style.cssText = "display:inline-block;width:12px;height:12px;border:1.4px solid #1f4f7b;" +
+            repl.style.cssText = "display:inline-block;width:12px;height:12px;border:1.4px solid #115e59;" +
                 "margin-right:6px;vertical-align:-1px;text-align:center;line-height:11px;" +
-                "font-size:10px;font-weight:800;color:#1f4f7b;";
+                "font-size:10px;font-weight:800;color:#115e59;";
             if (field.checked) repl.appendChild(document.createTextNode("\u2713"));
         } else {
             repl = document.createElement("div");
             var cs = window.getComputedStyle(field);
             repl.style.fontSize = cs.fontSize;
             repl.style.color = cs.color;
-            repl.style.border = "1px solid #b7c6d6";
+            repl.style.border = "1px solid #a6cdc8";
             repl.style.borderRadius = "6px";
             repl.style.padding = "8px 10px";
             repl.style.background = "#fff";
