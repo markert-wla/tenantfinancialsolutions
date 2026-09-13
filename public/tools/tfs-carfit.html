@@ -10,12 +10,12 @@
         --accent: #4a90e2;
         --danger: #d9534f;
         --success: #5cb85c;
-        --bg: #f4f5f7;
-        --card-bg: #ffffff;
+        --bg: #dce6f0;
+        --card-bg: #f4f8fc;
     }
     body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: var(--bg);
+        background: linear-gradient(160deg, #d7e4f0 0%, #e2e7ed 45%, #cfdde9 100%);
         margin: 0;
         padding: 0;
         color: #333;
@@ -38,12 +38,63 @@
         max-width: 1100px;
         margin: 20px auto 40px;
     }
+    .toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 14px;
+    }
+    .toolbar select {
+        width: auto;
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 1px solid #b7c6d6;
+        background: #f4f8fc;
+        font-size: 13px;
+        color: #1f4f7b;
+        font-weight: 600;
+    }
+    .vehicle-banner {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+    .vehicle-banner figure {
+        margin: 0;
+        background: linear-gradient(180deg, #f7fafd 0%, #e7eef5 100%);
+        border: 1px solid #c5d4e3;
+        border-radius: 12px;
+        padding: 12px 18px 8px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(31, 79, 123, 0.10);
+        flex: 1 1 150px;
+        max-width: 220px;
+        min-width: 0;
+    }
+    .vehicle-banner svg {
+        width: 100%;
+        max-width: 150px;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+    .vehicle-banner figcaption {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-top: 4px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
     .card {
-        background: var(--card-bg);
+        background: linear-gradient(180deg, #f7fafd 0%, #eaf0f6 100%);
         padding: 18px 20px;
         margin-bottom: 18px;
         border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        border: 1px solid #c9d7e4;
+        border-top: 4px solid var(--accent);
+        box-shadow: 0 2px 6px rgba(31, 79, 123, 0.10);
     }
     .card h2 {
         margin-top: 0;
@@ -57,14 +108,14 @@
         font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #777;
+        color: #5a7794;
     }
     .section-title {
         font-size: 15px;
         margin-top: 14px;
         margin-bottom: 6px;
         font-weight: 600;
-        color: #444;
+        color: #35526e;
     }
     label {
         font-size: 13px;
@@ -76,9 +127,10 @@
         width: 100%;
         padding: 8px 10px;
         border-radius: 6px;
-        border: 1px solid #ccd0d5;
+        border: 1px solid #b7c6d6;
         font-size: 13px;
         box-sizing: border-box;
+        background: #fff;
     }
     textarea {
         min-height: 60px;
@@ -101,7 +153,7 @@
         padding: 4px 10px;
         border-radius: 999px;
         font-size: 11px;
-        background: #eef3fb;
+        background: #dce9f8;
         color: var(--primary);
         margin-bottom: 8px;
     }
@@ -135,19 +187,19 @@
         background: #357abd;
     }
     .btn-secondary {
-        background: #e0e3ea;
+        background: #d9dfe8;
         color: #333;
     }
     .btn-secondary:hover {
-        background: #c9ccd4;
+        background: #c3cbd7;
     }
     .summary-box {
-        background: #f8f9fb;
+        background: #eef4fa;
         border-radius: 10px;
         padding: 10px 12px;
         font-size: 13px;
         margin-top: 10px;
-        border: 1px solid #e1e4ea;
+        border: 1px solid #c9d7e4;
     }
     .commitment-item {
         font-size: 13px;
@@ -157,266 +209,553 @@
         width: auto;
         margin-right: 6px;
     }
+    .doc-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+        border-top: 1px solid #c9d7e4;
+        padding-top: 6px;
+    }
     @media (max-width: 768px) {
         .grid-3, .grid-2 {
             grid-template-columns: 1fr;
         }
     }
+    @media print {
+        body { background: #fff; }
+        .toolbar, .doc-actions, button { display: none !important; }
+        .card { box-shadow: none; break-inside: avoid; }
+    }
+    body.pdf-mode { background: #fff; }
+    body.pdf-mode .toolbar,
+    body.pdf-mode button { display: none !important; }
+    body.pdf-mode .card { box-shadow: none; }
 </style>
 </head>
 <body>
 
+<div id="pdfRoot">
+
 <header>
     TFS CarFit
-    <div class="subheader">Car Buying Blueprint · Budget · Time Frame · Commitment</div>
+    <div class="subheader" data-i18n="subheader">Car Buying Blueprint · Budget · Time Frame · Commitment</div>
 </header>
 
 <div class="container">
 
+<div class="toolbar">
+    <select id="language" onchange="setLanguage(this.value)" aria-label="Language / Idioma">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+    </select>
+</div>
+
+<!-- VEHICLE BANNER -->
+<div class="vehicle-banner">
+    <figure>
+        <svg viewBox="0 0 150 64" role="img" aria-label="Car">
+            <path d="M14 44 L18 32 Q20 27 27 26 L46 24 Q54 13 66 12 L88 12 Q100 13 108 24 L126 26 Q134 28 136 34 L138 44 Q138 49 132 49 L20 49 Q14 49 14 44 Z" fill="#4a90e2"/>
+            <path d="M56 24 Q61 16 68 15 L75 15 L75 24 Z" fill="#d6e7fa"/>
+            <path d="M79 15 L87 15 Q96 16 102 24 L79 24 Z" fill="#d6e7fa"/>
+            <circle cx="44" cy="49" r="9" fill="#2c3e50"/><circle cx="44" cy="49" r="4" fill="#aab7c4"/>
+            <circle cx="110" cy="49" r="9" fill="#2c3e50"/><circle cx="110" cy="49" r="4" fill="#aab7c4"/>
+        </svg>
+        <figcaption data-i18n="bannerCar">Car</figcaption>
+    </figure>
+    <figure>
+        <svg viewBox="0 0 150 64" role="img" aria-label="SUV">
+            <path d="M14 46 L14 32 Q14 27 20 26 L36 24 L44 12 Q46 9 52 9 L102 9 Q108 9 111 13 L119 24 L131 26 Q136 27 136 32 L136 46 Q136 50 131 50 L19 50 Q14 50 14 46 Z" fill="#5b7f9d"/>
+            <path d="M48 24 L52 15 Q53 13 56 13 L72 13 L72 24 Z" fill="#d9e6f0"/>
+            <path d="M76 13 L100 13 Q104 13 106 16 L112 24 L76 24 Z" fill="#d9e6f0"/>
+            <circle cx="44" cy="50" r="9" fill="#2c3e50"/><circle cx="44" cy="50" r="4" fill="#aab7c4"/>
+            <circle cx="108" cy="50" r="9" fill="#2c3e50"/><circle cx="108" cy="50" r="4" fill="#aab7c4"/>
+        </svg>
+        <figcaption>SUV</figcaption>
+    </figure>
+    <figure>
+        <svg viewBox="0 0 150 64" role="img" aria-label="Truck">
+            <path d="M14 46 L14 22 Q14 18 19 18 L60 18 L60 46 Z" fill="#3f5f7d"/>
+            <path d="M60 46 L60 10 Q60 7 64 7 L88 7 Q92 7 94 10 L102 22 L128 24 Q135 25 136 31 L137 46 Q137 50 132 50 L18 50 Q14 50 14 46 Z" fill="#7d92a8"/>
+            <path d="M66 12 L86 12 Q89 12 90 14 L96 22 L66 22 Z" fill="#dde8f1"/>
+            <circle cx="42" cy="50" r="9" fill="#2c3e50"/><circle cx="42" cy="50" r="4" fill="#aab7c4"/>
+            <circle cx="112" cy="50" r="9" fill="#2c3e50"/><circle cx="112" cy="50" r="4" fill="#aab7c4"/>
+        </svg>
+        <figcaption data-i18n="bannerTruck">Truck</figcaption>
+    </figure>
+</div>
+
 <!-- OWNERSHIP STRATEGY -->
 <div class="card">
-    <div class="step-tag">TFS Principle</div>
-    <h2>Ownership Strategy Alert</h2>
-    <div class="pill">Best → Worst Financial Options</div>
+    <div class="step-tag" data-i18n="principleTag">TFS Principle</div>
+    <h2 data-i18n="ownershipTitle">Ownership Strategy Alert</h2>
+    <div class="pill" data-i18n="ownershipPill">Best → Worst Financial Options</div>
     <ul style="font-size:13px; margin-top:6px;">
-        <li><strong>Cash purchase</strong> – ideally 2+ years old, private sale often best value.</li>
-        <li><strong>Financing</strong> – acceptable if conservative and within guardrails.</li>
-        <li><strong>Leasing</strong> – typically the most expensive way to drive a vehicle.</li>
+        <li data-i18n-html="ownershipLi1"><strong>Cash purchase</strong> – ideally 2+ years old, private sale often best value.</li>
+        <li data-i18n-html="ownershipLi2"><strong>Financing</strong> – acceptable if conservative and within guardrails.</li>
+        <li data-i18n-html="ownershipLi3"><strong>Leasing</strong> – typically the most expensive way to drive a vehicle.</li>
     </ul>
 </div>
 
 <!-- STEP 1: VEHICLE BLUEPRINT -->
 <div class="card">
-    <div class="step-tag">Step 1</div>
-    <h2>Vehicle Blueprint – Needs & Wants</h2>
+    <div class="step-tag" data-i18n="step1Tag">Step 1</div>
+    <h2 data-i18n="step1Title">Vehicle Blueprint – Needs & Wants</h2>
 
-    <div class="section-title">Needs (Non‑Negotiables) – Rate 1–5</div>
+    <div class="section-title" data-i18n="needsTitle">Needs (Non‑Negotiables) – Rate 1–5</div>
     <div class="grid-2">
         <div>
-            <label>Safety</label>
+            <label data-i18n="lblSafety">Safety</label>
             <input type="number" id="safety" min="1" max="5" placeholder="1–5">
         </div>
         <div>
-            <label>MPG / Fuel Efficiency</label>
+            <label data-i18n="lblMpg">MPG / Fuel Efficiency</label>
             <input type="number" id="mpg" min="1" max="5" placeholder="1–5">
         </div>
         <div>
-            <label>Passenger Needs</label>
+            <label data-i18n="lblPassengers">Passenger Needs</label>
             <input type="number" id="passengers" min="1" max="5" placeholder="1–5">
         </div>
         <div>
-            <label>Reliability</label>
+            <label data-i18n="lblReliability">Reliability</label>
             <input type="number" id="reliability" min="1" max="5" placeholder="1–5">
         </div>
     </div>
 
-    <div class="section-title">Wants (Preferences) – Rate 1–5</div>
+    <div class="section-title" data-i18n="wantsTitle">Wants (Preferences) – Rate 1–5</div>
     <div class="grid-2">
         <div>
-            <label>Comfort & Features</label>
+            <label data-i18n="lblComfort">Comfort & Features</label>
             <input type="number" id="comfort" min="1" max="5" placeholder="1–5">
         </div>
         <div>
-            <label>Style / Brand Image</label>
+            <label data-i18n="lblStyle">Style / Brand Image</label>
             <input type="number" id="style" min="1" max="5" placeholder="1–5">
         </div>
         <div>
-            <label>Cargo Space</label>
+            <label data-i18n="lblCargo">Cargo Space</label>
             <input type="number" id="cargo" min="1" max="5" placeholder="1–5">
         </div>
         <div>
-            <label>Other Notes</label>
-            <textarea id="blueprintNotes" placeholder="Special needs, child seats, AWD, towing, etc."></textarea>
+            <label data-i18n="lblOtherNotes">Other Notes</label>
+            <textarea id="blueprintNotes" data-i18n-ph="phBlueprintNotes" placeholder="Special needs, child seats, AWD, towing, etc."></textarea>
         </div>
     </div>
 
-    <button class="btn-secondary" onclick="summarizeBlueprint()">Summarize Blueprint</button>
+    <button class="btn-secondary" onclick="summarizeBlueprint()" data-i18n="btnSummarize">Summarize Blueprint</button>
     <div id="blueprintSummary" class="summary-box"></div>
 </div>
 
 <!-- STEP 2: BUDGET & SHORTLIST -->
 <div class="card">
-    <div class="step-tag">Step 2</div>
-    <h2>Budget & Vehicle Shortlist</h2>
+    <div class="step-tag" data-i18n="step2Tag">Step 2</div>
+    <h2 data-i18n="step2Title">Budget & Vehicle Shortlist</h2>
 
-    <div class="section-title">Client Financial Snapshot</div>
+    <div class="section-title" data-i18n="snapshotTitle">Client Financial Snapshot</div>
     <div class="grid-2">
         <div>
-            <label>Total Net Worth ($)</label>
-            <input type="number" id="networth" placeholder="e.g., 150000">
+            <label data-i18n="lblNetworth">Total Net Worth ($)</label>
+            <input type="number" id="networth" data-i18n-ph="phNetworth" placeholder="e.g., 150000">
         </div>
         <div>
-            <label>Monthly Net Income ($)</label>
-            <input type="number" id="income" placeholder="e.g., 4500">
+            <label data-i18n="lblIncome">Monthly Net Income ($)</label>
+            <input type="number" id="income" data-i18n-ph="phIncome" placeholder="e.g., 4500">
         </div>
     </div>
 
-    <div class="section-title">Vehicle Candidates (3)</div>
+    <div class="section-title" data-i18n="candidatesTitle">Vehicle Candidates (3)</div>
     <div class="grid-3">
         <div>
-            <strong style="font-size:13px;">Vehicle A</strong>
-            <label>Make / Model / Year</label>
-            <input type="text" id="a_name" placeholder="e.g., Toyota Camry 2019">
-            <label>Price ($)</label>
-            <input type="number" id="a_price" placeholder="e.g., 18000">
-            <label>Monthly Payment ($, if financing/leasing)</label>
-            <input type="number" id="a_payment" placeholder="0 if cash">
+            <strong style="font-size:13px;" data-i18n="vehicleA">Vehicle A</strong>
+            <label data-i18n="lblMakeA">Make / Model / Year</label>
+            <input type="text" id="a_name" data-i18n-ph="phNameA" placeholder="e.g., Toyota Camry 2019">
+            <label data-i18n="lblPriceA">Price ($)</label>
+            <input type="number" id="a_price" data-i18n-ph="phPriceA" placeholder="e.g., 18000">
+            <label data-i18n="lblPaymentA">Monthly Payment ($, if financing/leasing)</label>
+            <input type="number" id="a_payment" data-i18n-ph="phPayment" placeholder="0 if cash">
         </div>
         <div>
-            <strong style="font-size:13px;">Vehicle B</strong>
-            <label>Make / Model / Year</label>
-            <input type="text" id="b_name" placeholder="e.g., Honda CR-V 2018">
-            <label>Price ($)</label>
-            <input type="number" id="b_price" placeholder="e.g., 20000">
-            <label>Monthly Payment ($, if financing/leasing)</label>
-            <input type="number" id="b_payment" placeholder="0 if cash">
+            <strong style="font-size:13px;" data-i18n="vehicleB">Vehicle B</strong>
+            <label data-i18n="lblMakeB">Make / Model / Year</label>
+            <input type="text" id="b_name" data-i18n-ph="phNameB" placeholder="e.g., Honda CR-V 2018">
+            <label data-i18n="lblPriceB">Price ($)</label>
+            <input type="number" id="b_price" data-i18n-ph="phPriceB" placeholder="e.g., 20000">
+            <label data-i18n="lblPaymentB">Monthly Payment ($, if financing/leasing)</label>
+            <input type="number" id="b_payment" data-i18n-ph="phPayment" placeholder="0 if cash">
         </div>
         <div>
-            <strong style="font-size:13px;">Vehicle C</strong>
-            <label>Make / Model / Year</label>
-            <input type="text" id="c_name" placeholder="e.g., Subaru Forester 2017">
-            <label>Price ($)</label>
-            <input type="number" id="c_price" placeholder="e.g., 17000">
-            <label>Monthly Payment ($, if financing/leasing)</label>
-            <input type="number" id="c_payment" placeholder="0 if cash">
+            <strong style="font-size:13px;" data-i18n="vehicleC">Vehicle C</strong>
+            <label data-i18n="lblMakeC">Make / Model / Year</label>
+            <input type="text" id="c_name" data-i18n-ph="phNameC" placeholder="e.g., Subaru Forester 2017">
+            <label data-i18n="lblPriceC">Price ($)</label>
+            <input type="number" id="c_price" data-i18n-ph="phPriceC" placeholder="e.g., 17000">
+            <label data-i18n="lblPaymentC">Monthly Payment ($, if financing/leasing)</label>
+            <input type="number" id="c_payment" data-i18n-ph="phPayment" placeholder="0 if cash">
         </div>
     </div>
 
-    <div class="section-title">Consumer Reports Grading (1–5 Stars)</div>
+    <div class="section-title" data-i18n="crTitle">Consumer Reports Grading (1–5 Stars)</div>
     <div class="grid-3">
         <div>
-            <strong style="font-size:13px;">Vehicle A</strong>
-            <label>Safety</label><input type="number" id="a_safety" min="1" max="5">
-            <label>Reliability</label><input type="number" id="a_reliability" min="1" max="5">
-            <label>Owner Satisfaction</label><input type="number" id="a_satisfaction" min="1" max="5">
-            <label>Overall</label><input type="number" id="a_overall" min="1" max="5">
+            <strong style="font-size:13px;" data-i18n="crVehicleA">Vehicle A</strong>
+            <label data-i18n="crSafetyA">Safety</label><input type="number" id="a_safety" min="1" max="5">
+            <label data-i18n="crReliabilityA">Reliability</label><input type="number" id="a_reliability" min="1" max="5">
+            <label data-i18n="crSatisfactionA">Owner Satisfaction</label><input type="number" id="a_satisfaction" min="1" max="5">
+            <label data-i18n="crOverallA">Overall</label><input type="number" id="a_overall" min="1" max="5">
         </div>
         <div>
-            <strong style="font-size:13px;">Vehicle B</strong>
-            <label>Safety</label><input type="number" id="b_safety" min="1" max="5">
-            <label>Reliability</label><input type="number" id="b_reliability" min="1" max="5">
-            <label>Owner Satisfaction</label><input type="number" id="b_satisfaction" min="1" max="5">
-            <label>Overall</label><input type="number" id="b_overall" min="1" max="5">
+            <strong style="font-size:13px;" data-i18n="crVehicleB">Vehicle B</strong>
+            <label data-i18n="crSafetyB">Safety</label><input type="number" id="b_safety" min="1" max="5">
+            <label data-i18n="crReliabilityB">Reliability</label><input type="number" id="b_reliability" min="1" max="5">
+            <label data-i18n="crSatisfactionB">Owner Satisfaction</label><input type="number" id="b_satisfaction" min="1" max="5">
+            <label data-i18n="crOverallB">Overall</label><input type="number" id="b_overall" min="1" max="5">
         </div>
         <div>
-            <strong style="font-size:13px;">Vehicle C</strong>
-            <label>Safety</label><input type="number" id="c_safety" min="1" max="5">
-            <label>Reliability</label><input type="number" id="c_reliability" min="1" max="5">
-            <label>Owner Satisfaction</label><input type="number" id="c_satisfaction" min="1" max="5">
-            <label>Overall</label><input type="number" id="c_overall" min="1" max="5">
+            <strong style="font-size:13px;" data-i18n="crVehicleC">Vehicle C</strong>
+            <label data-i18n="crSafetyC">Safety</label><input type="number" id="c_safety" min="1" max="5">
+            <label data-i18n="crReliabilityC">Reliability</label><input type="number" id="c_reliability" min="1" max="5">
+            <label data-i18n="crSatisfactionC">Owner Satisfaction</label><input type="number" id="c_satisfaction" min="1" max="5">
+            <label data-i18n="crOverallC">Overall</label><input type="number" id="c_overall" min="1" max="5">
         </div>
     </div>
 
-    <button onclick="calculateBudget()">Run Budget & Guardrails</button>
+    <button onclick="calculateBudget()" data-i18n="btnBudget">Run Budget & Guardrails</button>
     <div id="budgetAlerts" class="summary-box"></div>
 </div>
 
 <!-- STEP 3: TIME FRAME -->
 <div class="card">
-    <div class="step-tag">Step 3</div>
-    <h2>The Best Time to Buy a Car Is When You Do Not Need One</h2>
+    <div class="step-tag" data-i18n="step3Tag">Step 3</div>
+    <h2 data-i18n="step3Title">The Best Time to Buy a Car Is When You Do Not Need One</h2>
 
-    <div class="section-title">Current Transportation – 50% Repair Rule</div>
+    <div class="section-title" data-i18n="repairTitle">Current Transportation – 50% Repair Rule</div>
     <div class="grid-2">
         <div>
-            <label>Current Vehicle Market Value ($)</label>
-            <input type="number" id="marketValue" placeholder="e.g., 6000">
+            <label data-i18n="lblMarketValue">Current Vehicle Market Value ($)</label>
+            <input type="number" id="marketValue" data-i18n-ph="phMarketValue" placeholder="e.g., 6000">
         </div>
         <div>
-            <label>Upcoming Repair Cost ($)</label>
-            <input type="number" id="repairCost" placeholder="e.g., 3500">
+            <label data-i18n="lblRepairCost">Upcoming Repair Cost ($)</label>
+            <input type="number" id="repairCost" data-i18n-ph="phRepairCost" placeholder="e.g., 3500">
         </div>
     </div>
-    <button class="btn-secondary" onclick="checkRepairRule()">Check 50% Repair Rule</button>
+    <button class="btn-secondary" onclick="checkRepairRule()" data-i18n="btnRepair">Check 50% Repair Rule</button>
     <div id="repairAlert"></div>
 
-    <div class="section-title">Time Frame Options</div>
+    <div class="section-title" data-i18n="timeFrameTitle">Time Frame Options</div>
     <select id="timeFrame">
-        <option value="1">1 Month or Less</option>
-        <option value="2">1–6 Months</option>
-        <option value="3">6–12 Months</option>
+        <option value="1" data-i18n="tf1">1 Month or Less</option>
+        <option value="2" data-i18n="tf2">1–6 Months</option>
+        <option value="3" data-i18n="tf3">6–12 Months</option>
     </select>
 
-    <div class="section-title">Cash Buyer – Sinking Fund Plan</div>
+    <div class="section-title" data-i18n="sinkingTitle">Cash Buyer – Sinking Fund Plan</div>
     <div class="grid-2">
         <div>
-            <label>Target Vehicle Price ($)</label>
-            <input type="number" id="targetPrice" placeholder="Total cost incl. taxes/fees">
+            <label data-i18n="lblTargetPrice">Target Vehicle Price ($)</label>
+            <input type="number" id="targetPrice" data-i18n-ph="phTargetPrice" placeholder="Total cost incl. taxes/fees">
         </div>
         <div>
-            <label>Current Savings for Vehicle ($)</label>
-            <input type="number" id="currentSavings" placeholder="Already saved">
+            <label data-i18n="lblCurrentSavings">Current Savings for Vehicle ($)</label>
+            <input type="number" id="currentSavings" data-i18n-ph="phCurrentSavings" placeholder="Already saved">
         </div>
     </div>
-    <button onclick="calculateSinkingFund()">Calculate Monthly Savings Goal</button>
+    <button onclick="calculateSinkingFund()" data-i18n="btnSinking">Calculate Monthly Savings Goal</button>
     <div id="sinkingFundResult" class="summary-box"></div>
 </div>
 
 <!-- STEP 4: COMMITMENT -->
 <div class="card">
-    <div class="step-tag">Step 4</div>
-    <h2>Client Commitment</h2>
+    <div class="step-tag" data-i18n="step4Tag">Step 4</div>
+    <h2 data-i18n="step4Title">Client Commitment</h2>
 
-    <div class="section-title">Decision Snapshot</div>
+    <div class="section-title" data-i18n="decisionTitle">Decision Snapshot</div>
     <div class="grid-2">
         <div>
-            <label>Chosen Vehicle</label>
-            <input type="text" id="chosenVehicle" placeholder="e.g., Honda CR-V 2018">
+            <label data-i18n="lblChosenVehicle">Chosen Vehicle</label>
+            <input type="text" id="chosenVehicle" data-i18n-ph="phChosenVehicle" placeholder="e.g., Honda CR-V 2018">
         </div>
         <div>
-            <label>Ownership Method</label>
+            <label data-i18n="lblOwnership">Ownership Method</label>
             <select id="ownership">
-                <option value="cash">Cash</option>
-                <option value="finance">Finance</option>
-                <option value="lease">Lease</option>
+                <option value="cash" data-i18n="ownCash">Cash</option>
+                <option value="finance" data-i18n="ownFinance">Finance</option>
+                <option value="lease" data-i18n="ownLease">Lease</option>
             </select>
         </div>
     </div>
-    <label>Target Purchase Window</label>
-    <input type="text" id="purchaseWindow" placeholder="e.g., within 3–4 months">
+    <label data-i18n="lblPurchaseWindow">Target Purchase Window</label>
+    <input type="text" id="purchaseWindow" data-i18n-ph="phPurchaseWindow" placeholder="e.g., within 3–4 months">
 
-    <div class="section-title">Guardrails & Commitments</div>
+    <div class="section-title" data-i18n="guardrailsTitle">Guardrails & Commitments</div>
     <div class="commitment-item">
-        <input type="checkbox" id="c1"> Vehicle price ≤ 25% of net worth
+        <input type="checkbox" id="c1"> <span data-i18n="commit1">Vehicle price ≤ 25% of net worth</span>
     </div>
     <div class="commitment-item">
-        <input type="checkbox" id="c2"> Payment (if any) ≤ 10% of monthly cash flow
+        <input type="checkbox" id="c2"> <span data-i18n="commit2">Payment (if any) ≤ 10% of monthly cash flow</span>
     </div>
     <div class="commitment-item">
-        <input type="checkbox" id="c3"> Loan term (if financing) ≤ 4 years
+        <input type="checkbox" id="c3"> <span data-i18n="commit3">Loan term (if financing) ≤ 4 years</span>
     </div>
     <div class="commitment-item">
-        <input type="checkbox" id="c4"> I commit to buying within my financial boundaries, not emotional pressure.
+        <input type="checkbox" id="c4"> <span data-i18n="commit4">I commit to buying within my financial boundaries, not emotional pressure.</span>
     </div>
     <div class="commitment-item">
-        <input type="checkbox" id="c5"> I will complete Consumer Reports research before signing any contract.
+        <input type="checkbox" id="c5"> <span data-i18n="commit5">I will complete Consumer Reports research before signing any contract.</span>
     </div>
     <div class="commitment-item">
-        <input type="checkbox" id="c6"> I will review all numbers with my coach before signing.
+        <input type="checkbox" id="c6"> <span data-i18n="commit6">I will review all numbers with my coach before signing.</span>
     </div>
+
+    <div class="section-title" data-i18n="coachNotesTitle">Coach's Notes</div>
+    <textarea id="coachNotes" data-i18n-ph="phCoachNotes" placeholder="Observations, agreed next steps, follow-up items…"></textarea>
 
     <div class="grid-3" style="margin-top:10px;">
         <div>
-            <label>Client Name / Signature</label>
+            <label data-i18n="lblClientSig">Client Name / Signature</label>
             <input type="text" id="clientSig">
         </div>
         <div>
-            <label>Coach Name / Signature</label>
+            <label data-i18n="lblCoachSig">Coach Name / Signature</label>
             <input type="text" id="coachSig">
         </div>
         <div>
-            <label>Date</label>
+            <label data-i18n="lblCommitDate">Date</label>
             <input type="date" id="commitDate">
         </div>
     </div>
 
-    <button onclick="generateCommitment()">Generate Commitment Summary</button>
+    <button onclick="generateCommitment()" data-i18n="btnCommitment">Generate Commitment Summary</button>
     <div id="commitmentSummary" class="summary-box"></div>
+
+    <div class="doc-actions">
+        <button id="downloadBtn" onclick="downloadPdf()" data-i18n="btnDownload">&#11015; Download PDF</button>
+        <button class="btn-secondary" onclick="window.print()" data-i18n="btnPrint">&#128424; Print</button>
+    </div>
 </div>
 
 </div>
 
+</div>
+
+<script src="vendor/html2pdf.bundle.min.js"></script>
 <script>
+var LANG = "en";
+
+var I18N = {
+    en: {
+        subheader: "Car Buying Blueprint · Budget · Time Frame · Commitment",
+        bannerCar: "Car", bannerTruck: "Truck",
+        principleTag: "TFS Principle",
+        ownershipTitle: "Ownership Strategy Alert",
+        ownershipPill: "Best → Worst Financial Options",
+        ownershipLi1: "<strong>Cash purchase</strong> – ideally 2+ years old, private sale often best value.",
+        ownershipLi2: "<strong>Financing</strong> – acceptable if conservative and within guardrails.",
+        ownershipLi3: "<strong>Leasing</strong> – typically the most expensive way to drive a vehicle.",
+        step1Tag: "Step 1", step1Title: "Vehicle Blueprint – Needs & Wants",
+        needsTitle: "Needs (Non‑Negotiables) – Rate 1–5",
+        lblSafety: "Safety", lblMpg: "MPG / Fuel Efficiency", lblPassengers: "Passenger Needs", lblReliability: "Reliability",
+        wantsTitle: "Wants (Preferences) – Rate 1–5",
+        lblComfort: "Comfort & Features", lblStyle: "Style / Brand Image", lblCargo: "Cargo Space", lblOtherNotes: "Other Notes",
+        phBlueprintNotes: "Special needs, child seats, AWD, towing, etc.",
+        btnSummarize: "Summarize Blueprint",
+        step2Tag: "Step 2", step2Title: "Budget & Vehicle Shortlist",
+        snapshotTitle: "Client Financial Snapshot",
+        lblNetworth: "Total Net Worth ($)", phNetworth: "e.g., 150000",
+        lblIncome: "Monthly Net Income ($)", phIncome: "e.g., 4500",
+        candidatesTitle: "Vehicle Candidates (3)",
+        vehicleA: "Vehicle A", vehicleB: "Vehicle B", vehicleC: "Vehicle C",
+        crVehicleA: "Vehicle A", crVehicleB: "Vehicle B", crVehicleC: "Vehicle C",
+        lblMakeA: "Make / Model / Year", lblMakeB: "Make / Model / Year", lblMakeC: "Make / Model / Year",
+        phNameA: "e.g., Toyota Camry 2019", phNameB: "e.g., Honda CR-V 2018", phNameC: "e.g., Subaru Forester 2017",
+        lblPriceA: "Price ($)", lblPriceB: "Price ($)", lblPriceC: "Price ($)",
+        phPriceA: "e.g., 18000", phPriceB: "e.g., 20000", phPriceC: "e.g., 17000",
+        lblPaymentA: "Monthly Payment ($, if financing/leasing)", lblPaymentB: "Monthly Payment ($, if financing/leasing)", lblPaymentC: "Monthly Payment ($, if financing/leasing)",
+        phPayment: "0 if cash",
+        crTitle: "Consumer Reports Grading (1–5 Stars)",
+        crSafetyA: "Safety", crSafetyB: "Safety", crSafetyC: "Safety",
+        crReliabilityA: "Reliability", crReliabilityB: "Reliability", crReliabilityC: "Reliability",
+        crSatisfactionA: "Owner Satisfaction", crSatisfactionB: "Owner Satisfaction", crSatisfactionC: "Owner Satisfaction",
+        crOverallA: "Overall", crOverallB: "Overall", crOverallC: "Overall",
+        btnBudget: "Run Budget & Guardrails",
+        step3Tag: "Step 3", step3Title: "The Best Time to Buy a Car Is When You Do Not Need One",
+        repairTitle: "Current Transportation – 50% Repair Rule",
+        lblMarketValue: "Current Vehicle Market Value ($)", phMarketValue: "e.g., 6000",
+        lblRepairCost: "Upcoming Repair Cost ($)", phRepairCost: "e.g., 3500",
+        btnRepair: "Check 50% Repair Rule",
+        timeFrameTitle: "Time Frame Options",
+        tf1: "1 Month or Less", tf2: "1–6 Months", tf3: "6–12 Months",
+        sinkingTitle: "Cash Buyer – Sinking Fund Plan",
+        lblTargetPrice: "Target Vehicle Price ($)", phTargetPrice: "Total cost incl. taxes/fees",
+        lblCurrentSavings: "Current Savings for Vehicle ($)", phCurrentSavings: "Already saved",
+        btnSinking: "Calculate Monthly Savings Goal",
+        step4Tag: "Step 4", step4Title: "Client Commitment",
+        decisionTitle: "Decision Snapshot",
+        lblChosenVehicle: "Chosen Vehicle", phChosenVehicle: "e.g., Honda CR-V 2018",
+        lblOwnership: "Ownership Method",
+        ownCash: "Cash", ownFinance: "Finance", ownLease: "Lease",
+        lblPurchaseWindow: "Target Purchase Window", phPurchaseWindow: "e.g., within 3–4 months",
+        guardrailsTitle: "Guardrails & Commitments",
+        commit1: "Vehicle price ≤ 25% of net worth",
+        commit2: "Payment (if any) ≤ 10% of monthly cash flow",
+        commit3: "Loan term (if financing) ≤ 4 years",
+        commit4: "I commit to buying within my financial boundaries, not emotional pressure.",
+        commit5: "I will complete Consumer Reports research before signing any contract.",
+        commit6: "I will review all numbers with my coach before signing.",
+        coachNotesTitle: "Coach's Notes",
+        phCoachNotes: "Observations, agreed next steps, follow-up items…",
+        lblClientSig: "Client Name / Signature", lblCoachSig: "Coach Name / Signature", lblCommitDate: "Date",
+        btnCommitment: "Generate Commitment Summary",
+        btnDownload: "⬇ Download PDF", btnPrint: "🖨 Print",
+        downloadBusy: "Preparing PDF…",
+        pdfError: "Sorry — the PDF could not be created on this device. Use the Print button and choose “Save as PDF” instead.",
+        // Dynamic output strings
+        sumNeeds: "Needs (1–5):", sumWants: "Wants (1–5):",
+        sumSafety: "Safety", sumMpg: "MPG", sumPassengers: "Passengers", sumReliability: "Reliability",
+        sumComfort: "Comfort", sumStyle: "Style", sumCargo: "Cargo",
+        sumNotes: "Notes:", sumNoNotes: "None noted.",
+        outPrice: "Price:", outOfNetworth: "of net worth", outPayment: "Payment:", outOfCashflow: "of monthly cash flow",
+        alertNetworth: "⚠ Over 25% of Net Worth – high‑risk for client.",
+        okNetworth: "✓ Within 25% net worth guardrail.",
+        alertPayment: "⚠ Payment exceeds 10% of monthly cash flow.",
+        okPayment: "✓ Payment within 10% cash‑flow guardrail.",
+        okCash: "✓ Cash purchase – no monthly payment strain.",
+        outCr: "Consumer Reports (1–5):",
+        outCrSafety: "Safety", outCrReliability: "Reliability", outCrSatisfaction: "Satisfaction", outCrOverall: "Overall",
+        outNoVehicles: "Enter vehicle data to see budget analysis.",
+        repairMissing: "Enter both market value and repair cost.",
+        repairOver: "⚠ Repair exceeds 50% of market value – replacement recommended.",
+        repairUnder: "✓ Repair cost is under 50% of market value – repair may be reasonable.",
+        sinkingMissing: "Enter a target vehicle price to calculate.",
+        sinkTimeFrame: "Time Frame:", sinkNeeded: "Amount still needed:", sinkMonthly: "Monthly savings goal (sinking fund):",
+        tfLabel1: "1 month or less", tfLabel2: "1–6 months", tfLabel3: "6–12 months",
+        notSet: "(not set)", noClient: "(client)", noCoach: "(coach)", noDate: "(date)",
+        chkShort1: "Price ≤ 25% net worth", chkShort2: "Payment ≤ 10% cash flow", chkShort3: "Loan term ≤ 4 years",
+        chkShort4: "Financial boundaries over emotion", chkShort5: "Consumer Reports research completed", chkShort6: "Numbers reviewed with coach",
+        outVehicle: "Vehicle:", outOwnership: "Ownership:", outWindow: "Purchase Window:",
+        outCommitments: "Commitments:", outNoCommitments: "No commitments checked yet.",
+        outClient: "Client:", outCoach: "Coach:", outDate: "Date:",
+        pdfFileName: "tfs-carfit.pdf"
+    },
+    es: {
+        subheader: "Plan de compra de auto · Presupuesto · Plazo · Compromiso",
+        bannerCar: "Auto", bannerTruck: "Camioneta",
+        principleTag: "Principio TFS",
+        ownershipTitle: "Alerta de estrategia de propiedad",
+        ownershipPill: "Opciones financieras: de mejor a peor",
+        ownershipLi1: "<strong>Compra al contado</strong> – idealmente con 2+ años de antigüedad; la venta entre particulares suele ofrecer el mejor valor.",
+        ownershipLi2: "<strong>Financiamiento</strong> – aceptable si es conservador y dentro de los límites.",
+        ownershipLi3: "<strong>Arrendamiento (leasing)</strong> – normalmente la forma más cara de conducir un vehículo.",
+        step1Tag: "Paso 1", step1Title: "Perfil del vehículo – Necesidades y deseos",
+        needsTitle: "Necesidades (no negociables) – Califica 1–5",
+        lblSafety: "Seguridad", lblMpg: "MPG / Eficiencia de combustible", lblPassengers: "Necesidades de pasajeros", lblReliability: "Confiabilidad",
+        wantsTitle: "Deseos (preferencias) – Califica 1–5",
+        lblComfort: "Comodidad y equipamiento", lblStyle: "Estilo / Imagen de marca", lblCargo: "Espacio de carga", lblOtherNotes: "Otras notas",
+        phBlueprintNotes: "Necesidades especiales, sillas infantiles, AWD, remolque, etc.",
+        btnSummarize: "Resumir perfil",
+        step2Tag: "Paso 2", step2Title: "Presupuesto y lista de vehículos",
+        snapshotTitle: "Panorama financiero del cliente",
+        lblNetworth: "Patrimonio neto total ($)", phNetworth: "ej., 150000",
+        lblIncome: "Ingreso neto mensual ($)", phIncome: "ej., 4500",
+        candidatesTitle: "Vehículos candidatos (3)",
+        vehicleA: "Vehículo A", vehicleB: "Vehículo B", vehicleC: "Vehículo C",
+        crVehicleA: "Vehículo A", crVehicleB: "Vehículo B", crVehicleC: "Vehículo C",
+        lblMakeA: "Marca / Modelo / Año", lblMakeB: "Marca / Modelo / Año", lblMakeC: "Marca / Modelo / Año",
+        phNameA: "ej., Toyota Camry 2019", phNameB: "ej., Honda CR-V 2018", phNameC: "ej., Subaru Forester 2017",
+        lblPriceA: "Precio ($)", lblPriceB: "Precio ($)", lblPriceC: "Precio ($)",
+        phPriceA: "ej., 18000", phPriceB: "ej., 20000", phPriceC: "ej., 17000",
+        lblPaymentA: "Pago mensual ($, si financia o arrienda)", lblPaymentB: "Pago mensual ($, si financia o arrienda)", lblPaymentC: "Pago mensual ($, si financia o arrienda)",
+        phPayment: "0 si es al contado",
+        crTitle: "Calificación de Consumer Reports (1–5 estrellas)",
+        crSafetyA: "Seguridad", crSafetyB: "Seguridad", crSafetyC: "Seguridad",
+        crReliabilityA: "Confiabilidad", crReliabilityB: "Confiabilidad", crReliabilityC: "Confiabilidad",
+        crSatisfactionA: "Satisfacción del propietario", crSatisfactionB: "Satisfacción del propietario", crSatisfactionC: "Satisfacción del propietario",
+        crOverallA: "General", crOverallB: "General", crOverallC: "General",
+        btnBudget: "Analizar presupuesto y límites",
+        step3Tag: "Paso 3", step3Title: "El mejor momento para comprar un auto es cuando no lo necesitas",
+        repairTitle: "Transporte actual – Regla del 50% en reparaciones",
+        lblMarketValue: "Valor de mercado del vehículo actual ($)", phMarketValue: "ej., 6000",
+        lblRepairCost: "Costo de la reparación pendiente ($)", phRepairCost: "ej., 3500",
+        btnRepair: "Verificar la regla del 50%",
+        timeFrameTitle: "Opciones de plazo",
+        tf1: "1 mes o menos", tf2: "1–6 meses", tf3: "6–12 meses",
+        sinkingTitle: "Comprador al contado – Plan de fondo de ahorro",
+        lblTargetPrice: "Precio objetivo del vehículo ($)", phTargetPrice: "Costo total incl. impuestos y cargos",
+        lblCurrentSavings: "Ahorros actuales para el vehículo ($)", phCurrentSavings: "Ya ahorrado",
+        btnSinking: "Calcular meta de ahorro mensual",
+        step4Tag: "Paso 4", step4Title: "Compromiso del cliente",
+        decisionTitle: "Resumen de la decisión",
+        lblChosenVehicle: "Vehículo elegido", phChosenVehicle: "ej., Honda CR-V 2018",
+        lblOwnership: "Forma de adquisición",
+        ownCash: "Al contado", ownFinance: "Financiado", ownLease: "Arrendado (lease)",
+        lblPurchaseWindow: "Plazo objetivo de compra", phPurchaseWindow: "ej., dentro de 3–4 meses",
+        guardrailsTitle: "Límites y compromisos",
+        commit1: "Precio del vehículo ≤ 25% del patrimonio neto",
+        commit2: "Pago (si lo hay) ≤ 10% del flujo de efectivo mensual",
+        commit3: "Plazo del préstamo (si financia) ≤ 4 años",
+        commit4: "Me comprometo a comprar dentro de mis límites financieros, no por presión emocional.",
+        commit5: "Completaré la investigación en Consumer Reports antes de firmar cualquier contrato.",
+        commit6: "Revisaré todos los números con mi coach antes de firmar.",
+        coachNotesTitle: "Notas del coach",
+        phCoachNotes: "Observaciones, próximos pasos acordados, pendientes…",
+        lblClientSig: "Nombre / Firma del cliente", lblCoachSig: "Nombre / Firma del coach", lblCommitDate: "Fecha",
+        btnCommitment: "Generar resumen del compromiso",
+        btnDownload: "⬇ Descargar PDF", btnPrint: "🖨 Imprimir",
+        downloadBusy: "Preparando PDF…",
+        pdfError: "Lo sentimos — no se pudo crear el PDF en este dispositivo. Usa el botón Imprimir y elige “Guardar como PDF”.",
+        sumNeeds: "Necesidades (1–5):", sumWants: "Deseos (1–5):",
+        sumSafety: "Seguridad", sumMpg: "MPG", sumPassengers: "Pasajeros", sumReliability: "Confiabilidad",
+        sumComfort: "Comodidad", sumStyle: "Estilo", sumCargo: "Carga",
+        sumNotes: "Notas:", sumNoNotes: "Sin notas.",
+        outPrice: "Precio:", outOfNetworth: "del patrimonio neto", outPayment: "Pago:", outOfCashflow: "del flujo de efectivo mensual",
+        alertNetworth: "⚠ Supera el 25% del patrimonio neto – alto riesgo para el cliente.",
+        okNetworth: "✓ Dentro del límite del 25% del patrimonio neto.",
+        alertPayment: "⚠ El pago supera el 10% del flujo de efectivo mensual.",
+        okPayment: "✓ Pago dentro del límite del 10% del flujo de efectivo.",
+        okCash: "✓ Compra al contado – sin carga de pago mensual.",
+        outCr: "Consumer Reports (1–5):",
+        outCrSafety: "Seguridad", outCrReliability: "Confiabilidad", outCrSatisfaction: "Satisfacción", outCrOverall: "General",
+        outNoVehicles: "Ingresa los datos de los vehículos para ver el análisis.",
+        repairMissing: "Ingresa el valor de mercado y el costo de la reparación.",
+        repairOver: "⚠ La reparación supera el 50% del valor de mercado – se recomienda reemplazar el vehículo.",
+        repairUnder: "✓ El costo de la reparación es menor al 50% del valor de mercado – reparar puede ser razonable.",
+        sinkingMissing: "Ingresa el precio objetivo del vehículo para calcular.",
+        sinkTimeFrame: "Plazo:", sinkNeeded: "Monto que aún falta:", sinkMonthly: "Meta de ahorro mensual (fondo de ahorro):",
+        tfLabel1: "1 mes o menos", tfLabel2: "1–6 meses", tfLabel3: "6–12 meses",
+        notSet: "(sin definir)", noClient: "(cliente)", noCoach: "(coach)", noDate: "(fecha)",
+        chkShort1: "Precio ≤ 25% del patrimonio neto", chkShort2: "Pago ≤ 10% del flujo de efectivo", chkShort3: "Plazo del préstamo ≤ 4 años",
+        chkShort4: "Límites financieros por encima de la emoción", chkShort5: "Investigación en Consumer Reports completada", chkShort6: "Números revisados con el coach",
+        outVehicle: "Vehículo:", outOwnership: "Adquisición:", outWindow: "Plazo de compra:",
+        outCommitments: "Compromisos:", outNoCommitments: "Aún no se han marcado compromisos.",
+        outClient: "Cliente:", outCoach: "Coach:", outDate: "Fecha:",
+        pdfFileName: "tfs-carfit-plan.pdf"
+    }
+};
+
+function t(key) {
+    return (I18N[LANG] && I18N[LANG][key] !== undefined) ? I18N[LANG][key] : I18N.en[key];
+}
+
+function setLanguage(lang) {
+    LANG = lang;
+    document.documentElement.lang = lang;
+    var nodes = document.querySelectorAll("[data-i18n]");
+    for (var i = 0; i < nodes.length; i++) {
+        var key = nodes[i].getAttribute("data-i18n");
+        if (I18N[lang][key] !== undefined) nodes[i].innerText = I18N[lang][key];
+    }
+    var htmlNodes = document.querySelectorAll("[data-i18n-html]");
+    for (var j = 0; j < htmlNodes.length; j++) {
+        var hkey = htmlNodes[j].getAttribute("data-i18n-html");
+        if (I18N[lang][hkey] !== undefined) htmlNodes[j].innerHTML = I18N[lang][hkey];
+    }
+    var phNodes = document.querySelectorAll("[data-i18n-ph]");
+    for (var k = 0; k < phNodes.length; k++) {
+        var pkey = phNodes[k].getAttribute("data-i18n-ph");
+        if (I18N[lang][pkey] !== undefined) phNodes[k].placeholder = I18N[lang][pkey];
+    }
+}
+
 function summarizeBlueprint() {
     const safety = document.getElementById("safety").value || "-";
     const mpg = document.getElementById("mpg").value || "-";
@@ -425,14 +764,14 @@ function summarizeBlueprint() {
     const comfort = document.getElementById("comfort").value || "-";
     const style = document.getElementById("style").value || "-";
     const cargo = document.getElementById("cargo").value || "-";
-    const notes = document.getElementById("blueprintNotes").value || "None noted.";
+    const notes = document.getElementById("blueprintNotes").value || t("sumNoNotes");
 
     const html = `
-        <strong>Needs (1–5):</strong><br>
-        Safety: ${safety}, MPG: ${mpg}, Passengers: ${passengers}, Reliability: ${reliability}<br><br>
-        <strong>Wants (1–5):</strong><br>
-        Comfort: ${comfort}, Style: ${style}, Cargo: ${cargo}<br><br>
-        <strong>Notes:</strong> ${notes}
+        <strong>${t("sumNeeds")}</strong><br>
+        ${t("sumSafety")}: ${safety}, ${t("sumMpg")}: ${mpg}, ${t("sumPassengers")}: ${passengers}, ${t("sumReliability")}: ${reliability}<br><br>
+        <strong>${t("sumWants")}</strong><br>
+        ${t("sumComfort")}: ${comfort}, ${t("sumStyle")}: ${style}, ${t("sumCargo")}: ${cargo}<br><br>
+        <strong>${t("sumNotes")}</strong> ${notes}
     `;
     document.getElementById("blueprintSummary").innerHTML = html;
 }
@@ -444,7 +783,7 @@ function calculateBudget() {
     const vehicles = [
         {
             label: "A",
-            name: document.getElementById("a_name").value || "Vehicle A",
+            name: document.getElementById("a_name").value || t("vehicleA"),
             price: Number(document.getElementById("a_price").value || 0),
             payment: Number(document.getElementById("a_payment").value || 0),
             safety: document.getElementById("a_safety").value || "-",
@@ -454,7 +793,7 @@ function calculateBudget() {
         },
         {
             label: "B",
-            name: document.getElementById("b_name").value || "Vehicle B",
+            name: document.getElementById("b_name").value || t("vehicleB"),
             price: Number(document.getElementById("b_price").value || 0),
             payment: Number(document.getElementById("b_payment").value || 0),
             safety: document.getElementById("b_safety").value || "-",
@@ -464,7 +803,7 @@ function calculateBudget() {
         },
         {
             label: "C",
-            name: document.getElementById("c_name").value || "Vehicle C",
+            name: document.getElementById("c_name").value || t("vehicleC"),
             price: Number(document.getElementById("c_price").value || 0),
             payment: Number(document.getElementById("c_payment").value || 0),
             safety: document.getElementById("c_safety").value || "-",
@@ -481,28 +820,28 @@ function calculateBudget() {
         const cashPct = income ? (v.payment / income) * 100 : 0;
 
         out += `<strong>${v.name}</strong><br>`;
-        out += `Price: $${v.price.toLocaleString()} (${netPct.toFixed(1)}% of net worth)`;
+        out += `${t("outPrice")} $${v.price.toLocaleString()} (${netPct.toFixed(1)}% ${t("outOfNetworth")})`;
         if (netPct > 25) {
-            out += `<div class="alert">⚠ Over 25% of Net Worth – high‑risk for client.</div>`;
+            out += `<div class="alert">${t("alertNetworth")}</div>`;
         } else {
-            out += `<div class="success">✓ Within 25% net worth guardrail.</div>`;
+            out += `<div class="success">${t("okNetworth")}</div>`;
         }
 
         if (v.payment > 0) {
-            out += `Payment: $${v.payment.toLocaleString()} (${cashPct.toFixed(1)}% of monthly cash flow)`;
+            out += `${t("outPayment")} $${v.payment.toLocaleString()} (${cashPct.toFixed(1)}% ${t("outOfCashflow")})`;
             if (cashPct > 10) {
-                out += `<div class="alert">⚠ Payment exceeds 10% of monthly cash flow.</div>`;
+                out += `<div class="alert">${t("alertPayment")}</div>`;
             } else {
-                out += `<div class="success">✓ Payment within 10% cash‑flow guardrail.</div>`;
+                out += `<div class="success">${t("okPayment")}</div>`;
             }
         } else {
-            out += `<div class="success">✓ Cash purchase – no monthly payment strain.</div>`;
+            out += `<div class="success">${t("okCash")}</div>`;
         }
 
-        out += `<br><strong>Consumer Reports (1–5):</strong> Safety ${v.safety}, Reliability ${v.reliability}, Satisfaction ${v.satisfaction}, Overall ${v.overall}<br><hr style="border:none;border-top:1px solid #e1e4ea;margin:8px 0;">`;
+        out += `<br><strong>${t("outCr")}</strong> ${t("outCrSafety")} ${v.safety}, ${t("outCrReliability")} ${v.reliability}, ${t("outCrSatisfaction")} ${v.satisfaction}, ${t("outCrOverall")} ${v.overall}<br><hr style="border:none;border-top:1px solid #c9d7e4;margin:8px 0;">`;
     });
 
-    document.getElementById("budgetAlerts").innerHTML = out || "Enter vehicle data to see budget analysis.";
+    document.getElementById("budgetAlerts").innerHTML = out || t("outNoVehicles");
 }
 
 function checkRepairRule() {
@@ -511,16 +850,16 @@ function checkRepairRule() {
 
     if (!market || !repair) {
         document.getElementById("repairAlert").innerHTML =
-            `<div class="alert">Enter both market value and repair cost.</div>`;
+            `<div class="alert">${t("repairMissing")}</div>`;
         return;
     }
 
     if (repair > market * 0.5) {
         document.getElementById("repairAlert").innerHTML =
-            `<div class="alert">⚠ Repair exceeds 50% of market value – replacement recommended.</div>`;
+            `<div class="alert">${t("repairOver")}</div>`;
     } else {
         document.getElementById("repairAlert").innerHTML =
-            `<div class="success">✓ Repair cost is under 50% of market value – repair may be reasonable.</div>`;
+            `<div class="success">${t("repairUnder")}</div>`;
     }
 }
 
@@ -530,8 +869,7 @@ function calculateSinkingFund() {
     const timeframe = Number(document.getElementById("timeFrame").value || 1);
 
     if (!price) {
-        document.getElementById("sinkingFundResult").innerHTML =
-            "Enter a target vehicle price to calculate.";
+        document.getElementById("sinkingFundResult").innerHTML = t("sinkingMissing");
         return;
     }
 
@@ -539,43 +877,120 @@ function calculateSinkingFund() {
     const needed = price - savings;
     const monthly = needed > 0 ? needed / months : 0;
 
-    const label = timeframe === 1 ? "1 month or less"
-                 : timeframe === 2 ? "1–6 months"
-                 : "6–12 months";
+    const label = timeframe === 1 ? t("tfLabel1")
+                 : timeframe === 2 ? t("tfLabel2")
+                 : t("tfLabel3");
 
     document.getElementById("sinkingFundResult").innerHTML =
-        `<strong>Time Frame:</strong> ${label}<br>` +
-        `<strong>Amount still needed:</strong> $${needed.toFixed(2)}<br>` +
-        `<strong>Monthly savings goal (sinking fund):</strong> $${monthly.toFixed(2)}`;
+        `<strong>${t("sinkTimeFrame")}</strong> ${label}<br>` +
+        `<strong>${t("sinkNeeded")}</strong> $${needed.toFixed(2)}<br>` +
+        `<strong>${t("sinkMonthly")}</strong> $${monthly.toFixed(2)}`;
 }
 
 function generateCommitment() {
-    const vehicle = document.getElementById("chosenVehicle").value || "(not set)";
-    const ownership = document.getElementById("ownership").value;
-    const window = document.getElementById("purchaseWindow").value || "(not set)";
-    const client = document.getElementById("clientSig").value || "(client)";
-    const coach = document.getElementById("coachSig").value || "(coach)";
-    const date = document.getElementById("commitDate").value || "(date)";
+    const vehicle = document.getElementById("chosenVehicle").value || t("notSet");
+    const ownershipEl = document.getElementById("ownership");
+    const ownership = ownershipEl.options[ownershipEl.selectedIndex].text;
+    const win = document.getElementById("purchaseWindow").value || t("notSet");
+    const client = document.getElementById("clientSig").value || t("noClient");
+    const coach = document.getElementById("coachSig").value || t("noCoach");
+    const date = document.getElementById("commitDate").value || t("noDate");
 
     const checks = [];
-    if (document.getElementById("c1").checked) checks.push("Price ≤ 25% net worth");
-    if (document.getElementById("c2").checked) checks.push("Payment ≤ 10% cash flow");
-    if (document.getElementById("c3").checked) checks.push("Loan term ≤ 4 years");
-    if (document.getElementById("c4").checked) checks.push("Financial boundaries over emotion");
-    if (document.getElementById("c5").checked) checks.push("Consumer Reports research completed");
-    if (document.getElementById("c6").checked) checks.push("Numbers reviewed with coach");
+    if (document.getElementById("c1").checked) checks.push(t("chkShort1"));
+    if (document.getElementById("c2").checked) checks.push(t("chkShort2"));
+    if (document.getElementById("c3").checked) checks.push(t("chkShort3"));
+    if (document.getElementById("c4").checked) checks.push(t("chkShort4"));
+    if (document.getElementById("c5").checked) checks.push(t("chkShort5"));
+    if (document.getElementById("c6").checked) checks.push(t("chkShort6"));
 
     const html = `
-        <strong>Vehicle:</strong> ${vehicle}<br>
-        <strong>Ownership:</strong> ${ownership}<br>
-        <strong>Purchase Window:</strong> ${window}<br><br>
-        <strong>Commitments:</strong><br>
-        ${checks.length ? checks.map(c => "• " + c).join("<br>") : "No commitments checked yet."}<br><br>
-        <strong>Client:</strong> ${client}<br>
-        <strong>Coach:</strong> ${coach}<br>
-        <strong>Date:</strong> ${date}
+        <strong>${t("outVehicle")}</strong> ${vehicle}<br>
+        <strong>${t("outOwnership")}</strong> ${ownership}<br>
+        <strong>${t("outWindow")}</strong> ${win}<br><br>
+        <strong>${t("outCommitments")}</strong><br>
+        ${checks.length ? checks.map(c => "• " + c).join("<br>") : t("outNoCommitments")}<br><br>
+        <strong>${t("outClient")}</strong> ${client}<br>
+        <strong>${t("outCoach")}</strong> ${coach}<br>
+        <strong>${t("outDate")}</strong> ${date}
     `;
     document.getElementById("commitmentSummary").innerHTML = html;
+}
+
+function downloadPdf() {
+    var btn = document.getElementById("downloadBtn");
+    if (typeof html2pdf === "undefined") {
+        alert(t("pdfError"));
+        return;
+    }
+    btn.disabled = true;
+    btn.innerText = t("downloadBusy");
+    document.body.classList.add("pdf-mode");
+
+    // Swap every field for plain text BEFORE the PDF library measures the page,
+    // so typed values always show and page breaks match the captured layout.
+    var swaps = [];
+    var fields = document.querySelectorAll("#pdfRoot input, #pdfRoot select, #pdfRoot textarea");
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        if (field.id === "language") continue;
+        var repl;
+        if (field.type === "checkbox") {
+            repl = document.createElement("span");
+            repl.style.cssText = "display:inline-block;width:12px;height:12px;border:1.4px solid #1f4f7b;" +
+                "margin-right:6px;vertical-align:-1px;text-align:center;line-height:11px;" +
+                "font-size:10px;font-weight:800;color:#1f4f7b;";
+            if (field.checked) repl.appendChild(document.createTextNode("\u2713"));
+        } else {
+            repl = document.createElement("div");
+            var cs = window.getComputedStyle(field);
+            repl.style.fontSize = cs.fontSize;
+            repl.style.color = cs.color;
+            repl.style.border = "1px solid #b7c6d6";
+            repl.style.borderRadius = "6px";
+            repl.style.padding = "8px 10px";
+            repl.style.background = "#fff";
+            repl.style.minHeight = field.offsetHeight + "px";
+            repl.style.height = "auto";
+            repl.style.overflow = "visible";
+            repl.style.whiteSpace = "pre-wrap";
+            repl.style.boxSizing = "border-box";
+            var text = "";
+            if (field.tagName === "SELECT") {
+                text = field.options[field.selectedIndex] ? field.options[field.selectedIndex].text : "";
+            } else {
+                text = field.value;
+            }
+            repl.appendChild(document.createTextNode(text));
+        }
+        field.style.display = "none";
+        field.parentNode.insertBefore(repl, field);
+        swaps.push({ field: field, repl: repl });
+    }
+
+    function cleanup() {
+        for (var j = 0; j < swaps.length; j++) {
+            if (swaps[j].repl.parentNode) swaps[j].repl.parentNode.removeChild(swaps[j].repl);
+            swaps[j].field.style.display = "";
+        }
+        document.body.classList.remove("pdf-mode");
+        btn.disabled = false;
+        btn.innerText = t("btnDownload");
+    }
+
+    html2pdf().set({
+        margin: [10, 8, 12, 8],
+        filename: t("pdfFileName"),
+        image: { type: "jpeg", quality: 0.95 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "mm", format: "letter", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"], avoid: [".vehicle-banner", ".commitment-item", ".summary-box", ".grid-2 > div", ".grid-3 > div", ".section-title", ".alert", ".success", "h2", "ul"] }
+    }).from(document.getElementById("pdfRoot")).save()
+        .then(cleanup)
+        .catch(function () {
+            cleanup();
+            alert(t("pdfError"));
+        });
 }
 </script>
 
