@@ -166,6 +166,15 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
+    .ladder-input {
+      margin-bottom: 0 !important;
+      padding: 8px 10px !important;
+      font-size: 0.95rem !important;
+      min-width: 110px;
+    }
+    .ladder-input.ladder-name {
+      min-width: 160px;
+    }
     .empty-row td {
       color: var(--muted);
       font-style: italic;
@@ -454,6 +463,7 @@
   <!-- HIGH MONTH PRIORITY LADDER -->
   <div class="card">
     <h2 data-i18n="ladderTitle">High-Month Priority Ladder</h2>
+    <p data-i18n="ladderDesc">Start with the suggested split, then change any amount or category name, add your own categories, or remove ones you don't need — until the excess is shared out the way you want.</p>
 
     <div class="summary-box">
       <strong data-i18n="excessLabel">Excess Income Above Baseline:</strong>
@@ -461,48 +471,37 @@
     </div>
 
     <div class="table-scroll">
-      <table>
+      <table id="ladderTable">
         <thead>
           <tr>
             <th data-i18n="thTier">Tier</th>
             <th data-i18n="thCategory">Category</th>
             <th data-i18n="thAlloc">Allocation</th>
+            <th></th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td class="priority-tier" data-i18n="tier1">Tier 1</td>
-            <td data-i18n="cat1">Buffer Account</td>
-            <td id="tier1">$0</td>
-          </tr>
-          <tr>
-            <td class="priority-tier" data-i18n="tier2">Tier 2</td>
-            <td data-i18n="cat2">Irregular Expenses Fund</td>
-            <td id="tier2">$0</td>
-          </tr>
-          <tr>
-            <td class="priority-tier" data-i18n="tier3">Tier 3</td>
-            <td data-i18n="cat3">Accelerated Debt / Savings</td>
-            <td id="tier3">$0</td>
-          </tr>
-          <tr>
-            <td class="priority-tier" data-i18n="tier4">Tier 4</td>
-            <td data-i18n="cat4">Lifestyle &amp; Reward</td>
-            <td id="tier4">$0</td>
-          </tr>
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
-  </div>
 
-  <!-- INCOME STABILIZER -->
-  <div class="card">
-    <h2 data-i18n="stabTitle">Income Stabilizer — Fixed Salary Method</h2>
+    <div class="add-row" style="margin-top:16px;">
+      <div class="field-name">
+        <label for="ladderCategory" data-i18n="lblLadderCategory">New Category</label>
+        <input type="text" id="ladderCategory" data-i18n-ph="phLadderCategory" placeholder="Add category (e.g., Car Repair Fund)">
+      </div>
+      <div class="field-amount">
+        <label for="ladderAmount" data-i18n="lblLadderAmount">Allocation ($)</label>
+        <input type="number" id="ladderAmount" min="0" step="1" data-i18n-ph="phLadderAmount" placeholder="e.g., 200">
+      </div>
+      <button class="btn-secondary" type="button" onclick="addLadderRow()"><span data-i18n="btnAddCategory">Add Category</span></button>
+    </div>
 
     <div class="summary-box">
-      <strong data-i18n="lblWeekly">Weekly Salary:</strong> <span id="weeklySalary">$0</span><br>
-      <strong data-i18n="lblBiweekly">Bi-Weekly Salary:</strong> <span id="biweeklySalary">$0</span>
+      <strong data-i18n="allocatedLabel">Total Allocated:</strong> <span id="allocatedDisplay">$0</span><br>
+      <strong data-i18n="remainingLabel">Left to Allocate:</strong> <span id="remainingDisplay">$0</span>
     </div>
+
+    <div class="status neutral" id="ladderStatus">Run the calculator to see the excess, then share it out however you choose.</div>
   </div>
 
   <!-- BUTTONS -->
@@ -536,6 +535,9 @@
   var LANG = "en";
   var HAS_CALCULATED = false;
   var items = [];
+  var EXCESS = 0;
+  var LADDER_TOUCHED = false;
+  var ladder = [];
 
   var I18N = {
     en: {
@@ -583,21 +585,30 @@
       phAdditional: "e.g., 1500",
       additionalLabel: "Total Additional Income:",
       ladderTitle: "High-Month Priority Ladder",
+      ladderDesc: "Start with the suggested split, then change any amount or category name, add your own categories, or remove ones you don't need \u2014 until the excess is shared out the way you want.",
       excessLabel: "Excess Income Above Baseline:",
       thTier: "Tier",
       thCategory: "Category",
       thAlloc: "Allocation",
-      tier1: "Tier 1",
-      tier2: "Tier 2",
-      tier3: "Tier 3",
-      tier4: "Tier 4",
+      tierWord: "Tier",
       cat1: "Buffer Account",
       cat2: "Irregular Expenses Fund",
       cat3: "Accelerated Debt / Savings",
       cat4: "Lifestyle & Reward",
-      stabTitle: "Income Stabilizer \u2014 Fixed Salary Method",
-      lblWeekly: "Weekly Salary:",
-      lblBiweekly: "Bi-Weekly Salary:",
+      lblLadderCategory: "New Category",
+      phLadderCategory: "Add category (e.g., Car Repair Fund)",
+      lblLadderAmount: "Allocation ($)",
+      phLadderAmount: "e.g., 200",
+      btnAddCategory: "Add Category",
+      allocatedLabel: "Total Allocated:",
+      remainingLabel: "Left to Allocate:",
+      emptyLadder: "No categories yet \u2014 add one below.",
+      ladderStart: "Run the calculator to see the excess, then share it out however you choose.",
+      ladderLeftA: "",
+      ladderLeftB: " left to allocate.",
+      ladderBalanced: "Every dollar of the excess is allocated.",
+      ladderOverA: "Over-allocated by ",
+      ladderOverB: " \u2014 lower an amount or remove a category.",
       btnRun: "Run Full Calculator",
       btnReset: "Reset",
       statusLowA: "LOW MONTH: You are short ",
@@ -658,21 +669,30 @@
       phAdditional: "ej. 1500",
       additionalLabel: "Ingreso Adicional Total:",
       ladderTitle: "Escalera de Prioridades para Meses Altos",
+      ladderDesc: "Comienza con la distribuci\u00f3n sugerida y luego cambia cualquier monto o nombre de categor\u00eda, agrega tus propias categor\u00edas o elimina las que no necesites, hasta repartir el excedente como quieras.",
       excessLabel: "Ingreso Excedente Sobre la Base:",
       thTier: "Nivel",
       thCategory: "Categor\u00eda",
       thAlloc: "Asignaci\u00f3n",
-      tier1: "Nivel 1",
-      tier2: "Nivel 2",
-      tier3: "Nivel 3",
-      tier4: "Nivel 4",
+      tierWord: "Nivel",
       cat1: "Cuenta Colch\u00f3n",
       cat2: "Fondo de Gastos Irregulares",
       cat3: "Deuda Acelerada / Ahorro",
       cat4: "Estilo de Vida y Recompensa",
-      stabTitle: "Estabilizador de Ingresos \u2014 M\u00e9todo de Salario Fijo",
-      lblWeekly: "Salario Semanal:",
-      lblBiweekly: "Salario Quincenal:",
+      lblLadderCategory: "Nueva Categor\u00eda",
+      phLadderCategory: "Agregar categor\u00eda (ej. Fondo de Reparaci\u00f3n del Auto)",
+      lblLadderAmount: "Asignaci\u00f3n ($)",
+      phLadderAmount: "ej. 200",
+      btnAddCategory: "Agregar Categor\u00eda",
+      allocatedLabel: "Total Asignado:",
+      remainingLabel: "Por Asignar:",
+      emptyLadder: "A\u00fan no hay categor\u00edas: agrega una abajo.",
+      ladderStart: "Ejecuta la calculadora para ver el excedente y luego rep\u00e1rtelo como prefieras.",
+      ladderLeftA: "Quedan ",
+      ladderLeftB: " por asignar.",
+      ladderBalanced: "Todo el excedente est\u00e1 asignado.",
+      ladderOverA: "Asignaste ",
+      ladderOverB: " de m\u00e1s: reduce un monto o elimina una categor\u00eda.",
       btnRun: "Ejecutar Calculadora Completa",
       btnReset: "Reiniciar",
       statusLowA: "MES BAJO: Te faltan ",
@@ -709,6 +729,7 @@
     }
     renderItems();
     renderPriorityTable();
+    renderLadder();
     if (HAS_CALCULATED) {
       runCalculator();
     } else {
@@ -810,6 +831,127 @@
     });
   }
 
+  function defaultLadder() {
+    return [
+      { key: "cat1", share: 0.20, name: "", amount: 0 },
+      { key: "cat2", share: 0.20, name: "", amount: 0 },
+      { key: "cat3", share: 0.40, name: "", amount: 0 },
+      { key: "cat4", share: 0.20, name: "", amount: 0 }
+    ];
+  }
+
+  function ladderLabel(row) {
+    return row.name !== "" ? row.name : (row.key ? t(row.key) : "");
+  }
+
+  function addLadderRow() {
+    var nameEl = document.getElementById("ladderCategory");
+    var amountEl = document.getElementById("ladderAmount");
+    var name = nameEl.value.trim();
+    if (!name) return;
+    var amount = parseFloat(amountEl.value);
+    ladder.push({ key: null, share: undefined, name: name, amount: isNaN(amount) ? 0 : amount });
+    LADDER_TOUCHED = true;
+    nameEl.value = "";
+    amountEl.value = "";
+    nameEl.focus();
+    renderLadder();
+  }
+
+  function removeLadderRow(index) {
+    ladder.splice(index, 1);
+    LADDER_TOUCHED = true;
+    renderLadder();
+  }
+
+  function renderLadder() {
+    var tbody = document.querySelector("#ladderTable tbody");
+    tbody.innerHTML = "";
+    if (ladder.length === 0) {
+      var emptyRow = document.createElement("tr");
+      emptyRow.className = "empty-row";
+      var emptyCell = document.createElement("td");
+      emptyCell.colSpan = 4;
+      emptyCell.textContent = t("emptyLadder");
+      emptyRow.appendChild(emptyCell);
+      tbody.appendChild(emptyRow);
+      updateLadderTotals();
+      return;
+    }
+    ladder.forEach(function (row, index) {
+      var tr = document.createElement("tr");
+
+      var tierCell = document.createElement("td");
+      tierCell.className = "priority-tier";
+      tierCell.textContent = t("tierWord") + " " + (index + 1);
+
+      var nameCell = document.createElement("td");
+      var nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.className = "ladder-input ladder-name";
+      nameInput.value = ladderLabel(row);
+      nameInput.oninput = function () {
+        row.name = nameInput.value;
+        LADDER_TOUCHED = true;
+      };
+      nameCell.appendChild(nameInput);
+
+      var amountCell = document.createElement("td");
+      var amountInput = document.createElement("input");
+      amountInput.type = "number";
+      amountInput.min = "0";
+      amountInput.step = "1";
+      amountInput.className = "ladder-input";
+      amountInput.value = row.amount ? row.amount : "";
+      amountInput.oninput = function () {
+        var v = parseFloat(amountInput.value);
+        row.amount = isNaN(v) ? 0 : v;
+        LADDER_TOUCHED = true;
+        updateLadderTotals();
+      };
+      amountCell.appendChild(amountInput);
+
+      var actionCell = document.createElement("td");
+      var removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "row-remove";
+      removeBtn.textContent = t("btnRemove");
+      removeBtn.onclick = function () { removeLadderRow(index); };
+      actionCell.appendChild(removeBtn);
+
+      tr.appendChild(tierCell);
+      tr.appendChild(nameCell);
+      tr.appendChild(amountCell);
+      tr.appendChild(actionCell);
+      tbody.appendChild(tr);
+    });
+    updateLadderTotals();
+  }
+
+  function updateLadderTotals() {
+    var allocated = 0;
+    ladder.forEach(function (row) { allocated += (row.amount || 0); });
+    var remaining = EXCESS - allocated;
+
+    document.getElementById("allocatedDisplay").innerText = formatCurrency(allocated);
+    document.getElementById("remainingDisplay").innerText = formatCurrency(remaining);
+
+    var box = document.getElementById("ladderStatus");
+    if (EXCESS === 0 && allocated === 0) {
+      box.className = "status neutral";
+      box.innerText = t("ladderStart");
+    } else if (remaining > 0) {
+      box.className = "status neutral";
+      box.innerText = t("ladderLeftA") + formatCurrency(remaining) + t("ladderLeftB");
+    } else if (remaining < 0) {
+      box.className = "status low";
+      box.innerText = t("ladderOverA") + formatCurrency(Math.abs(remaining)) + t("ladderOverB");
+    } else {
+      box.className = "status high";
+      box.innerText = t("ladderBalanced");
+    }
+  }
+
   function runCalculator() {
     var housing = getNumber("housing");
     var living = getNumber("living");
@@ -843,22 +985,23 @@
     document.getElementById("additionalIncomeDisplay").innerText = formatCurrency(additionalIncome);
 
     var excess = actualIncome - baseline;
-    document.getElementById("excessDisplay").innerText = formatCurrency(Math.max(excess, 0));
+    EXCESS = Math.max(excess, 0);
+    document.getElementById("excessDisplay").innerText = formatCurrency(EXCESS);
 
-    if (excess > 0) {
-      document.getElementById("tier1").innerText = formatCurrency(excess * 0.20);
-      document.getElementById("tier2").innerText = formatCurrency(excess * 0.20);
-      document.getElementById("tier3").innerText = formatCurrency(excess * 0.40);
-      document.getElementById("tier4").innerText = formatCurrency(excess * 0.20);
+    if (!LADDER_TOUCHED) {
+      var assigned = 0;
+      ladder.forEach(function (row, i) {
+        if (i < ladder.length - 1) {
+          row.amount = Math.round(EXCESS * row.share);
+          assigned += row.amount;
+        } else {
+          row.amount = Math.max(EXCESS - assigned, 0);
+        }
+      });
+      renderLadder();
     } else {
-      document.getElementById("tier1").innerText = "$0";
-      document.getElementById("tier2").innerText = "$0";
-      document.getElementById("tier3").innerText = "$0";
-      document.getElementById("tier4").innerText = "$0";
+      updateLadderTotals();
     }
-
-    document.getElementById("weeklySalary").innerText = formatCurrency(baseline / 4);
-    document.getElementById("biweeklySalary").innerText = formatCurrency(baseline / 2);
 
     HAS_CALCULATED = true;
   }
@@ -870,7 +1013,7 @@
   }
 
   function resetAll() {
-    var ids = ["housing", "living", "debt", "expectedIncome", "actualIncome", "bufferBalance", "itemInput", "itemAmount", "additionalIncome"];
+    var ids = ["housing", "living", "debt", "expectedIncome", "actualIncome", "bufferBalance", "itemInput", "itemAmount", "additionalIncome", "ladderCategory", "ladderAmount"];
     ids.forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.value = "";
@@ -882,12 +1025,10 @@
     document.getElementById("expectedIncomeDisplay").innerText = "$0";
     document.getElementById("additionalIncomeDisplay").innerText = "$0";
     document.getElementById("excessDisplay").innerText = "$0";
-    document.getElementById("tier1").innerText = "$0";
-    document.getElementById("tier2").innerText = "$0";
-    document.getElementById("tier3").innerText = "$0";
-    document.getElementById("tier4").innerText = "$0";
-    document.getElementById("weeklySalary").innerText = "$0";
-    document.getElementById("biweeklySalary").innerText = "$0";
+    EXCESS = 0;
+    LADDER_TOUCHED = false;
+    ladder = defaultLadder();
+    renderLadder();
     HAS_CALCULATED = false;
     resetStatus();
   }
@@ -900,8 +1041,17 @@
     if (e.key === "Enter") { e.preventDefault(); addItem(); }
   });
 
+  document.getElementById("ladderCategory").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); addLadderRow(); }
+  });
+  document.getElementById("ladderAmount").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); addLadderRow(); }
+  });
+
+  ladder = defaultLadder();
   renderItems();
   renderPriorityTable();
+  renderLadder();
 
   function downloadPdf() {
     var btn = document.getElementById("downloadBtn");
