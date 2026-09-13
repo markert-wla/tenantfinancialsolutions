@@ -560,7 +560,7 @@
     </select>
 
     <div class="section-title" data-i18n="sinkingTitle">Cash Buyer – Sinking Fund Plan</div>
-    <div class="grid-2">
+    <div class="grid-3">
         <div>
             <label data-i18n="lblTargetPrice">Target Vehicle Price ($)</label>
             <input type="number" id="targetPrice" data-i18n-ph="phTargetPrice" placeholder="Total cost incl. taxes/fees">
@@ -568,6 +568,10 @@
         <div>
             <label data-i18n="lblCurrentSavings">Current Savings for Vehicle ($)</label>
             <input type="number" id="currentSavings" data-i18n-ph="phCurrentSavings" placeholder="Already saved">
+        </div>
+        <div>
+            <label data-i18n="lblVehicleValue">Plus Value of Current Vehicle ($)</label>
+            <input type="number" id="currentVehicleValue" data-i18n-ph="phVehicleValue" placeholder="Trade-in or sale value">
         </div>
     </div>
     <button onclick="calculateSinkingFund()" data-i18n="btnSinking">Calculate Monthly Savings Goal</button>
@@ -710,6 +714,7 @@ var I18N = {
         sinkingTitle: "Cash Buyer – Sinking Fund Plan",
         lblTargetPrice: "Target Vehicle Price ($)", phTargetPrice: "Total cost incl. taxes/fees",
         lblCurrentSavings: "Current Savings for Vehicle ($)", phCurrentSavings: "Already saved",
+        lblVehicleValue: "Plus Value of Current Vehicle ($)", phVehicleValue: "Trade-in or sale value",
         btnSinking: "Calculate Monthly Savings Goal",
         step4Tag: "Step 4", step4Title: "Client Commitment",
         decisionTitle: "Decision Snapshot",
@@ -749,7 +754,7 @@ var I18N = {
         repairOver: "⚠ Repair exceeds 50% of market value – replacement recommended.",
         repairUnder: "✓ Repair cost is under 50% of market value – repair may be reasonable.",
         sinkingMissing: "Enter a target vehicle price to calculate.",
-        sinkTimeFrame: "Time Frame:", sinkNeeded: "Amount still needed:", sinkMonthly: "Monthly savings goal (sinking fund):",
+        sinkTimeFrame: "Time Frame:", sinkAvailable: "Savings plus current vehicle value:", sinkNeeded: "Amount still needed:", sinkMonthly: "Monthly savings goal (sinking fund):",
         tfLabel1: "1 month or less", tfLabel2: "1–6 months", tfLabel3: "6–12 months",
         notSet: "(not set)", noClient: "(client)", noCoach: "(coach)", noDate: "(date)",
         chkShort1: "Price ≤ 20% net worth", chkShort2: "Payment ≤ 10% cash flow", chkShort3: "Loan term ≤ 4 years",
@@ -816,6 +821,7 @@ var I18N = {
         sinkingTitle: "Comprador al contado – Plan de fondo de ahorro",
         lblTargetPrice: "Precio objetivo del vehículo ($)", phTargetPrice: "Costo total incl. impuestos y cargos",
         lblCurrentSavings: "Ahorros actuales para el vehículo ($)", phCurrentSavings: "Ya ahorrado",
+        lblVehicleValue: "Más el valor del vehículo actual ($)", phVehicleValue: "Valor de intercambio o venta",
         btnSinking: "Calcular meta de ahorro mensual",
         step4Tag: "Paso 4", step4Title: "Compromiso del cliente",
         decisionTitle: "Resumen de la decisión",
@@ -854,7 +860,7 @@ var I18N = {
         repairOver: "⚠ La reparación supera el 50% del valor de mercado – se recomienda reemplazar el vehículo.",
         repairUnder: "✓ El costo de la reparación es menor al 50% del valor de mercado – reparar puede ser razonable.",
         sinkingMissing: "Ingresa el precio objetivo del vehículo para calcular.",
-        sinkTimeFrame: "Plazo:", sinkNeeded: "Monto que aún falta:", sinkMonthly: "Meta de ahorro mensual (fondo de ahorro):",
+        sinkTimeFrame: "Plazo:", sinkAvailable: "Ahorros más el valor del vehículo actual:", sinkNeeded: "Monto que aún falta:", sinkMonthly: "Meta de ahorro mensual (fondo de ahorro):",
         tfLabel1: "1 mes o menos", tfLabel2: "1–6 meses", tfLabel3: "6–12 meses",
         notSet: "(sin definir)", noClient: "(cliente)", noCoach: "(coach)", noDate: "(fecha)",
         chkShort1: "Precio ≤ 20% del patrimonio neto", chkShort2: "Pago ≤ 10% del flujo de efectivo", chkShort3: "Plazo del préstamo ≤ 4 años",
@@ -1013,6 +1019,7 @@ function checkRepairRule() {
 function calculateSinkingFund() {
     const price = Number(document.getElementById("targetPrice").value || 0);
     const savings = Number(document.getElementById("currentSavings").value || 0);
+    const vehicleValue = Number(document.getElementById("currentVehicleValue").value || 0);
     const timeframe = Number(document.getElementById("timeFrame").value || 1);
 
     if (!price) {
@@ -1021,7 +1028,8 @@ function calculateSinkingFund() {
     }
 
     const months = timeframe === 1 ? 1 : timeframe === 2 ? 6 : 12;
-    const needed = price - savings;
+    const available = savings + vehicleValue;
+    const needed = price - available;
     const monthly = needed > 0 ? needed / months : 0;
 
     const label = timeframe === 1 ? t("tfLabel1")
@@ -1030,6 +1038,7 @@ function calculateSinkingFund() {
 
     document.getElementById("sinkingFundResult").innerHTML =
         `<strong>${t("sinkTimeFrame")}</strong> ${label}<br>` +
+        `<strong>${t("sinkAvailable")}</strong> $${available.toFixed(2)}<br>` +
         `<strong>${t("sinkNeeded")}</strong> $${needed.toFixed(2)}<br>` +
         `<strong>${t("sinkMonthly")}</strong> $${monthly.toFixed(2)}`;
 }
