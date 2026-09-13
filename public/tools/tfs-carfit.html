@@ -203,6 +203,12 @@
         margin-top: 10px;
         border: 1px solid #bfdeda;
     }
+    .limit-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-top: 4px;
+    }
     .commitment-item {
         font-size: 13px;
         margin-top: 6px;
@@ -358,10 +364,10 @@
     </ul>
 </div>
 
-<!-- STEP 1: BUDGET & SHORTLIST -->
+<!-- STEP 1: CLIENT CAR BUDGET -->
 <div class="card">
     <div class="step-tag" data-i18n="step1Tag">Step 1</div>
-    <h2 data-i18n="step1Title">Budget & Vehicle Shortlist</h2>
+    <h2 data-i18n="step1Title">Client Car Budget</h2>
 
     <div class="section-title" data-i18n="snapshotTitle">Client Financial Snapshot</div>
     <div class="grid-2">
@@ -374,6 +380,98 @@
             <input type="number" id="income" data-i18n-ph="phIncome" placeholder="e.g., 4500">
         </div>
     </div>
+
+    <div class="section-title" data-i18n="limitsTitle">Budget Guardrails</div>
+    <div class="grid-2">
+        <div class="summary-box">
+            <strong data-i18n="limitCashTitle">Cash Buyer – 20% of Net Worth or Less</strong>
+            <div style="margin-top:2px;" data-i18n="limitCashDesc">Most a cash purchase should cost:</div>
+            <div class="limit-value" id="limitCashValue">—</div>
+        </div>
+        <div class="summary-box">
+            <strong data-i18n="limitPayTitle">Payment – 10% of Monthly Cash Flow or Less</strong>
+            <div style="margin-top:2px;" data-i18n="limitPayDesc">Most a monthly payment should be:</div>
+            <div class="limit-value" id="limitPayValue">—</div>
+        </div>
+    </div>
+
+    <div class="section-title" data-i18n="agreedTitle">Agreed Range – Coach & Client</div>
+    <p style="font-size:12px; margin:0;" data-i18n="agreedIntro">Coach and client agree on the range the client will shop within. Complete the column that applies.</p>
+    <div class="grid-3">
+        <div>
+            <strong style="font-size:13px;" data-i18n="agreedCash">Cash Purchase Range (total price $)</strong>
+            <label data-i18n="lblRangeLow">Low ($)</label>
+            <input type="number" id="cashRangeLow">
+            <label data-i18n="lblRangeHigh">High ($)</label>
+            <input type="number" id="cashRangeHigh">
+        </div>
+        <div>
+            <strong style="font-size:13px;" data-i18n="agreedFinance">Finance Range (monthly payment $)</strong>
+            <label data-i18n="lblRangeLow">Low ($)</label>
+            <input type="number" id="financeRangeLow">
+            <label data-i18n="lblRangeHigh">High ($)</label>
+            <input type="number" id="financeRangeHigh">
+        </div>
+        <div>
+            <strong style="font-size:13px;" data-i18n="agreedLease">Lease Range (monthly payment $)</strong>
+            <label data-i18n="lblRangeLow">Low ($)</label>
+            <input type="number" id="leaseRangeLow">
+            <label data-i18n="lblRangeHigh">High ($)</label>
+            <input type="number" id="leaseRangeHigh">
+        </div>
+    </div>
+    <div class="commitment-item">
+        <input type="checkbox" id="rangeAgreed"> <span data-i18n="agreedCheck">Coach and client agree on the range above.</span>
+    </div>
+</div>
+
+<!-- STEP 2: VEHICLE BLUEPRINT & CANDIDATES -->
+<div class="card">
+    <div class="step-tag" data-i18n="step2Tag">Step 2</div>
+    <h2 data-i18n="step2Title">Vehicle Blueprint – Needs & Wants</h2>
+
+    <div class="section-title" data-i18n="needsTitle">Needs (Non‑Negotiables) – Rate 1–5</div>
+    <div class="grid-2">
+        <div>
+            <label data-i18n="lblSafety">Safety</label>
+            <input type="number" id="safety" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblMpg">MPG / Fuel Efficiency</label>
+            <input type="number" id="mpg" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblPassengers">Passenger Needs</label>
+            <input type="number" id="passengers" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblReliability">Reliability</label>
+            <input type="number" id="reliability" min="1" max="5" placeholder="1–5">
+        </div>
+    </div>
+
+    <div class="section-title" data-i18n="wantsTitle">Wants (Preferences) – Rate 1–5</div>
+    <div class="grid-2">
+        <div>
+            <label data-i18n="lblComfort">Comfort & Features</label>
+            <input type="number" id="comfort" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblStyle">Style / Brand Image</label>
+            <input type="number" id="style" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblCargo">Cargo Space</label>
+            <input type="number" id="cargo" min="1" max="5" placeholder="1–5">
+        </div>
+        <div>
+            <label data-i18n="lblOtherNotes">Other Notes</label>
+            <textarea id="blueprintNotes" data-i18n-ph="phBlueprintNotes" placeholder="Special needs, child seats, AWD, towing, etc."></textarea>
+        </div>
+    </div>
+
+    <button class="btn-secondary" onclick="summarizeBlueprint()" data-i18n="btnSummarize">Summarize Blueprint</button>
+    <div id="blueprintSummary" class="summary-box"></div>
 
     <div class="section-title" data-i18n="candidatesTitle">Vehicle Candidates (3)</div>
     <div class="grid-3">
@@ -433,84 +531,6 @@
 
     <button onclick="calculateBudget()" data-i18n="btnBudget">Run Budget & Guardrails</button>
     <div id="budgetAlerts" class="summary-box"></div>
-
-    <div class="section-title" data-i18n="agreedTitle">Agreed Range – Coach & Client</div>
-    <p style="font-size:12px; margin:0;" data-i18n="agreedIntro">Coach and client agree on the range the client will shop within. Complete the column that applies.</p>
-    <div class="grid-3">
-        <div>
-            <strong style="font-size:13px;" data-i18n="agreedCash">Cash Purchase Range (total price $)</strong>
-            <label data-i18n="lblRangeLow">Low ($)</label>
-            <input type="number" id="cashRangeLow">
-            <label data-i18n="lblRangeHigh">High ($)</label>
-            <input type="number" id="cashRangeHigh">
-        </div>
-        <div>
-            <strong style="font-size:13px;" data-i18n="agreedFinance">Finance Range (monthly payment $)</strong>
-            <label data-i18n="lblRangeLow">Low ($)</label>
-            <input type="number" id="financeRangeLow">
-            <label data-i18n="lblRangeHigh">High ($)</label>
-            <input type="number" id="financeRangeHigh">
-        </div>
-        <div>
-            <strong style="font-size:13px;" data-i18n="agreedLease">Lease Range (monthly payment $)</strong>
-            <label data-i18n="lblRangeLow">Low ($)</label>
-            <input type="number" id="leaseRangeLow">
-            <label data-i18n="lblRangeHigh">High ($)</label>
-            <input type="number" id="leaseRangeHigh">
-        </div>
-    </div>
-    <div class="commitment-item">
-        <input type="checkbox" id="rangeAgreed"> <span data-i18n="agreedCheck">Coach and client agree on the range above.</span>
-    </div>
-</div>
-
-<!-- STEP 2: VEHICLE BLUEPRINT -->
-<div class="card">
-    <div class="step-tag" data-i18n="step2Tag">Step 2</div>
-    <h2 data-i18n="step2Title">Vehicle Blueprint – Needs & Wants</h2>
-
-    <div class="section-title" data-i18n="needsTitle">Needs (Non‑Negotiables) – Rate 1–5</div>
-    <div class="grid-2">
-        <div>
-            <label data-i18n="lblSafety">Safety</label>
-            <input type="number" id="safety" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblMpg">MPG / Fuel Efficiency</label>
-            <input type="number" id="mpg" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblPassengers">Passenger Needs</label>
-            <input type="number" id="passengers" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblReliability">Reliability</label>
-            <input type="number" id="reliability" min="1" max="5" placeholder="1–5">
-        </div>
-    </div>
-
-    <div class="section-title" data-i18n="wantsTitle">Wants (Preferences) – Rate 1–5</div>
-    <div class="grid-2">
-        <div>
-            <label data-i18n="lblComfort">Comfort & Features</label>
-            <input type="number" id="comfort" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblStyle">Style / Brand Image</label>
-            <input type="number" id="style" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblCargo">Cargo Space</label>
-            <input type="number" id="cargo" min="1" max="5" placeholder="1–5">
-        </div>
-        <div>
-            <label data-i18n="lblOtherNotes">Other Notes</label>
-            <textarea id="blueprintNotes" data-i18n-ph="phBlueprintNotes" placeholder="Special needs, child seats, AWD, towing, etc."></textarea>
-        </div>
-    </div>
-
-    <button class="btn-secondary" onclick="summarizeBlueprint()" data-i18n="btnSummarize">Summarize Blueprint</button>
-    <div id="blueprintSummary" class="summary-box"></div>
 </div>
 
 <!-- STEP 3: TIME FRAME -->
@@ -642,7 +662,7 @@ var I18N = {
         ownershipLi1: "<strong>Cash purchase</strong> – ideally 2+ years old, private sale often best value.",
         ownershipLi2: "<strong>Financing</strong> – acceptable if conservative and within guardrails.",
         ownershipLi3: "<strong>Leasing</strong> – typically the most expensive way to drive a vehicle.",
-        step1Tag: "Step 1", step1Title: "Budget & Vehicle Shortlist",
+        step1Tag: "Step 1", step1Title: "Client Car Budget",
         needsTitle: "Needs (Non‑Negotiables) – Rate 1–5",
         lblSafety: "Safety", lblMpg: "MPG / Fuel Efficiency", lblPassengers: "Passenger Needs", lblReliability: "Reliability",
         wantsTitle: "Wants (Preferences) – Rate 1–5",
@@ -651,6 +671,11 @@ var I18N = {
         btnSummarize: "Summarize Blueprint",
         step2Tag: "Step 2", step2Title: "Vehicle Blueprint – Needs & Wants",
         snapshotTitle: "Client Financial Snapshot",
+        limitsTitle: "Budget Guardrails",
+        limitCashTitle: "Cash Buyer – 20% of Net Worth or Less",
+        limitCashDesc: "Most a cash purchase should cost:",
+        limitPayTitle: "Payment – 10% of Monthly Cash Flow or Less",
+        limitPayDesc: "Most a monthly payment should be:",
         lblNetworth: "Total Net Worth ($)", phNetworth: "e.g., 150000",
         lblIncome: "Monthly Net Income ($)", phIncome: "e.g., 4500",
         candidatesTitle: "Vehicle Candidates (3)",
@@ -743,7 +768,7 @@ var I18N = {
         ownershipLi1: "<strong>Compra al contado</strong> – idealmente con 2+ años de antigüedad; la venta entre particulares suele ofrecer el mejor valor.",
         ownershipLi2: "<strong>Financiamiento</strong> – aceptable si es conservador y dentro de los límites.",
         ownershipLi3: "<strong>Arrendamiento (leasing)</strong> – normalmente la forma más cara de conducir un vehículo.",
-        step1Tag: "Paso 1", step1Title: "Presupuesto y lista de vehículos",
+        step1Tag: "Paso 1", step1Title: "Presupuesto del auto del cliente",
         needsTitle: "Necesidades (no negociables) – Califica 1–5",
         lblSafety: "Seguridad", lblMpg: "MPG / Eficiencia de combustible", lblPassengers: "Necesidades de pasajeros", lblReliability: "Confiabilidad",
         wantsTitle: "Deseos (preferencias) – Califica 1–5",
@@ -752,6 +777,11 @@ var I18N = {
         btnSummarize: "Resumir perfil",
         step2Tag: "Paso 2", step2Title: "Perfil del vehículo – Necesidades y deseos",
         snapshotTitle: "Panorama financiero del cliente",
+        limitsTitle: "Límites del presupuesto",
+        limitCashTitle: "Compra al contado – 20% del patrimonio neto o menos",
+        limitCashDesc: "Lo máximo que debería costar una compra al contado:",
+        limitPayTitle: "Pago – 10% del flujo de efectivo mensual o menos",
+        limitPayDesc: "Lo máximo que debería ser el pago mensual:",
         lblNetworth: "Patrimonio neto total ($)", phNetworth: "ej., 150000",
         lblIncome: "Ingreso neto mensual ($)", phIncome: "ej., 4500",
         candidatesTitle: "Vehículos candidatos (3)",
@@ -859,6 +889,19 @@ function setLanguage(lang) {
         if (I18N[lang][pkey] !== undefined) phNodes[k].placeholder = I18N[lang][pkey];
     }
 }
+
+function updateBudgetLimits() {
+    var networth = Number(document.getElementById("networth").value || 0);
+    var income = Number(document.getElementById("income").value || 0);
+    document.getElementById("limitCashValue").innerText =
+        networth > 0 ? "$" + Math.round(networth * 0.20).toLocaleString() : "\u2014";
+    document.getElementById("limitPayValue").innerText =
+        income > 0 ? "$" + Math.round(income * 0.10).toLocaleString() : "\u2014";
+}
+
+document.getElementById("networth").addEventListener("input", updateBudgetLimits);
+document.getElementById("income").addEventListener("input", updateBudgetLimits);
+updateBudgetLimits();
 
 function summarizeBlueprint() {
     const safety = document.getElementById("safety").value || "-";
