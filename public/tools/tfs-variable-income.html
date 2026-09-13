@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TFS Variable Income</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #f97373;
+      --success: #4ade80;
+      --border: #1f2937;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font);
+      background: radial-gradient(circle at top left, #1f2937, #020617);
+      color: var(--text);
+    }
+    .tool-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(2, 6, 23, 0.85);
+      border-bottom: 1px solid var(--border);
+    }
+    .tool-header img {
+      height: 40px;
+      width: auto;
+      flex: 0 0 auto;
+      background: #fbfbfb;
+      border-radius: 10px;
+      padding: 4px 6px;
+    }
+    .tool-header .brand {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1.1;
+    }
+    .tool-header .brand-sub {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      font-weight: 600;
+    }
+    h1 {
+      font-size: 2rem;
+    }
+    h2 {
+      font-size: 1.4rem;
+    }
+    h3 {
+      font-size: 1.1rem;
+    }
+    p {
+      margin: 4px 0 10px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 16px;
+    }
+    .pill span.icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 0.9rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 24px;
+      margin-top: 24px;
+    }
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .tag {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .inputs-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+    input[type="number"]:focus {
+      outline: 1px solid var(--accent);
+      border-color: var(--accent);
+    }
+    .section-title {
+      margin-top: 24px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .priority-table {
+      width: 100%;
+      min-width: 460px;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 0.85rem;
+    }
+    .priority-table th,
+    .priority-table td {
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    .priority-table th {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .priority-tier {
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status.low {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+    .status.high {
+      border-color: var(--success);
+      color: var(--success);
+    }
+    .status span.icon {
+      font-size: 1rem;
+    }
+    .reflection {
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+    .reflection p {
+      font-size: 0.85rem;
+    }
+    .reflection textarea {
+      width: 100%;
+      min-height: 60px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: var(--text);
+      font-size: 0.85rem;
+      resize: vertical;
+      margin-top: 6px;
+    }
+    .cta-bar {
+      margin-top: 24px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 600;
+    }
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-primary span.icon,
+    .btn-secondary span.icon {
+      font-size: 1rem;
+    }
+    /* Imaging: income sources + variability chart */
+    .visual-card {
+      background: linear-gradient(135deg, #020617, #0b1120);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .visual-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .visual-header h3 {
+      font-size: 1rem;
+    }
+    .income-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .income-tag {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .income-tag span.dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+    }
+    .dot-salary { background: #22c55e; }
+    .dot-gig { background: #38bdf8; }
+    .dot-commission { background: #f97316; }
+    .dot-bonus { background: #a855f7; }
+    .chart-wrapper {
+      margin-top: 14px;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 10px;
+    }
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    svg {
+      width: 100%;
+      height: 120px;
+    }
+    .chart-caption {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .calc-summary {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .calc-summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .calc-summary-row span.label {
+      color: var(--muted);
+    }
+    .calc-summary-row span.value {
+      font-weight: 500;
+    }
+    .toolbar {
+      margin-left: auto;
+    }
+    .toolbar select {
+      background: #020617;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.85rem;
+    }
+    .doc-actions {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .card textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: var(--text);
+      font-size: 0.85rem;
+      resize: vertical;
+      margin-top: 6px;
+    }
+    @media print {
+  body { background: #fff !important; color: #111827 !important; }
+  .tool-header { background: #fff !important; border-bottom: 1px solid #cbd5e1 !important; }
+  .tool-header .brand { color: #0f172a !important; }
+  h1, h2, h3, strong, li, .calc-summary-row span.value, .priority-table td { color: #111827 !important; }
+  p, label, .tag, .pill, .badge, .income-tag, .section-title, .chart-caption, .chart-labels,
+  .calc-summary-row span.label, .priority-table th, .tool-header .brand-sub { color: #374151 !important; }
+  .card, .visual-card, .calc-summary, .chart-wrapper, .status, .pill, .income-tag, .badge,
+  textarea, input[type="number"] { background: #fff !important; box-shadow: none !important; border-color: #cbd5e1 !important; }
+  .priority-tier { color: #0369a1 !important; }
+  .status.low { color: #b91c1c !important; border-color: #b91c1c !important; }
+  .status.high { color: #15803d !important; border-color: #15803d !important; }
+  .toolbar, .cta-bar, .doc-actions, button, select { display: none !important; }
+  .table-scroll { overflow: visible !important; }
+  .grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .card, .visual-card, .priority-table tr, .calc-summary { break-inside: avoid; }
+  @page { margin: 14mm; }
+    }
+    body.pdf-mode { background: #fff !important; color: #111827 !important; }
+    body.pdf-mode .tool-header { background: #fff !important; border-bottom: 1px solid #cbd5e1 !important; }
+    body.pdf-mode .tool-header .brand { color: #0f172a !important; }
+    body.pdf-mode h1,
+    body.pdf-mode h2,
+    body.pdf-mode h3,
+    body.pdf-mode strong,
+    body.pdf-mode li,
+    body.pdf-mode .calc-summary-row span.value,
+    body.pdf-mode .priority-table td { color: #111827 !important; }
+    body.pdf-mode p,
+    body.pdf-mode label,
+    body.pdf-mode .tag,
+    body.pdf-mode .pill,
+    body.pdf-mode .badge,
+    body.pdf-mode .income-tag,
+    body.pdf-mode .section-title,
+    body.pdf-mode .chart-caption,
+    body.pdf-mode .chart-labels,
+    body.pdf-mode .calc-summary-row span.label,
+    body.pdf-mode .priority-table th,
+    body.pdf-mode .tool-header .brand-sub { color: #374151 !important; }
+    body.pdf-mode .card,
+    body.pdf-mode .visual-card,
+    body.pdf-mode .calc-summary,
+    body.pdf-mode .chart-wrapper,
+    body.pdf-mode .status,
+    body.pdf-mode .pill,
+    body.pdf-mode .income-tag,
+    body.pdf-mode .badge,
+    body.pdf-mode textarea,
+    body.pdf-mode input[type="number"] { background: #fff !important; box-shadow: none !important; border-color: #cbd5e1 !important; }
+    body.pdf-mode .priority-tier { color: #0369a1 !important; }
+    body.pdf-mode .status.low { color: #b91c1c !important; border-color: #b91c1c !important; }
+    body.pdf-mode .status.high { color: #15803d !important; border-color: #15803d !important; }
+    body.pdf-mode .toolbar,
+    body.pdf-mode .cta-bar,
+    body.pdf-mode .doc-actions,
+    body.pdf-mode button,
+    body.pdf-mode select { display: none !important; }
+    body.pdf-mode .table-scroll { overflow: visible !important; }
+    body.pdf-mode .grid { grid-template-columns: minmax(0, 1fr) !important; }
+  </style>
+</head>
+<body>
+<div id="pdfRoot">
+<header class="tool-header">
+  <img src="/images/logo.png" alt="Tenant Financial Solutions" />
+  <div>
+    <div class="brand">TFS</div>
+    <div class="brand-sub" data-i18n="brandSub">Variable Income</div>
+  </div>
+  <div class="toolbar">
+    <select id="language" onchange="setLanguage(this.value)" aria-label="Language / Idioma">
+      <option value="en">English</option>
+      <option value="es">Español</option>
+    </select>
+  </div>
+</header>
+
+<div class="app">
+  <div class="pill">
+    <span class="icon">💡</span>
+    <span data-i18n="pillText">Variable / Gig Income Stabilizer · Tenant Confidence Tool</span>
+  </div>
+
+  <h1 data-i18n="h1">Variable / Gig Income Allocation &amp; Stabilizer</h1>
+  <p data-i18n="intro">
+    A step-by-step interactive tool for tenants with irregular, commission, or hourly shifts to define their
+    Baseline Survival Target, build a Low-Month Survival Plan, and assign every extra dollar in High Months
+    using a clear priority ladder—ending with a “fixed salary” Income Stabilizer method.
+  </p>
+
+  <div class="grid">
+    <!-- LEFT: Steps + Calculator -->
+    <div>
+      <!-- Step 1: Baseline -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="step1Title">Step 1 · Define the Baseline (“Must-Haves”)</h2>
+            <p data-i18n="step1Desc">Establish the minimum monthly amount needed to cover non-negotiable living expenses.</p>
+          </div>
+          <span class="tag" data-i18n="tagBaseline">Baseline Target</span>
+        </div>
+
+        <div class="inputs-row">
+          <div>
+            <label data-i18n="lblHousing">Housing &amp; Utilities (rent, electricity, water, gas, internet)</label>
+            <input type="number" id="housing" min="0" step="1" data-i18n-ph="phHousing" placeholder="e.g. 1200" />
+          </div>
+          <div>
+            <label data-i18n="lblBasic">Basic Living (groceries, transit, essential insurance)</label>
+            <input type="number" id="basicLiving" min="0" step="1" data-i18n-ph="phBasic" placeholder="e.g. 450" />
+          </div>
+          <div>
+            <label data-i18n="lblDebt">Minimum Debt Obligations (credit cards, loans)</label>
+            <input type="number" id="minDebt" min="0" step="1" data-i18n-ph="phDebt" placeholder="e.g. 200" />
+          </div>
+        </div>
+
+        <div class="section-title" data-i18n="baselineSectionTitle">Baseline Monthly Survival Target</div>
+        <div class="calc-summary" id="baselineSummary">
+          <div class="calc-summary-row">
+            <span class="label" data-i18n="lblTotalBaseline">Total Baseline (per month)</span>
+            <span class="value" id="baselineValue">$0</span>
+          </div>
+          <div class="calc-summary-row">
+            <span class="label" data-i18n="lblClientNote">Client note</span>
+            <span class="value" data-i18n="clientNoteValue">“This is the minimum I must protect every month.”</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Low-Month Plan -->
+      <div class="card" style="margin-top: 18px;">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="step2Title">Step 2 · Low-Month Survival Plan</h2>
+            <p data-i18n="step2Desc">When monthly earnings only cover or fall slightly below the Baseline Target.</p>
+          </div>
+          <span class="tag" data-i18n="tagSurvival">Survival Mode</span>
+        </div>
+
+        <div class="inputs-row">
+          <div>
+            <label data-i18n="lblCurrentIncome">Current Month Income</label>
+            <input type="number" id="currentIncome" min="0" step="1" data-i18n-ph="phCurrentIncome" placeholder="e.g. 900" />
+          </div>
+          <div>
+            <label data-i18n="lblBuffer">Current Buffer Account Balance</label>
+            <input type="number" id="bufferBalance" min="0" step="1" data-i18n-ph="phBuffer" placeholder="e.g. 300" />
+          </div>
+        </div>
+
+        <div id="lowMonthStatus" class="status">
+          <span class="icon">📊</span>
+          <span data-i18n="statusDefault">Enter income and baseline to see if this is a Low Month or High Month.</span>
+        </div>
+
+        <div class="section-title" data-i18n="lowRulesTitle">Low-Month Rules</div>
+        <ul style="font-size:0.85rem; color:var(--muted); padding-left:18px; margin-top:4px;">
+          <li data-i18n-html="rule1"><strong>Fund Baseline First:</strong> Direct 100% of incoming funds toward Step 1 expenses.</li>
+          <li data-i18n-html="rule2"><strong>Activate Emergency Buffer:</strong> If earnings fall short, draw only the exact difference from the Buffer Account.</li>
+          <li data-i18n-html="rule3"><strong>Pause Non-Essentials:</strong> Freeze discretionary spending and extra debt payoff until income recovers.</li>
+        </ul>
+      </div>
+
+      <!-- Step 3: Priority Ladder -->
+      <div class="card" style="margin-top: 18px;">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="step3Title">Step 3 · Priority Ladder for High Months</h2>
+            <p data-i18n="step3Desc">When monthly earnings exceed the Baseline Target, assign every extra dollar down this ladder.</p>
+          </div>
+          <span class="tag" data-i18n="tagHigh">High-Month Allocation</span>
+        </div>
+
+        <div class="section-title" data-i18n="excessTitle">Excess Income (High Month)</div>
+        <div class="calc-summary" id="excessSummary">
+          <div class="calc-summary-row">
+            <span class="label" data-i18n="lblExcess">Excess above Baseline</span>
+            <span class="value" id="excessValue">$0</span>
+          </div>
+          <div class="calc-summary-row">
+            <span class="label" data-i18n="lblMode">Mode</span>
+            <span class="value" id="modeLabel">Not yet determined</span>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="priority-table">
+            <thead>
+              <tr>
+                <th data-i18n="thTier">Priority Tier</th>
+                <th data-i18n="thCategory">Category</th>
+                <th data-i18n="thRule">Allocation Rule / Target</th>
+                <th data-i18n="thAlloc">Suggested Allocation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="priority-tier" data-i18n="tier1">Tier 1</td>
+                <td data-i18n="cat1">Buffer Account (Hill-Covering Fund)</td>
+                <td data-i18n="rule1t">First 20% of excess until 1 month of expenses is saved.</td>
+                <td id="tier1Alloc">$0</td>
+              </tr>
+              <tr>
+                <td class="priority-tier" data-i18n="tier2">Tier 2</td>
+                <td data-i18n="cat2">Irregular Expenses Fund</td>
+                <td data-i18n="rule2t">Next 20% toward non-monthly bills (car insurance, annual fees).</td>
+                <td id="tier2Alloc">$0</td>
+              </tr>
+              <tr>
+                <td class="priority-tier" data-i18n="tier3">Tier 3</td>
+                <td data-i18n="cat3">Accelerated Debt / Savings</td>
+                <td data-i18n="rule3t">40% toward highest priority debt or financial goal.</td>
+                <td id="tier3Alloc">$0</td>
+              </tr>
+              <tr>
+                <td class="priority-tier" data-i18n="tier4">Tier 4</td>
+                <td data-i18n="cat4">Lifestyle &amp; Reward</td>
+                <td data-i18n="rule4t">Final 20% for guilt-free personal spend or family enjoyment.</td>
+                <td id="tier4Alloc">$0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span data-i18n="badgeText">Every extra dollar is assigned a job—no “mystery money.”</span>
+        </div>
+      </div>
+
+      <!-- Step 4: Income Stabilizer -->
+      <div class="card" style="margin-top: 18px;">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="step4Title">Step 4 · Income Stabilizer (“Hill-Covering” Method)</h2>
+            <p data-i18n="step4Desc">Use a Buffer Account to pay yourself a fixed “salary” equal to your Baseline Target.</p>
+          </div>
+          <span class="tag" data-i18n="tagFixed">Fixed Paycheck</span>
+        </div>
+
+        <ul style="font-size:0.85rem; color:var(--muted); padding-left:18px; margin-top:4px;">
+          <li data-i18n-html="stab1"><strong>Separate Accounts:</strong> Maintain a separate Income Buffer Account alongside primary checking.</li>
+          <li data-i18n-html="stab2"><strong>Deposit All Income:</strong> During high-earning months, deposit all revenue into the Buffer Account.</li>
+          <li data-i18n-html="stab3"><strong>Pay a Fixed Salary:</strong> Transfer a consistent weekly or bi-weekly “salary” equal to the Baseline Target into checking.</li>
+        </ul>
+
+        <div class="calc-summary">
+          <div class="calc-summary-row">
+            <span class="label" data-i18n="lblBiweekly">Suggested bi-weekly “salary”</span>
+            <span class="value" id="salaryBiweekly">$0</span>
+          </div>
+          <div class="calc-summary-row">
+            <span class="label" data-i18n="lblWeekly">Suggested weekly “salary”</span>
+            <span class="value" id="salaryWeekly">$0</span>
+          </div>
+        </div>
+
+        <div class="reflection">
+          <p data-i18n-html="reflectTitle"><strong>Session Discussion &amp; Reflection Prompts</strong></p>
+          <p data-i18n="reflectQ1">What is the lowest monthly income you’ve experienced in the past 6 months, and how did you manage it?</p>
+          <textarea data-i18n-ph="phReflection" placeholder="Client reflection..."></textarea>
+          <p data-i18n="reflectQ2">How would it feel to have a fixed “paycheck” transferred to your checking account every two weeks, regardless of hours or shifts?</p>
+          <textarea data-i18n-ph="phReflection" placeholder="Client reflection..."></textarea>
+          <p data-i18n="reflectQ3">Which priority in Tier 3 or 4 motivates you most to capitalize on higher-earning months?</p>
+          <textarea data-i18n-ph="phReflection" placeholder="Client reflection..."></textarea>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-bar">
+        <button class="btn-secondary" type="button" onclick="resetAll()">
+          <span class="icon">🧹</span>
+          <span data-i18n="btnReset">Reset tool</span>
+        </button>
+        <button class="btn-primary" type="button" onclick="calculateAll()">
+          <span class="icon">⚙️</span>
+          <span data-i18n="btnCalculate">Run Allocation Calculator</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Imaging / Visuals -->
+    <div>
+      <div class="visual-card">
+        <div class="visual-header">
+          <h3 data-i18n="visualTitle">Income Sources &amp; Variability</h3>
+          <span class="tag" data-i18n="tagVisual">Visual Snapshot</span>
+        </div>
+        <p style="font-size:0.85rem;" data-i18n="visualDesc">
+          This visual represents a tenant with mixed income sources—hourly shifts, gig work, and commission—
+          and how their monthly totals rise and fall around the Baseline Target.
+        </p>
+
+        <div class="income-tags">
+          <div class="income-tag">
+            <span class="dot dot-salary"></span>
+            <span data-i18n="tagHourly">Hourly / Salary</span>
+          </div>
+          <div class="income-tag">
+            <span class="dot dot-gig"></span>
+            <span data-i18n="tagGig">Gig / Side Jobs</span>
+          </div>
+          <div class="income-tag">
+            <span class="dot dot-commission"></span>
+            <span data-i18n="tagCommission">Commission</span>
+          </div>
+          <div class="income-tag">
+            <span class="dot dot-bonus"></span>
+            <span data-i18n="tagBonus">Bonuses / Tips</span>
+          </div>
+        </div>
+
+        <div class="chart-wrapper">
+          <div class="chart-labels">
+            <span data-i18n="chartLabel1">Monthly Income vs Baseline</span>
+            <span data-i18n="chartLabel2">Last 6 months</span>
+          </div>
+          <!-- Simple SVG line chart with baseline -->
+          <svg viewBox="0 0 300 120">
+            <!-- Baseline line -->
+            <line x1="0" y1="60" x2="300" y2="60" stroke="#4b5563" stroke-dasharray="4 4" />
+            <!-- Income line (example variability) -->
+            <polyline
+              points="0,80 50,40 100,70 150,50 200,90 250,45 300,75"
+              fill="none"
+              stroke="#38bdf8"
+              stroke-width="2.5"
+            />
+            <!-- Dots -->
+            <circle cx="0" cy="80" r="3" fill="#38bdf8" />
+            <circle cx="50" cy="40" r="3" fill="#38bdf8" />
+            <circle cx="100" cy="70" r="3" fill="#38bdf8" />
+            <circle cx="150" cy="50" r="3" fill="#38bdf8" />
+            <circle cx="200" cy="90" r="3" fill="#38bdf8" />
+            <circle cx="250" cy="45" r="3" fill="#38bdf8" />
+            <circle cx="300" cy="75" r="3" fill="#38bdf8" />
+          </svg>
+          <div class="chart-caption" data-i18n="chartCaption">
+            Blue line = actual monthly income. Dashed line = Baseline Survival Target.
+            High months sit above the baseline; low months dip below and rely on the Buffer Account.
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 18px;">
+        <h3 data-i18n="confTitle">Client Confidence Snapshot</h3>
+        <p style="font-size:0.85rem;" data-i18n="confDesc">
+          As you complete the Baseline, Low-Month Plan, and Priority Ladder, this tool helps you see that
+          even with fluctuating income, your essentials can stay protected and your goals can move forward.
+        </p>
+        <div class="calc-summary">
+          <div class="calc-summary-row">
+            <span class="label" data-i18n="lblProtected">Baseline protected?</span>
+            <span class="value" id="baselineProtectedLabel">Pending</span>
+          </div>
+          <div class="calc-summary-row">
+            <span class="label" data-i18n="lblBufferMonths">Buffer coverage (months)</span>
+            <span class="value" id="bufferMonthsLabel">0</span>
+          </div>
+          <div class="calc-summary-row">
+            <span class="label" data-i18n="lblModeMonth">Mode this month</span>
+            <span class="value" id="modeSummaryLabel">Not calculated</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coach's Notes + document actions -->
+  <div class="card" style="margin-top: 18px;">
+    <h3 data-i18n="coachNotesTitle">Coach's Notes</h3>
+    <p style="font-size:0.85rem;" data-i18n="coachNotesDesc">Observations from the session, agreed next steps and follow-up items. Included in the print-out and the downloaded PDF.</p>
+    <textarea id="coachNotes" rows="5" style="min-height:110px;" data-i18n-ph="phCoachNotes" placeholder="Observations, agreed next steps, follow-up items…"></textarea>
+  </div>
+
+  <div class="doc-actions">
+    <button class="btn-primary" type="button" id="downloadBtn" onclick="downloadPdf()">
+      <span class="icon">⬇</span>
+      <span data-i18n="btnDownload">Download PDF</span>
+    </button>
+    <button class="btn-secondary" type="button" onclick="window.print()">
+      <span class="icon">🖨</span>
+      <span data-i18n="btnPrint">Print</span>
+    </button>
+  </div>
+</div>
+</div>
+
+<script src="vendor/html2pdf.bundle.min.js"></script>
+<script>
+  var LANG = "en";
+  var HAS_CALCULATED = false;
+
+  var I18N = {
+    en: {
+      brandSub: "Variable Income",
+      pillText: "Variable / Gig Income Stabilizer \u00b7 Tenant Confidence Tool",
+      h1: "Variable / Gig Income Allocation & Stabilizer",
+      intro: "A step-by-step interactive tool for tenants with irregular, commission, or hourly shifts to define their Baseline Survival Target, build a Low-Month Survival Plan, and assign every extra dollar in High Months using a clear priority ladder\u2014ending with a \u201cfixed salary\u201d Income Stabilizer method.",
+      step1Title: "Step 1 \u00b7 Define the Baseline (\u201cMust-Haves\u201d)",
+      step1Desc: "Establish the minimum monthly amount needed to cover non-negotiable living expenses.",
+      tagBaseline: "Baseline Target",
+      lblHousing: "Housing & Utilities (rent, electricity, water, gas, internet)",
+      phHousing: "e.g. 1200",
+      lblBasic: "Basic Living (groceries, transit, essential insurance)",
+      phBasic: "e.g. 450",
+      lblDebt: "Minimum Debt Obligations (credit cards, loans)",
+      phDebt: "e.g. 200",
+      baselineSectionTitle: "Baseline Monthly Survival Target",
+      lblTotalBaseline: "Total Baseline (per month)",
+      lblClientNote: "Client note",
+      clientNoteValue: "\u201cThis is the minimum I must protect every month.\u201d",
+      step2Title: "Step 2 \u00b7 Low-Month Survival Plan",
+      step2Desc: "When monthly earnings only cover or fall slightly below the Baseline Target.",
+      tagSurvival: "Survival Mode",
+      lblCurrentIncome: "Current Month Income",
+      phCurrentIncome: "e.g. 900",
+      lblBuffer: "Current Buffer Account Balance",
+      phBuffer: "e.g. 300",
+      statusDefault: "Enter income and baseline to see if this is a Low Month or High Month.",
+      lowRulesTitle: "Low-Month Rules",
+      rule1: "<strong>Fund Baseline First:</strong> Direct 100% of incoming funds toward Step 1 expenses.",
+      rule2: "<strong>Activate Emergency Buffer:</strong> If earnings fall short, draw only the exact difference from the Buffer Account.",
+      rule3: "<strong>Pause Non-Essentials:</strong> Freeze discretionary spending and extra debt payoff until income recovers.",
+      step3Title: "Step 3 \u00b7 Priority Ladder for High Months",
+      step3Desc: "When monthly earnings exceed the Baseline Target, assign every extra dollar down this ladder.",
+      tagHigh: "High-Month Allocation",
+      excessTitle: "Excess Income (High Month)",
+      lblExcess: "Excess above Baseline",
+      lblMode: "Mode",
+      thTier: "Priority Tier",
+      thCategory: "Category",
+      thRule: "Allocation Rule / Target",
+      thAlloc: "Suggested Allocation",
+      tier1: "Tier 1",
+      tier2: "Tier 2",
+      tier3: "Tier 3",
+      tier4: "Tier 4",
+      cat1: "Buffer Account (Hill-Covering Fund)",
+      cat2: "Irregular Expenses Fund",
+      cat3: "Accelerated Debt / Savings",
+      cat4: "Lifestyle & Reward",
+      rule1t: "First 20% of excess until 1 month of expenses is saved.",
+      rule2t: "Next 20% toward non-monthly bills (car insurance, annual fees).",
+      rule3t: "40% toward highest priority debt or financial goal.",
+      rule4t: "Final 20% for guilt-free personal spend or family enjoyment.",
+      badgeText: "Every extra dollar is assigned a job\u2014no \u201cmystery money.\u201d",
+      step4Title: "Step 4 \u00b7 Income Stabilizer (\u201cHill-Covering\u201d Method)",
+      step4Desc: "Use a Buffer Account to pay yourself a fixed \u201csalary\u201d equal to your Baseline Target.",
+      tagFixed: "Fixed Paycheck",
+      stab1: "<strong>Separate Accounts:</strong> Maintain a separate Income Buffer Account alongside primary checking.",
+      stab2: "<strong>Deposit All Income:</strong> During high-earning months, deposit all revenue into the Buffer Account.",
+      stab3: "<strong>Pay a Fixed Salary:</strong> Transfer a consistent weekly or bi-weekly \u201csalary\u201d equal to the Baseline Target into checking.",
+      lblBiweekly: "Suggested bi-weekly \u201csalary\u201d",
+      lblWeekly: "Suggested weekly \u201csalary\u201d",
+      reflectTitle: "<strong>Session Discussion & Reflection Prompts</strong>",
+      reflectQ1: "What is the lowest monthly income you\u2019ve experienced in the past 6 months, and how did you manage it?",
+      reflectQ2: "How would it feel to have a fixed \u201cpaycheck\u201d transferred to your checking account every two weeks, regardless of hours or shifts?",
+      reflectQ3: "Which priority in Tier 3 or 4 motivates you most to capitalize on higher-earning months?",
+      phReflection: "Client reflection...",
+      btnReset: "Reset tool",
+      btnCalculate: "Run Allocation Calculator",
+      visualTitle: "Income Sources & Variability",
+      tagVisual: "Visual Snapshot",
+      visualDesc: "This visual represents a tenant with mixed income sources\u2014hourly shifts, gig work, and commission\u2014and how their monthly totals rise and fall around the Baseline Target.",
+      tagHourly: "Hourly / Salary",
+      tagGig: "Gig / Side Jobs",
+      tagCommission: "Commission",
+      tagBonus: "Bonuses / Tips",
+      chartLabel1: "Monthly Income vs Baseline",
+      chartLabel2: "Last 6 months",
+      chartCaption: "Blue line = actual monthly income. Dashed line = Baseline Survival Target. High months sit above the baseline; low months dip below and rely on the Buffer Account.",
+      confTitle: "Client Confidence Snapshot",
+      confDesc: "As you complete the Baseline, Low-Month Plan, and Priority Ladder, this tool helps you see that even with fluctuating income, your essentials can stay protected and your goals can move forward.",
+      lblProtected: "Baseline protected?",
+      lblBufferMonths: "Buffer coverage (months)",
+      lblModeMonth: "Mode this month",
+      coachNotesTitle: "Coach's Notes",
+      coachNotesDesc: "Observations from the session, agreed next steps and follow-up items. Included in the print-out and the downloaded PDF.",
+      phCoachNotes: "Observations, agreed next steps, follow-up items\u2026",
+      btnDownload: "Download PDF",
+      btnPrint: "Print",
+      downloadBusy: "Preparing\u2026",
+      pdfFileName: "tfs-variable-income.pdf",
+      pdfError: "Sorry \u2014 the PDF could not be created. Please use Print instead.",
+      modeUndetermined: "Not yet determined",
+      modeNotCalc: "Not calculated",
+      modeLow: "Low Month (Survival Mode)",
+      modeHigh: "High Month (Allocation Mode)",
+      statusLowA: "Low Month: Fund Baseline first. Draw ",
+      statusLowB: " from Buffer to cover the shortfall. Pause non-essentials.",
+      statusHigh: "High Month: Baseline covered. Use the Priority Ladder to assign every extra dollar.",
+      protectedYes: "Yes (this month)",
+      protectedNo: "Not fully",
+      valPending: "Pending"
+    },
+    es: {
+      brandSub: "Ingreso Variable",
+      pillText: "Estabilizador de Ingresos Variables / Gig \u00b7 Herramienta de Confianza del Inquilino",
+      h1: "Asignaci\u00f3n y Estabilizaci\u00f3n de Ingresos Variables / Gig",
+      intro: "Una herramienta interactiva paso a paso para inquilinos con ingresos irregulares, por comisi\u00f3n o por horas: define tu Meta B\u00e1sica de Supervivencia, crea un Plan de Supervivencia para Meses Bajos y asigna cada d\u00f3lar extra en los Meses Altos con una escalera de prioridades clara, terminando con el m\u00e9todo Estabilizador de Ingresos de \u201csalario fijo\u201d.",
+      step1Title: "Paso 1 \u00b7 Define la Base (\u201cIndispensables\u201d)",
+      step1Desc: "Establece la cantidad mensual m\u00ednima necesaria para cubrir los gastos de vida no negociables.",
+      tagBaseline: "Meta B\u00e1sica",
+      lblHousing: "Vivienda y Servicios (renta, electricidad, agua, gas, internet)",
+      phHousing: "ej. 1200",
+      lblBasic: "Gastos B\u00e1sicos (comida, transporte, seguros esenciales)",
+      phBasic: "ej. 450",
+      lblDebt: "Pagos M\u00ednimos de Deudas (tarjetas, pr\u00e9stamos)",
+      phDebt: "ej. 200",
+      baselineSectionTitle: "Meta B\u00e1sica Mensual de Supervivencia",
+      lblTotalBaseline: "Base Total (por mes)",
+      lblClientNote: "Nota del cliente",
+      clientNoteValue: "\u201cEsto es lo m\u00ednimo que debo proteger cada mes.\u201d",
+      step2Title: "Paso 2 \u00b7 Plan de Supervivencia para Meses Bajos",
+      step2Desc: "Cuando los ingresos del mes apenas cubren o quedan por debajo de la Meta B\u00e1sica.",
+      tagSurvival: "Modo Supervivencia",
+      lblCurrentIncome: "Ingreso del Mes Actual",
+      phCurrentIncome: "ej. 900",
+      lblBuffer: "Saldo Actual de la Cuenta Colch\u00f3n",
+      phBuffer: "ej. 300",
+      statusDefault: "Ingresa el ingreso y la base para ver si este es un Mes Bajo o un Mes Alto.",
+      lowRulesTitle: "Reglas para Meses Bajos",
+      rule1: "<strong>Cubre la Base Primero:</strong> Dirige el 100% del dinero que entra a los gastos del Paso 1.",
+      rule2: "<strong>Activa el Colch\u00f3n de Emergencia:</strong> Si el ingreso no alcanza, retira solo la diferencia exacta de la Cuenta Colch\u00f3n.",
+      rule3: "<strong>Pausa lo No Esencial:</strong> Congela los gastos discrecionales y los pagos extra de deuda hasta que el ingreso se recupere.",
+      step3Title: "Paso 3 \u00b7 Escalera de Prioridades para Meses Altos",
+      step3Desc: "Cuando los ingresos del mes superan la Meta B\u00e1sica, asigna cada d\u00f3lar extra siguiendo esta escalera.",
+      tagHigh: "Asignaci\u00f3n de Mes Alto",
+      excessTitle: "Ingreso Excedente (Mes Alto)",
+      lblExcess: "Excedente sobre la Base",
+      lblMode: "Modo",
+      thTier: "Nivel de Prioridad",
+      thCategory: "Categor\u00eda",
+      thRule: "Regla / Meta de Asignaci\u00f3n",
+      thAlloc: "Asignaci\u00f3n Sugerida",
+      tier1: "Nivel 1",
+      tier2: "Nivel 2",
+      tier3: "Nivel 3",
+      tier4: "Nivel 4",
+      cat1: "Cuenta Colch\u00f3n (Fondo Cubre-Colinas)",
+      cat2: "Fondo de Gastos Irregulares",
+      cat3: "Deuda Acelerada / Ahorro",
+      cat4: "Estilo de Vida y Recompensa",
+      rule1t: "Primer 20% del excedente hasta ahorrar 1 mes de gastos.",
+      rule2t: "Siguiente 20% para cuentas no mensuales (seguro del auto, cuotas anuales).",
+      rule3t: "40% para la deuda o meta financiera de mayor prioridad.",
+      rule4t: "\u00daltimo 20% para gasto personal sin culpa o disfrute familiar.",
+      badgeText: "Cada d\u00f3lar extra tiene un trabajo asignado: sin \u201cdinero misterioso\u201d.",
+      step4Title: "Paso 4 \u00b7 Estabilizador de Ingresos (M\u00e9todo \u201cCubre-Colinas\u201d)",
+      step4Desc: "Usa una Cuenta Colch\u00f3n para pagarte un \u201csalario\u201d fijo igual a tu Meta B\u00e1sica.",
+      tagFixed: "Sueldo Fijo",
+      stab1: "<strong>Cuentas Separadas:</strong> Mant\u00e9n una Cuenta Colch\u00f3n separada de tu cuenta corriente principal.",
+      stab2: "<strong>Deposita Todo el Ingreso:</strong> En los meses de altos ingresos, deposita todo el dinero en la Cuenta Colch\u00f3n.",
+      stab3: "<strong>P\u00e1gate un Salario Fijo:</strong> Transfiere a tu cuenta corriente un \u201csalario\u201d constante, semanal o quincenal, igual a la Meta B\u00e1sica.",
+      lblBiweekly: "\u201cSalario\u201d quincenal sugerido",
+      lblWeekly: "\u201cSalario\u201d semanal sugerido",
+      reflectTitle: "<strong>Preguntas de Reflexi\u00f3n y Conversaci\u00f3n de Sesi\u00f3n</strong>",
+      reflectQ1: "\u00bfCu\u00e1l es el ingreso mensual m\u00e1s bajo que has tenido en los \u00faltimos 6 meses y c\u00f3mo lo manejaste?",
+      reflectQ2: "\u00bfC\u00f3mo se sentir\u00eda recibir un \u201csueldo\u201d fijo en tu cuenta corriente cada dos semanas, sin importar las horas o los turnos?",
+      reflectQ3: "\u00bfQu\u00e9 prioridad del Nivel 3 o 4 te motiva m\u00e1s a aprovechar los meses de mayores ingresos?",
+      phReflection: "Reflexi\u00f3n del cliente...",
+      btnReset: "Reiniciar herramienta",
+      btnCalculate: "Ejecutar Calculadora de Asignaci\u00f3n",
+      visualTitle: "Fuentes de Ingreso y Variabilidad",
+      tagVisual: "Vista Visual",
+      visualDesc: "Esta imagen representa a un inquilino con fuentes de ingreso mixtas \u2014turnos por hora, trabajo gig y comisiones\u2014 y c\u00f3mo sus totales mensuales suben y bajan alrededor de la Meta B\u00e1sica.",
+      tagHourly: "Por Hora / Salario",
+      tagGig: "Gig / Trabajos Extra",
+      tagCommission: "Comisi\u00f3n",
+      tagBonus: "Bonos / Propinas",
+      chartLabel1: "Ingreso Mensual vs Base",
+      chartLabel2: "\u00daltimos 6 meses",
+      chartCaption: "L\u00ednea azul = ingreso mensual real. L\u00ednea punteada = Meta B\u00e1sica de Supervivencia. Los meses altos quedan por encima de la base; los meses bajos caen por debajo y dependen de la Cuenta Colch\u00f3n.",
+      confTitle: "Panorama de Confianza del Cliente",
+      confDesc: "A medida que completas la Base, el Plan de Meses Bajos y la Escalera de Prioridades, esta herramienta te ayuda a ver que, aun con ingresos que fluct\u00faan, tus gastos esenciales pueden quedar protegidos y tus metas pueden avanzar.",
+      lblProtected: "\u00bfBase protegida?",
+      lblBufferMonths: "Cobertura del colch\u00f3n (meses)",
+      lblModeMonth: "Modo de este mes",
+      coachNotesTitle: "Notas del coach",
+      coachNotesDesc: "Observaciones de la sesi\u00f3n, pr\u00f3ximos pasos acordados y pendientes. Se incluyen en la impresi\u00f3n y en el PDF descargado.",
+      phCoachNotes: "Observaciones, pr\u00f3ximos pasos acordados, pendientes\u2026",
+      btnDownload: "Descargar PDF",
+      btnPrint: "Imprimir",
+      downloadBusy: "Preparando\u2026",
+      pdfFileName: "tfs-ingreso-variable.pdf",
+      pdfError: "Lo sentimos, no se pudo crear el PDF. Usa Imprimir en su lugar.",
+      modeUndetermined: "A\u00fan no determinado",
+      modeNotCalc: "No calculado",
+      modeLow: "Mes Bajo (Modo Supervivencia)",
+      modeHigh: "Mes Alto (Modo Asignaci\u00f3n)",
+      statusLowA: "Mes Bajo: cubre primero la Base. Retira ",
+      statusLowB: " de la Cuenta Colch\u00f3n para cubrir la diferencia. Pausa lo no esencial.",
+      statusHigh: "Mes Alto: la Base est\u00e1 cubierta. Usa la Escalera de Prioridades para asignar cada d\u00f3lar extra.",
+      protectedYes: "S\u00ed (este mes)",
+      protectedNo: "No del todo",
+      valPending: "Pendiente"
+    }
+  };
+
+  function t(key) {
+    return (I18N[LANG] && I18N[LANG][key] !== undefined) ? I18N[LANG][key] : I18N.en[key];
+  }
+
+  function setLanguage(lang) {
+    LANG = lang;
+    document.documentElement.lang = lang;
+    var nodes = document.querySelectorAll("[data-i18n]");
+    for (var i = 0; i < nodes.length; i++) {
+      var key = nodes[i].getAttribute("data-i18n");
+      if (I18N[lang][key] !== undefined) nodes[i].innerText = I18N[lang][key];
+    }
+    var htmlNodes = document.querySelectorAll("[data-i18n-html]");
+    for (var j = 0; j < htmlNodes.length; j++) {
+      var hkey = htmlNodes[j].getAttribute("data-i18n-html");
+      if (I18N[lang][hkey] !== undefined) htmlNodes[j].innerHTML = I18N[lang][hkey];
+    }
+    var phNodes = document.querySelectorAll("[data-i18n-ph]");
+    for (var k = 0; k < phNodes.length; k++) {
+      var pkey = phNodes[k].getAttribute("data-i18n-ph");
+      if (I18N[lang][pkey] !== undefined) phNodes[k].placeholder = I18N[lang][pkey];
+    }
+    if (HAS_CALCULATED) {
+      calculateAll();
+    } else {
+      resetLabels();
+    }
+  }
+
+  function formatCurrency(value) {
+    if (isNaN(value) || value === null) return "$0";
+    return "$" + value.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  }
+
+  function getNumber(id) {
+    const el = document.getElementById(id);
+    const v = parseFloat(el.value);
+    return isNaN(v) ? 0 : v;
+  }
+
+  function calculateAll() {
+    const housing = getNumber("housing");
+    const basicLiving = getNumber("basicLiving");
+    const minDebt = getNumber("minDebt");
+    const currentIncome = getNumber("currentIncome");
+    const bufferBalance = getNumber("bufferBalance");
+
+    const baseline = housing + basicLiving + minDebt;
+    document.getElementById("baselineValue").textContent = formatCurrency(baseline);
+
+    // Low vs High month
+    const lowMonthStatus = document.getElementById("lowMonthStatus");
+    const excess = currentIncome - baseline;
+    document.getElementById("excessValue").textContent = formatCurrency(Math.max(excess, 0));
+
+    let mode = "";
+    if (baseline === 0 || currentIncome === 0) {
+      lowMonthStatus.className = "status";
+      lowMonthStatus.innerHTML = '<span class="icon">📊</span><span></span>';
+      lowMonthStatus.lastChild.textContent = t("statusDefault");
+      mode = t("modeNotCalc");
+    } else if (currentIncome < baseline) {
+      lowMonthStatus.className = "status low";
+      const shortfall = baseline - currentIncome;
+      const fromBuffer = Math.min(shortfall, bufferBalance);
+      lowMonthStatus.innerHTML = '<span class="icon">⚠️</span><span></span>';
+      lowMonthStatus.lastChild.textContent =
+        t("statusLowA") + formatCurrency(fromBuffer) + t("statusLowB");
+      mode = t("modeLow");
+    } else {
+      lowMonthStatus.className = "status high";
+      lowMonthStatus.innerHTML = '<span class="icon">✅</span><span></span>';
+      lowMonthStatus.lastChild.textContent = t("statusHigh");
+      mode = t("modeHigh");
+    }
+
+    document.getElementById("modeLabel").textContent = mode;
+    document.getElementById("modeSummaryLabel").textContent = mode;
+
+    // Priority ladder allocations (only if excess > 0)
+    let tier1 = 0, tier2 = 0, tier3 = 0, tier4 = 0;
+    if (excess > 0) {
+      tier1 = excess * 0.20;
+      tier2 = excess * 0.20;
+      tier3 = excess * 0.40;
+      tier4 = excess * 0.20;
+    }
+    document.getElementById("tier1Alloc").textContent = formatCurrency(tier1);
+    document.getElementById("tier2Alloc").textContent = formatCurrency(tier2);
+    document.getElementById("tier3Alloc").textContent = formatCurrency(tier3);
+    document.getElementById("tier4Alloc").textContent = formatCurrency(tier4);
+
+    // Income stabilizer suggested salary
+    const biweekly = baseline / 2;
+    const weekly = baseline / 4;
+    document.getElementById("salaryBiweekly").textContent = formatCurrency(biweekly);
+    document.getElementById("salaryWeekly").textContent = formatCurrency(weekly);
+
+    // Confidence snapshot
+    const baselineProtected = currentIncome >= baseline ? t("protectedYes") : t("protectedNo");
+    document.getElementById("baselineProtectedLabel").textContent = baselineProtected;
+
+    const bufferMonths = baseline > 0 ? (bufferBalance / baseline).toFixed(2) : "0";
+    document.getElementById("bufferMonthsLabel").textContent = bufferMonths;
+
+    HAS_CALCULATED = true;
+  }
+
+  function resetAll() {
+    const ids = [
+      "housing",
+      "basicLiving",
+      "minDebt",
+      "currentIncome",
+      "bufferBalance"
+    ];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+
+    HAS_CALCULATED = false;
+    resetLabels();
+  }
+
+  function resetLabels() {
+    document.getElementById("baselineValue").textContent = "$0";
+    document.getElementById("excessValue").textContent = "$0";
+    document.getElementById("tier1Alloc").textContent = "$0";
+    document.getElementById("tier2Alloc").textContent = "$0";
+    document.getElementById("tier3Alloc").textContent = "$0";
+    document.getElementById("tier4Alloc").textContent = "$0";
+    document.getElementById("salaryBiweekly").textContent = "$0";
+    document.getElementById("salaryWeekly").textContent = "$0";
+    document.getElementById("baselineProtectedLabel").textContent = t("valPending");
+    document.getElementById("bufferMonthsLabel").textContent = "0";
+    document.getElementById("modeLabel").textContent = t("modeUndetermined");
+    document.getElementById("modeSummaryLabel").textContent = t("modeNotCalc");
+
+    const lowMonthStatus = document.getElementById("lowMonthStatus");
+    lowMonthStatus.className = "status";
+    lowMonthStatus.innerHTML = '<span class="icon">📊</span><span></span>';
+    lowMonthStatus.lastChild.textContent = t("statusDefault");
+  }
+
+  function downloadPdf() {
+    var btn = document.getElementById("downloadBtn");
+    var btnLabel = btn.querySelector('[data-i18n="btnDownload"]');
+    if (typeof html2pdf === "undefined") {
+      alert(t("pdfError"));
+      return;
+    }
+    btn.disabled = true;
+    btnLabel.innerText = t("downloadBusy");
+    document.body.classList.add("pdf-mode");
+
+    // Swap every field for plain text before the PDF library measures the page,
+    // so typed values always show up in the saved file.
+    var swaps = [];
+    var fields = document.querySelectorAll("#pdfRoot input, #pdfRoot select, #pdfRoot textarea");
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      if (field.id === "language") continue;
+      var repl = document.createElement("div");
+      var cs = window.getComputedStyle(field);
+      repl.style.fontSize = cs.fontSize;
+      repl.style.color = "#111827";
+      repl.style.border = "1px solid #cbd5e1";
+      repl.style.borderRadius = "10px";
+      repl.style.padding = "8px 10px";
+      repl.style.background = "#fff";
+      repl.style.minHeight = field.offsetHeight + "px";
+      repl.style.height = "auto";
+      repl.style.overflow = "visible";
+      repl.style.whiteSpace = "pre-wrap";
+      repl.style.boxSizing = "border-box";
+      repl.appendChild(document.createTextNode(field.value || "\u2014"));
+      field.style.display = "none";
+      field.parentNode.insertBefore(repl, field);
+      swaps.push({ field: field, repl: repl });
+    }
+
+    function cleanup() {
+      for (var j = 0; j < swaps.length; j++) {
+        if (swaps[j].repl.parentNode) swaps[j].repl.parentNode.removeChild(swaps[j].repl);
+        swaps[j].field.style.display = "";
+      }
+      document.body.classList.remove("pdf-mode");
+      btn.disabled = false;
+      btnLabel.innerText = t("btnDownload");
+    }
+
+    html2pdf().set({
+      margin: [10, 8, 12, 8],
+      filename: t("pdfFileName"),
+      image: { type: "jpeg", quality: 0.95 },
+      html2canvas: { scale: 2, backgroundColor: "#ffffff" },
+      jsPDF: { unit: "mm", format: "letter", orientation: "portrait" },
+      pagebreak: { mode: ["css", "legacy"], avoid: [".card", ".visual-card", ".calc-summary", ".status", ".section-title", "h2", "h3", "tr"] }
+    }).from(document.getElementById("pdfRoot")).save()
+      .then(cleanup)
+      .catch(function () {
+        cleanup();
+        alert(t("pdfError"));
+      });
+  }
+</script>
+</body>
+</html>
