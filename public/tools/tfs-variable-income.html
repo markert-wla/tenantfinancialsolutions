@@ -74,6 +74,12 @@
     h3 {
       font-size: 1.1rem;
     }
+    .sub-title {
+      margin-top: 16px;
+      margin-bottom: 4px;
+      font-size: 1rem;
+      color: var(--soft);
+    }
     p {
       margin: 4px 0 10px;
       color: var(--muted);
@@ -113,6 +119,14 @@
     textarea:focus {
       outline: 2px solid var(--accent);
       border-color: var(--accent);
+    }
+    input:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
     .add-row {
       display: flex;
@@ -376,12 +390,12 @@
 <div class="app">
 
   <h1 data-i18n="h1">TFS Variable Income Planner</h1>
-  <p data-i18n="intro">A complete interactive tool for tenants with irregular income to understand their baseline, best/worst months, priorities, and how to avoid going into the red.</p>
+  <p data-i18n="intro">A guided planner for tenants with variable income to stay out of the red, protect essentials, and prioritize goals.</p>
 
-  <!-- STEP 1: BASELINE -->
+  <!-- STEP 1: BASELINE MONTHLY SURVIVAL TARGET -->
   <div class="card">
     <h2 data-i18n="step1Title">Step 1 — Baseline Monthly Survival Target</h2>
-    <p data-i18n="step1Desc">Enter your non-negotiable monthly expenses.</p>
+    <p data-i18n="step1Desc">Enter your non-negotiable monthly expenses. These are the amounts you must cover to stay afloat.</p>
 
     <label for="housing" data-i18n="lblHousing">Housing &amp; Utilities</label>
     <input type="number" id="housing" min="0" step="1" data-i18n-ph="phHousing" placeholder="e.g., 1200">
@@ -392,16 +406,19 @@
     <label for="debt" data-i18n="lblDebt">Minimum Debt Payments</label>
     <input type="number" id="debt" min="0" step="1" data-i18n-ph="phDebt" placeholder="e.g., 200">
 
+    <label for="otherNonNeg" data-i18n="lblOther">Other Non-Negotiables (optional)</label>
+    <input type="number" id="otherNonNeg" min="0" step="1" data-i18n-ph="phOther" placeholder="e.g., 100">
+
     <div class="summary-box">
       <strong data-i18n="baselineLabel">Baseline Monthly Survival Target:</strong>
       <span id="baselineDisplay">$0</span>
     </div>
   </div>
 
-  <!-- STEP 1A: IRREGULAR INCOME PLANNING — MONTHLY CASH FLOW PLAN -->
+  <!-- STEP 2: EXPECTED MONTHLY INCOME -->
   <div class="card">
-    <h2 data-i18n="step1aTitle">Irregular Income Planning — Monthly Cash Flow Plan</h2>
-    <p data-i18n="step1aDesc">Enter your expected income for the month (use last year's lowest month if unsure).</p>
+    <h2 data-i18n="step2Title">Step 2 — Expected Monthly Income</h2>
+    <p data-i18n="step2Desc">Enter your expected income for this month. If you're unsure, use last year's lowest month as a conservative estimate.</p>
 
     <label for="expectedIncome" data-i18n="lblExpected">Expected Monthly Income</label>
     <input type="number" id="expectedIncome" min="0" step="1" data-i18n-ph="phExpected" placeholder="e.g., 1800">
@@ -412,9 +429,10 @@
     </div>
   </div>
 
-  <!-- STEP 2: LOW MONTH -->
+  <!-- STEP 3: LOW-MONTH SURVIVAL PLAN -->
   <div class="card">
-    <h2 data-i18n="step2Title">Step 2 — Low-Month Survival Plan</h2>
+    <h2 data-i18n="step3Title">Step 3 — Low-Month Survival Plan</h2>
+    <p data-i18n="step3Desc">If your actual income is lower than your baseline, this section shows how to cover the gap and what to pause.</p>
 
     <label for="actualIncome" data-i18n="lblActual">Actual Income This Month</label>
     <input type="number" id="actualIncome" min="0" step="1" data-i18n-ph="phActual" placeholder="e.g., 900">
@@ -425,12 +443,17 @@
     <div id="lowMonthStatus" class="status neutral">
       Enter income to determine if this is a low or high month.
     </div>
+
+    <div class="summary-box">
+      <strong data-i18n="bufferUsedLabel">Buffer used:</strong> <span id="bufferUsedDisplay">$0</span><br>
+      <strong data-i18n="bufferRemainingLabel">Remaining buffer:</strong> <span id="bufferRemainingDisplay">$0</span>
+    </div>
   </div>
 
-  <!-- STEP 3: ITEMS NOT IN CASH FLOW PLAN -->
+  <!-- STEP 4: ITEMS NOT COVERED -->
   <div class="card">
-    <h2 data-i18n="step3Title">Step 3 — Items Not Covered in Monthly Cash Flow Plan</h2>
-    <p data-i18n="step3Desc">List items that didn't fit into your expected income budget.</p>
+    <h2 data-i18n="step4Title">Step 4 — Items Not Covered in Monthly Cash Flow Plan</h2>
+    <p data-i18n="step4Desc">List any items that didn't fit into your expected income budget. These are flexible or irregular expenses.</p>
 
     <div class="add-row">
       <div class="field-name">
@@ -456,12 +479,14 @@
         <tbody></tbody>
       </table>
     </div>
+
+    <p class="limit-note" data-i18n="rankNote">You'll rank these in the next step.</p>
   </div>
 
-  <!-- STEP 4: PRIORITY REWRITE -->
+  <!-- STEP 5: PRIORITY ORDER -->
   <div class="card">
-    <h2 data-i18n="step4Title">Step 4 — Rewrite Expenses in Priority Order</h2>
-    <p data-i18n="step4Desc">Drag a row by its handle — or use the ▲ ▼ buttons — to set the priority order. The running total updates as you reorder.</p>
+    <h2 data-i18n="step5Title">Step 5 — Rewrite Overflow Items in Priority Order</h2>
+    <p data-i18n="step5Desc">Drag items by the handle or use the ▲ ▼ buttons to set the order of importance. The running total updates as you reorder.</p>
 
     <div class="table-scroll">
       <table id="priorityTable">
@@ -479,10 +504,10 @@
     </div>
   </div>
 
-  <!-- STEP 5: ADDITIONAL IRREGULAR INCOME -->
+  <!-- STEP 6: ADDITIONAL IRREGULAR INCOME -->
   <div class="card">
-    <h2 data-i18n="step5Title">Step 5 — Additional Irregular Income</h2>
-    <p data-i18n="step5Desc">Name up to five additional income sources. The total adds up as you type.</p>
+    <h2 data-i18n="step6Title">Step 6 — Additional Irregular Income</h2>
+    <p data-i18n="step6Desc">List any extra income sources you can use this month (side jobs, gig work, seasonal work). Up to five sources.</p>
 
     <div class="table-scroll">
       <table id="sourcesTable">
@@ -509,23 +534,55 @@
     </div>
   </div>
 
-  <!-- HIGH MONTH PRIORITY LADDER -->
+  <!-- RUN CALCULATOR (before the ladder) -->
+  <div class="cta-bar">
+    <button class="btn-primary" type="button" onclick="runCalculator()"><span data-i18n="btnRun">Run Full Calculator</span></button>
+    <button class="btn-secondary" type="button" onclick="resetAll()"><span data-i18n="btnReset">Reset</span></button>
+  </div>
+
+  <!-- STEP 7: HIGH-MONTH PRIORITY LADDER -->
   <div class="card">
-    <h2 data-i18n="ladderTitle">High-Month Priority Ladder</h2>
-    <p data-i18n="ladderDesc">Start with the suggested split, then change any amount or category name, add your own categories, or remove ones you don't need — until the excess is shared out the way you want.</p>
+    <h2 data-i18n="step7Title">Step 7 — High-Month Priority Ladder</h2>
+    <p data-i18n="step7Desc">When your income is above your baseline, this ladder helps you decide exactly where the extra goes. Start with the suggested categories, then customize them.</p>
 
     <div class="summary-box">
       <strong data-i18n="excessLabel">Excess Income Above Baseline:</strong>
       <span id="excessDisplay">$0</span>
     </div>
 
+    <h3 class="sub-title" data-i18n="defaultTiersTitle">Default Tiers</h3>
     <div class="table-scroll">
       <table id="ladderTable">
         <thead>
           <tr>
             <th data-i18n="thTier">Tier</th>
             <th data-i18n="thCategory">Category</th>
-            <th data-i18n="thAlloc">Allocation</th>
+            <th data-i18n="thAlloc">Allocation ($)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-title" data-i18n="customCatsTitle">Custom Categories</h3>
+    <div class="add-row" style="margin-top:8px;">
+      <div class="field-name">
+        <label for="ladderCategory" data-i18n="lblLadderCategory">New Category Name</label>
+        <input type="text" id="ladderCategory" data-i18n-ph="phLadderCategory" placeholder="e.g., Car Repair Fund">
+      </div>
+      <div class="field-amount">
+        <label for="ladderAmount" data-i18n="lblLadderAmount">Allocation ($)</label>
+        <input type="number" id="ladderAmount" min="0" step="1" data-i18n-ph="phLadderAmount" placeholder="e.g., 200">
+      </div>
+      <button class="btn-secondary" type="button" id="addCategoryBtn" onclick="addLadderRow()"><span data-i18n="btnAddCategory">Add Category</span></button>
+    </div>
+
+    <div class="table-scroll">
+      <table id="customTable">
+        <thead>
+          <tr>
+            <th data-i18n="thCategory2">Category</th>
+            <th data-i18n="thAlloc2">Allocation ($)</th>
             <th></th>
           </tr>
         </thead>
@@ -533,36 +590,18 @@
       </table>
     </div>
 
-    <div class="add-row" style="margin-top:16px;">
-      <div class="field-name">
-        <label for="ladderCategory" data-i18n="lblLadderCategory">New Category</label>
-        <input type="text" id="ladderCategory" data-i18n-ph="phLadderCategory" placeholder="Add category (e.g., Car Repair Fund)">
-      </div>
-      <div class="field-amount">
-        <label for="ladderAmount" data-i18n="lblLadderAmount">Allocation ($)</label>
-        <input type="number" id="ladderAmount" min="0" step="1" data-i18n-ph="phLadderAmount" placeholder="e.g., 200">
-      </div>
-      <button class="btn-secondary" type="button" onclick="addLadderRow()"><span data-i18n="btnAddCategory">Add Category</span></button>
-    </div>
-
     <div class="summary-box">
       <strong data-i18n="allocatedLabel">Total Allocated:</strong> <span id="allocatedDisplay">$0</span><br>
       <strong data-i18n="remainingLabel">Left to Allocate:</strong> <span id="remainingDisplay">$0</span>
     </div>
 
-    <div class="status neutral" id="ladderStatus">Run the calculator to see the excess, then share it out however you choose.</div>
-  </div>
-
-  <!-- BUTTONS -->
-  <div class="cta-bar">
-    <button class="btn-primary" type="button" onclick="runCalculator()"><span data-i18n="btnRun">Run Full Calculator</span></button>
-    <button class="btn-secondary" type="button" onclick="resetAll()"><span data-i18n="btnReset">Reset</span></button>
+    <div class="status neutral" id="ladderStatus">Run the Full Calculator above to unlock the ladder.</div>
   </div>
 
   <!-- Coach's Notes + document actions -->
   <div class="card">
     <h3 data-i18n="coachNotesTitle">Coach's Notes</h3>
-    <p style="font-size:0.9rem;" data-i18n="coachNotesDesc">Observations from the session, agreed next steps and follow-up items. Included in the print-out and the downloaded PDF.</p>
+    <p style="font-size:0.9rem;" data-i18n="coachNotesDesc">Summarize observations, agreed next steps, and follow-up items. Included in the print-out and the downloaded PDF.</p>
     <textarea id="coachNotes" rows="5" style="min-height:110px;" data-i18n-ph="phCoachNotes" placeholder="Observations, agreed next steps, follow-up items…"></textarea>
   </div>
 
@@ -585,8 +624,8 @@
   var HAS_CALCULATED = false;
   var items = [];
   var EXCESS = 0;
-  var LADDER_TOUCHED = false;
-  var ladder = [];
+  var tiers = [];
+  var customCats = [];
   var MAX_SOURCES = 5;
   var incomeSources = [];
   var dragIndex = null;
@@ -595,29 +634,43 @@
     en: {
       brandSub: "Variable Income Planner",
       h1: "TFS Variable Income Planner",
-      intro: "A complete interactive tool for tenants with irregular income to understand their baseline, best/worst months, priorities, and how to avoid going into the red.",
+      intro: "A guided planner for tenants with variable income to stay out of the red, protect essentials, and prioritize goals.",
       step1Title: "Step 1 \u2014 Baseline Monthly Survival Target",
-      step1Desc: "Enter your non-negotiable monthly expenses.",
+      step1Desc: "Enter your non-negotiable monthly expenses. These are the amounts you must cover to stay afloat.",
       lblHousing: "Housing & Utilities",
       phHousing: "e.g., 1200",
       lblLiving: "Basic Living (groceries, transit, insurance)",
       phLiving: "e.g., 450",
       lblDebt: "Minimum Debt Payments",
       phDebt: "e.g., 200",
+      lblOther: "Other Non-Negotiables (optional)",
+      phOther: "e.g., 100",
       baselineLabel: "Baseline Monthly Survival Target:",
-      step1aTitle: "Irregular Income Planning \u2014 Monthly Cash Flow Plan",
-      step1aDesc: "Enter your expected income for the month (use last year's lowest month if unsure).",
+      step2Title: "Step 2 \u2014 Expected Monthly Income",
+      step2Desc: "Enter your expected income for this month. If you're unsure, use last year's lowest month as a conservative estimate.",
       lblExpected: "Expected Monthly Income",
       phExpected: "e.g., 1800",
       expectedLabel: "Expected Income:",
-      step2Title: "Step 2 \u2014 Low-Month Survival Plan",
+      step3Title: "Step 3 \u2014 Low-Month Survival Plan",
+      step3Desc: "If your actual income is lower than your baseline, this section shows how to cover the gap and what to pause.",
       lblActual: "Actual Income This Month",
       phActual: "e.g., 900",
       lblBuffer: "Current Buffer Account Balance",
       phBuffer: "e.g., 300",
+      bufferUsedLabel: "Buffer used:",
+      bufferRemainingLabel: "Remaining buffer:",
       statusDefault: "Enter income to determine if this is a low or high month.",
-      step3Title: "Step 3 \u2014 Items Not Covered in Monthly Cash Flow Plan",
-      step3Desc: "List items that didn't fit into your expected income budget.",
+      statusAboveA: "You are above your baseline by ",
+      statusAboveB: ". Essentials are covered. Use the High-Month Priority Ladder below to allocate the extra.",
+      statusLowA: "LOW MONTH: You are short ",
+      statusLowB: ". Use ",
+      statusLowC: " from buffer. Pause non-essentials.",
+      statusLowAllA: "LOW MONTH: You are short ",
+      statusLowAllB: ". Use all ",
+      statusLowAllC: " from buffer. You still have ",
+      statusLowAllD: " not covered \u2014 you must pause or reduce more non-essentials.",
+      step4Title: "Step 4 \u2014 Items Not Covered in Monthly Cash Flow Plan",
+      step4Desc: "List any items that didn't fit into your expected income budget. These are flexible or irregular expenses.",
       lblItem: "Item",
       phItem: "Add item (e.g., Hospital Bill)",
       lblItemAmount: "Budgeted Amount ($)",
@@ -630,12 +683,13 @@
       thRunning: "Running Total",
       btnRemove: "Remove",
       emptyItems: "No items added yet.",
-      step4Title: "Step 4 \u2014 Rewrite Expenses in Priority Order",
-      step4Desc: "Drag a row by its handle \u2014 or use the \u25b2 \u25bc buttons \u2014 to set the priority order. The running total updates as you reorder.",
+      rankNote: "You'll rank these in the next step.",
+      step5Title: "Step 5 \u2014 Rewrite Overflow Items in Priority Order",
+      step5Desc: "Drag items by the handle or use the \u25b2 \u25bc buttons to set the order of importance. The running total updates as you reorder.",
       btnMoveUp: "Move up",
       btnMoveDown: "Move down",
-      step5Title: "Step 5 \u2014 Additional Irregular Income",
-      step5Desc: "Name up to five additional income sources. The total adds up as you type.",
+      step6Title: "Step 6 \u2014 Additional Irregular Income",
+      step6Desc: "List any extra income sources you can use this month (side jobs, gig work, seasonal work). Up to five sources.",
       thSource: "Income Source",
       thSourceAmount: "Amount ($)",
       phSourceName: "e.g., Weekend catering",
@@ -644,39 +698,40 @@
       sourceLimit: "That's the maximum of 5 income sources.",
       emptySources: "No income sources yet \u2014 add one below.",
       additionalLabel: "Total Additional Income:",
-      ladderTitle: "High-Month Priority Ladder",
-      ladderDesc: "Start with the suggested split, then change any amount or category name, add your own categories, or remove ones you don't need \u2014 until the excess is shared out the way you want.",
+      step7Title: "Step 7 \u2014 High-Month Priority Ladder",
+      step7Desc: "When your income is above your baseline, this ladder helps you decide exactly where the extra goes. Start with the suggested categories, then customize them.",
       excessLabel: "Excess Income Above Baseline:",
+      defaultTiersTitle: "Default Tiers",
+      customCatsTitle: "Custom Categories",
       thTier: "Tier",
       thCategory: "Category",
-      thAlloc: "Allocation",
+      thAlloc: "Allocation ($)",
+      thCategory2: "Category",
+      thAlloc2: "Allocation ($)",
       tierWord: "Tier",
       cat1: "Buffer Account",
       cat2: "Irregular Expenses Fund",
       cat3: "Accelerated Debt / Savings",
       cat4: "Lifestyle & Reward",
-      lblLadderCategory: "New Category",
-      phLadderCategory: "Add category (e.g., Car Repair Fund)",
+      lblLadderCategory: "New Category Name",
+      phLadderCategory: "e.g., Car Repair Fund",
       lblLadderAmount: "Allocation ($)",
       phLadderAmount: "e.g., 200",
       btnAddCategory: "Add Category",
+      emptyCustom: "No custom categories yet \u2014 add one above.",
       allocatedLabel: "Total Allocated:",
       remainingLabel: "Left to Allocate:",
-      emptyLadder: "No categories yet \u2014 add one below.",
-      ladderStart: "Run the calculator to see the excess, then share it out however you choose.",
+      ladderLockedRun: "Run the Full Calculator above to unlock the ladder.",
+      ladderLockedNoExcess: "No income above your baseline this month \u2014 the ladder unlocks on a high month.",
       ladderLeftA: "",
       ladderLeftB: " left to allocate.",
       ladderBalanced: "Every dollar of the excess is allocated.",
-      ladderOverA: "Over-allocated by ",
-      ladderOverB: " \u2014 lower an amount or remove a category.",
+      ladderOverA: "You've allocated ",
+      ladderOverB: " more than your excess. Reduce one or more amounts.",
       btnRun: "Run Full Calculator",
       btnReset: "Reset",
-      statusLowA: "LOW MONTH: You are short ",
-      statusLowB: ". Use ",
-      statusLowC: " from buffer. Pause non-essentials.",
-      statusHigh: "HIGH MONTH: Baseline covered. Use Priority Ladder.",
       coachNotesTitle: "Coach's Notes",
-      coachNotesDesc: "Observations from the session, agreed next steps and follow-up items. Included in the print-out and the downloaded PDF.",
+      coachNotesDesc: "Summarize observations, agreed next steps, and follow-up items. Included in the print-out and the downloaded PDF.",
       phCoachNotes: "Observations, agreed next steps, follow-up items\u2026",
       btnDownload: "Download PDF",
       btnPrint: "Print",
@@ -687,29 +742,43 @@
     es: {
       brandSub: "Planificador de Ingreso Variable",
       h1: "Planificador de Ingreso Variable TFS",
-      intro: "Una herramienta interactiva completa para inquilinos con ingresos irregulares: entiende tu base, tus mejores y peores meses, tus prioridades y c\u00f3mo evitar quedar en n\u00fameros rojos.",
+      intro: "Un planificador guiado para inquilinos con ingreso variable: evita los n\u00fameros rojos, protege lo esencial y prioriza tus metas.",
       step1Title: "Paso 1 \u2014 Meta B\u00e1sica Mensual de Supervivencia",
-      step1Desc: "Ingresa tus gastos mensuales no negociables.",
+      step1Desc: "Ingresa tus gastos mensuales no negociables. Son los montos que debes cubrir para mantenerte a flote.",
       lblHousing: "Vivienda y Servicios",
       phHousing: "ej. 1200",
       lblLiving: "Gastos B\u00e1sicos (comida, transporte, seguros)",
       phLiving: "ej. 450",
       lblDebt: "Pagos M\u00ednimos de Deudas",
       phDebt: "ej. 200",
+      lblOther: "Otros Gastos No Negociables (opcional)",
+      phOther: "ej. 100",
       baselineLabel: "Meta B\u00e1sica Mensual de Supervivencia:",
-      step1aTitle: "Planificaci\u00f3n de Ingreso Irregular \u2014 Plan Mensual de Flujo de Efectivo",
-      step1aDesc: "Ingresa tu ingreso esperado del mes (si no est\u00e1s seguro, usa el mes m\u00e1s bajo del a\u00f1o pasado).",
+      step2Title: "Paso 2 \u2014 Ingreso Mensual Esperado",
+      step2Desc: "Ingresa tu ingreso esperado para este mes. Si no est\u00e1s seguro, usa el mes m\u00e1s bajo del a\u00f1o pasado como estimaci\u00f3n conservadora.",
       lblExpected: "Ingreso Mensual Esperado",
       phExpected: "ej. 1800",
       expectedLabel: "Ingreso Esperado:",
-      step2Title: "Paso 2 \u2014 Plan de Supervivencia para Meses Bajos",
+      step3Title: "Paso 3 \u2014 Plan de Supervivencia para Meses Bajos",
+      step3Desc: "Si tu ingreso real es menor que tu base, esta secci\u00f3n muestra c\u00f3mo cubrir la diferencia y qu\u00e9 pausar.",
       lblActual: "Ingreso Real de Este Mes",
       phActual: "ej. 900",
       lblBuffer: "Saldo Actual de la Cuenta Colch\u00f3n",
       phBuffer: "ej. 300",
+      bufferUsedLabel: "Colch\u00f3n utilizado:",
+      bufferRemainingLabel: "Colch\u00f3n restante:",
       statusDefault: "Ingresa el ingreso para determinar si este es un mes bajo o un mes alto.",
-      step3Title: "Paso 3 \u2014 Gastos No Cubiertos en el Plan Mensual de Flujo de Efectivo",
-      step3Desc: "Anota los gastos que no cupieron en el presupuesto de tu ingreso esperado.",
+      statusAboveA: "Est\u00e1s por encima de tu base por ",
+      statusAboveB: ". Lo esencial est\u00e1 cubierto. Usa la Escalera de Prioridades para Meses Altos m\u00e1s abajo para asignar el extra.",
+      statusLowA: "MES BAJO: Te faltan ",
+      statusLowB: ". Usa ",
+      statusLowC: " del colch\u00f3n. Pausa lo no esencial.",
+      statusLowAllA: "MES BAJO: Te faltan ",
+      statusLowAllB: ". Usa todo el colch\u00f3n (",
+      statusLowAllC: "). A\u00fan te quedan ",
+      statusLowAllD: " sin cubrir: debes pausar o reducir m\u00e1s gastos no esenciales.",
+      step4Title: "Paso 4 \u2014 Gastos No Cubiertos en el Plan Mensual de Flujo de Efectivo",
+      step4Desc: "Anota los gastos que no cupieron en el presupuesto de tu ingreso esperado. Son gastos flexibles o irregulares.",
       lblItem: "Concepto",
       phItem: "Agregar concepto (ej. Cuenta del Hospital)",
       lblItemAmount: "Monto Presupuestado ($)",
@@ -722,12 +791,13 @@
       thRunning: "Total Acumulado",
       btnRemove: "Quitar",
       emptyItems: "A\u00fan no se han agregado conceptos.",
-      step4Title: "Paso 4 \u2014 Reescribe los Gastos en Orden de Prioridad",
-      step4Desc: "Arrastra una fila por su manija \u2014 o usa los botones \u25b2 \u25bc \u2014 para establecer el orden de prioridad. El total acumulado se actualiza al reordenar.",
+      rankNote: "Los ordenar\u00e1s por prioridad en el siguiente paso.",
+      step5Title: "Paso 5 \u2014 Reescribe los Gastos en Orden de Prioridad",
+      step5Desc: "Arrastra las filas por su manija o usa los botones \u25b2 \u25bc para establecer el orden de importancia. El total acumulado se actualiza al reordenar.",
       btnMoveUp: "Subir",
       btnMoveDown: "Bajar",
-      step5Title: "Paso 5 \u2014 Ingreso Irregular Adicional",
-      step5Desc: "Nombra hasta cinco fuentes de ingreso adicionales. El total se suma mientras escribes.",
+      step6Title: "Paso 6 \u2014 Ingreso Irregular Adicional",
+      step6Desc: "Anota cualquier ingreso extra que puedas usar este mes (trabajos secundarios, changas, trabajo de temporada). Hasta cinco fuentes.",
       thSource: "Fuente de Ingreso",
       thSourceAmount: "Monto ($)",
       phSourceName: "ej. Banquetes de fin de semana",
@@ -736,39 +806,40 @@
       sourceLimit: "Ese es el m\u00e1ximo de 5 fuentes de ingreso.",
       emptySources: "A\u00fan no hay fuentes de ingreso: agrega una abajo.",
       additionalLabel: "Ingreso Adicional Total:",
-      ladderTitle: "Escalera de Prioridades para Meses Altos",
-      ladderDesc: "Comienza con la distribuci\u00f3n sugerida y luego cambia cualquier monto o nombre de categor\u00eda, agrega tus propias categor\u00edas o elimina las que no necesites, hasta repartir el excedente como quieras.",
+      step7Title: "Paso 7 \u2014 Escalera de Prioridades para Meses Altos",
+      step7Desc: "Cuando tu ingreso supera tu base, esta escalera te ayuda a decidir exactamente a d\u00f3nde va el extra. Comienza con las categor\u00edas sugeridas y luego personal\u00edzalas.",
       excessLabel: "Ingreso Excedente Sobre la Base:",
+      defaultTiersTitle: "Niveles Sugeridos",
+      customCatsTitle: "Categor\u00edas Personalizadas",
       thTier: "Nivel",
       thCategory: "Categor\u00eda",
-      thAlloc: "Asignaci\u00f3n",
+      thAlloc: "Asignaci\u00f3n ($)",
+      thCategory2: "Categor\u00eda",
+      thAlloc2: "Asignaci\u00f3n ($)",
       tierWord: "Nivel",
       cat1: "Cuenta Colch\u00f3n",
       cat2: "Fondo de Gastos Irregulares",
       cat3: "Deuda Acelerada / Ahorro",
       cat4: "Estilo de Vida y Recompensa",
-      lblLadderCategory: "Nueva Categor\u00eda",
-      phLadderCategory: "Agregar categor\u00eda (ej. Fondo de Reparaci\u00f3n del Auto)",
+      lblLadderCategory: "Nombre de la Nueva Categor\u00eda",
+      phLadderCategory: "ej. Fondo de Reparaci\u00f3n del Auto",
       lblLadderAmount: "Asignaci\u00f3n ($)",
       phLadderAmount: "ej. 200",
       btnAddCategory: "Agregar Categor\u00eda",
+      emptyCustom: "A\u00fan no hay categor\u00edas personalizadas: agrega una arriba.",
       allocatedLabel: "Total Asignado:",
       remainingLabel: "Por Asignar:",
-      emptyLadder: "A\u00fan no hay categor\u00edas: agrega una abajo.",
-      ladderStart: "Ejecuta la calculadora para ver el excedente y luego rep\u00e1rtelo como prefieras.",
+      ladderLockedRun: "Ejecuta la Calculadora Completa arriba para activar la escalera.",
+      ladderLockedNoExcess: "Este mes no hay ingreso por encima de tu base: la escalera se activa en un mes alto.",
       ladderLeftA: "Quedan ",
       ladderLeftB: " por asignar.",
       ladderBalanced: "Todo el excedente est\u00e1 asignado.",
       ladderOverA: "Asignaste ",
-      ladderOverB: " de m\u00e1s: reduce un monto o elimina una categor\u00eda.",
+      ladderOverB: " de m\u00e1s que tu excedente. Reduce uno o m\u00e1s montos.",
       btnRun: "Ejecutar Calculadora Completa",
       btnReset: "Reiniciar",
-      statusLowA: "MES BAJO: Te faltan ",
-      statusLowB: ". Usa ",
-      statusLowC: " del colch\u00f3n. Pausa lo no esencial.",
-      statusHigh: "MES ALTO: La base est\u00e1 cubierta. Usa la Escalera de Prioridades.",
       coachNotesTitle: "Notas del coach",
-      coachNotesDesc: "Observaciones de la sesi\u00f3n, pr\u00f3ximos pasos acordados y pendientes. Se incluyen en la impresi\u00f3n y en el PDF descargado.",
+      coachNotesDesc: "Resume observaciones, pr\u00f3ximos pasos acordados y pendientes. Se incluyen en la impresi\u00f3n y en el PDF descargado.",
       phCoachNotes: "Observaciones, pr\u00f3ximos pasos acordados, pendientes\u2026",
       btnDownload: "Descargar PDF",
       btnPrint: "Imprimir",
@@ -798,12 +869,9 @@
     renderItems();
     renderPriorityTable();
     renderSources();
-    renderLadder();
-    if (HAS_CALCULATED) {
-      runCalculator();
-    } else {
-      resetStatus();
-    }
+    renderTiers();
+    renderCustomCats();
+    recalcLive();
   }
 
   function formatCurrency(value) {
@@ -818,6 +886,8 @@
     var v = parseFloat(el.value);
     return isNaN(v) ? 0 : v;
   }
+
+  /* ---------- Step 4: items not covered ---------- */
 
   function addItem() {
     var nameEl = document.getElementById("itemInput");
@@ -872,6 +942,8 @@
     });
   }
 
+  /* ---------- Step 5: priority order (drag or buttons) ---------- */
+
   function renderPriorityTable() {
     var tbody = document.querySelector("#priorityTable tbody");
     tbody.innerHTML = "";
@@ -879,7 +951,7 @@
       var emptyRow = document.createElement("tr");
       emptyRow.className = "empty-row";
       var emptyCell = document.createElement("td");
-      emptyCell.colSpan = 3;
+      emptyCell.colSpan = 5;
       emptyCell.textContent = t("emptyItems");
       emptyRow.appendChild(emptyCell);
       tbody.appendChild(emptyRow);
@@ -973,6 +1045,8 @@
     renderPriorityTable();
   }
 
+  /* ---------- Step 6: additional irregular income (max 5) ---------- */
+
   function defaultSources() {
     return [{ name: "", amount: 0 }];
   }
@@ -986,6 +1060,7 @@
   function removeSource(index) {
     incomeSources.splice(index, 1);
     renderSources();
+    recalcLive();
   }
 
   function renderSources() {
@@ -1023,7 +1098,7 @@
         amountInput.oninput = function () {
           var v = parseFloat(amountInput.value);
           source.amount = isNaN(v) ? 0 : v;
-          updateSourcesTotal();
+          recalcLive();
         };
         amountCell.appendChild(amountInput);
 
@@ -1052,56 +1127,29 @@
     var total = 0;
     incomeSources.forEach(function (source) { total += (source.amount || 0); });
     document.getElementById("additionalIncomeDisplay").innerText = formatCurrency(total);
+    return total;
   }
 
-  function defaultLadder() {
+  /* ---------- Step 7: high-month priority ladder ---------- */
+
+  function defaultTiers() {
     return [
-      { key: "cat1", share: 0.20, name: "", amount: 0 },
-      { key: "cat2", share: 0.20, name: "", amount: 0 },
-      { key: "cat3", share: 0.40, name: "", amount: 0 },
-      { key: "cat4", share: 0.20, name: "", amount: 0 }
+      { key: "cat1", amount: 0 },
+      { key: "cat2", amount: 0 },
+      { key: "cat3", amount: 0 },
+      { key: "cat4", amount: 0 }
     ];
   }
 
-  function ladderLabel(row) {
-    return row.name !== "" ? row.name : (row.key ? t(row.key) : "");
+  function ladderActive() {
+    return HAS_CALCULATED && EXCESS > 0;
   }
 
-  function addLadderRow() {
-    var nameEl = document.getElementById("ladderCategory");
-    var amountEl = document.getElementById("ladderAmount");
-    var name = nameEl.value.trim();
-    if (!name) return;
-    var amount = parseFloat(amountEl.value);
-    ladder.push({ key: null, share: undefined, name: name, amount: isNaN(amount) ? 0 : amount });
-    LADDER_TOUCHED = true;
-    nameEl.value = "";
-    amountEl.value = "";
-    nameEl.focus();
-    renderLadder();
-  }
-
-  function removeLadderRow(index) {
-    ladder.splice(index, 1);
-    LADDER_TOUCHED = true;
-    renderLadder();
-  }
-
-  function renderLadder() {
+  function renderTiers() {
     var tbody = document.querySelector("#ladderTable tbody");
     tbody.innerHTML = "";
-    if (ladder.length === 0) {
-      var emptyRow = document.createElement("tr");
-      emptyRow.className = "empty-row";
-      var emptyCell = document.createElement("td");
-      emptyCell.colSpan = 4;
-      emptyCell.textContent = t("emptyLadder");
-      emptyRow.appendChild(emptyCell);
-      tbody.appendChild(emptyRow);
-      updateLadderTotals();
-      return;
-    }
-    ladder.forEach(function (row, index) {
+    var active = ladderActive();
+    tiers.forEach(function (row, index) {
       var tr = document.createElement("tr");
 
       var tierCell = document.createElement("td");
@@ -1109,15 +1157,7 @@
       tierCell.textContent = t("tierWord") + " " + (index + 1);
 
       var nameCell = document.createElement("td");
-      var nameInput = document.createElement("input");
-      nameInput.type = "text";
-      nameInput.className = "ladder-input ladder-name";
-      nameInput.value = ladderLabel(row);
-      nameInput.oninput = function () {
-        row.name = nameInput.value;
-        LADDER_TOUCHED = true;
-      };
-      nameCell.appendChild(nameInput);
+      nameCell.textContent = t(row.key);
 
       var amountCell = document.createElement("td");
       var amountInput = document.createElement("input");
@@ -1126,131 +1166,206 @@
       amountInput.step = "1";
       amountInput.className = "ladder-input";
       amountInput.value = row.amount ? row.amount : "";
+      amountInput.disabled = !active;
       amountInput.oninput = function () {
         var v = parseFloat(amountInput.value);
         row.amount = isNaN(v) ? 0 : v;
-        LADDER_TOUCHED = true;
         updateLadderTotals();
       };
       amountCell.appendChild(amountInput);
 
-      var actionCell = document.createElement("td");
-      var removeBtn = document.createElement("button");
-      removeBtn.type = "button";
-      removeBtn.className = "row-remove";
-      removeBtn.textContent = t("btnRemove");
-      removeBtn.onclick = function () { removeLadderRow(index); };
-      actionCell.appendChild(removeBtn);
-
       tr.appendChild(tierCell);
       tr.appendChild(nameCell);
       tr.appendChild(amountCell);
-      tr.appendChild(actionCell);
       tbody.appendChild(tr);
     });
+  }
+
+  function addLadderRow() {
+    if (!ladderActive()) return;
+    var nameEl = document.getElementById("ladderCategory");
+    var amountEl = document.getElementById("ladderAmount");
+    var name = nameEl.value.trim();
+    if (!name) return;
+    var amount = parseFloat(amountEl.value);
+    customCats.push({ name: name, amount: isNaN(amount) ? 0 : amount });
+    nameEl.value = "";
+    amountEl.value = "";
+    nameEl.focus();
+    renderCustomCats();
     updateLadderTotals();
   }
 
-  function updateLadderTotals() {
+  function removeCustomCat(index) {
+    customCats.splice(index, 1);
+    renderCustomCats();
+    updateLadderTotals();
+  }
+
+  function renderCustomCats() {
+    var tbody = document.querySelector("#customTable tbody");
+    tbody.innerHTML = "";
+    var active = ladderActive();
+    if (customCats.length === 0) {
+      var emptyRow = document.createElement("tr");
+      emptyRow.className = "empty-row";
+      var emptyCell = document.createElement("td");
+      emptyCell.colSpan = 3;
+      emptyCell.textContent = t("emptyCustom");
+      emptyRow.appendChild(emptyCell);
+      tbody.appendChild(emptyRow);
+    } else {
+      customCats.forEach(function (row, index) {
+        var tr = document.createElement("tr");
+
+        var nameCell = document.createElement("td");
+        nameCell.textContent = row.name;
+
+        var amountCell = document.createElement("td");
+        var amountInput = document.createElement("input");
+        amountInput.type = "number";
+        amountInput.min = "0";
+        amountInput.step = "1";
+        amountInput.className = "ladder-input";
+        amountInput.value = row.amount ? row.amount : "";
+        amountInput.disabled = !active;
+        amountInput.oninput = function () {
+          var v = parseFloat(amountInput.value);
+          row.amount = isNaN(v) ? 0 : v;
+          updateLadderTotals();
+        };
+        amountCell.appendChild(amountInput);
+
+        var actionCell = document.createElement("td");
+        var removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "row-remove";
+        removeBtn.textContent = t("btnRemove");
+        removeBtn.disabled = !active;
+        removeBtn.onclick = function () { removeCustomCat(index); };
+        actionCell.appendChild(removeBtn);
+
+        tr.appendChild(nameCell);
+        tr.appendChild(amountCell);
+        tr.appendChild(actionCell);
+        tbody.appendChild(tr);
+      });
+    }
+    var addInputs = [document.getElementById("ladderCategory"), document.getElementById("ladderAmount"), document.getElementById("addCategoryBtn")];
+    addInputs.forEach(function (el) { el.disabled = !active; });
+  }
+
+  function totalAllocated() {
     var allocated = 0;
-    ladder.forEach(function (row) { allocated += (row.amount || 0); });
+    tiers.forEach(function (row) { allocated += (row.amount || 0); });
+    customCats.forEach(function (row) { allocated += (row.amount || 0); });
+    return allocated;
+  }
+
+  function updateLadderTotals() {
+    var allocated = totalAllocated();
     var remaining = EXCESS - allocated;
 
     document.getElementById("allocatedDisplay").innerText = formatCurrency(allocated);
-    document.getElementById("remainingDisplay").innerText = formatCurrency(remaining);
+    document.getElementById("remainingDisplay").innerText = formatCurrency(Math.max(remaining, 0));
 
     var box = document.getElementById("ladderStatus");
-    if (EXCESS === 0 && allocated === 0) {
+    if (!HAS_CALCULATED) {
       box.className = "status neutral";
-      box.innerText = t("ladderStart");
-    } else if (remaining > 0) {
+      box.innerText = t("ladderLockedRun");
+    } else if (EXCESS <= 0) {
       box.className = "status neutral";
-      box.innerText = t("ladderLeftA") + formatCurrency(remaining) + t("ladderLeftB");
+      box.innerText = t("ladderLockedNoExcess");
     } else if (remaining < 0) {
       box.className = "status low";
       box.innerText = t("ladderOverA") + formatCurrency(Math.abs(remaining)) + t("ladderOverB");
+    } else if (remaining > 0) {
+      box.className = "status neutral";
+      box.innerText = t("ladderLeftA") + formatCurrency(remaining) + t("ladderLeftB");
     } else {
       box.className = "status high";
       box.innerText = t("ladderBalanced");
     }
   }
 
+  /* ---------- Calculations ---------- */
+
   function currentBaseline() {
-    return getNumber("housing") + getNumber("living") + getNumber("debt");
+    return getNumber("housing") + getNumber("living") + getNumber("debt") + getNumber("otherNonNeg");
   }
 
   function updateBaselineDisplay() {
     document.getElementById("baselineDisplay").innerText = formatCurrency(currentBaseline());
   }
 
-  function distributeDefaultLadder() {
-    var assigned = 0;
-    ladder.forEach(function (row, i) {
-      if (i < ladder.length - 1) {
-        row.amount = Math.round(EXCESS * row.share);
-        assigned += row.amount;
-      } else {
-        row.amount = Math.max(EXCESS - assigned, 0);
-      }
-    });
-  }
-
-  function updateExcess() {
-    EXCESS = Math.max(getNumber("actualIncome") - currentBaseline(), 0);
-    document.getElementById("excessDisplay").innerText = formatCurrency(EXCESS);
-    if (LADDER_TOUCHED) {
-      updateLadderTotals();
-    } else {
-      distributeDefaultLadder();
-      renderLadder();
-    }
-  }
-
-  function recalcLive() {
-    updateBaselineDisplay();
-    updateExcess();
-  }
-
-  function runCalculator() {
+  function updateLowMonth() {
     var baseline = currentBaseline();
-
-    updateBaselineDisplay();
-
-    var expectedIncome = getNumber("expectedIncome");
-    document.getElementById("expectedIncomeDisplay").innerText = formatCurrency(expectedIncome);
-
     var actualIncome = getNumber("actualIncome");
     var bufferBalance = getNumber("bufferBalance");
 
     var status = document.getElementById("lowMonthStatus");
+    var bufferUsed = 0;
+    var remainingBuffer = bufferBalance;
 
     if (baseline === 0 && actualIncome === 0) {
       status.className = "status neutral";
       status.innerText = t("statusDefault");
-    } else if (actualIncome < baseline) {
-      var shortfall = baseline - actualIncome;
-      var bufferUse = Math.min(shortfall, bufferBalance);
-      status.className = "status low";
-      status.innerText = t("statusLowA") + formatCurrency(shortfall) + t("statusLowB") + formatCurrency(bufferUse) + t("statusLowC");
     } else {
-      status.className = "status high";
-      status.innerText = t("statusHigh");
+      var shortfall = baseline - actualIncome;
+      if (shortfall <= 0) {
+        status.className = "status high";
+        status.innerText = t("statusAboveA") + formatCurrency(Math.abs(shortfall)) + t("statusAboveB");
+      } else if (bufferBalance >= shortfall) {
+        bufferUsed = shortfall;
+        remainingBuffer = bufferBalance - shortfall;
+        status.className = "status low";
+        status.innerText = t("statusLowA") + formatCurrency(shortfall) + t("statusLowB") + formatCurrency(shortfall) + t("statusLowC");
+      } else {
+        bufferUsed = bufferBalance;
+        remainingBuffer = 0;
+        var uncovered = shortfall - bufferBalance;
+        status.className = "status low";
+        status.innerText = t("statusLowAllA") + formatCurrency(shortfall) + t("statusLowAllB") + formatCurrency(bufferBalance) + t("statusLowAllC") + formatCurrency(uncovered) + t("statusLowAllD");
+      }
     }
 
-    updateSourcesTotal();
-    updateExcess();
-
-    HAS_CALCULATED = true;
+    document.getElementById("bufferUsedDisplay").innerText = formatCurrency(bufferUsed);
+    document.getElementById("bufferRemainingDisplay").innerText = formatCurrency(remainingBuffer);
   }
 
-  function resetStatus() {
-    var status = document.getElementById("lowMonthStatus");
-    status.className = "status neutral";
-    status.innerText = t("statusDefault");
+  function updateExcess() {
+    var baseline = currentBaseline();
+    var expectedIncome = getNumber("expectedIncome");
+    var actualIncome = getNumber("actualIncome");
+    var totalAdditional = updateSourcesTotal();
+    var effectiveIncome = Math.max(expectedIncome, actualIncome) + totalAdditional;
+    var wasActive = ladderActive();
+    EXCESS = Math.max(effectiveIncome - baseline, 0);
+    document.getElementById("excessDisplay").innerText = formatCurrency(EXCESS);
+    if (ladderActive() !== wasActive) {
+      renderTiers();
+      renderCustomCats();
+    }
+    updateLadderTotals();
+  }
+
+  function recalcLive() {
+    updateBaselineDisplay();
+    document.getElementById("expectedIncomeDisplay").innerText = formatCurrency(getNumber("expectedIncome"));
+    updateLowMonth();
+    updateExcess();
+  }
+
+  function runCalculator() {
+    HAS_CALCULATED = true;
+    recalcLive();
+    renderTiers();
+    renderCustomCats();
+    updateLadderTotals();
   }
 
   function resetAll() {
-    var ids = ["housing", "living", "debt", "expectedIncome", "actualIncome", "bufferBalance", "itemInput", "itemAmount", "ladderCategory", "ladderAmount"];
+    var ids = ["housing", "living", "debt", "otherNonNeg", "expectedIncome", "actualIncome", "bufferBalance", "itemInput", "itemAmount", "ladderCategory", "ladderAmount"];
     ids.forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.value = "";
@@ -1260,15 +1375,22 @@
     renderPriorityTable();
     incomeSources = defaultSources();
     renderSources();
+    tiers = defaultTiers();
+    customCats = [];
+    EXCESS = 0;
+    HAS_CALCULATED = false;
+    document.getElementById("coachNotes").value = "";
     document.getElementById("baselineDisplay").innerText = "$0";
     document.getElementById("expectedIncomeDisplay").innerText = "$0";
     document.getElementById("excessDisplay").innerText = "$0";
-    EXCESS = 0;
-    LADDER_TOUCHED = false;
-    ladder = defaultLadder();
-    renderLadder();
-    HAS_CALCULATED = false;
-    resetStatus();
+    document.getElementById("bufferUsedDisplay").innerText = "$0";
+    document.getElementById("bufferRemainingDisplay").innerText = "$0";
+    var status = document.getElementById("lowMonthStatus");
+    status.className = "status neutral";
+    status.innerText = t("statusDefault");
+    renderTiers();
+    renderCustomCats();
+    updateLadderTotals();
   }
 
   // Allow Enter in the item boxes to add the item.
@@ -1286,17 +1408,20 @@
     if (e.key === "Enter") { e.preventDefault(); addLadderRow(); }
   });
 
-  // Keep the baseline, the excess and the ladder totals up to date as amounts are typed.
-  ["housing", "living", "debt", "actualIncome"].forEach(function (id) {
+  // Keep every total up to date as amounts are typed.
+  ["housing", "living", "debt", "otherNonNeg", "expectedIncome", "actualIncome", "bufferBalance"].forEach(function (id) {
     document.getElementById(id).addEventListener("input", recalcLive);
   });
 
-  ladder = defaultLadder();
+  tiers = defaultTiers();
+  customCats = [];
   incomeSources = defaultSources();
   renderItems();
   renderPriorityTable();
   renderSources();
-  renderLadder();
+  renderTiers();
+  renderCustomCats();
+  updateLadderTotals();
 
   function downloadPdf() {
     var btn = document.getElementById("downloadBtn");
