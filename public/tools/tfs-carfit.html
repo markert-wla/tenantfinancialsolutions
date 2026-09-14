@@ -756,6 +756,7 @@ var I18N = {
         outNoVehicles: "Enter vehicle data to see budget analysis.",
         repairMissing: "Enter both market value and repair cost.",
         repairOver: "⚠ Repair exceeds 50% of market value – replacement recommended.",
+        repairOverNote: "You're not fixing the car, you're subsidizing the depreciation.",
         repairUnder: "✓ Repair cost is under 50% of market value – repair may be reasonable.",
         sinkingMissing: "Enter a target vehicle price to calculate.",
         sinkTimeFrame: "Time Frame:", sinkAvailable: "Savings plus current vehicle value:", sinkNeeded: "Amount still needed:", sinkMonthly: "Monthly savings goal (sinking fund):",
@@ -862,6 +863,7 @@ var I18N = {
         outNoVehicles: "Ingresa los datos de los vehículos para ver el análisis.",
         repairMissing: "Ingresa el valor de mercado y el costo de la reparación.",
         repairOver: "⚠ La reparación supera el 50% del valor de mercado – se recomienda reemplazar el vehículo.",
+        repairOverNote: "No estás arreglando el auto, estás subsidiando la depreciación.",
         repairUnder: "✓ El costo de la reparación es menor al 50% del valor de mercado – reparar puede ser razonable.",
         sinkingMissing: "Ingresa el precio objetivo del vehículo para calcular.",
         sinkTimeFrame: "Plazo:", sinkAvailable: "Ahorros más el valor del vehículo actual:", sinkNeeded: "Monto que aún falta:", sinkMonthly: "Meta de ahorro mensual (fondo de ahorro):",
@@ -1013,7 +1015,7 @@ function checkRepairRule() {
 
     if (repair > market * 0.5) {
         document.getElementById("repairAlert").innerHTML =
-            `<div class="alert">${t("repairOver")}</div>`;
+            `<div class="alert">${t("repairOver")}<br>${t("repairOverNote")}</div>`;
     } else {
         document.getElementById("repairAlert").innerHTML =
             `<div class="success">${t("repairUnder")}</div>`;
