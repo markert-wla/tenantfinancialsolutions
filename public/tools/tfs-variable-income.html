@@ -166,6 +166,34 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
+    .drag-handle {
+      cursor: grab;
+      color: var(--muted);
+      font-size: 1.1rem;
+      user-select: none;
+      padding: 0 2px;
+    }
+    tr.dragging {
+      opacity: 0.5;
+    }
+    tr.drag-over td {
+      border-top: 2px solid var(--accent);
+    }
+    .row-move {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--soft);
+      border-radius: 8px;
+      padding: 2px 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-right: 4px;
+    }
+    .limit-note {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
     .ladder-input {
       margin-bottom: 0 !important;
       padding: 8px 10px !important;
@@ -288,7 +316,7 @@
       .status.low { color: #b91c1c !important; border-color: #b91c1c !important; }
       .status.high { color: #15803d !important; border-color: #15803d !important; }
       .status.neutral { color: #374151 !important; }
-      .toolbar, .cta-bar, .doc-actions, .add-row button, .row-remove, button, select { display: none !important; }
+      .toolbar, .cta-bar, .doc-actions, .add-row button, .row-remove, .row-move, .drag-handle, button, select { display: none !important; }
       .table-scroll { overflow: visible !important; }
       .card, tr, .summary-box { break-inside: avoid; }
       @page { margin: 14mm; }
@@ -322,6 +350,8 @@
     body.pdf-mode .doc-actions,
     body.pdf-mode .add-row button,
     body.pdf-mode .row-remove,
+    body.pdf-mode .row-move,
+    body.pdf-mode .drag-handle,
     body.pdf-mode button,
     body.pdf-mode select { display: none !important; }
     body.pdf-mode .table-scroll { overflow: visible !important; }
@@ -431,15 +461,17 @@
   <!-- STEP 4: PRIORITY REWRITE -->
   <div class="card">
     <h2 data-i18n="step4Title">Step 4 — Rewrite Expenses in Priority Order</h2>
-    <p data-i18n="step4Desc">Each item is listed in priority order (the order you added them) with a running total.</p>
+    <p data-i18n="step4Desc">Drag a row by its handle — or use the ▲ ▼ buttons — to set the priority order. The running total updates as you reorder.</p>
 
     <div class="table-scroll">
       <table id="priorityTable">
         <thead>
           <tr>
+            <th></th>
             <th data-i18n="thItem2">Item</th>
             <th data-i18n="thAmount2">Budgeted Amount</th>
             <th data-i18n="thRunning">Running Total</th>
+            <th></th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -450,9 +482,26 @@
   <!-- STEP 5: ADDITIONAL IRREGULAR INCOME -->
   <div class="card">
     <h2 data-i18n="step5Title">Step 5 — Additional Irregular Income</h2>
+    <p data-i18n="step5Desc">Name up to five additional income sources. The total adds up as you type.</p>
 
-    <label for="additionalIncome" data-i18n="lblAdditional">Additional Income This Month</label>
-    <input type="number" id="additionalIncome" min="0" step="1" data-i18n-ph="phAdditional" placeholder="e.g., 1500">
+    <div class="table-scroll">
+      <table id="sourcesTable">
+        <thead>
+          <tr>
+            <th data-i18n="thSource">Income Source</th>
+            <th data-i18n="thSourceAmount">Amount ($)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="cta-bar" style="margin-top:14px;">
+      <button class="btn-secondary" type="button" id="addSourceBtn" onclick="addSource()"><span data-i18n="btnAddSource">Add Income Source</span></button>
+    </div>
+
+    <p id="sourceLimitNote" class="limit-note" data-i18n="sourceLimit" style="display:none;">That's the maximum of 5 income sources.</p>
 
     <div class="summary-box">
       <strong data-i18n="additionalLabel">Total Additional Income:</strong>
@@ -538,6 +587,9 @@
   var EXCESS = 0;
   var LADDER_TOUCHED = false;
   var ladder = [];
+  var MAX_SOURCES = 5;
+  var incomeSources = [];
+  var dragIndex = null;
 
   var I18N = {
     en: {
@@ -579,10 +631,18 @@
       btnRemove: "Remove",
       emptyItems: "No items added yet.",
       step4Title: "Step 4 \u2014 Rewrite Expenses in Priority Order",
-      step4Desc: "Each item is listed in priority order (the order you added them) with a running total.",
+      step4Desc: "Drag a row by its handle \u2014 or use the \u25b2 \u25bc buttons \u2014 to set the priority order. The running total updates as you reorder.",
+      btnMoveUp: "Move up",
+      btnMoveDown: "Move down",
       step5Title: "Step 5 \u2014 Additional Irregular Income",
-      lblAdditional: "Additional Income This Month",
-      phAdditional: "e.g., 1500",
+      step5Desc: "Name up to five additional income sources. The total adds up as you type.",
+      thSource: "Income Source",
+      thSourceAmount: "Amount ($)",
+      phSourceName: "e.g., Weekend catering",
+      phSourceAmount: "e.g., 400",
+      btnAddSource: "Add Income Source",
+      sourceLimit: "That's the maximum of 5 income sources.",
+      emptySources: "No income sources yet \u2014 add one below.",
       additionalLabel: "Total Additional Income:",
       ladderTitle: "High-Month Priority Ladder",
       ladderDesc: "Start with the suggested split, then change any amount or category name, add your own categories, or remove ones you don't need \u2014 until the excess is shared out the way you want.",
@@ -663,10 +723,18 @@
       btnRemove: "Quitar",
       emptyItems: "A\u00fan no se han agregado conceptos.",
       step4Title: "Paso 4 \u2014 Reescribe los Gastos en Orden de Prioridad",
-      step4Desc: "Cada concepto aparece en orden de prioridad (el orden en que los agregaste) con un total acumulado.",
+      step4Desc: "Arrastra una fila por su manija \u2014 o usa los botones \u25b2 \u25bc \u2014 para establecer el orden de prioridad. El total acumulado se actualiza al reordenar.",
+      btnMoveUp: "Subir",
+      btnMoveDown: "Bajar",
       step5Title: "Paso 5 \u2014 Ingreso Irregular Adicional",
-      lblAdditional: "Ingreso Adicional de Este Mes",
-      phAdditional: "ej. 1500",
+      step5Desc: "Nombra hasta cinco fuentes de ingreso adicionales. El total se suma mientras escribes.",
+      thSource: "Fuente de Ingreso",
+      thSourceAmount: "Monto ($)",
+      phSourceName: "ej. Banquetes de fin de semana",
+      phSourceAmount: "ej. 400",
+      btnAddSource: "Agregar Fuente de Ingreso",
+      sourceLimit: "Ese es el m\u00e1ximo de 5 fuentes de ingreso.",
+      emptySources: "A\u00fan no hay fuentes de ingreso: agrega una abajo.",
       additionalLabel: "Ingreso Adicional Total:",
       ladderTitle: "Escalera de Prioridades para Meses Altos",
       ladderDesc: "Comienza con la distribuci\u00f3n sugerida y luego cambia cualquier monto o nombre de categor\u00eda, agrega tus propias categor\u00edas o elimina las que no necesites, hasta repartir el excedente como quieras.",
@@ -729,6 +797,7 @@
     }
     renderItems();
     renderPriorityTable();
+    renderSources();
     renderLadder();
     if (HAS_CALCULATED) {
       runCalculator();
@@ -739,7 +808,9 @@
 
   function formatCurrency(value) {
     if (isNaN(value) || value === null) return "$0";
-    return "$" + Number(value).toLocaleString(undefined, { maximumFractionDigits: 0 });
+    var n = Number(value);
+    var sign = n < 0 ? "-" : "";
+    return sign + "$" + Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
   }
 
   function getNumber(id) {
@@ -815,20 +886,172 @@
       return;
     }
     var running = 0;
-    items.forEach(function (item) {
+    items.forEach(function (item, index) {
       running += item.amount;
       var row = document.createElement("tr");
+      row.draggable = true;
+
+      var handleCell = document.createElement("td");
+      var handle = document.createElement("span");
+      handle.className = "drag-handle";
+      handle.textContent = "\u2261";
+      handleCell.appendChild(handle);
+
       var nameCell = document.createElement("td");
       nameCell.textContent = item.name;
       var amountCell = document.createElement("td");
       amountCell.textContent = formatCurrency(item.amount);
       var runningCell = document.createElement("td");
       runningCell.textContent = formatCurrency(running);
+
+      var moveCell = document.createElement("td");
+      var upBtn = document.createElement("button");
+      upBtn.type = "button";
+      upBtn.className = "row-move";
+      upBtn.textContent = "\u25b2";
+      upBtn.title = t("btnMoveUp");
+      upBtn.setAttribute("aria-label", t("btnMoveUp"));
+      upBtn.disabled = index === 0;
+      upBtn.onclick = function () { moveItem(index, index - 1); };
+      var downBtn = document.createElement("button");
+      downBtn.type = "button";
+      downBtn.className = "row-move";
+      downBtn.textContent = "\u25bc";
+      downBtn.title = t("btnMoveDown");
+      downBtn.setAttribute("aria-label", t("btnMoveDown"));
+      downBtn.disabled = index === items.length - 1;
+      downBtn.onclick = function () { moveItem(index, index + 1); };
+      moveCell.appendChild(upBtn);
+      moveCell.appendChild(downBtn);
+
+      row.ondragstart = function (e) {
+        dragIndex = index;
+        row.classList.add("dragging");
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "move";
+          try { e.dataTransfer.setData("text/plain", String(index)); } catch (err) {}
+        }
+      };
+      row.ondragend = function () {
+        dragIndex = null;
+        row.classList.remove("dragging");
+        clearDragMarkers();
+      };
+      row.ondragover = function (e) {
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+        if (dragIndex !== null && dragIndex !== index) row.classList.add("drag-over");
+      };
+      row.ondragleave = function () { row.classList.remove("drag-over"); };
+      row.ondrop = function (e) {
+        e.preventDefault();
+        row.classList.remove("drag-over");
+        if (dragIndex === null || dragIndex === index) return;
+        moveItem(dragIndex, index);
+        dragIndex = null;
+      };
+
+      row.appendChild(handleCell);
       row.appendChild(nameCell);
       row.appendChild(amountCell);
       row.appendChild(runningCell);
+      row.appendChild(moveCell);
       tbody.appendChild(row);
     });
+  }
+
+  function clearDragMarkers() {
+    var rows = document.querySelectorAll("#priorityTable tbody tr");
+    for (var i = 0; i < rows.length; i++) rows[i].classList.remove("drag-over");
+  }
+
+  function moveItem(from, to) {
+    if (to < 0 || to >= items.length || from === to) return;
+    var moved = items.splice(from, 1)[0];
+    items.splice(to, 0, moved);
+    renderItems();
+    renderPriorityTable();
+  }
+
+  function defaultSources() {
+    return [{ name: "", amount: 0 }];
+  }
+
+  function addSource() {
+    if (incomeSources.length >= MAX_SOURCES) return;
+    incomeSources.push({ name: "", amount: 0 });
+    renderSources();
+  }
+
+  function removeSource(index) {
+    incomeSources.splice(index, 1);
+    renderSources();
+  }
+
+  function renderSources() {
+    var tbody = document.querySelector("#sourcesTable tbody");
+    tbody.innerHTML = "";
+    if (incomeSources.length === 0) {
+      var emptyRow = document.createElement("tr");
+      emptyRow.className = "empty-row";
+      var emptyCell = document.createElement("td");
+      emptyCell.colSpan = 3;
+      emptyCell.textContent = t("emptySources");
+      emptyRow.appendChild(emptyCell);
+      tbody.appendChild(emptyRow);
+    } else {
+      incomeSources.forEach(function (source, index) {
+        var tr = document.createElement("tr");
+
+        var nameCell = document.createElement("td");
+        var nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.className = "ladder-input ladder-name";
+        nameInput.value = source.name;
+        nameInput.placeholder = t("phSourceName");
+        nameInput.oninput = function () { source.name = nameInput.value; };
+        nameCell.appendChild(nameInput);
+
+        var amountCell = document.createElement("td");
+        var amountInput = document.createElement("input");
+        amountInput.type = "number";
+        amountInput.min = "0";
+        amountInput.step = "1";
+        amountInput.className = "ladder-input";
+        amountInput.value = source.amount ? source.amount : "";
+        amountInput.placeholder = t("phSourceAmount");
+        amountInput.oninput = function () {
+          var v = parseFloat(amountInput.value);
+          source.amount = isNaN(v) ? 0 : v;
+          updateSourcesTotal();
+        };
+        amountCell.appendChild(amountInput);
+
+        var actionCell = document.createElement("td");
+        var removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "row-remove";
+        removeBtn.textContent = t("btnRemove");
+        removeBtn.onclick = function () { removeSource(index); };
+        actionCell.appendChild(removeBtn);
+
+        tr.appendChild(nameCell);
+        tr.appendChild(amountCell);
+        tr.appendChild(actionCell);
+        tbody.appendChild(tr);
+      });
+    }
+
+    var atLimit = incomeSources.length >= MAX_SOURCES;
+    document.getElementById("addSourceBtn").disabled = atLimit;
+    document.getElementById("sourceLimitNote").style.display = atLimit ? "block" : "none";
+    updateSourcesTotal();
+  }
+
+  function updateSourcesTotal() {
+    var total = 0;
+    incomeSources.forEach(function (source) { total += (source.amount || 0); });
+    document.getElementById("additionalIncomeDisplay").innerText = formatCurrency(total);
   }
 
   function defaultLadder() {
@@ -952,13 +1175,46 @@
     }
   }
 
-  function runCalculator() {
-    var housing = getNumber("housing");
-    var living = getNumber("living");
-    var debt = getNumber("debt");
-    var baseline = housing + living + debt;
+  function currentBaseline() {
+    return getNumber("housing") + getNumber("living") + getNumber("debt");
+  }
 
-    document.getElementById("baselineDisplay").innerText = formatCurrency(baseline);
+  function updateBaselineDisplay() {
+    document.getElementById("baselineDisplay").innerText = formatCurrency(currentBaseline());
+  }
+
+  function distributeDefaultLadder() {
+    var assigned = 0;
+    ladder.forEach(function (row, i) {
+      if (i < ladder.length - 1) {
+        row.amount = Math.round(EXCESS * row.share);
+        assigned += row.amount;
+      } else {
+        row.amount = Math.max(EXCESS - assigned, 0);
+      }
+    });
+  }
+
+  function updateExcess() {
+    EXCESS = Math.max(getNumber("actualIncome") - currentBaseline(), 0);
+    document.getElementById("excessDisplay").innerText = formatCurrency(EXCESS);
+    if (LADDER_TOUCHED) {
+      updateLadderTotals();
+    } else {
+      distributeDefaultLadder();
+      renderLadder();
+    }
+  }
+
+  function recalcLive() {
+    updateBaselineDisplay();
+    updateExcess();
+  }
+
+  function runCalculator() {
+    var baseline = currentBaseline();
+
+    updateBaselineDisplay();
 
     var expectedIncome = getNumber("expectedIncome");
     document.getElementById("expectedIncomeDisplay").innerText = formatCurrency(expectedIncome);
@@ -981,27 +1237,8 @@
       status.innerText = t("statusHigh");
     }
 
-    var additionalIncome = getNumber("additionalIncome");
-    document.getElementById("additionalIncomeDisplay").innerText = formatCurrency(additionalIncome);
-
-    var excess = actualIncome - baseline;
-    EXCESS = Math.max(excess, 0);
-    document.getElementById("excessDisplay").innerText = formatCurrency(EXCESS);
-
-    if (!LADDER_TOUCHED) {
-      var assigned = 0;
-      ladder.forEach(function (row, i) {
-        if (i < ladder.length - 1) {
-          row.amount = Math.round(EXCESS * row.share);
-          assigned += row.amount;
-        } else {
-          row.amount = Math.max(EXCESS - assigned, 0);
-        }
-      });
-      renderLadder();
-    } else {
-      updateLadderTotals();
-    }
+    updateSourcesTotal();
+    updateExcess();
 
     HAS_CALCULATED = true;
   }
@@ -1013,7 +1250,7 @@
   }
 
   function resetAll() {
-    var ids = ["housing", "living", "debt", "expectedIncome", "actualIncome", "bufferBalance", "itemInput", "itemAmount", "additionalIncome", "ladderCategory", "ladderAmount"];
+    var ids = ["housing", "living", "debt", "expectedIncome", "actualIncome", "bufferBalance", "itemInput", "itemAmount", "ladderCategory", "ladderAmount"];
     ids.forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.value = "";
@@ -1021,9 +1258,10 @@
     items = [];
     renderItems();
     renderPriorityTable();
+    incomeSources = defaultSources();
+    renderSources();
     document.getElementById("baselineDisplay").innerText = "$0";
     document.getElementById("expectedIncomeDisplay").innerText = "$0";
-    document.getElementById("additionalIncomeDisplay").innerText = "$0";
     document.getElementById("excessDisplay").innerText = "$0";
     EXCESS = 0;
     LADDER_TOUCHED = false;
@@ -1048,9 +1286,16 @@
     if (e.key === "Enter") { e.preventDefault(); addLadderRow(); }
   });
 
+  // Keep the baseline, the excess and the ladder totals up to date as amounts are typed.
+  ["housing", "living", "debt", "actualIncome"].forEach(function (id) {
+    document.getElementById(id).addEventListener("input", recalcLive);
+  });
+
   ladder = defaultLadder();
+  incomeSources = defaultSources();
   renderItems();
   renderPriorityTable();
+  renderSources();
   renderLadder();
 
   function downloadPdf() {
