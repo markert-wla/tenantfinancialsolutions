@@ -43,7 +43,7 @@ const INDIVIDUAL_PLANS = [
     color: 'border-amber-400',
     badge: 'amber',
     features: [
-      '1 individual coaching session per month',
+      '1 individual coaching booking per month',
       '1 complimentary TFS Community Connect session per month',
     ],
     cta: 'Get Started',
@@ -59,7 +59,7 @@ const INDIVIDUAL_PLANS = [
     badge: 'teal',
     popular: true,
     features: [
-      '2 individual coaching sessions per month',
+      '2 individual coaching bookings per month',
       '1 complimentary TFS Community Connect session per month',
       'Priority scheduling',
       'Text check-ins',
@@ -273,7 +273,7 @@ export default function ServicesPage() {
               <ul className="space-y-3 text-tfs-slate text-sm mb-6">
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Admin generates promo codes — 1 per unit</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> Tenants register with their code → Advantage Plan unlocked</li>
-                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> 2 individual sessions + TFS Community Connect per tenant/mo</li>
+                <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> 2 individual bookings + TFS Community Connect per tenant/mo</li>
                 <li className="flex gap-2"><Check size={16} className="text-tfs-teal-button shrink-0 mt-0.5" /> No cost or billing to your tenants</li>
               </ul>
               <Link href="/contact?type=property-manager" className="btn-primary text-sm">
