@@ -163,12 +163,12 @@ export default function Navbar() {
             )}
           </div>
           <span className="text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase leading-none pl-0.5 text-tfs-gold">
-            Tenant Focused – Community{' '}
+            Stable Tenants – Stronger{' '}
             <span
               className="text-[1.5em] leading-none"
               style={IMPACT_METALLIC}
             >
-              Impact
+              Communities
             </span>
           </span>
         </div>
