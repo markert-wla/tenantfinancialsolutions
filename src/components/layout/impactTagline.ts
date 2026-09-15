@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react'
 
 /**
- * Shared styling for the word "Impact" in the "Tenant Focused – Community Impact"
- * tagline that sits under the logo in the header and the footer.
+ * Shared styling for the word "Communities" in the "Stable Tenants – Stronger
+ * Communities" tagline that sits under the logo in the header and the footer.
  *
  * Set in Playfair Display Black (weight 900), loaded and self-hosted by Next via
  * next/font in the root layout and exposed as the --font-playfair CSS variable —

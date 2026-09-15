@@ -9,7 +9,7 @@ import HeroCTAButton from '@/components/layout/HeroCTAButton'
 import CoachCard from '@/components/public/CoachCard'
 
 export const metadata: Metadata = {
-  title: 'Tenant Financial Solutions — Tenant Focused, Community Impact',
+  title: 'Tenant Financial Solutions — Stable Tenants → Stronger Communities',
   description:
     'Financial coaching for tenants, property managers, and non-profits. One-on-one sessions with dedicated coaches. Real People – Real Coaching.',
   openGraph: {
@@ -186,7 +186,7 @@ export default async function HomePage({
             </h1>
             <div className="mt-5 h-px max-w-md bg-gradient-to-r from-tfs-gold-dark/70 to-transparent" aria-hidden="true" />
             <p className="mt-4 text-base sm:text-lg font-semibold text-tfs-gold-dark">
-              Tenant Focused&ensp;&bull;&ensp;Community Impact
+              Stable Tenants&ensp;&rarr;&ensp;Stronger Communities
             </p>
 
             <ul className="mt-8 flex gap-4 sm:gap-10">

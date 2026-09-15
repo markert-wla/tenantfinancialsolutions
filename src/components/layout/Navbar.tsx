@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/cn'
-import { IMPACT_METALLIC } from './impactTagline'
 
 const NAV_LINKS = [
   { label: 'Home',      href: '/' },
@@ -163,13 +162,7 @@ export default function Navbar() {
             )}
           </div>
           <span className="text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase leading-none pl-0.5 text-tfs-gold">
-            Tenant Focused – Community{' '}
-            <span
-              className="text-[1.5em] leading-none"
-              style={IMPACT_METALLIC}
-            >
-              Impact
-            </span>
+            Stable Tenants → Stronger Communities
           </span>
         </div>
 
