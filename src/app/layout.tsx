@@ -24,7 +24,7 @@ const playfair = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Tenant Financial Solutions — Stable Tenants, Stronger Communities',
+    default: 'Tenant Financial Solutions — Stable Tenants → Stronger Communities',
     template: '%s | Tenant Financial Solutions',
   },
   applicationName: 'Tenant Financial Solutions',
