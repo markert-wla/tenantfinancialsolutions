@@ -72,7 +72,7 @@ export default async function AboutPage() {
               Our Vision
             </p>
             <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white leading-tight">
-              To create a world where millions of tenants take ownership of their financial futures
+              We compassionately empower tenants with financial skills that increase stability, reduce delinquency, and strengthen property communities.
             </h2>
           </div>
 
