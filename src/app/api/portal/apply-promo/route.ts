@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getStripe, PLAN_PRICE_IDS, resolvePlanChangeTarget, type PlanChangeTarget } from '@/lib/stripe'
+import { notifyAdminOfPlanChange } from '@/lib/plan-alerts'
 
 const NEXT_TIER: Record<string, string | undefined> = {
   free:   'starter',
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan_tier, promo_code_used, stripe_customer_id')
+    .select('plan_tier, promo_code_used, stripe_customer_id, first_name, last_name, email')
     .eq('id', user.id)
     .single()
 
@@ -156,6 +157,20 @@ export async function POST(req: NextRequest) {
 
       await redeemCode()
 
+      // The webhook's customer.subscription.updated lands after the write
+      // above, by which point the profile already shows the new tier and the
+      // alert there would see no change — so send it from here.
+      await notifyAdminOfPlanChange({
+        userId:       user.id,
+        previousTier: currentTier,
+        newTier:      targetTier,
+        firstName:    profile.first_name,
+        lastName:     profile.last_name,
+        email:        profile.email,
+        promoCode:    code,
+        source:       'apply-promo-switch',
+      })
+
       return NextResponse.json({ ok: true, switched: true, newTier: targetTier })
     }
 
@@ -219,6 +234,20 @@ export async function POST(req: NextRequest) {
     .from('promo_codes')
     .update({ uses_count: promoCode.uses_count + 1 })
     .eq('code', code)
+
+  // Comp / tier-assignment codes grant a plan with no payment behind them, so
+  // nothing from Stripe would ever announce this one.
+  await notifyAdminOfPlanChange({
+    userId:       user.id,
+    previousTier: profile.plan_tier,
+    newTier:      promoCode.assigned_tier,
+    firstName:    profile.first_name,
+    lastName:     profile.last_name,
+    email:        profile.email,
+    event:        'promo',
+    promoCode:    code,
+    source:       `apply-promo-${promoCode.code_type ?? 'comp'}`,
+  })
 
   return NextResponse.json({ ok: true, newTier: promoCode.assigned_tier })
 }
