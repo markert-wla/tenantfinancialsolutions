@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
 import { tierForSubscription, VALID_TIERS } from '@/lib/stripe'
+import { notifyAdminOfPlanChange } from '@/lib/plan-alerts'
 
 /**
  * Writing a Stripe subscription onto a profile, shared by the webhook and the
@@ -39,6 +40,14 @@ export async function syncSubscriptionToProfile(
 
   const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id
 
+  // Read first so the admin alert below can tell a new subscriber / upgrade
+  // apart from a renewal, which re-sends the same tier every billing cycle.
+  const { data: before } = await supabase
+    .from('profiles')
+    .select('plan_tier, first_name, last_name, email')
+    .eq('id', userId)
+    .maybeSingle()
+
   const { data, error } = await supabase
     .from('profiles')
     .update({
@@ -59,6 +68,17 @@ export async function syncSubscriptionToProfile(
   }
 
   console.log(`[stripe-sync] ${source}: user ${userId} → ${tier} (${sub.id})`)
+
+  await notifyAdminOfPlanChange({
+    userId,
+    previousTier: before?.plan_tier ?? null,
+    newTier:      tier,
+    firstName:    before?.first_name,
+    lastName:     before?.last_name,
+    email:        before?.email,
+    source,
+  })
+
   return { ok: true, tier, userId }
 }
 

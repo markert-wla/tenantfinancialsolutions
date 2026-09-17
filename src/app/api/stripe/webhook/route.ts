@@ -4,6 +4,7 @@ import { syncSubscriptionToProfile } from '@/lib/stripe-sync'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
+import { notifyAdminOfPlanChange } from '@/lib/plan-alerts'
 import Stripe from 'stripe'
 
 // Raw body required for Stripe signature verification
@@ -98,6 +99,33 @@ async function handleEvent(event: Stripe.Event) {
       const sub        = event.data.object as Stripe.Subscription
       const customerId = sub.customer as string
 
+      // Snapshot before anything is written: the downgrade below sets plan_tier
+      // to free, and the admin alert has to name the plan they were on.
+      const { data: beforeRows } = await supabase
+        .from('profiles')
+        .select('id, plan_tier, first_name, last_name, email, stripe_subscription_id')
+        .eq('stripe_customer_id', customerId)
+        .limit(1)
+      const before = beforeRows?.[0] ?? null
+
+      /** Only alerts when this profile is the one the downgrade actually matched. */
+      const alertCancelled = async (exactOnly = false) => {
+        if (!before) return
+        const matched = before.stripe_subscription_id === sub.id ||
+                        (!exactOnly && before.stripe_subscription_id === null)
+        if (!matched) return
+        await notifyAdminOfPlanChange({
+          userId:       before.id,
+          previousTier: before.plan_tier,
+          newTier:      'free',
+          firstName:    before.first_name,
+          lastName:     before.last_name,
+          email:        before.email,
+          event:        'cancellation',
+          source:       'subscription.deleted',
+        })
+      }
+
       // Ask Stripe what's left before downgrading anyone. Cancelling one of two
       // duplicate subscriptions is a *cleanup*, not a cancellation, and the
       // legacy customer-only match below would read it as the latter and drop a
@@ -118,6 +146,7 @@ async function handleEvent(event: Stripe.Event) {
             .eq('stripe_customer_id', customerId)
             .eq('stripe_subscription_id', sub.id)
         )
+        await alertCancelled(true)
         break
       }
 
@@ -161,6 +190,7 @@ async function handleEvent(event: Stripe.Event) {
           .or(`stripe_subscription_id.eq.${sub.id},stripe_subscription_id.is.null`)
       )
       console.log(`[webhook] ${customerId} downgraded to free after ${sub.id} was cancelled`)
+      await alertCancelled()
       break
     }
 

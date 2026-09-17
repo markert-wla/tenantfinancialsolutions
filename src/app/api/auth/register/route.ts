@@ -4,6 +4,7 @@ import { getStripe, PLAN_PRICE_IDS } from '@/lib/stripe'
 import { sendEmail } from '@/lib/resend'
 import { brandedEmail, emailButton } from '@/lib/email-template'
 import { authLimiter, checkRateLimit } from '@/lib/ratelimit'
+import { notifyAdminOfPlanChange } from '@/lib/plan-alerts'
 
 function esc(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -190,6 +191,23 @@ export async function POST(req: NextRequest) {
 
   const { error: profileErr } = await supabase.from('profiles').update(profileUpdate).eq('id', userId)
   if (profileErr) console.error('[Register] Profile update failed:', profileErr.message, profileErr.details, profileErr.hint)
+
+  // A comp / tier-assignment code (or a paying partner's code) puts a brand-new
+  // client straight onto a paid plan with no Stripe subscription behind it, so
+  // nothing else would ever tell the admin about it.
+  if (billedTier === 'free' && effectiveTier !== 'free') {
+    await notifyAdminOfPlanChange({
+      userId,
+      previousTier: 'free',
+      newTier:      effectiveTier,
+      firstName,
+      lastName,
+      email,
+      event:        'promo',
+      promoCode:    promoCode ?? null,
+      source:       'register',
+    })
+  }
 
   // 3b. Auto-subscribe new clients to newsletter (fire-and-forget — never blocks registration).
   // ignoreDuplicates: true means existing records (including previously unsubscribed ones) are untouched.
