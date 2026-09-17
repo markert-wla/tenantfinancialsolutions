@@ -5,6 +5,7 @@ import {
   PLAN_PRICE_IDS,
   resolvePlanChangeTarget,
 } from '@/lib/stripe'
+import { notifyAdminOfPlanChange } from '@/lib/plan-alerts'
 
 /** Mid-cycle plan changes bill the difference on the next invoice instead of
  *  charging straight away — that's what /portal/billing promises the client
@@ -121,6 +122,20 @@ export async function POST(req: NextRequest) {
         })
 
         await syncProfile(updated.id, customerId)
+
+        // The webhook's customer.subscription.updated arrives after this write,
+        // by which point the profile already shows the new tier and the alert
+        // there would see no change — so send it from here.
+        await notifyAdminOfPlanChange({
+          userId:       user.id,
+          previousTier: target.tier,
+          newTier:      tier,
+          firstName:    profile.first_name,
+          lastName:     profile.last_name,
+          email:        profile.email,
+          source:       'portal-upgrade',
+        })
+
         return NextResponse.json({ switched: true, tier })
       }
     }
