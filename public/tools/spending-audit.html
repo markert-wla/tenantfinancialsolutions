@@ -4,12 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TFS 30-Day Spending Audit Tool</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="/tools/css/spending-audit.css">
+<script src="/tools/vendor/lucide.min.js"></script>
 <script src="/tools/vendor/html2canvas.min.js"></script>
 <script src="/tools/vendor/jspdf.umd.min.js"></script>
 <script>
-tailwind.config = {
+window.tailwind = window.tailwind || {}; // palette source for scripts/build-tools-css.mjs (CSS is precompiled; no Tailwind runtime)
+    tailwind.config = {
   theme: {
     extend: {
       colors: {

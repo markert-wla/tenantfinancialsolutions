@@ -6,10 +6,11 @@
     <title>TFS MVP Coaching App — Money · Values · Purpose</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <link rel="stylesheet" href="/tools/css/mvp-alignment.css">
+    <script src="/tools/vendor/lucide.min.js"></script>
     <script>
-      tailwind.config = {
+      window.tailwind = window.tailwind || {}; // palette source for scripts/build-tools-css.mjs (CSS is precompiled; no Tailwind runtime)
+    tailwind.config = {
         theme: {
           extend: {
             colors: {
