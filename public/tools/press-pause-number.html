@@ -285,7 +285,7 @@
               <div class="motivation-card pause-level-card" data-level="2"><div class="radio-dot"><span class="radio-fill"></span></div><span class="text-sm font-medium" data-i18n="plLevel2">Level 2 — Pause for 48 hours</span></div>
               <div class="motivation-card pause-level-card" data-level="3"><div class="radio-dot"><span class="radio-fill"></span></div><span class="text-sm font-medium" data-i18n="plLevel3">Level 3 — Pause for 24 hours (empowerment level)</span></div>
             </div>
-            <div id="coach-note" class="advisory-note text-left no-print hidden" style="margin-top:20px">
+            <div id="coach-note" class="advisory-note text-left" style="margin-top:20px">
               <p><span data-i18n-html="plCoachNote">🧭 <strong>Coach note:</strong> Pause level can be adjusted during coaching calls based on client stability, confidence, and spending behavior.</span></p>
             </div>
           </div>
@@ -396,12 +396,9 @@
       state.pauseLevel = parseInt(card.dataset.level, 10) || 1;
     });
 
-    // The coach note is guidance for the coach, not the client: it only appears
-    // when the tool is opened from the coach Tools page (?coach=1), and it is
-    // marked no-print so it never lands in a printed or downloaded commitment.
-    if (new URLSearchParams(window.location.search).get('coach') === '1') {
-      document.getElementById('coach-note').classList.remove('hidden');
-    }
+    // The coach note stays visible to the client as well: the commitment sheet is
+    // often downloaded and sent to the client by their coach, so it prints and
+    // exports with the rest of the commitment.
 
     document.getElementById('input-name').addEventListener('input', function () {
       state.clientName = this.value;

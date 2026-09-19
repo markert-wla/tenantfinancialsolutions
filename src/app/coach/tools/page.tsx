@@ -51,7 +51,7 @@ const tools: Tool[] = [
     description: 'A guided 5-step discovery tool that helps clients calculate the dollar threshold at which they should pause, breathe, and wait before any purchase — blending gut instinct with real financial data.',
     emoji: '⏸️',
     color: '#4FB3B3',
-    href: '/tools/press-pause-number.html?coach=1',
+    href: '/tools/press-pause-number.html',
   },
   {
     id: 'mvp-alignment',
