@@ -31,6 +31,13 @@ const nextConfig = {
               "connect-src 'self' https://*.supabase.co https://api.stripe.com https://api.resend.com https://www.weblaunchacademy.com https://weblaunchacademy.com",
               "frame-src https://js.stripe.com https://hooks.stripe.com",
               "frame-ancestors 'self' https://www.weblaunchacademy.com https://*.weblaunchacademy.com",
+              // Additive hardening (safe — no effect on normal app behavior):
+              // block plugin/object embeds and prevent <base> tag hijacking of relative URLs.
+              "object-src 'none'",
+              "base-uri 'self'",
+              // Restrict where forms can POST (self + Stripe checkout). If a form legitimately
+              // posts elsewhere, add that origin here.
+              "form-action 'self' https://js.stripe.com https://hooks.stripe.com",
             ].join('; '),
           },
         ],
