@@ -4,11 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TFS HOP Goal Setting Sheet</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/tools/css/hop-goal-setting.css">
 <script src="/tools/vendor/html2canvas.min.js"></script>
 <script src="/tools/vendor/jspdf.umd.min.js"></script>
 <script>
-tailwind.config = {
+window.tailwind = window.tailwind || {}; // palette source for scripts/build-tools-css.mjs (CSS is precompiled; no Tailwind runtime)
+    tailwind.config = {
   theme: {
     extend: {
       colors: {
